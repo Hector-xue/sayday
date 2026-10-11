@@ -26,3 +26,37 @@ export function calibrate(model, gop, seq, V = 42) {
     return predict(model, x)
   })
 }
+
+export const VOWELS = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH', 'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
+
+/** 以辅音结尾的词，其最后一个音素在整句音素序列里的下标 */
+export function tailPositions(words) {
+  const pos = []
+  let k = 0
+  for (const w of words) {
+    k += w.phones.length
+    if (!VOWELS.includes(w.phones[w.phones.length - 1])) pos.push({ word: w, at: k - 1 })
+  }
+  return pos
+}
+
+/**
+ * 整句分（0~10，贴近人工句子准确度刻度）。
+ * scores：逐音素校准分；tails：tailLLR 结果；T：帧数
+ */
+export function uttScore(model, scores, tails, nWords, T) {
+  const u = model.utt
+  const n = scores.length
+  const ins = tails.map((t) => t.ins)
+  const x = [
+    scores.reduce((a, b) => a + b, 0) / n,
+    Math.min(...scores),
+    scores.filter((s) => s < 1.4).length / n,
+    ins.filter((v) => v > u.insTh).length / nWords,
+    tails.filter((t) => t.del > u.delTh).length / nWords,
+    ins.length ? ins.reduce((a, v) => a + Math.max(0, v), 0) / ins.length : 0,
+    T / n,
+  ]
+  const y = x.reduce((a, v, i) => a + v * u.coef[i], u.intercept)
+  return Math.max(0, Math.min(10, y))
+}

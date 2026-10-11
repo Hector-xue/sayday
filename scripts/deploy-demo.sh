@@ -22,6 +22,8 @@ for f in sqlite3-bundler-friendly.mjs sqlite3.wasm sqlite3-opfs-async-proxy.js; 
 NEW="$DEST.new.$$"
 rm -rf "$NEW"
 cp -r "$STAGE" "$NEW"
+# download/（安装包）不归本脚本管，替换时原样保留
+if [ -d "$DEST/download" ]; then cp -r "$DEST/download" "$NEW/download"; fi
 if [ -d "$DEST" ]; then rm -rf "$DEST.old"; mv "$DEST" "$DEST.old"; fi
 mv "$NEW" "$DEST"
 rm -rf "$DEST.old"
