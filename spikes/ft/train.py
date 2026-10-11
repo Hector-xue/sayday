@@ -47,7 +47,8 @@ def labels_of(words) -> list[int]:
             q = mis.get(i, p)
             if q == "<DEL>":
                 continue
-            out.append(UNK if q == "<unk>" else VOCAB[strip(q)])
+            # “T*” 是带口音、走了样的 T，当作含糊音；“IH R” 是一个音读成了两个
+            out.extend(UNK if t == "<unk>" or t.endswith("*") else VOCAB[strip(t)] for t in q.split())
     out.append(SIL)
     return out
 
