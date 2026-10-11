@@ -42,6 +42,13 @@ NATIVE=0 bash "$ROOT/scripts/prepare-web-assets.sh" >/dev/null
 cp -r "$ROOT/apps/web/dist" "$STAGE/app"
 rm -f "$STAGE/app/models/phone_ctc.int8.onnx" && ln -s ../../web/models/phone_ctc.int8.onnx "$STAGE/app/models/phone_ctc.int8.onnx"
 
+# 离线语音识别模型（scripts/fetch-asr-model.sh 下载到 .cache/models/asr）→ /asr/moonshine-base-q8/（公开，App 跨域取）
+ASR=$ROOT/.cache/models/asr/moonshine-base
+mkdir -p "$STAGE/asr/moonshine-base-q8"
+cat "$ASR/onnx/encoder_model_quantized.onnx" > "$STAGE/asr/moonshine-base-q8/encoder.onnx"
+cat "$ASR/onnx/decoder_model_merged_quantized.onnx" > "$STAGE/asr/moonshine-base-q8/decoder.onnx"
+cat "$ASR/vocab.json" > "$STAGE/asr/moonshine-base-q8/vocab.json"
+
 # 先放到同级临时目录，再整体替换，避免发布中途页面读到半套文件
 NEW="$DEST.new.$$"
 rm -rf "$NEW"

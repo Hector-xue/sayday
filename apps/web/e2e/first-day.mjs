@@ -24,6 +24,7 @@ try {
   const p = await b.newPage()
   if (process.env.PW) await p.authenticate({ username: 'sayday', password: process.env.PW })
   p.on('pageerror', (e) => errors.push('pageerror ' + e.message))
+  p.on('dialog', (d) => d.accept())
   const audioHits = []
   p.on('response', (r) => { if (r.url().includes('/audio/')) audioHits.push(`${r.status()} ${r.url().replace(/^.*\/audio\//, '')}`) })
   p.on('console', (m) => { if (m.type() === 'error') errors.push('console ' + m.text().slice(0, 200)) })
@@ -176,6 +177,11 @@ try {
     await p.waitForSelector('.fix', { timeout: 20000 }); await sleep(500)
     await shot('15-chat')
     log('聊天', JSON.stringify(await p.evaluate(() => ({ bubbles: document.querySelectorAll('.bubble').length, fix: document.querySelector('.fix')?.textContent }))))
+    // 说话输入：假麦克风放一句示范音 → 本机识别（Moonshine）→ 填进输入框
+    // 本地测试要先把识别模型挂到 dist/asr/moonshine-base-q8/（见 scripts/deploy-demo.sh）
+    await p.click('.mic-in'); await sleep(4000); await p.click('.mic-in')
+    const heard = await p.waitForFunction(() => document.querySelector('.composer textarea')?.value, { timeout: 300000 }).then((h) => h.jsonValue()).catch(() => '（超时）')
+    log('说话输入识别', JSON.stringify(heard))
     await p.click('.session-top .icon-btn'); await sleep(400)
     await p.click('.ai-grid .ai-card:nth-child(2)')
     await p.waitForSelector('.diary-edit', { timeout: 20000 })

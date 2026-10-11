@@ -346,3 +346,7 @@ p { margin: 0; }
 .act-prev .en { font-family: var(--serif); font-size: 17px; }
 .act-prev .icon-btn { margin-top: 4px; }
 .input.time { width: 96px; height: 36px; padding: 0 8px; margin-right: 8px; }
+.mic-in { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; }
+.mic-in svg { width: 20px; height: 20px; }
+.mic-in.rec { background: var(--bad); color: #fff; animation: pulse 1.3s ease-in-out infinite; }
+.mic-in.busy { background: var(--brand-soft); color: var(--brand); }

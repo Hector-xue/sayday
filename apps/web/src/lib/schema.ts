@@ -38,4 +38,8 @@ export const MIGRATIONS: string[] = [
   CREATE TABLE diary(id INTEGER PRIMARY KEY, date TEXT NOT NULL, text TEXT NOT NULL, result TEXT, ts INTEGER NOT NULL);
   CREATE INDEX diary_date ON diary(date);
   `,
+  // v0.0.5：雅思口语模考记录（题目、转写、流利度、发音分、AI 评分都放 data）
+  `
+  CREATE TABLE speaking_test(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, band REAL, data TEXT NOT NULL);
+  `,
 ]

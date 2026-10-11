@@ -3,7 +3,7 @@
 #   content/   内容包（content/pack，由 content/build_content.py 生成）
 #   speech/    评分校准、CMU 词典、音素表
 #   models/    音素识别模型（.cache/models，NATIVE=1 时跳过：App 里走原生插件自带的模型）
-#   ort/       onnxruntime-web 的 wasm
+#   ort/       onnxruntime-web 的 wasm（网页打分 + 两端的语音识别）
 #   tts/       预置示范音频（其余走音频包，现编句子用系统语音）
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
@@ -13,12 +13,13 @@ mkdir -p "$PUB/content" "$PUB/speech" "$PUB/ort"
 for f in words.json sentences.json pseudo.json meta.json; do cat "$ROOT/content/pack/$f" > "$PUB/content/$f"; done
 # 剧集台词（content/episodes，手写；配音由 content-episodes 工作流生成到音频包）
 cat "$ROOT/content/episodes/s1.json" > "$PUB/content/episodes-s1.json"
+# 雅思口语模考题库（原创题目）
+cat "$ROOT/content/ielts/speaking.json" > "$PUB/content/ielts-speaking.json"
 for f in calib.json cmudict.min.json cmudict.LICENSE; do cat "$ROOT/packages/speech/$f" > "$PUB/speech/$f"; done
 cat "$ROOT/.cache/models/charsiu_vocab.json" > "$PUB/speech/charsiu_vocab.json"
 for f in icon-180.png icon-192.png icon-512.png; do cat "$ROOT/assets/brand/$f" > "$ROOT/apps/web/public/$f"; done
-if [ "${NATIVE:-0}" = "1" ]; then rm -rf "$PUB/ort"; else
-  for f in ort-wasm-simd-threaded.wasm ort-wasm-simd-threaded.mjs; do cat "$NM/onnxruntime-web/dist/$f" > "$PUB/ort/$f"; done
-fi
+# App 里也要：音素打分走原生插件，但语音识别（Moonshine）在 WebView 里用 wasm 跑
+for f in ort-wasm-simd-threaded.wasm ort-wasm-simd-threaded.mjs; do cat "$NM/onnxruntime-web/dist/$f" > "$PUB/ort/$f"; done
 if [ "${NATIVE:-0}" != "1" ]; then
   mkdir -p "$PUB/models"
   cat "$ROOT/.cache/models/phone_ctc.int8.onnx" > "$PUB/models/phone_ctc.int8.onnx"

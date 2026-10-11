@@ -4,6 +4,7 @@ import { Overlay } from '../components/Overlay'
 import { Shadow } from '../components/Shadow'
 import { PlayButton } from '../components/PlayButton'
 import { Tappable } from '../components/Tappable'
+import { MicInput } from '../components/MicInput'
 import { useApp } from '../store'
 import { AiError, getAi, type AiConfig } from '../lib/ai'
 import { correct, deleteEntry, entries, saveEntry, type DiaryResult, type Entry } from '../lib/diary'
@@ -77,7 +78,10 @@ function Editor({ cfg, accent, init, list, onPick, onSaved, onClose, levelOf }: 
         <>
           <p className="small muted" style={{ marginBottom: 10 }}>写几句今天的事。不会的词直接写中文，AI 会教你怎么说。</p>
           <textarea className="diary-edit" value={text} onChange={(e) => setText(e.target.value)} placeholder="Today I…" autoFocus rows={9} />
-          <p className="small faint" style={{ marginTop: 6 }}>{words} 个英文词{words < 3 ? ' · 至少写 3 个词' : ''}</p>
+          <div className="row" style={{ marginTop: 8 }}>
+            <MicInput onText={(t) => setText((x) => (x.trim() ? x.trimEnd() + ' ' : '') + t)} />
+            <span className="small faint">{words} 个英文词{words < 3 ? ' · 至少写 3 个词' : ' · 也可以点麦克风说'}</span>
+          </div>
           {err && <div className="err-box">{err}</div>}
         </>
       ) : (

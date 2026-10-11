@@ -25,6 +25,9 @@
     "paths": {
       "@speech/*": [
         "../../packages/speech/*"
+      ],
+      "@asr/*": [
+        "../../packages/asr/*"
       ]
     }
   },

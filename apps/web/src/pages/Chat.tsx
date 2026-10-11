@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Overlay } from '../components/Overlay'
 import { Icon } from '../components/icons'
 import { Tappable } from '../components/Tappable'
+import { MicInput } from '../components/MicInput'
 import { useApp } from '../store'
 import { AiError, getAi, type AiConfig } from '../lib/ai'
 import { clearChat, getMemory, history, send, type ChatMsg } from '../lib/companion'
@@ -99,7 +100,8 @@ export function Chat({ onClose, onSetup }: { onClose: () => void; onSetup: () =>
       right={<button className="btn small ghost" onClick={async () => setMem(await getMemory())}>她记得</button>}
       foot={
         <div className="composer">
-          <textarea rows={1} value={draft} placeholder="用英文回她，不会说的直接写中文" onChange={(e) => setDraft(e.target.value)}
+          <MicInput disabled={live !== null} onText={(t) => setDraft((d) => (d ? d + ' ' : '') + t)} />
+          <textarea rows={1} value={draft} placeholder="打字或点麦克风说，不会的直接写中文" onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit() } }} />
           <button className="btn primary" disabled={!draft.trim() || live !== null} onClick={submit}>发送</button>
         </div>
