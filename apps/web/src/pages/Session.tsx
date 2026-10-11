@@ -4,7 +4,9 @@ import { useApp } from '../store'
 import { Icon } from '../components/icons'
 import { PlayButton } from '../components/PlayButton'
 import { Shadow } from '../components/Shadow'
-import { buildSession, markDay, saveAttempt, type Step } from '../lib/lesson'
+import { buildSession, markDay, saveAttempt, saveRecording, type Step } from '../lib/lesson'
+import { applyCheck, saveListen, type CheckItem } from '../lib/calibrate'
+import type { Answer } from '../lib/placement'
 import { addCard, grade, preview, Rating } from '../lib/srs'
 import { prefetch } from '../lib/tts'
 import type { Sentence } from '../lib/content'
@@ -37,8 +39,8 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
       setSteps(s)
       // 后台提前合成示范读音：先跟读句，再例句
       const clips = [
-        ...s.flatMap((x) => (x.kind === 'shadow' ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])),
-        ...s.flatMap((x) => (x.kind !== 'shadow' ? [{ text: x.word.w, word: x.word.w }, ...(x.sentence ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])] : [])),
+        ...s.flatMap((x) => (x.kind === 'shadow' || x.kind === 'listen' ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])),
+        ...s.flatMap((x) => (x.kind === 'learn' || x.kind === 'review' ? [{ text: x.word.w, word: x.word.w }, ...(x.sentence ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])] : [])),
       ]
       prefetch(clips, accent)
     })
@@ -70,7 +72,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
         <div className="fade-in">
           <div style={{ fontSize: 48 }} aria-hidden>{steps.length ? '🌱' : '☕'}</div>
           <h2 style={{ margin: '12px 0 8px' }}>{steps.length ? '这一组完成了' : '今天的量已经做完了'}</h2>
-          <p className="muted">{steps.length ? `复习 ${steps.filter((s) => s.kind === 'review').length} · 新词 ${steps.filter((s) => s.kind === 'learn').length} · 跟读 ${steps.filter((s) => s.kind === 'shadow').length}` : '明天到期的词会自动排好。'}</p>
+          <p className="muted">{steps.length ? [['review', '复习'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((s) => s.kind === k)).map(([k, t]) => `${t} ${steps.filter((s) => s.kind === k).length}`).join(' · ') : '明天到期的词会自动排好。'}</p>
         </div>
       </div>
       <div className="session-foot"><button className="btn primary block" onClick={finish}>好的</button></div>
@@ -129,14 +131,28 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
           </div>
         )}
 
+        {step.kind === 'check' && <WeeklyCheck items={step.items} onDone={async (answers) => {
+          const r = await applyCheck(profile!, answers)
+          const d = r.after - r.before
+          toast(r.unreliable ? '假词点了不少“认识”，这次先不算，下周再测' : `小测完成：约 ${r.after.toLocaleString()} 词（${d >= 0 ? '+' : ''}${d}）`)
+          refresh()
+          next()
+        }} />}
+
+        {step.kind === 'listen' && <Listen key={step.sentence.id} step={step} accent={accent} onAnswer={async (ok) => {
+          await saveListen(step.sentence.id, step.sentence.hard, step.sentence.cefr, ok)
+          setScored(true)
+        }} />}
+
         {step.kind === 'shadow' && (
           <div className="fade-in">
             <p className="step-kind">跟读</p>
-            <p className="shadow-sentence en"><Tappable text={step.sentence.en} highlight={step.focus} /></p>
+            <p className="shadow-sentence en"><Tappable text={step.sentence.en} highlight={step.focus} karaoke /></p>
             <p className="shadow-zh">{step.sentence.zh}</p>
-            <Shadow text={step.sentence.en} sentenceId={step.sentence.id} accent={accent} onScored={async (r) => {
+            <Shadow text={step.sentence.en} sentenceId={step.sentence.id} accent={accent} onScored={async (r, audio) => {
               const phones = r.words.flatMap((w) => w.phones.map((p) => [p.p, +p.s.toFixed(2)] as [string, number]))
               await saveAttempt(step.sentence.id, step.sentence.en, r.score, phones, r.words.filter((w) => w.tail).map((w) => `${w.word}:${w.tail}`))
+              saveRecording(step.sentence.id, step.sentence.en, r.score, audio).catch(() => {})
               if (!scored) { await markDay({ shadows: 1 }); setScored(true) }
             }} />
           </div>
@@ -158,12 +174,85 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
             <button className="btn primary" style={{ flex: 2 }} onClick={() => learn(false)}>记下了</button>
           </div>
         )}
+        {step.kind === 'listen' && (
+          <div className="row">
+            {!scored && <button className="btn quiet" style={{ flex: 1 }} onClick={() => { toast('跳过了这题'); next(false) }}>跳过</button>}
+            <button className="btn primary" style={{ flex: 2 }} disabled={!scored} onClick={() => next()}>下一题</button>
+          </div>
+        )}
         {step.kind === 'shadow' && (
           <div className="row">
             <button className="btn quiet" style={{ flex: 1 }} onClick={() => { toast('跳过了这句'); next(false) }}>跳过</button>
             <button className="btn primary" style={{ flex: 2 }} disabled={!scored} onClick={() => next()}>下一句</button>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/** 听音选义：先只给声音，选对应的中文意思；选完再显示原句 */
+function Listen({ step, accent, onAnswer }: { step: Extract<Step, { kind: 'listen' }>; accent: 'us' | 'gb'; onAnswer: (ok: boolean) => void }) {
+  const [pick, setPick] = useState<number | null>(null)
+  const [err, setErr] = useState('')
+  const s = step.sentence
+  const clip = { text: s.en, sentenceId: s.id }
+  return (
+    <div className="fade-in">
+      <p className="step-kind">听力 · 听完选意思</p>
+      <div className="listen-play">
+        <PlayButton text={s.en} clip={clip} accent={accent} label="播放" onError={(e) => setErr('这句的音频没下载下来：' + e.message)} />
+        <PlayButton text={s.en} clip={clip} accent={accent} rate={0.75} label="慢速" />
+        <span className="small muted">可以多听几遍</span>
+      </div>
+      {err && <p className="small" style={{ color: 'var(--warn)' }}>{err}</p>}
+      <div className="options" style={{ marginTop: 18 }}>
+        {step.options.map((o, k) => {
+          const state = pick === null ? '' : k === step.answer ? 'right' : k === pick ? 'wrong' : 'dim'
+          return (
+            <button key={k} className={`opt ${state}`} disabled={pick !== null} onClick={() => { setPick(k); onAnswer(k === step.answer) }}>
+              <b style={{ fontWeight: 500 }}>{o}</b>
+            </button>
+          )
+        })}
+      </div>
+      {pick !== null && (
+        <div className="example fade-in" style={{ marginTop: 16 }}>
+          <p className="small muted">{pick === step.answer ? '答对了。原句：' : '原句是：'}</p>
+          <p className="en"><Tappable text={s.en} /></p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** 每周小测：和入门定级一样的“认识 / 不认识”，只测水平边界附近，约 1 分钟 */
+function WeeklyCheck({ items, onDone }: { items: CheckItem[]; onDone: (a: Answer[]) => void }) {
+  const [k, setK] = useState(-1)
+  const answers = useRef<Answer[]>([])
+  const shown = useRef(performance.now())
+  if (k < 0) return (
+    <div className="fade-in" style={{ textAlign: 'center', paddingTop: 24 }}>
+      <p className="step-kind">每周小测</p>
+      <h2 style={{ margin: '8px 0' }}>1 分钟，校准一下水平</h2>
+      <p className="muted small">和刚开始那次一样：看到就知道意思才点“认识”，里面混了假词。<br />结果只会让每天的新词更合适，不会扣分。</p>
+      <button className="btn primary" style={{ marginTop: 20 }} onClick={() => { setK(0); shown.current = performance.now() }}>开始</button>
+    </div>
+  )
+  const it = items[k]
+  const answer = (yes: boolean) => {
+    answers.current.push({ item: { text: it.text, real: it.real, band: it.band }, yes, ms: Math.round(performance.now() - shown.current) })
+    shown.current = performance.now()
+    if (k + 1 < items.length) setK(k + 1)
+    else onDone(answers.current)
+  }
+  return (
+    <div>
+      <p className="step-kind">每周小测 · {k + 1}/{items.length}</p>
+      <div className="quiz-word en" key={it.text}>{it.text}</div>
+      <div className="yn" style={{ marginTop: 24 }}>
+        <button className="btn" onClick={() => answer(false)}>不认识</button>
+        <button className="btn primary" onClick={() => answer(true)}>认识</button>
       </div>
     </div>
   )

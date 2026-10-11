@@ -6,25 +6,36 @@ import { buildItems, manualPlacement, scorePlacement, shouldStop, type Answer, t
 import { CEFR, SCENES, cefrFromIelts, eta, goalLabel, ieltsLabel, type Cefr, type Goal } from '../lib/levels'
 import { db } from '../lib/db'
 import type { Profile } from '../lib/lesson'
+import { resetVocabState } from '../lib/calibrate'
+import { currentLevel } from '../lib/progress'
 
 type Stage = 'welcome' | 'goal' | 'minutes' | 'place' | 'quiz' | 'manual' | 'report'
 const IELTS = [5, 5.5, 6, 6.5, 7, 7.5, 8]
 const MINUTES = [{ m: 10, t: '10 分钟', d: '先养成习惯' }, { m: 20, t: '20 分钟', d: '推荐' }, { m: 30, t: '30 分钟', d: '稳步提升' }, { m: 45, t: '45 分钟', d: '冲刺备考' }]
 
-export function Onboarding({ redo }: { redo?: 'goal' | 'place' }) {
+export function Onboarding({ redo, onExit }: { redo?: 'goal' | 'place'; onExit?: () => void }) {
   const { setProfile, profile } = useApp()
   const [stage, setStage] = useState<Stage>(redo === 'goal' ? 'goal' : redo === 'place' ? 'place' : 'welcome')
   const [goal, setGoal] = useState<Goal | null>(profile?.goal ?? null)
   const [minutes, setMinutes] = useState(profile?.minutes ?? 20)
   const [result, setResult] = useState<PlacementResult | null>(null)
 
+  const [prev, setPrev] = useState<number | null>(null)
+  useEffect(() => { if (profile && redo === 'place') currentLevel(profile).then((l) => setPrev(l.vocab)) }, [])
   const finish = async (placement: PlacementResult) => {
+    const isPlace = placement !== profile?.placement
+    // 起点（进度条从这里算）：刚开始几天内重测算重新起步；之后重测保留最初的起点，进度才连贯
+    const fresh = !profile || Date.now() - profile.createdAt < 3 * 86400_000
     const p: Profile = {
-      goal: goal!, minutes, accent: profile?.accent ?? 'us', start: placement.cefr, placement, createdAt: profile?.createdAt ?? Date.now(),
+      goal: goal!, minutes, accent: profile?.accent ?? 'us', start: fresh ? placement.cefr : profile!.start, placement, createdAt: profile?.createdAt ?? Date.now(),
     }
-    await db.run('INSERT INTO level_estimate(skill, cefr, value, se, source, ts, detail) VALUES (?,?,?,?,?,?,?)', ['vocab', placement.cefr, placement.vocab, null, placement.answered ? 'placement' : 'manual', Date.now(), JSON.stringify(placement.bands)])
+    if (isPlace) await resetVocabState(p)
+    if (isPlace) await db.run('INSERT INTO level_estimate(skill, cefr, value, se, source, ts, detail) VALUES (?,?,?,?,?,?,?)', ['vocab', placement.cefr, placement.vocab, null, placement.answered ? 'placement' : 'manual', Date.now(), JSON.stringify(placement.bands)])
     await setProfile(p)
+    onExit?.()
   }
+  // 从设置 / 今天进来的“改目标”“重测”：随时可以退回去，不改任何东西
+  const back = redo && profile && onExit ? <button className="btn ghost small onb-back" onClick={onExit}>取消</button> : null
 
   if (stage === 'welcome') return (
     <div className="onb fade-in">
@@ -40,6 +51,7 @@ export function Onboarding({ redo }: { redo?: 'goal' | 'place' }) {
   if (stage === 'goal') return (
     <div className="onb fade-in">
       <div className="onb-body">
+        {back}
         <h1>你的目标是？</h1>
         <p className="lead">之后可以随时改。</p>
         <p className="section-title" style={{ marginTop: 0 }}>考雅思</p>
@@ -68,6 +80,7 @@ export function Onboarding({ redo }: { redo?: 'goal' | 'place' }) {
   if (stage === 'minutes') return (
     <div className="onb fade-in">
       <div className="onb-body">
+        {back}
         <h1>每天能练多久？</h1>
         <p className="lead">按这个时间排每天的量。哪天忙，点“保底”做 2 分钟也算数。</p>
         <div className="options cols-2">
@@ -89,6 +102,7 @@ export function Onboarding({ redo }: { redo?: 'goal' | 'place' }) {
   if (stage === 'place') return (
     <div className="onb fade-in">
       <div className="onb-body">
+        {back}
         <h1>测一下现在的水平</h1>
         <p className="lead">约 3 分钟：一个个看单词，<b>看到就知道意思</b>才点“认识”。里面混了一些<b>假词</b>，乱点会被看出来。</p>
         <div className="card">
@@ -108,7 +122,7 @@ export function Onboarding({ redo }: { redo?: 'goal' | 'place' }) {
 
   if (stage === 'quiz') return <Quiz onDone={(r) => { setResult(r); setStage('report') }} />
 
-  return <Report goal={goal!} minutes={minutes} r={result!} onStart={() => finish(result!)} onRetry={() => setStage('quiz')} />
+  return <Report goal={goal!} minutes={minutes} r={result!} prev={prev} onStart={() => finish(result!)} onRetry={() => setStage('quiz')} />
 }
 
 function ManualPick({ onPick }: { onPick: (c: Cefr) => void }) {
@@ -171,7 +185,7 @@ function Quiz({ onDone }: { onDone: (r: PlacementResult) => void }) {
   )
 }
 
-function Report({ goal, minutes, r, onStart, onRetry }: { goal: Goal; minutes: number; r: PlacementResult; onStart: () => void; onRetry: () => void }) {
+function Report({ goal, minutes, r, prev, onStart, onRetry }: { goal: Goal; minutes: number; r: PlacementResult; prev: number | null; onStart: () => void; onRetry: () => void }) {
   const e = eta(r.cefr, goal.target, minutes)
   const reached = e.hoursLeft === 0
   return (
@@ -185,6 +199,7 @@ function Report({ goal, minutes, r, onStart, onRetry }: { goal: Goal; minutes: n
             <div style={{ textAlign: 'right' }}><b>约 {r.vocab.toLocaleString()} 词</b><p className="small muted">雅思参考 {ieltsLabel(r.cefr)}</p></div>
           </div>
           <p className="small faint" style={{ marginTop: 6 }}>按词汇量估算 · 之后随练习自动校准</p>
+          {prev !== null && <p className="small" style={{ marginTop: 6 }}>重测前估计约 {prev.toLocaleString()} 词，这次 {r.vocab >= prev ? '多了' : '少了'} <b>{Math.abs(r.vocab - prev).toLocaleString()}</b>{r.vocab < prev ? '（状态不好也会这样，不急着下结论）' : ''}</p>}
           {r.bands.length > 0 && (
             <div className="bands">
               <p className="small muted" style={{ marginBottom: 2 }}>按常用程度分组，每组认识多少</p>
@@ -206,7 +221,7 @@ function Report({ goal, minutes, r, onStart, onRetry }: { goal: Goal; minutes: n
         </div>
       </div>
       <div className="onb-foot">
-        <button className="btn primary block" onClick={onStart}>开始今天的练习</button>
+        <button className="btn primary block" onClick={onStart}>{prev !== null ? '用这个结果' : '开始今天的练习'}</button>
         {r.answered > 0 && <button className="btn ghost block" onClick={onRetry}>重测一次</button>}
       </div>
     </div>

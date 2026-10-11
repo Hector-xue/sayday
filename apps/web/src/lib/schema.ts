@@ -21,4 +21,14 @@ export const MIGRATIONS: string[] = [
   -- 水平估计（定级 / 日常 / 手动），值的含义见 source
   CREATE TABLE level_estimate(id INTEGER PRIMARY KEY, skill TEXT NOT NULL, cefr TEXT NOT NULL, value REAL, se REAL, source TEXT NOT NULL, ts INTEGER NOT NULL, detail TEXT);
   `,
+  // v0.0.4：听力记录、每天的听力量、录音存档（进步页的前后对比）
+  `
+  ALTER TABLE day ADD COLUMN listens INTEGER NOT NULL DEFAULT 0;
+  -- 听音选义：sentence 的难度（hard = 句中最难词的词频排名）和对错
+  CREATE TABLE listen_log(id INTEGER PRIMARY KEY, sentence_id INTEGER NOT NULL, hard INTEGER NOT NULL, cefr TEXT NOT NULL, ok INTEGER NOT NULL, ts INTEGER NOT NULL);
+  CREATE INDEX listen_ts ON listen_log(ts);
+  -- 录音存档：16kHz 单声道 int16；只留“第一次”和每句最近一次，够做前后对比
+  CREATE TABLE recording(id INTEGER PRIMARY KEY, sentence_id INTEGER, text TEXT NOT NULL, score INTEGER NOT NULL, pcm BLOB NOT NULL, ts INTEGER NOT NULL);
+  CREATE INDEX recording_text ON recording(text, ts);
+  `,
 ]

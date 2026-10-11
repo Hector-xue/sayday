@@ -7,10 +7,11 @@ import { Session } from './pages/Session'
 import { Words } from './pages/Words'
 import { Progress } from './pages/Progress'
 import { Settings } from './pages/Settings'
+import { Lab } from './pages/Lab'
 
-type Tab = 'today' | 'words' | 'progress' | 'settings'
+type Tab = 'today' | 'lab' | 'words' | 'progress' | 'settings'
 const TABS: { k: Tab; t: string; i: () => ReactElement }[] = [
-  { k: 'today', t: '今天', i: Icon.today }, { k: 'words', t: '词库', i: Icon.words }, { k: 'progress', t: '进步', i: Icon.progress }, { k: 'settings', t: '设置', i: Icon.settings },
+  { k: 'today', t: '今天', i: Icon.today }, { k: 'lab', t: '发音', i: Icon.mic }, { k: 'words', t: '词库', i: Icon.words }, { k: 'progress', t: '进步', i: Icon.progress }, { k: 'settings', t: '设置', i: Icon.settings },
 ]
 
 function Main() {
@@ -19,10 +20,11 @@ function Main() {
   const [session, setSession] = useState<null | { minimum: boolean }>(null)
   const [redo, setRedo] = useState<null | 'goal' | 'place'>(null)
   if (profile === undefined) return <div className="loading">…</div>
-  if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} />
+  if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (
     <div className="shell">
-      {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} />}
+      {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} onRetest={() => setRedo('place')} />}
+      {tab === 'lab' && <Lab />}
       {tab === 'words' && <Words />}
       {tab === 'progress' && <Progress />}
       {tab === 'settings' && <Settings onRedo={setRedo} />}

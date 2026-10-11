@@ -113,7 +113,7 @@ export function cancelRecording() {
   if (mediaRec) { mediaRec.stream.getTracks().forEach((t) => t.stop()); try { mediaRec.stop() } catch {} mediaRec = null }
 }
 
-async function decodeTo16k(buf: ArrayBuffer): Promise<Float32Array> {
+export async function decodeTo16k(buf: ArrayBuffer): Promise<Float32Array> {
   const Ctx = window.AudioContext || (window as any).webkitAudioContext
   const ctx = new Ctx()
   const audio = await ctx.decodeAudioData(buf)

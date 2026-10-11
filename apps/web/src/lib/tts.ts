@@ -117,15 +117,27 @@ export async function prefetch(clips: (Clip | string)[], accent: Accent) {
   pump()
 }
 
+// 播放进度广播（跟读句子的卡拉 OK 逐词高亮用）：frac = 播到几成，结束时为 null
+type Progress = { text: string; frac: number | null }
+const playListeners = new Set<(p: Progress) => void>()
+export function onPlayback(f: (p: Progress) => void) { playListeners.add(f); return () => { playListeners.delete(f) } }
+const emit = (p: Progress) => playListeners.forEach((f) => f(p))
+
 let current: HTMLAudioElement | null = null
 export async function play(clip: Clip | string, accent: Accent, rate = 1): Promise<void> {
+  const text = asClip(clip).text
   const url = await getAudio(clip, accent)
   current?.pause()
   const a = new Audio(url)
   a.playbackRate = rate
   current = a
   await a.play()
+  let raf = 0
+  const tick = () => { if (a.duration) emit({ text, frac: a.currentTime / a.duration }); raf = requestAnimationFrame(tick) }
+  if (playListeners.size) tick()
   await new Promise<void>((r) => { a.onended = () => r(); a.onpause = () => r() })
+  cancelAnimationFrame(raf)
+  emit({ text, frac: null })
 }
 export const stopAudio = () => current?.pause()
 

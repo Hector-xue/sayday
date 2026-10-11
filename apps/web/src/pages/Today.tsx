@@ -1,31 +1,42 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../store'
 import { Icon } from '../components/icons'
-import { dayRow, recentDays, sizeFor, type DayRow } from '../lib/lesson'
+import { dailySize, dayRow, recentDays, type DayRow } from '../lib/lesson'
+import { weeklyDue } from '../lib/calibrate'
+import { db } from '../lib/db'
 import { dueCount } from '../lib/srs'
 import { currentLevel } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart }: { onStart: (minimum: boolean) => void }) {
+export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => void; onRetest: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
   const [week, setWeek] = useState<DayRow[]>([])
   const [lv, setLv] = useState<{ cefr: Cefr; vocab: number } | null>(null)
+  const [size, setSize] = useState<Awaited<ReturnType<typeof dailySize>> | null>(null)
+  const [check, setCheck] = useState(false)
+  const [retest, setRetest] = useState(false)
   useEffect(() => {
+    if (profile) {
+      dailySize(profile).then(setSize)
+      weeklyDue(profile).then(setCheck)
+      // 每月可选一次完整复测：离上次完整定级满 30 天
+      db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
+    }
     dayRow().then(setD)
     dueCount().then(setDue)
     recentDays(7).then(setWeek)
     if (profile) currentLevel(profile).then(setLv)
   }, [tick, profile])
-  if (!profile || !d) return <div className="loading">…</div>
-  const size = sizeFor(profile.minutes)
+  if (!profile || !d || !size) return <div className="loading">…</div>
   const rv = { done: Math.min(d.reviews, size.review), want: Math.min(size.review, d.reviews + due) }
   const items = [
     { k: 'review', ico: <Icon.review />, t: '复习', s: rv.want ? '到期的词，趁快忘之前' : '今天没有到期的词', n: `${rv.done}/${rv.want}`, done: rv.want > 0 && rv.done >= rv.want },
     { k: 'new', ico: <Icon.plus />, t: '新词', s: '带例句和发音', n: `${Math.min(d.new_words, size.fresh)}/${size.fresh}`, done: d.new_words >= size.fresh },
+    { k: 'listen', ico: <Icon.ear />, t: '听力', s: '听一句，选意思', n: `${Math.min(d.listens, size.listen)}/${size.listen}`, done: d.listens >= size.listen },
     { k: 'shadow', ico: <Icon.mic />, t: '跟读', s: '逐个音标打分', n: `${Math.min(d.shadows, size.shadow)}/${size.shadow}`, done: d.shadows >= size.shadow },
   ]
   const allDone = items.every((x) => x.done || (x.k === 'review' && rv.want === 0))
@@ -46,7 +57,7 @@ export function Today({ onStart }: { onStart: (minimum: boolean) => void }) {
             <div><b>今天的练习完成了</b><p className="small muted">明天到期的词会自动排好。想多练可以再来一组。</p></div>
           </div>
         ) : (
-          <div><b style={{ fontSize: 18 }}>今日练习</b><p className="small muted">约 {profile.minutes} 分钟，做完一项算一项</p></div>
+          <div><b style={{ fontSize: 18 }}>今日练习</b><p className="small muted">约 {profile.minutes} 分钟，做完一项算一项{check ? ' · 今天先做 1 分钟每周小测' : ''}</p></div>
         )}
         <ul className="today-list">
           {items.map((x) => (
@@ -57,7 +68,7 @@ export function Today({ onStart }: { onStart: (minimum: boolean) => void }) {
             </li>
           ))}
         </ul>
-        <button className="btn primary block" onClick={() => onStart(false)}>{allDone ? '再来一组' : d.reviews + d.new_words + d.shadows > 0 ? '继续' : '开始'}</button>
+        <button className="btn primary block" onClick={() => onStart(false)}>{allDone ? '再来一组' : d.reviews + d.new_words + d.shadows + d.listens > 0 ? '继续' : '开始'}</button>
         {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很忙，只做 2 分钟</button>}
       </div>
 
@@ -72,12 +83,18 @@ export function Today({ onStart }: { onStart: (minimum: boolean) => void }) {
         </>
       )}
 
+      {retest && (
+        <div className="card" style={{ marginTop: 12 }}>
+          <div className="row"><div><b>满一个月了</b><p className="small muted">可以重新测一次词汇量，看看这个月的变化（约 3 分钟，可不做）</p></div><div className="spacer" /><button className="btn small quiet" onClick={onRetest}>去测</button></div>
+        </div>
+      )}
+
       <p className="section-title">最近 7 天</p>
       <div className="card">
         <div className="week">
           {week.map((w, i) => {
             const dt = new Date(Date.now() - (6 - i) * 86400_000)
-            const any = w.reviews + w.new_words + w.shadows > 0
+            const any = w.reviews + w.new_words + w.shadows + w.listens > 0
             return (
               <div key={w.date}>
                 <div className="d">{WEEK[dt.getDay()]}</div>

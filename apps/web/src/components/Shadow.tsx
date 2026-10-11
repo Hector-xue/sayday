@@ -5,6 +5,8 @@ import { PlayButton } from './PlayButton'
 import { ensureEngine, engineStatus, onEngineStatus, infer, startRecording, stopRecording, cancelRecording, isNative } from '../lib/speech/engine'
 import { score, type ScoreResult } from '../lib/speech/score'
 import type { Accent } from '../lib/tts'
+import { Intonation } from './Intonation'
+import { ipa } from '../lib/phones'
 
 export const HINT: Record<string, string> = {
   TH: '舌尖轻放上下齿之间送气，不要发成 s / f', DH: '舌尖放齿间并振动声带，不要发成 d / z', V: '上齿轻咬下唇并振动，不要发成 w',
@@ -12,7 +14,10 @@ export const HINT: Record<string, string> = {
   IY: '长音 /iː/，嘴角向两边拉开并拉长', IH: '短音 /ɪ/，放松、短促', AE: '/æ/ 嘴张大、舌位低，介于“啊”和“诶”之间', NG: '舌后部抵软腭，不要加 g 的爆破',
   Z: '/z/ 要振动声带，不要发成 s', SH: '/ʃ/ 双唇前突，舌面抬高', S: '/s/ 舌尖靠近上齿龈，不要卷舌', UW: '长音 /uː/，双唇收圆前突', UH: '短音 /ʊ/，双唇微圆、放松',
   ER: '/ɜː/ 舌身后缩、卷舌，不要发成“饿”', AH: '/ʌ/ 嘴自然张开、短促，像轻声的“啊”', EY: '/eɪ/ 从“诶”滑向“衣”', OW: '/əʊ/ 从“呃”滑向“乌”', D: '舌尖抵上齿龈后弹开，词尾不要带出元音',
-  T: '舌尖抵上齿龈后弹开，词尾不要带出元音', K: '舌后部抵软腭后放开，词尾轻收', JH: '/dʒ/ 舌尖贴上齿龈，双唇前突', CH: '/tʃ/ 舌尖贴上齿龈，双唇前突、送气',
+  T: '舌尖抵上齿龈后弹开，词尾不要带出元音', F: '上齿轻咬下唇送气，不要发成“夫”', P: '双唇闭紧再爆开，词尾不要带出元音', B: '双唇闭紧爆开并振动声带，词尾轻收',
+  M: '双唇闭紧，气流从鼻腔出', G: '舌后部抵软腭后放开并振动声带，词尾轻收', HH: '张嘴直接呼气，不要发成喉咙里的“喝”', Y: '舌前部贴近上颚，马上滑向后面的元音',
+  ZH: '/ʒ/ 像 /ʃ/ 但振动声带', EH: '/e/ 嘴半开，比“诶”更短更开', AA: '/ɑː/ 嘴张大、舌位低靠后，拉长', AO: '/ɔː/ 双唇收圆、舌位低靠后，拉长',
+  AW: '/aʊ/ 从“啊”滑向“乌”，嘴唇逐渐收圆', AY: '/aɪ/ 从“啊”滑向“衣”', OY: '/ɔɪ/ 从“奥”滑向“衣”', K: '舌后部抵软腭后放开，词尾轻收', JH: '/dʒ/ 舌尖贴上齿龈，双唇前突', CH: '/tʃ/ 舌尖贴上齿龈，双唇前突、送气',
 }
 
 export function ScoreView({ r }: { r: ScoreResult }) {
@@ -34,21 +39,22 @@ export function ScoreView({ r }: { r: ScoreResult }) {
         {r.words.map((w, i) => (
           <div className="w" key={i}>
             <b>{w.word}</b>
-            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level}`}>{p.p.toLowerCase()}</span>)}</span>
-            {w.tail === 'ins' && <span className="tail">/{w.phones[w.phones.length - 1].p.toLowerCase()}/ 后面多了个元音</span>}
+            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level}`}>{ipa(p.p)}</span>)}</span>
+            {w.tail === 'ins' && <span className="tail">/{ipa(w.phones[w.phones.length - 1].p)}/ 后面多了个元音</span>}
             {w.tail === 'del' && <span className="tail">尾音可能没读出来</span>}
           </div>
         ))}
       </div>
-      {tips.length > 0 && <ul className="tips">{tips.map(([p]) => <li key={p}><b>/{p.toLowerCase()}/</b>{HINT[p]}</li>)}</ul>}
+      {tips.length > 0 && <ul className="tips">{tips.map(([p]) => <li key={p}><b>/{ipa(p)}/</b>{HINT[p]}</li>)}</ul>}
       {r.skipped.length > 0 && <p className="small faint" style={{ marginTop: 10 }}>词典里没有的词没打分：{r.skipped.join('、')}</p>}
     </div>
   )
 }
 
-export function Shadow({ text, sentenceId, accent, onScored }: { text: string; sentenceId?: number; accent: Accent; onScored?: (r: ScoreResult) => void }) {
+export function Shadow({ text, sentenceId, accent, onScored }: { text: string; sentenceId?: number; accent: Accent; onScored?: (r: ScoreResult, audio: Float32Array) => void }) {
   const [phase, setPhase] = useState<'idle' | 'rec' | 'busy'>('idle')
   const [result, setResult] = useState<ScoreResult | null>(null)
+  const [heard, setHeard] = useState<Float32Array | null>(null)
   const [msg, setMsg] = useState('')
   const [eng, setEng] = useState(engineStatus())
   const recRef = useRef(false)
@@ -81,8 +87,9 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
       const lg = await infer(audio)
       const r = await score(text, lg)
       setResult(r)
+      setHeard(audio)
       setMsg('')
-      onScored?.(r)
+      onScored?.(r, audio)
     } catch (e) {
       setMsg('打分出错：' + ((e as Error).message || e))
     } finally {
@@ -106,6 +113,7 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
         </div>
       </div>
       {result && <ScoreView r={result} />}
+      {result && heard && (text.match(/[A-Za-z]+/g) || []).length >= 3 && <Intonation clip={{ text, sentenceId }} accent={accent} audio={heard} />}
     </div>
   )
 }

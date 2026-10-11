@@ -44,6 +44,7 @@ try {
   await clickText('20 分钟')
   await clickText('下一步')
   await clickText('开始测')
+  await p.waitForSelector('.quiz-word', { timeout: 60000 })
   // 定级：模拟“认识前 2000 个词”的学习者；假词一律不认识
   let n = 0
   for (;;) {
@@ -68,7 +69,7 @@ try {
   // 第一组：没有到期复习 → 新词 8 个 → 跟读 3 句
   await clickText('开始')
   await p.waitForSelector('.session .step-kind')
-  let learned = 0, known = 0, shadows = 0, reviews = 0
+  let learned = 0, known = 0, shadows = 0, reviews = 0, listens = 0
   for (let guard = 0; guard < 80; guard++) {
     const kind = await p.evaluate(() => document.querySelector('.session .step-kind')?.textContent ?? '')
     if (!kind) break
@@ -81,6 +82,13 @@ try {
         log('音频包请求', audioHits.length, '条，例如', audioHits.slice(0, 3).join(' / '), '· 点播放', played)
       }
       if (learned + known === 2) { await clickText('早就认识'); known++ } else { await clickText('记下了'); learned++ }
+    } else if (kind.startsWith('听力')) {
+      // 听音选义：随便选第一个，看对错反馈和原句出来
+      await p.evaluate(() => document.querySelector('.session .options .opt').click()); await sleep(300)
+      const fb = await p.evaluate(() => ({ right: !!document.querySelector('.opt.right'), sentence: document.querySelector('.session .example .en')?.textContent }))
+      if (listens === 0) { log('听力题', JSON.stringify(fb)); await shot('07b-listen') }
+      listens++
+      await clickText('下一题')
     } else if (kind.startsWith('复习')) {
       await clickText('看答案'); await clickText('记得'); reviews++
     } else if (kind.startsWith('跟读')) {
@@ -96,15 +104,32 @@ try {
   }
   await p.waitForFunction(() => /这一组完成了|今天的量已经做完了/.test(document.body.innerText))
   await shot('08-done')
-  log('一组做完：新词', learned, '早就认识', known, '跟读', shadows, '复习', reviews)
+  log('一组做完：新词', learned, '早就认识', known, '听力', listens, '跟读', shadows, '复习', reviews)
   await clickText('好的')
   await sleep(600)
   await shot('09-today-after')
   log('今天页（做完后）', (await text()).replace(/\s+/g, ' ').match(/今日练习.*?跟读.*?\d+\/\d+|今天的练习完成了.*?跟读.*?\d+\/\d+/)?.[0])
 
-  for (const [tab, name] of [['词库', '10-words'], ['进步', '11-progress'], ['设置', '12-settings']]) {
+  for (const [tab, name] of [['发音', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress'], ['设置', '12-settings']]) {
     await clickText(tab, '.tab'); await sleep(700); await shot(name)
   }
+  log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+ \S+/)?.[0])
+
+  // 发音实验室：音标口型卡、最小对立听辨两题
+  await clickText('发音', '.tab'); await sleep(300)
+  await p.evaluate(() => [...document.querySelectorAll('.phone-chips button')].find((b) => b.textContent === 'θ').click()); await sleep(500)
+  await shot('10b-phone')
+  log('口型卡', (await text()).replace(/\s+/g, ' ').match(/舌尖伸到[^·]*/)?.[0])
+  await p.click('.session-top .icon-btn'); await sleep(300)
+  await clickText('听辨'); await sleep(400)
+  for (let k = 0; k < 2; k++) { await p.evaluate(() => document.querySelector('.session .options .opt').click()); await sleep(300); await clickText('下一题') }
+  await shot('10c-pairs')
+  await p.click('.session-top .icon-btn'); await sleep(300)
+  log('最小对立统计', (await text()).replace(/\s+/g, ' ').match(/听辨 \S+/)?.[0])
+
+  // 改目标：改完要回到主界面（v0.0.3 的 bug：会卡在引导页出不来）
+  await clickText('设置', '.tab'); await clickText('修改'); await clickText('下一步'); await clickText('保存'); await sleep(500)
+  log('改目标后回到主界面', await p.evaluate(() => !!document.querySelector('.tabbar')))
   log('词库', (await (async () => { await clickText('词库', '.tab'); await sleep(400); return (await text()).match(/学习中 \d+/)?.[0] })()))
 
   // 刷新：数据还在（OPFS）
@@ -122,11 +147,21 @@ try {
   // 断网：停掉服务器后刷新，应该从离线缓存打开
   if (process.env.SERVER_PID) {
     process.kill(Number(process.env.SERVER_PID), 'SIGTERM'); await sleep(800)
+    const offErr = []
+    p.on('console', (m) => offErr.push(m.type() + ' ' + m.text().slice(0, 200)))
+    p.on('requestfailed', (r) => offErr.push('请求失败 ' + r.url().replace(BASE, '')))
     await p.reload({ waitUntil: 'domcontentloaded' })
-    await p.waitForFunction(() => document.body.innerText.includes('今天'), { timeout: 30000 })
-    log('断网刷新', (await text()).includes('今日练习') || (await text()).includes('今天的练习完成了') ? '正常打开' : '异常')
+    await p.waitForFunction(() => /今日练习|今天的练习完成了/.test(document.body.innerText), { timeout: 30000 }).catch(() => {})
+    const okOff = /今日练习|今天的练习完成了/.test(await text())
+    log('断网刷新', okOff ? '正常打开' : '异常', okOff ? '' : JSON.stringify(offErr.slice(0, 12)))
     await shot('14-offline')
   }
+} catch (e) {
+  // 出错时留一张当时的画面 + 页面文字，方便定位
+  const p = (await b.pages()).at(-1)
+  await p?.screenshot({ path: join(OUT, 'e2e-zz-fail.png') }).catch(() => {})
+  console.log('失败时页面：', (await p?.evaluate(() => document.body.innerText).catch(() => ''))?.replace(/\s+/g, ' ').slice(0, 400))
+  throw e
 } finally {
   console.log('错误', JSON.stringify(errors.filter((e) => !/Failed to load resource|ERR_CONNECTION_REFUSED|ERR_FAILED/.test(e)), null, 1))
   await b.close()

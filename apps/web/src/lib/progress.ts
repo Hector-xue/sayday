@@ -1,17 +1,12 @@
 // 进步：当前水平估计、练习统计、发音弱项
 import { db } from './db'
-import { cefrFromVocab, type Cefr } from './levels'
-import { State } from './srs'
-import { loadContent } from './content'
+import type { Cefr } from './levels'
+import { vocabLevel } from './calibrate'
 import type { Profile } from './lesson'
 
-/** 当前词汇量 = 定级估计 + 边界以外新学会（进入复习期）的词。只升不降（降档要长期证据，M1 不做） */
+/** 当前水平（词汇）：见 calibrate.ts。保留旧名字给各页面用 */
 export async function currentLevel(p: Profile): Promise<{ cefr: Cefr; vocab: number; learned: number }> {
-  const { byWord } = await loadContent()
-  const rows = await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 AND state = ?', [State.Review])
-  const beyond = rows.filter((r) => (byWord.get(r.word)?.rank ?? 0) >= p.placement.frontier).length
-  const vocab = p.placement.vocab + beyond
-  return { cefr: cefrFromVocab(vocab), vocab, learned: rows.length }
+  return vocabLevel(p)
 }
 
 export async function stats() {

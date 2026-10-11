@@ -4,6 +4,19 @@ import { currentLevel, scoreTrend, stats, weakPhones } from '../lib/progress'
 import { recentDays, type DayRow } from '../lib/lesson'
 import { CEFR, eta, goalLabel, ieltsLabel, nextCefr, vocabFloor, type Cefr } from '../lib/levels'
 import { HINT } from '../components/Shadow'
+import { listenLevel, type ListenLevel } from '../lib/calibrate'
+import { recordingPairs, playRecording, type Pair } from '../lib/recordings'
+import { db } from '../lib/db'
+import { Icon } from '../components/icons'
+import { ipa } from '../lib/phones'
+
+const SRC: Record<string, string> = { placement: '入门定级', manual: '手动选择', weekly: '每周小测' }
+const md = (ts: number) => { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()}` }
+
+function PlayRec({ id }: { id: number }) {
+  const [on, setOn] = useState(false)
+  return <button className={`icon-btn ${on ? 'playing' : ''}`} aria-label="播放录音" onClick={async () => { setOn(true); try { await playRecording(id) } finally { setOn(false) } }}>{on ? <Icon.stop /> : <Icon.play />}</button>
+}
 
 export function Progress() {
   const { profile, tick } = useApp()
@@ -12,9 +25,14 @@ export function Progress() {
   const [weak, setWeak] = useState<Awaited<ReturnType<typeof weakPhones>>>([])
   const [days, setDays] = useState<DayRow[]>([])
   const [trend, setTrend] = useState<Awaited<ReturnType<typeof scoreTrend>>>([])
+  const [ll, setLl] = useState<ListenLevel | null>(null)
+  const [hist, setHist] = useState<{ cefr: string; value: number; source: string; ts: number }[]>([])
+  const [pairs, setPairs] = useState<Pair[]>([])
   useEffect(() => {
     if (!profile) return
     currentLevel(profile).then(setLv); stats().then(setSt); weakPhones().then(setWeak); recentDays(7).then(setDays); scoreTrend().then(setTrend)
+    listenLevel().then(setLl); recordingPairs().then(setPairs)
+    db.all<{ cefr: string; value: number; source: string; ts: number }>("SELECT cefr, value, source, ts FROM level_estimate WHERE skill = 'vocab' ORDER BY ts DESC LIMIT 8").then(setHist)
   }, [tick, profile])
   if (!profile || !lv || !st) return <div className="loading">…</div>
   const e = eta(lv.cefr, profile.goal.target, profile.minutes, profile.start)
@@ -34,6 +52,13 @@ export function Progress() {
         <div className="bar" style={{ margin: '14px 0 8px' }}><i style={{ width: `${Math.round(e.progress * 100)}%` }} /></div>
         <p className="small muted">{e.hoursLeft ? `已走完 ${Math.round(e.progress * 100)}% · 预计 ${e.date} 到达 · 雅思参考 ${ieltsLabel(lv.cefr)}` : '词汇量已达到目标档位'}</p>
         {nxt && <p className="small" style={{ marginTop: 10 }}>下一个里程碑：再认识约 <b>{Math.max(0, vocabFloor(nxt) - lv.vocab).toLocaleString()}</b> 个词 → 升 {nxt}</p>}
+      </div>
+
+      <p className="section-title">分项</p>
+      <div className="list">
+        <div className="set-row"><div className="k"><b>词汇</b><span>约 {lv.vocab.toLocaleString()} 词 · 每学会一个词都算上</span></div><b className="skill-lv">{lv.cefr}</b></div>
+        <div className="set-row"><div className="k"><b>听力</b><span>{ll && ll.cefr ? `听音选义 ${ll.n} 题，正确率 ${Math.round(ll.acc * 100)}%` : `每天练习里的听力题，再做 ${Math.max(1, 6 - (ll?.n ?? 0))} 题以上出结果`}</span></div><b className="skill-lv">{ll?.cefr ?? '—'}</b></div>
+        <div className="set-row"><div className="k"><b>发音</b><span>{st.recentScore !== null ? '最近 20 句跟读的平均分' : '跟读几句就有'}</span></div><b className="skill-lv">{st.recentScore ?? '—'}</b></div>
       </div>
 
       <p className="section-title">词汇阶梯</p>
@@ -72,12 +97,41 @@ export function Progress() {
         {weak.length === 0 ? <p className="small muted">跟读多几句就能看出来（每个音至少练 5 次）。</p> : (
           <ul className="tips" style={{ margin: 0, background: 'none', padding: 0 }}>
             {weak.map((w) => (
-              <li key={w.phone}><b>/{w.phone.toLowerCase()}/</b>{HINT[w.phone] ?? '多听示范，注意口型'}<span className="faint small"> · 练过 {w.n} 次，{Math.round((w.bad / w.n) * 100)}% 没读准</span></li>
+              <li key={w.phone}><b>/{ipa(w.phone)}/</b>{HINT[w.phone] ?? '多听示范，注意口型'}<span className="faint small"> · 练过 {w.n} 次，{Math.round((w.bad / w.n) * 100)}% 没读准</span></li>
             ))}
           </ul>
         )}
         {trend.length > 1 && <p className="small muted" style={{ marginTop: 12 }}>跟读分数：{trend.map((t) => Math.round(t.avg)).join(' → ')}</p>}
       </div>
+
+      <p className="section-title">录音对比</p>
+      <div className="card">
+        {pairs.length === 0 ? <p className="small muted">同一句读过两次以上（隔几天再遇到时），这里能听到第一次和最近一次的差别。</p> : (
+          <div className="pairs">
+            {pairs.map((p) => (
+              <div className="pair" key={p.text}>
+                <p className="en">{p.text}</p>
+                <div className="row">
+                  <PlayRec id={p.first.id} /><span className="small muted">{md(p.first.ts)} · {p.first.score} 分</span>
+                  <div className="spacer" />
+                  <span className="small">{md(p.last.ts)} · <b>{p.last.score}</b> 分</span><PlayRec id={p.last.id} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {hist.length > 0 && (
+        <>
+          <p className="section-title">水平记录</p>
+          <div className="list">
+            {hist.map((h, i) => (
+              <div className="set-row" key={i}><div className="k"><b>{h.cefr} · 约 {Math.round(h.value).toLocaleString()} 词</b><span>{new Date(h.ts).toLocaleDateString()} · {SRC[h.source] ?? h.source}</span></div></div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

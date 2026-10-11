@@ -141,7 +141,7 @@ jobs:
           "$BT/zipalign" -f -p 4 "$src" aligned.apk
           "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$ALIAS" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
             --out "sayday-v$V-arm64.apk" aligned.apk
-          rm -f aligned.apk "$src" "$KS"
+          rm -f aligned.apk "$src" "$KS" *.idsig
           # 证书指纹进日志：以后有人报“签名不一致”，对一下各版本的 SHA-256 就知道
           "$BT/apksigner" verify --print-certs "sayday-v$V-arm64.apk" | grep -i "SHA-256"
           ls -la
