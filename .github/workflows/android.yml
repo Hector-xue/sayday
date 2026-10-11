@@ -1,16 +1,12 @@
 # 安卓 App。本机不装 NDK/不编 APK（磁盘吃紧，曾把盘写满导致生产库宕机），安卓构建一律走这里。
-#  - feat/android** 分支 / 手动触发：debug APK，挂在 workflow artifact 上，给开发自测
-#  - 推 v* 标签：release APK，用仓库 Secret 里的固定密钥签名，自动传到 GitHub Release
+#  一律编 release 包，用仓库 Secret 里的固定密钥签名（开发包和正式包能互相覆盖安装）
+#  - feat/android** 分支 / 手动触发：挂在 workflow artifact 上，给开发自测；没配密钥时用临时密钥签（提示一声）
+#  - 推 v* 标签：必须有固定密钥，签完自动传到 GitHub Release
 #    （签名一旦固定就永远不换：换了钥匙，老用户升级会报“签名不一致”只能卸载重装，而卸载会丢学习记录）
 name: android
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: '试编 release 包（不签名、不发版）'
-        type: boolean
-        default: false
   push:
     branches:
       - 'feat/android**'
@@ -108,11 +104,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y gradle
           unset NDK_HOME
-          if [[ "$GITHUB_REF" == refs/tags/v* || "${{ inputs.release }}" == "true" ]]; then
-            npm run tauri -- android build --apk --target aarch64
-          else
-            npm run tauri -- android build --apk --debug --target aarch64
-          fi
+          npm run tauri -- android build --apk --target aarch64
           mkdir -p apk-out
           find src-tauri/gen/android -name "*.apk" -exec cp {} apk-out/ \;
           ls -la apk-out
@@ -120,7 +112,6 @@ jobs:
           cp src-tauri/Cargo.lock apk-out/Cargo.lock
 
       - name: 签名（固定发布密钥）
-        if: startsWith(github.ref, 'refs/tags/v')
         working-directory: apps/native/apk-out
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -128,18 +119,24 @@ jobs:
           KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           set -euo pipefail
-          if [ -z "${KS_B64:-}" ] || [ -z "${KS_PASS:-}" ]; then
-            echo "::error::缺少 ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD Secret：宁可不出包，也不能出一个签名会变的包"
-            exit 1
-          fi
           KS="$RUNNER_TEMP/sayday.keystore"; ALIAS="${KS_ALIAS:-sayday}"
-          echo "$KS_B64" | base64 -d > "$KS"
+          if [ -z "${KS_B64:-}" ] || [ -z "${KS_PASS:-}" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+              echo "::error::缺少 ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD Secret：宁可不出包，也不能出一个签名会变的包"
+              exit 1
+            fi
+            echo "::warning::没配固定密钥，这个开发包用临时密钥签：装之前要先卸载旧版"
+            KS_PASS=temppass; ALIAS=sayday
+            keytool -genkeypair -keystore "$KS" -storepass "$KS_PASS" -keypass "$KS_PASS" -alias "$ALIAS" -keyalg RSA -keysize 2048 -validity 30 -dname "CN=Sayday dev" > /dev/null 2>&1
+          else
+            echo "$KS_B64" | base64 -d > "$KS"
+          fi
           keytool -list -keystore "$KS" -storepass "$KS_PASS" -alias "$ALIAS" > /dev/null
           SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           hit="$(ls -d "$SDK"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)"
           [ -n "$hit" ] || { echo "::error::找不到 apksigner"; exit 1; }
           BT="$(dirname "$hit")"
-          V="${GITHUB_REF_NAME#v}"
+          V=$(python3 -c "import json; print(json.load(open('../src-tauri/tauri.conf.json'))['version'])")
           src=$(ls *.apk | head -1)
           "$BT/zipalign" -f -p 4 "$src" aligned.apk
           "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$ALIAS" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
