@@ -6,6 +6,7 @@ import { CEFR, eta, goalLabel, ieltsLabel, nextCefr, vocabFloor, type Cefr } fro
 import { HINT } from '../components/Shadow'
 import { listenLevel, type ListenLevel } from '../lib/calibrate'
 import { recordingPairs, playRecording, type Pair } from '../lib/recordings'
+import { lastTests } from '../lib/ielts'
 import { db } from '../lib/db'
 import { Icon } from '../components/icons'
 import { ipa } from '../lib/phones'
@@ -28,10 +29,12 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
   const [ll, setLl] = useState<ListenLevel | null>(null)
   const [hist, setHist] = useState<{ cefr: string; value: number; source: string; ts: number }[]>([])
   const [pairs, setPairs] = useState<Pair[]>([])
+  const [mock, setMock] = useState<{ band: number | null; fc: number | null; p: number | null; ts: number } | null>(null)
   useEffect(() => {
     if (!profile) return
     currentLevel(profile).then(setLv); stats().then(setSt); weakPhones().then(setWeak); recentDays(7).then(setDays); scoreTrend().then(setTrend)
     listenLevel().then(setLl); recordingPairs().then(setPairs)
+    lastTests(1).then((r) => { if (r[0]) { const d = JSON.parse(r[0].data); setMock({ band: r[0].band, fc: d.grade?.fc ?? d.objective?.fc ?? null, p: d.grade?.p ?? d.objective?.p ?? null, ts: r[0].ts }) } })
     db.all<{ cefr: string; value: number; source: string; ts: number }>("SELECT cefr, value, source, ts FROM level_estimate WHERE skill = 'vocab' ORDER BY ts DESC LIMIT 8").then(setHist)
   }, [tick, profile])
   if (!profile || !lv || !st) return <div className="loading">…</div>
@@ -58,6 +61,7 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
       <div className="list">
         <div className="set-row"><div className="k"><b>词汇</b><span>约 {lv.vocab.toLocaleString()} 词 · 每学会一个词都算上</span></div><b className="skill-lv">{lv.cefr}</b></div>
         <div className="set-row"><div className="k"><b>听力</b><span>{ll && ll.cefr ? `听音选义 ${ll.n} 题，正确率 ${Math.round(ll.acc * 100)}%` : (ll?.n ?? 0) >= 6 ? `做了 ${ll!.n} 题，正确率 ${Math.round(ll!.acc * 100)}%，某一档稳定答对七成就出结果` : `每天练习里的听力题，再做 ${6 - (ll?.n ?? 0)} 题以上出结果`}</span></div><b className="skill-lv">{ll?.cefr ?? '—'}</b></div>
+        <div className="set-row"><div className="k"><b>口语（模考）</b><span>{mock ? `${new Date(mock.ts).toLocaleDateString()} · ${mock.band !== null ? 'AI 四项评分' : `流利 ${mock.fc ?? '—'} · 发音 ${mock.p ?? '—'}（参考）`}` : '在“发音”页做一次雅思口语模考'}</span></div><b className="skill-lv">{mock?.band?.toFixed(1) ?? '—'}</b></div>
         <div className="set-row"><div className="k"><b>发音</b><span>{st.recentScore !== null ? '最近 20 句跟读的平均分' : '跟读几句就有'}</span></div><b className="skill-lv">{st.recentScore ?? '—'}</b></div>
       </div>
 

@@ -117,8 +117,8 @@ try {
   for (const [tab, name] of [['发音', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress']]) {
     await clickText(tab, '.tab'); await sleep(700); await shot(name)
   }
-  await openSettings(); await sleep(400); await shot('12-settings')
   log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+/)?.[0])
+  await openSettings(); await sleep(400); await shot('12-settings')
 
   // 发音实验室：音标口型卡、最小对立听辨两题
   await clickText('发音', '.tab'); await sleep(300)
@@ -192,6 +192,21 @@ try {
     log('日记', JSON.stringify(await p.evaluate(() => ({ edits: document.querySelectorAll('.edit').length, natural: document.querySelectorAll('.nat').length, comment: document.querySelector('.diary-res .card p')?.textContent?.slice(0, 20) }))))
     await p.click('.session-top .icon-btn'); await sleep(400)
     log('今天页日记状态', (await text()).includes('今天写过了') ? '已写' : '未显示')
+    // 雅思口语模考：10 道题，每题录 3 秒（假麦克风），Part 2 跳过准备；AI（假服务）评分
+    await clickText('发音', '.tab'); await sleep(300)
+    await p.click('.mock-card'); await sleep(400)
+    await clickText('开始')
+    for (let k = 0; k < 12; k++) {
+      await p.waitForFunction(() => /说完了|准备好了/.test(document.querySelector('.session-foot')?.textContent ?? '') || /模考报告|正在整理/.test(document.body.innerText), { timeout: 60000 })
+      const foot = await p.evaluate(() => document.querySelector('.session-foot')?.textContent ?? '')
+      if (foot.includes('准备好了')) { await clickText('准备好了'); await sleep(300); continue }
+      if (foot.includes('说完了')) { if (k === 0) await shot('22-speaking-q'); await sleep(3000); await clickText('说完了'); await sleep(300); continue }
+      break
+    }
+    await p.waitForFunction(() => document.body.innerText.includes('模考报告'), { timeout: 600000 })
+    await sleep(500); await shot('23-speaking-report')
+    log('口语模考', (await text()).replace(/\s+/g, ' ').match(/总分.{0,60}/)?.[0], '· 识别', JSON.stringify(await p.evaluate(() => document.querySelector('.edit .en')?.textContent)))
+    await clickText('好的'); await sleep(300)
   } finally { mock.close() }
 
   // 改目标：改完要回到主界面（v0.0.3 的 bug：会卡在引导页出不来）

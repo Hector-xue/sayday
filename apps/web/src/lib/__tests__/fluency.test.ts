@@ -21,3 +21,17 @@ describe('流利度', () => {
   })
   it('全是静音', () => expect(fluency(clip([[false, 2]]), '').wpm).toBeNull())
 })
+
+import { segments } from '../fluency'
+describe('长回答切段', () => {
+  it('短的不切；长的在静音处切、每段不超过上限', () => {
+    expect(segments(clip([[true, 8]]))).toHaveLength(1)
+    const a = clip([[true, 12], [false, 1], [true, 12], [false, 0.6], [true, 10]])
+    const s = segments(a, 20)
+    expect(s.length).toBe(3)
+    for (const [x, y] of s) expect((y - x) / 16000).toBeLessThanOrEqual(20.01)
+    // 第一刀应落在第一段静音里（12~13 秒）
+    expect(s[0][1] / 16000).toBeGreaterThan(12)
+    expect(s[0][1] / 16000).toBeLessThan(13)
+  })
+})

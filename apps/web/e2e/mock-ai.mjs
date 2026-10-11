@@ -10,6 +10,8 @@ const DIARY = JSON.stringify({
   comment: '时间顺序写得很清楚。最值得改的是时态：写今天已经发生的事，动词用过去式。',
 })
 
+const IELTS = JSON.stringify({ fc: 6, lr: 5.5, gra: 5.5, p: 6, summary: '整体在 5.5~6 分左右，回答切题、能说出理由。', tips: ['回答再展开一句，加一个具体例子', '少用 very good，换成 really enjoyable 这类说法', '注意过去时：I go → I went'], better: { q: 'Do you like walking?', answer: 'Yes, I really do. I usually go for a walk after dinner, because it helps me relax after work. Sometimes I walk along the river near my flat, which is lovely in the evening.' } })
+
 export function startMockAi(port = 5392) {
   const srv = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -21,7 +23,7 @@ export function startMockAi(port = 5392) {
     req.on('end', () => {
       const j = JSON.parse(body || '{}')
       const all = JSON.stringify(j.messages ?? [])
-      const text = all.includes('Reply with just: OK') ? 'OK' : all.includes('You are Emma') ? EMMA : all.includes('diary entry') ? DIARY : all.includes('Existing facts') ? '{"facts": ["The learner is called Lin"]}' : 'OK'
+      const text = all.includes('Reply with just: OK') ? 'OK' : all.includes('IELTS Speaking test') ? IELTS : all.includes('You are Emma') ? EMMA : all.includes('diary entry') ? DIARY : all.includes('Existing facts') ? '{"facts": ["The learner is called Lin"]}' : 'OK'
       if (!j.stream) { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ choices: [{ message: { content: text } }] })) }
       res.writeHead(200, { 'content-type': 'text/event-stream' })
       const parts = text.match(/.{1,12}/gs)

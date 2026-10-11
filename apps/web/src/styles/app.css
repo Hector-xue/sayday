@@ -350,3 +350,13 @@ p { margin: 0; }
 .mic-in svg { width: 20px; height: 20px; }
 .mic-in.rec { background: var(--bad); color: #fff; animation: pulse 1.3s ease-in-out infinite; }
 .mic-in.busy { background: var(--brand-soft); color: var(--brand); }
+.mock-card { margin-bottom: 4px; border-style: solid; }
+.band-rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 14px; }
+.band-rows div { padding: 10px; border-radius: 12px; background: var(--surface-2); display: grid; gap: 2px; }
+.band-rows span { font-size: 12px; color: var(--soft); }
+.band-rows b { font: 600 20px var(--num); color: var(--brand); }
+.examiner { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--hair); }
+.examiner .ex-ico { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; flex: none; }
+.examiner .ex-ico svg { width: 20px; height: 20px; }
+.examiner .en { font-family: var(--serif); font-size: 20px; line-height: 1.5; }
+.cue ul { margin: 6px 0 0 18px; display: grid; gap: 4px; font-family: var(--serif); font-size: 16px; }

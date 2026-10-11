@@ -28,8 +28,10 @@ export async function speak(text: string, accent: Accent, rate = 0.95): Promise<
   const v = pickVoice(LANG[accent])
   if (v) u.voice = v
   await new Promise<void>((resolve, reject) => {
-    u.onend = () => resolve()
-    u.onerror = (e) => (e.error === 'interrupted' || e.error === 'canceled' ? resolve() : reject(new Error('朗读失败：' + e.error)))
+    // 有的浏览器 / 没装语音的系统不触发 onend：按字数估一个上限，到点就当读完了
+    const guard = setTimeout(resolve, Math.max(4000, text.length * 120 / rate))
+    u.onend = () => { clearTimeout(guard); resolve() }
+    u.onerror = (e) => { clearTimeout(guard); if (e.error === 'interrupted' || e.error === 'canceled') resolve(); else reject(new Error('朗读失败：' + e.error)) }
     speechSynthesis.speak(u)
   })
 }

@@ -14,7 +14,8 @@ export function fluency(audio: Float32Array, transcript: string, sr = 16000): Fl
   const sorted = [...rms].sort((a, b) => a - b)
   const loud = sorted[Math.floor(sorted.length * 0.9)] ?? 0
   const floor = sorted[Math.floor(sorted.length * 0.1)] ?? 0
-  const th = Math.max(floor * 2, loud * 0.12, 0.003)
+  // 静音很少时 10% 分位落在说话帧上，噪声底不可信：最多取到最响帧的 30%
+  const th = Math.max(Math.min(floor * 2, loud * 0.3), loud * 0.12, 0.003)
   const voiced = rms.map((r) => r > th)
   // 首尾的静音不算（开口前、说完后）
   const first = voiced.indexOf(true), last = voiced.lastIndexOf(true)
@@ -35,4 +36,31 @@ export function fluencyNote(f: Fluency): string {
   if (!f.wpm) return '说得太短，看不出流利度'
   const speed = f.wpm < 80 ? '偏慢' : f.wpm > 170 ? '偏快' : '适中'
   return `每分钟约 ${f.wpm} 词（${speed}），停顿 ${f.pauses} 次${f.longestPause >= 2 ? `，最长停了 ${f.longestPause} 秒` : ''}`
+}
+
+/**
+ * 长回答切段（识别模型一次只适合听 20 秒左右）：从开头往后，每段到 maxSec 前找最长的一段静音切开；
+ * 实在没有静音就硬切。返回 [起, 止) 样本下标
+ */
+export function segments(audio: Float32Array, maxSec = 20, sr = 16000): [number, number][] {
+  const hop = Math.round(sr * 0.02)
+  const n = Math.floor(audio.length / hop)
+  const rms = Array.from({ length: n }, (_, k) => { let e = 0; for (let i = k * hop; i < (k + 1) * hop; i++) e += audio[i] * audio[i]; return Math.sqrt(e / hop) })
+  const sorted = [...rms].sort((a, b) => a - b)
+  const loud = sorted[Math.floor(n * 0.9)] ?? 0
+  const th = Math.max(Math.min((sorted[Math.floor(n * 0.1)] ?? 0) * 2, loud * 0.3), loud * 0.12, 0.003)
+  const maxF = Math.round(maxSec / 0.02), minF = Math.round(maxF * 0.4)
+  const out: [number, number][] = []
+  let start = 0
+  while (n - start > maxF) {
+    // 在 [start+40%, start+100%] 里找最长的静音段，从它中间切
+    let bestMid = start + maxF, bestLen = 0, run = 0
+    for (let k = start + minF; k < start + maxF; k++) {
+      if (rms[k] <= th) { run++; if (run > bestLen) { bestLen = run; bestMid = k - Math.floor(run / 2) } } else run = 0
+    }
+    out.push([start * hop, bestMid * hop])
+    start = bestMid
+  }
+  out.push([start * hop, audio.length])
+  return out.filter(([a, b]) => b - a > sr * 0.3)
 }

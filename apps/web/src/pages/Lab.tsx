@@ -16,16 +16,19 @@ import { kvGet, kvSet } from '../lib/db'
 import { markDay, saveAttempt } from '../lib/lesson'
 import { prefetch, type Accent } from '../lib/tts'
 import { vocabLevel } from '../lib/calibrate'
+import { lastTests } from '../lib/ielts'
+import { Speaking } from './Speaking'
 
 type PairStats = Record<string, { listen: [number, number]; speak: [number, number] }>
-type View = null | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
+type View = null | { kind: 'speaking' } | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
 
-export function Lab() {
+export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
   const { profile, tick } = useApp()
   const [weak, setWeak] = useState<Awaited<ReturnType<typeof weakPhones>>>([])
   const [ps, setPs] = useState<PairStats>({})
   const [view, setView] = useState<View>(null)
-  useEffect(() => { weakPhones(4).then(setWeak); kvGet<PairStats>('pair_stats', {}).then(setPs) }, [tick, view])
+  const [last, setLast] = useState<number | null>(null)
+  useEffect(() => { weakPhones(4).then(setWeak); kvGet<PairStats>('pair_stats', {}).then(setPs); lastTests(1).then((r) => setLast(r[0]?.band ?? null)) }, [tick, view])
   if (!profile) return null
   const accent = profile.accent
   const pct = (x?: [number, number]) => (x && x[1] ? `${Math.round((x[0] / x[1]) * 100)}%` : '—')
@@ -34,6 +37,12 @@ export function Lab() {
   return (
     <div className="page fade-in">
       <div className="page-head"><h1>发音</h1></div>
+
+      <button className="card raised ai-card wide mock-card" onClick={() => setView({ kind: 'speaking' })}>
+        <span className="small muted">约 12 分钟 · 三个部分</span>
+        <b style={{ fontSize: 18 }}>雅思口语模考</b>
+        <span>考官提问，你开口答；本机识别 + 流利度 + 发音，接了 AI 还能按四项标准打分{last !== null ? ` · 上次 ${last.toFixed(1)}` : ''}</span>
+      </button>
 
       <p className="section-title" style={{ marginTop: 0 }}>{weak.length ? '你的弱项' : '中国人常见的难点'}</p>
       <div className="list">
@@ -69,6 +78,7 @@ export function Lab() {
         <div className="phone-chips">{Object.keys(IPA).filter((p) => !VOWEL_SET.has(p)).map((p) => <button key={p} onClick={() => setView({ kind: 'phone', phone: p })}>{IPA[p]}</button>)}</div>
       </div>
 
+      {view?.kind === 'speaking' && <Speaking onClose={() => setView(null)} onSetupAi={() => { setView(null); onSetupAi() }} />}
       {view?.kind === 'drill' && <Drill phone={view.phone} accent={accent} onClose={() => setView(null)} onPairs={(s) => setView({ kind: 'pairs', set: s, mode: 'listen' })} />}
       {view?.kind === 'pairs' && <PairGame set={view.set} mode={view.mode} accent={accent} onClose={() => setView(null)} />}
       {view?.kind === 'phone' && <PhoneCard phone={view.phone} accent={accent} onClose={() => setView(null)} onDrill={() => setView({ kind: 'drill', phone: view.phone })} />}

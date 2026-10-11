@@ -34,7 +34,7 @@ function Main() {
     <div className="shell">
       {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); setTab('episodes') }} onSettings={() => setTab('settings')} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
-      {tab === 'lab' && <Lab />}
+      {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} />}
       {tab === 'words' && <Words />}
       {tab === 'progress' && <Progress onSettings={() => setTab('settings')} />}
       {tab === 'settings' && <Settings onRedo={setRedo} onAi={() => setAi('setup')} onBack={() => setTab('today')} />}
