@@ -12,8 +12,21 @@ trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/web/models" "$STAGE/web/samples" \
   "$STAGE/node_modules/onnxruntime-web/dist" \
   "$STAGE/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm"
-for f in index.html app.js db-worker.js demo.html demo.js infer-worker.js gop.mjs calib.mjs sw.js; do cat "$M0/web/$f" > "$STAGE/web/$f"; done
+for f in index.html app.js db-worker.js demo.html demo.js infer-worker.js tts-worker.js gop.mjs calib.mjs sw.js; do cat "$M0/web/$f" > "$STAGE/web/$f"; done
+# 门户首页 + 品牌图标（公开）
 cat "$M0/web/home.html" > "$STAGE/index.html"
+mkdir -p "$STAGE/brand"
+for s in 32 64 180 192 512; do cat "$ROOT/assets/brand/icon-$s.png" > "$STAGE/brand/icon-$s.png"; done
+cat "$ROOT/assets/brand/favicon.ico" > "$STAGE/favicon.ico"
+# 示范读音：预生成音频 + 自定义句子用的 Kokoro（模型由 spikes/tts 准备到 .cache/models/kokoro）
+TTS=$ROOT/.cache/models/kokoro/onnx-community/Kokoro-82M-v1.0-ONNX
+TNM=$ROOT/spikes/tts/node_modules
+mkdir -p "$STAGE/web/tts/samples" "$STAGE/web/tts/onnx-community/Kokoro-82M-v1.0-ONNX/onnx" "$STAGE/web/tts/onnx-community/Kokoro-82M-v1.0-ONNX/voices" \
+  "$STAGE/node_modules/kokoro-js/dist" "$STAGE/node_modules/kokoro-js/ort"
+for f in "$M0"/web/tts/samples/*; do cat "$f" > "$STAGE/web/tts/samples/$(basename "$f")"; done
+for f in config.json tokenizer.json tokenizer_config.json onnx/model_quantized.onnx voices/af_heart.bin voices/bf_emma.bin; do cat "$TTS/$f" > "$STAGE/web/tts/onnx-community/Kokoro-82M-v1.0-ONNX/$f"; done
+cat "$TNM/kokoro-js/dist/kokoro.web.js" > "$STAGE/node_modules/kokoro-js/dist/kokoro.web.js"
+for f in ort-wasm-simd-threaded.jsep.mjs ort-wasm-simd-threaded.jsep.wasm; do cat "$TNM/onnxruntime-web/dist/$f" > "$STAGE/node_modules/kokoro-js/ort/$f"; done
 for f in calib.json cmudict.min.json cmudict.LICENSE meta.json u0.f32 u0.ref.f32 u1.f32 u1.ref.f32 u2.f32 u2.ref.f32; do cat "$M0/web/samples/$f" > "$STAGE/web/samples/$f"; done
 for f in phone_ctc.int8.onnx charsiu_vocab.json; do cat "$ROOT/.cache/models/$f" > "$STAGE/web/models/$f"; done
 for f in ort.wasm.min.mjs ort-wasm-simd-threaded.mjs ort-wasm-simd-threaded.wasm; do cat "$NM/onnxruntime-web/dist/$f" > "$STAGE/node_modules/onnxruntime-web/dist/$f"; done

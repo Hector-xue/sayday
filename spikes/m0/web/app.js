@@ -3,7 +3,7 @@ import * as ort from '../node_modules/onnxruntime-web/dist/ort.wasm.min.mjs'
 const out = document.getElementById('out')
 const step = document.getElementById('step')
 const say = (t) => { step.textContent = t }
-const CACHE = 'sayday-m0-v3'
+const CACHE = 'sayday-m0-v4'
 const log = (o) => {
   const runs = o.model?.runs || []
   const rtf = runs.length ? runs.reduce((a, r) => a + r.inferMs / 1000 / r.audioS, 0) / runs.length : null

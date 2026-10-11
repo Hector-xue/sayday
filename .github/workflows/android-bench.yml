@@ -75,8 +75,10 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm run tauri -- android init
-          python3 ../../scripts/make-icon.py icon-src.png
+          cat ../../assets/brand/icon-1024.png > icon-src.png
           npm run tauri -- icon icon-src.png
+          # 自适应图标前景层换成留了安全区的版本（scripts/make-android-icon.py 生成）
+          for d in ../../assets/brand/android/mipmap-*; do cat "$d/ic_launcher_foreground.png" > "src-tauri/gen/android/app/src/main/res/$(basename "$d")/ic_launcher_foreground.png"; done
 
       - name: 构建 debug APK（仅 arm64）
         working-directory: apps/native

@@ -30,7 +30,10 @@
 | [speechocean762](https://www.openslr.org/101/) | 评测与校准；`spikes/m0/web/samples/u*.f32` 是其中 3 条录音的派生数据 | CC BY 4.0（Junbo Zhang 等） |
 | [charsiu/en_w2v2_ctc_libris_and_cv](https://huggingface.co/charsiu/en_w2v2_ctc_libris_and_cv) | 音素识别模型（不在仓库内，需自行下载） | 模型页未标注；项目代码 MIT，**正式发版前需确认** |
 | [CMUdict](https://github.com/cmusphinx/cmudict) | 发音词典 | BSD，见 `spikes/m0/web/samples/cmudict.LICENSE` |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)（[ONNX 版](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)） | 示范读音合成；`spikes/m0/web/tts/samples/*.wav` 由它生成 | Apache-2.0 |
+| [kokoro-js](https://github.com/hexgrad/kokoro/tree/main/kokoro.js) | 浏览器端合成自定义句子 | Apache-2.0；其中打包的 eSpeak NG 音素化为 **GPL-3.0，正式发版前需评估或替换** |
 | onnxruntime-web / SQLite WASM / silk-wasm | 运行时 | MIT / 公有领域 / MIT |
+| 品牌图标 `assets/brand/` | 应用与网站图标 | 本项目所有 |
 
 ## 许可证
 代码以 [MIT](LICENSE) 发布。

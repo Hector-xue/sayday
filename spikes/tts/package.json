@@ -1,0 +1,9 @@
+{
+  "name": "sayday-tts-spike",
+  "private": true,
+  "type": "module",
+  "description": "离线 TTS 技术验证：Kokoro-82M（kokoro-js），预生成示范音频 + 浏览器端按需合成",
+  "dependencies": {
+    "kokoro-js": "^1.2.1"
+  }
+}

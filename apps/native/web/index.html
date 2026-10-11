@@ -28,7 +28,9 @@
   .chip { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
   .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
   .target { font: 500 21px/1.4 Georgia, serif; margin: 16px 0 4px; }
-  .row { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
+  .seg { display: flex; gap: 4px; }
+  .seg .chip { padding: 4px 10px; font-size: 12px; }
   .rec { width: 64px; height: 64px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 14px; flex: none; }
   .rec.on { background: var(--bad); }
   .rec:disabled, .btn:disabled { opacity: .4; }
@@ -57,6 +59,10 @@
     <div class="target" id="target"></div>
     <div class="row">
       <button class="rec" id="rec" disabled>录音</button>
+      <button class="btn" id="listen">听示范</button>
+      <span class="seg"><button class="chip" data-accent="us">美音</button><button class="chip" data-accent="gb">英音</button></span>
+    </div>
+    <div class="row" style="margin-top:8px">
       <span class="status" id="status">正在准备模型…</span>
     </div>
     <div id="result" hidden>
