@@ -15,7 +15,7 @@
     document.querySelectorAll('[data-ver]').forEach((e) => { e.textContent = 'v' + v.version })
     const set = (sel, t) => { const e = document.querySelector(sel); if (e) e.textContent = t }
     if (v.published_at) set('[data-date]', '· ' + v.published_at.slice(0, 10))
-    if (v.prerelease) set('[data-pre]', ' · 技术验证版')
+    if (v.prerelease) set('[data-pre]', ' · 预发布')
     if (v.android_arm64_size) set('[data-size]', '· ' + Math.round(v.android_arm64_size / 1048576) + 'MB')
     set('[data-notes]', (v.notes || '').replace(/\*\*/g, '').replace(/`/g, ''))
     const links = (src) => document.querySelectorAll('[data-dl]').forEach((a) => { const u = src[a.dataset.dl]; if (u) a.href = u })
