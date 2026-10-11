@@ -1,0 +1,5 @@
+.cache/
+.venv/
+node_modules/
+spikes/m0/web/models
+__pycache__/

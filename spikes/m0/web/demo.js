@@ -1,0 +1,193 @@
+// 跟读测评演示：录音 → 16k 重采样 → Worker 推理 + GOP → 校准（0~2 分）→ 红黄绿
+import { calibrate } from './calib.mjs'
+const SENTENCES = [
+  'I think three things are worth thanking for',
+  'The weather this week is very wet and windy',
+  'Light rain is right for a long walk',
+  'She sells sea shells by the sea shore',
+  'Mark is going to see elephant',
+]
+// 分档阈值在 calib.json 里（校准分 <0.8 红，<1.4 黄）：宁可漏报也不冤枉，标红的音素约 3/4 确实需要纠正
+let calib = null
+const HINT = {
+  TH: '舌尖轻放上下齿之间送气，不要发成 s / f',
+  DH: '舌尖放齿间并振动声带，不要发成 d / z',
+  V: '上齿轻咬下唇并振动，不要发成 w',
+  W: '双唇收圆再展开，不要咬唇',
+  R: '舌尖向后卷、不碰上颚，嘴唇略圆',
+  L: '舌尖抵上齿龈，气流从舌两侧出',
+  N: '舌尖抵上齿龈，气流从鼻腔出',
+  IY: '长音 /iː/，嘴角向两边拉开并拉长',
+  IH: '短音 /ɪ/，放松、短促',
+  AE: '/æ/ 嘴张大、舌位低，介于“啊”和“诶”之间',
+  NG: '舌后部抵软腭，不要加 g 的爆破',
+  Z: '/z/ 要振动声带，不要发成 s',
+  SH: '/ʃ/ 双唇前突，舌面抬高',
+  S: '/s/ 舌尖靠近上齿龈，不要卷舌',
+}
+
+const $ = (id) => document.getElementById(id)
+const params = new URLSearchParams(location.search)
+const worker = new Worker('./infer-worker.js', { type: 'module' })
+let dict = null
+let vocab = null
+let target = null
+let pending = null
+const meta = { ua: navigator.userAgent, cores: navigator.hardwareConcurrency, coi: self.crossOriginIsolated }
+
+function showMeta(extra = {}) {
+  Object.assign(meta, extra)
+  $('meta').textContent = Object.entries(meta).map(([k, v]) => `${k}: ${v}`).join('\n')
+}
+
+function toPhones(text) {
+  const words = (text.match(/[A-Za-z']+/g) || []).map((w) => w.toLowerCase())
+  return words.map((w) => ({ word: w, phones: dict[w] ? dict[w].split(' ') : null }))
+}
+
+function setTarget(text) {
+  target = { text, words: toPhones(text) }
+  $('target').textContent = text
+  $('phon').textContent = target.words.map((w) => (w.phones ? '/' + w.phones.join(' ').toLowerCase() + '/' : '（未收录）')).join('  ')
+  for (const b of $('chips').children) b.setAttribute('aria-pressed', String(b.textContent === text))
+  $('result').hidden = true
+}
+
+worker.onmessage = (e) => {
+  const d = e.data
+  if (d.type === 'progress' && d.total) $('status').textContent = `正在载入模型 ${Math.round((d.got / d.total) * 100)}%`
+  else if (d.type === 'ready') {
+    $('status').textContent = '准备好了，点“录音”开始，读完再点一次'
+    $('rec').disabled = false
+    showMeta({ modelCreateMs: d.createMs, threads: d.threads, modelLoadMs: Math.round(performance.now() - loadStart) })
+    if (params.has('auto')) autoRun()
+  } else if (d.type === 'scored' && pending) { pending.resolve(d); pending = null }
+  else if (d.type === 'error') {
+    $('status').textContent = '出错：' + d.error.split('\n')[0]
+    if (pending) { pending.reject(new Error(d.error)); pending = null }
+    window.__result = { error: d.error }
+  }
+}
+
+async function decodeTo16k(blob) {
+  const buf = await blob.arrayBuffer()
+  const ctx = new (window.AudioContext || window.webkitAudioContext)()
+  const audio = await ctx.decodeAudioData(buf)
+  ctx.close()
+  const len = Math.ceil(audio.duration * 16000)
+  const off = new OfflineAudioContext(1, len, 16000)
+  const src = off.createBufferSource()
+  src.buffer = audio
+  src.connect(off.destination)
+  src.start()
+  const r = await off.startRendering()
+  return r.getChannelData(0)
+}
+
+let recorder = null
+let chunks = []
+async function startRec() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } })
+  recorder = new MediaRecorder(stream)
+  chunks = []
+  recorder.ondataavailable = (e) => chunks.push(e.data)
+  recorder.start()
+  $('rec').classList.add('on')
+  $('rec').textContent = '停止'
+  $('status').textContent = '正在听…'
+}
+
+function stopRec() {
+  return new Promise((resolve) => {
+    recorder.onstop = async () => {
+      recorder.stream.getTracks().forEach((t) => t.stop())
+      $('rec').classList.remove('on')
+      $('rec').textContent = '录音'
+      resolve(new Blob(chunks, { type: recorder.mimeType }))
+    }
+    recorder.stop()
+  })
+}
+
+async function evaluate(blob) {
+  $('status').textContent = '正在打分…'
+  const t0 = performance.now()
+  const audio = await decodeTo16k(blob)
+  const decodeMs = Math.round(performance.now() - t0)
+  const known = target.words.filter((w) => w.phones)
+  const phones = known.flatMap((w) => w.phones)
+  const r = await new Promise((resolve, reject) => {
+    pending = { resolve, reject }
+    worker.postMessage({ type: 'score', id: 1, audio, phones }, [audio.buffer])
+  })
+  const seq = phones.map((p) => vocab[p])
+  render(known, calibrate(calib, r.gop, seq))
+  const totalMs = Math.round(performance.now() - t0)
+  showMeta({ audioS: r.audioS, decodeMs, inferMs: r.inferMs, gopMs: r.gopMs, totalMs })
+  $('status').textContent = `用时 ${(totalMs / 1000).toFixed(1)} 秒`
+  return { ...r, decodeMs, totalMs }
+}
+
+function render(words, scores) {
+  const { red, yellow } = calib.thresholds
+  const cls = (g) => (g < red ? 'r' : g < yellow ? 'y' : 'g')
+  const s = (g) => Math.max(0, Math.min(1, g / 2))
+  const gop = scores
+  let k = 0
+  const bad = new Map()
+  $('words').innerHTML = ''
+  for (const w of words) {
+    const el = document.createElement('div')
+    el.className = 'w'
+    const gs = w.phones.map(() => gop[k++])
+    const min = Math.min(...gs)
+    el.innerHTML = `<b class="${cls(min) === 'g' ? '' : cls(min)}" style="background:none">${w.word}</b><span class="ps">${w.phones.map((p, i) => `<span class="p ${cls(gs[i])}" title="${gs[i].toFixed(2)}">${p.toLowerCase()}</span>`).join('')}</span>`
+    $('words').appendChild(el)
+    w.phones.forEach((p, i) => { if (gs[i] < yellow && HINT[p]) bad.set(p, (bad.get(p) || 0) + 1) })
+  }
+  $('score').textContent = Math.round((gop.reduce((a, g) => a + s(g), 0) / gop.length) * 100)
+  $('tips').innerHTML = [...bad.keys()].slice(0, 3).map((p) => `<li><b>/${p.toLowerCase()}/</b> ${HINT[p]}</li>`).join('')
+  $('result').hidden = false
+}
+
+$('rec').onclick = async () => {
+  if (recorder && recorder.state === 'recording') {
+    const blob = await stopRec()
+    try { await evaluate(blob) } catch (e) { $('status').textContent = '出错：' + e.message }
+  } else {
+    try { await startRec() } catch (e) { $('status').textContent = '无法使用麦克风：' + e.message }
+  }
+}
+$('listen').onclick = () => {
+  const u = new SpeechSynthesisUtterance(target.text)
+  u.lang = 'en-GB'
+  u.rate = 0.9
+  speechSynthesis.cancel()
+  speechSynthesis.speak(u)
+}
+$('useCustom').onclick = () => { const t = $('custom').value.trim(); if (t) setTarget(t) }
+
+async function autoRun() {
+  // 自动化验证：录 params.auto 毫秒（默认 5000）后打分，结果写到 window.__result
+  setTarget(params.get('text') || SENTENCES[4])
+  await startRec()
+  await new Promise((r) => setTimeout(r, Number(params.get('auto')) || 5000))
+  const r = await evaluate(await stopRec())
+  const words = [...$('words').children].map((el) => el.querySelector('b').textContent + ':' + [...el.querySelectorAll('.p')].map((p) => p.className.slice(2)).join(''))
+  window.__result = { ...r, score: $('score').textContent, words, meta }
+}
+
+const loadStart = performance.now()
+;(async () => {
+  ;[dict, vocab, calib] = await Promise.all(['./samples/cmudict.min.json', './models/charsiu_vocab.json', './samples/calib.json'].map(async (u) => (await fetch(u)).json()))
+  for (const s of SENTENCES) {
+    const b = document.createElement('button')
+    b.className = 'chip'
+    b.textContent = s
+    b.onclick = () => setTarget(s)
+    $('chips').appendChild(b)
+  }
+  setTarget(SENTENCES[0])
+  showMeta()
+  worker.postMessage({ type: 'load', modelUrl: './models/phone_ctc.int8.onnx' })
+})()

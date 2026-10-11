@@ -1,0 +1,1 @@
+{"name":"sayday-m0-spikes","private":true,"type":"module","dependencies":{"@sqlite.org/sqlite-wasm":"^3.50.4-build1","onnxruntime-web":"^1.20.1","puppeteer-core":"^23.11.1","silk-wasm":"^3.7.1"}}
