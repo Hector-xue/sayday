@@ -9,6 +9,10 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.SystemClock
+import android.content.ContentValues
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
@@ -33,6 +37,14 @@ import kotlin.concurrent.thread
 @InvokeArg
 class LoadArgs {
   var threads: Int = 4
+}
+
+@InvokeArg
+class SaveArgs {
+  lateinit var name: String
+  var mime: String = "application/json"
+  /** 文件内容的 base64 */
+  lateinit var data: String
 }
 
 @InvokeArg
@@ -251,5 +263,33 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   fun speakStop(invoke: Invoke) {
     tts?.stop()
     invoke.resolve(JSObject())
+  }
+
+  // ---- 导出备份：WebView 不处理网页触发的下载，这里直接写进系统“下载”目录 ----
+  @Command
+  fun saveToDownloads(invoke: Invoke) {
+    val args = invoke.parseArgs(SaveArgs::class.java)
+    onWorker(invoke, "保存失败") {
+      val bytes = Base64.decode(args.data, Base64.DEFAULT)
+      val where: String
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val values = ContentValues().apply {
+          put(MediaStore.Downloads.DISPLAY_NAME, args.name)
+          put(MediaStore.Downloads.MIME_TYPE, args.mime)
+          put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Sayday")
+        }
+        val uri = activity.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: throw IllegalStateException("无法创建文件")
+        activity.contentResolver.openOutputStream(uri)!!.use { it.write(bytes) }
+        where = "下载/Sayday/" + args.name
+      } else {
+        // 安卓 9 及以下：写到 App 自己的外部目录（不用存储权限）
+        val dir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: activity.filesDir
+        File(dir, args.name).writeBytes(bytes)
+        where = File(dir, args.name).absolutePath
+      }
+      val ret = JSObject()
+      ret.put("path", where)
+      invoke.resolve(ret)
+    }
   }
 }

@@ -12,7 +12,7 @@ import { eta, goalLabel, type Cefr } from '../lib/levels'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary') => void; onEpisode: (id: number) => void; onSettings: () => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: number) => void; onSettings: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -114,6 +114,11 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onSt
           <button className="card ai-card" onClick={() => onAi('diary')}>
             <span className="ai-ico">✍️</span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
           </button>
+          {profile.goal.kind === 'ielts' && (
+            <button className="card ai-card wide-2" onClick={() => onAi('writing')}>
+              <span className="ai-ico">📝</span><b>雅思写作</b><span>大作文 / 书信，AI 按四项标准批改、逐句改错</span>
+            </button>
+          )}
         </div>
       ) : (
         <button className="card ai-card wide" onClick={() => onAi('setup')}>

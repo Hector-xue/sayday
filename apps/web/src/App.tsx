@@ -12,6 +12,7 @@ import { AiSetup } from './pages/AiSetup'
 import { Chat } from './pages/Chat'
 import { Diary } from './pages/Diary'
 import { Episodes } from './pages/Episodes'
+import { Writing } from './pages/Writing'
 
 type Tab = 'today' | 'episodes' | 'lab' | 'words' | 'progress' | 'settings'
 // 设置不占底栏：从“今天”和“进步”右上角的齿轮进
@@ -24,9 +25,9 @@ function Main() {
   const [tab, setTab] = useState<Tab>('today')
   const [session, setSession] = useState<null | { minimum: boolean }>(null)
   const [redo, setRedo] = useState<null | 'goal' | 'place'>(null)
-  const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary'>(null)
+  const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary' | 'writing'>(null)
   const [openEp, setOpenEp] = useState<number | null>(null)
-  const [after, setAfter] = useState<null | 'chat' | 'diary'>(null)
+  const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing'>(null)
   const { refresh } = useApp()
   if (profile === undefined) return <div className="loading">…</div>
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
@@ -48,6 +49,7 @@ function Main() {
       {session && <Session minimum={session.minimum} onClose={() => setSession(null)} />}
       {ai === 'chat' && <Chat onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('chat'); setAi('setup') }} />}
       {ai === 'diary' && <Diary onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('diary'); setAi('setup') }} />}
+      {ai === 'writing' && <Writing onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('writing'); setAi('setup') }} />}
       {ai === 'setup' && <AiSetup onClose={(ok) => { setAi(ok ? after : null); setAfter(null); refresh() }} />}
     </div>
   )

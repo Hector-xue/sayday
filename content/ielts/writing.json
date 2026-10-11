@@ -1,0 +1,23 @@
+{
+  "note": "日日说原创的雅思写作风格练习题（题型参考常见考法，题目文字为原创，不是真题）",
+  "task2": [
+    { "id": "t2-remote", "type": "opinion", "prompt": "Some people believe that working from home is better for employees, while others think it harms teamwork and careers. Discuss both views and give your own opinion.", "zh": "有人认为在家办公对员工更好，也有人认为它损害团队合作和职业发展。讨论两种观点并给出你的看法。" },
+    { "id": "t2-phones-school", "type": "agree", "prompt": "Mobile phones should be banned in schools. To what extent do you agree or disagree?", "zh": "学校应该禁止使用手机。你在多大程度上同意或不同意？" },
+    { "id": "t2-cities", "type": "problem", "prompt": "Many large cities are becoming too crowded. What problems does this cause, and what can be done to solve them?", "zh": "许多大城市越来越拥挤。这带来了哪些问题？可以怎样解决？" },
+    { "id": "t2-online-learning", "type": "adv", "prompt": "More and more people are learning new skills online instead of in classrooms. Do the advantages of this outweigh the disadvantages?", "zh": "越来越多的人在网上而不是在教室里学习新技能。这样做利大于弊吗？" },
+    { "id": "t2-tourism", "type": "opinion", "prompt": "International tourism brings money to many countries, but it can also damage local culture and the environment. Discuss both sides and give your opinion.", "zh": "国际旅游给许多国家带来收入，但也可能破坏当地文化和环境。讨论两方面并给出你的看法。" },
+    { "id": "t2-elderly", "type": "agree", "prompt": "Families, not governments, should be responsible for looking after elderly people. To what extent do you agree or disagree?", "zh": "照顾老人应该是家庭而不是政府的责任。你在多大程度上同意或不同意？" },
+    { "id": "t2-fast-food", "type": "problem", "prompt": "Children today eat more unhealthy food than in the past. Why is this happening, and what can be done about it?", "zh": "如今孩子比过去吃更多不健康的食物。原因是什么？可以怎么办？" },
+    { "id": "t2-ai-jobs", "type": "opinion", "prompt": "Some people think artificial intelligence will create more jobs than it destroys. Others believe the opposite. Discuss both views and give your own opinion.", "zh": "有人认为人工智能创造的工作会比它消灭的多，也有人持相反意见。讨论两种观点并给出你的看法。" },
+    { "id": "t2-university", "type": "agree", "prompt": "University education should be free for everyone. To what extent do you agree or disagree?", "zh": "大学教育应该对所有人免费。你在多大程度上同意或不同意？" },
+    { "id": "t2-sport", "type": "adv", "prompt": "Professional athletes earn much more than doctors and teachers. Is this a positive or negative development?", "zh": "职业运动员的收入远高于医生和教师。这是积极还是消极的现象？" },
+    { "id": "t2-plastic", "type": "problem", "prompt": "Plastic waste is a growing problem around the world. What are the main causes, and what measures can individuals and governments take?", "zh": "塑料垃圾在全世界越来越严重。主要原因是什么？个人和政府可以采取哪些措施？" },
+    { "id": "t2-gap-year", "type": "adv", "prompt": "Some students take a year off between school and university to work or travel. Do the advantages of this outweigh the disadvantages?", "zh": "有些学生在中学和大学之间休学一年去工作或旅行。这样做利大于弊吗？" }
+  ],
+  "letters": [
+    { "id": "l-neighbour", "prompt": "Your neighbour has been making a lot of noise late at night. Write a letter to your neighbour. In your letter: explain the situation, describe how it affects you, and suggest what could be done.", "zh": "你的邻居深夜很吵。给邻居写信：说明情况、它对你的影响、提出解决办法。" },
+    { "id": "l-course", "prompt": "You recently attended an English course, but you were not satisfied. Write a letter to the course organiser. In your letter: give details of the course, explain what was wrong, and say what you would like them to do.", "zh": "你最近上了一个英语课程但不满意。给主办方写信：说明课程情况、哪里有问题、希望对方怎么做。" },
+    { "id": "l-friend-visit", "prompt": "A friend from another country is coming to visit your city for a week. Write a letter to your friend. In your letter: suggest where they could stay, recommend things to do, and offer to help.", "zh": "外国朋友要来你的城市玩一周。给朋友写信：建议住哪里、推荐做什么、表示可以帮忙。" },
+    { "id": "l-lost-item", "prompt": "You left a bag on a train last week. Write a letter to the railway company. In your letter: describe the bag and its contents, say when and where you lost it, and explain why it is important to you.", "zh": "你上周把包落在火车上了。给铁路公司写信：描述包和里面的东西、何时何地丢的、为什么它对你很重要。" }
+  ]
+}

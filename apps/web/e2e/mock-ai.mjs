@@ -12,6 +12,8 @@ const DIARY = JSON.stringify({
 
 const IELTS = JSON.stringify({ fc: 6, lr: 5.5, gra: 5.5, p: 6, summary: '整体在 5.5~6 分左右，回答切题、能说出理由。', tips: ['回答再展开一句，加一个具体例子', '少用 very good，换成 really enjoyable 这类说法', '注意过去时：I go → I went'], better: { q: 'Do you like walking?', answer: 'Yes, I really do. I usually go for a walk after dinner, because it helps me relax after work. Sometimes I walk along the river near my flat, which is lovely in the evening.' } })
 
+const WRITING = JSON.stringify({ tr: 6, cc: 6, lr: 5.5, gra: 5.5, summary: '大约 5.5~6 分，观点清楚但论证不够展开。', strengths: ['开头直接回应了题目'], improve: ['每段加一个具体例子', '少用 so，换成 therefore / as a result', '注意主谓一致：people thinks → people think'], edits: [{ from: 'people thinks', to: 'people think', why: 'people 是复数' }], rewrite: 'Working from home has become increasingly common. While some argue that it benefits employees, others believe it weakens teamwork. In my view, a balanced approach works best.', phrases: [{ en: 'a balanced approach', zh: '折中的办法' }] })
+
 export function startMockAi(port = 5392) {
   const srv = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -23,7 +25,7 @@ export function startMockAi(port = 5392) {
     req.on('end', () => {
       const j = JSON.parse(body || '{}')
       const all = JSON.stringify(j.messages ?? [])
-      const text = all.includes('Reply with just: OK') ? 'OK' : all.includes('IELTS Speaking test') ? IELTS : all.includes('You are Emma') ? EMMA : all.includes('diary entry') ? DIARY : all.includes('Existing facts') ? '{"facts": ["The learner is called Lin"]}' : 'OK'
+      const text = all.includes('Reply with just: OK') ? 'OK' : all.includes('IELTS Writing Task 2') ? WRITING : all.includes('IELTS Speaking test') ? IELTS : all.includes('You are Emma') ? EMMA : all.includes('diary entry') ? DIARY : all.includes('Existing facts') ? '{"facts": ["The learner is called Lin"]}' : 'OK'
       if (!j.stream) { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ choices: [{ message: { content: text } }] })) }
       res.writeHead(200, { 'content-type': 'text/event-stream' })
       const parts = text.match(/.{1,12}/gs)

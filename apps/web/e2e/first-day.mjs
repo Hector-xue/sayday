@@ -4,7 +4,7 @@
 //   测线上：PW=<内测密码> node e2e/first-day.mjs https://sayday.ivyea.com/app/ <输出目录> [wav]
 import puppeteer from 'puppeteer-core'
 import { startMockAi } from './mock-ai.mjs'
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const [BASE, OUT, WAV] = process.argv.slice(2)
@@ -192,6 +192,18 @@ try {
     log('日记', JSON.stringify(await p.evaluate(() => ({ edits: document.querySelectorAll('.edit').length, natural: document.querySelectorAll('.nat').length, comment: document.querySelector('.diary-res .card p')?.textContent?.slice(0, 20) }))))
     await p.click('.session-top .icon-btn'); await sleep(400)
     log('今天页日记状态', (await text()).includes('今天写过了') ? '已写' : '未显示')
+    // 雅思写作：选第一题，写一段，提交 → 假 AI 批改
+    await clickText('今天', '.tab'); await sleep(300)
+    await p.click('.ai-grid .wide-2'); await sleep(400)
+    await p.click('.session .list .list-row'); await sleep(400)
+    await p.type('.diary-edit', 'Nowadays many people work from home. Some people thinks it is better for employees because they save time. However, others believe it harms teamwork. In my opinion, both views have some truth, so companies should find a balance between office work and remote work.')
+    await clickText('提交批改')
+    await p.waitForFunction(() => document.body.innerText.includes('逐句改错'), { timeout: 20000 })
+    await shot('24-writing')
+    log('写作批改', (await text()).replace(/\s+/g, ' ').match(/总分（AI 评估） \S+/)?.[0])
+    await p.click('.session-top .icon-btn'); await sleep(300)
+    await p.click('.session-top .icon-btn'); await sleep(300)
+
     // 雅思口语模考：10 道题，每题录 3 秒（假麦克风），Part 2 跳过准备；AI（假服务）评分
     await clickText('发音', '.tab'); await sleep(300)
     await p.click('.mock-card'); await sleep(400)
@@ -221,6 +233,17 @@ try {
   log('刷新后存储', (await text()).match(/保存在\s*(.+)/)?.[1])
   await clickText('今天', '.tab')
   log('刷新后今天页', (await text()).replace(/\s+/g, ' ').match(/新词.*?\d+\/\d+/)?.[0])
+
+  // 备份：截下导出的 JSON，再导回去（覆盖成同样的数据），词库数量应该不变
+  await openSettings()
+  await p.evaluate(() => { window.__backup = null; const orig = URL.createObjectURL; URL.createObjectURL = (b) => { b.text().then((t) => { window.__backup = t }); return orig(b) } })
+  await clickText('导出'); await p.waitForFunction(() => window.__backup, { timeout: 10000 })
+  const backup = await p.evaluate(() => window.__backup)
+  const bfile = join(OUT, 'e2e-backup.json'); writeFileSync(bfile, backup)
+  const input = await p.$('input[type=file]'); await input.uploadFile(bfile)
+  await p.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 }).catch(() => {})
+  await clickText('词库', '.tab'); await sleep(500)
+  log('导出再导入', `备份 ${Math.round(backup.length / 1024)}KB`, (await text()).match(/学习中 \d+/)?.[0])
 
   // 深色
   await openSettings(); await clickText('深色'); await clickText('今天', '.tab'); await sleep(400); await shot('13-today-dark')

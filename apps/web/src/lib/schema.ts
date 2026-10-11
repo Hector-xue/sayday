@@ -42,4 +42,8 @@ export const MIGRATIONS: string[] = [
   `
   CREATE TABLE speaking_test(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, band REAL, data TEXT NOT NULL);
   `,
+  // v0.0.5：雅思写作批改记录
+  `
+  CREATE TABLE writing(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, prompt_id TEXT NOT NULL, text TEXT NOT NULL, band REAL, result TEXT);
+  `,
 ]

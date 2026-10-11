@@ -1,5 +1,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "允许载入音素模型、推理、录音和朗读。"
-permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-stop", "allow-speak", "allow-speak-stop"]
+description = "允许载入音素模型、推理、录音、朗读和导出备份。"
+permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-stop", "allow-speak", "allow-speak-stop", "allow-save-to-downloads"]

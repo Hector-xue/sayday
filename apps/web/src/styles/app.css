@@ -360,3 +360,4 @@ p { margin: 0; }
 .examiner .ex-ico svg { width: 20px; height: 20px; }
 .examiner .en { font-family: var(--serif); font-size: 20px; line-height: 1.5; }
 .cue ul { margin: 6px 0 0 18px; display: grid; gap: 4px; font-family: var(--serif); font-size: 16px; }
+.ai-grid .wide-2 { grid-column: 1 / -1; }
