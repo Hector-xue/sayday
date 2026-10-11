@@ -13,6 +13,7 @@ mkdir -p "$STAGE/web/models" "$STAGE/web/samples" \
   "$STAGE/node_modules/onnxruntime-web/dist" \
   "$STAGE/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm"
 for f in index.html app.js db-worker.js demo.html demo.js infer-worker.js gop.mjs calib.mjs sw.js; do cat "$M0/web/$f" > "$STAGE/web/$f"; done
+cat "$M0/web/home.html" > "$STAGE/index.html"
 for f in calib.json cmudict.min.json cmudict.LICENSE meta.json u0.f32 u0.ref.f32 u1.f32 u1.ref.f32 u2.f32 u2.ref.f32; do cat "$M0/web/samples/$f" > "$STAGE/web/samples/$f"; done
 for f in phone_ctc.int8.onnx charsiu_vocab.json; do cat "$ROOT/.cache/models/$f" > "$STAGE/web/models/$f"; done
 for f in ort.wasm.min.mjs ort-wasm-simd-threaded.mjs ort-wasm-simd-threaded.wasm; do cat "$NM/onnxruntime-web/dist/$f" > "$STAGE/node_modules/onnxruntime-web/dist/$f"; done

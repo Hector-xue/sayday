@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>日日说</title>
+<style>
+  :root { --bg: #faf8f4; --surface: #fff; --ink: #1d1c1a; --muted: #77736b; --line: #e7e2d8; --accent: #2f4fa8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #161614; --surface: #1f1f1c; --ink: #ecebe6; --muted: #9b978d; --line: #33322d; --accent: #8aa4ee; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 28px; }
+  a.card { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
+  a.card:active { border-color: var(--accent); }
+  .t { font-size: 17px; font-weight: 600; color: var(--accent); }
+  .d { color: var(--muted); font-size: 13px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>日日说</h1>
+  <p class="sub">技术验证版 · 发音打分全部在本机完成，录音不上传</p>
+  <a class="card" href="/web/demo.html"><div class="t">跟读测评</div><div class="d">读一句英文，逐个音标出红黄绿，并给整句分。第一次打开要下载约 120MB 的模型。</div></a>
+  <a class="card" href="/web/index.html"><div class="t">设备测速</div><div class="d">测本机打分速度、本地数据库和离线缓存。跑完截图发回即可。</div></a>
+  <a class="card" href="/download/sayday-bench.apk" download><div class="t">安卓 App 测速包</div><div class="d">约 130MB。安装时需允许“安装未知来源应用”。也可以在 GitHub 发布页下载。</div></a>
+</main>
+</body>
+</html>

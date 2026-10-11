@@ -1,6 +1,6 @@
 // 离线壳：安装时预缓存完整资源清单（含按需加载的 worker 脚本与 wasm），之后同源 GET 一律缓存优先。
 // 只靠“访问过才缓存”不够：多线程推理和 SQLite 的 OPFS 代理是懒加载的，第一次断网时才会被请求。
-const CACHE = 'sayday-m0-v2'
+const CACHE = 'sayday-m0-v3'
 const NM = '../node_modules/'
 const PRECACHE = [
   './index.html', './app.js', './db-worker.js', './demo.html', './demo.js', './infer-worker.js', './gop.mjs', './calib.mjs',
@@ -18,7 +18,14 @@ const PRECACHE = [
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE)
-    await cache.addAll(PRECACHE)
+    // 本版缓存里已有的（页面先下好的模型）跳过；旧版缓存只复用模型这种大文件，页面脚本必须取新的
+    for (const u of PRECACHE) {
+      const url = new URL(u, self.location.href).href
+      if (await cache.match(url)) continue
+      const old = url.endsWith('.onnx') ? await caches.match(url) : null
+      if (old) await cache.put(url, old)
+      else await cache.add(url)
+    }
     await self.skipWaiting()
   })())
 })
