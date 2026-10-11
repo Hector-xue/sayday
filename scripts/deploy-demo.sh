@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 把 M0 演示页（spikes/m0/web + 运行时依赖 + 模型）发布到静态目录。
+# 发布 sayday.ivyea.com：门户（site/）+ 演示页（spikes/m0/web + 运行时依赖 + 模型）。
 # 用法: scripts/deploy-demo.sh /var/www/sayday.ivyea.com
 set -euo pipefail
 DEST=${1:?目标目录}
@@ -13,8 +13,11 @@ mkdir -p "$STAGE/web/models" "$STAGE/web/samples" \
   "$STAGE/node_modules/onnxruntime-web/dist" \
   "$STAGE/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm"
 for f in index.html app.js db-worker.js demo.html demo.js infer-worker.js tts-worker.js gop.mjs calib.mjs sw.js; do cat "$M0/web/$f" > "$STAGE/web/$f"; done
-# 门户首页 + 品牌图标（公开）
-cat "$M0/web/home.html" > "$STAGE/index.html"
+# 门户（公开）：site/ 原样放到站点根；品牌图标
+cat "$ROOT/site/index.html" > "$STAGE/index.html"
+mkdir -p "$STAGE/assets/audio"
+for f in site.css site.js; do cat "$ROOT/site/assets/$f" > "$STAGE/assets/$f"; done
+for f in "$ROOT"/site/assets/audio/*; do cat "$f" > "$STAGE/assets/audio/$(basename "$f")"; done
 mkdir -p "$STAGE/brand"
 for s in 32 64 180 192 512; do cat "$ROOT/assets/brand/icon-$s.png" > "$STAGE/brand/icon-$s.png"; done
 cat "$ROOT/assets/brand/favicon.ico" > "$STAGE/favicon.ico"
@@ -36,8 +39,8 @@ for f in sqlite3-bundler-friendly.mjs sqlite3.wasm sqlite3-opfs-async-proxy.js; 
 NEW="$DEST.new.$$"
 rm -rf "$NEW"
 cp -r "$STAGE" "$NEW"
-# download/（安装包）不归本脚本管，替换时原样保留
-if [ -d "$DEST/download" ]; then cp -r "$DEST/download" "$NEW/download"; fi
+# download/（安装包 + version.json）由 scripts/sync-release.sh 管，替换时原样保留（cp -a 保留软链接）
+if [ -d "$DEST/download" ]; then cp -a "$DEST/download" "$NEW/download"; fi
 if [ -d "$DEST" ]; then rm -rf "$DEST.old"; mv "$DEST" "$DEST.old"; fi
 mv "$NEW" "$DEST"
 rm -rf "$DEST.old"
