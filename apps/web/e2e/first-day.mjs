@@ -23,6 +23,8 @@ try {
   const p = await b.newPage()
   if (process.env.PW) await p.authenticate({ username: 'sayday', password: process.env.PW })
   p.on('pageerror', (e) => errors.push('pageerror ' + e.message))
+  const audioHits = []
+  p.on('response', (r) => { if (r.url().includes('/audio/')) audioHits.push(`${r.status()} ${r.url().replace(/^.*\/audio\//, '')}`) })
   p.on('console', (m) => { if (m.type() === 'error') errors.push('console ' + m.text().slice(0, 200)) })
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
   const shot = (n) => p.screenshot({ path: join(OUT, `e2e-${n}.png`) })
@@ -71,7 +73,13 @@ try {
     const kind = await p.evaluate(() => document.querySelector('.session .step-kind')?.textContent ?? '')
     if (!kind) break
     if (kind.startsWith('新词')) {
-      if (learned === 0) await shot('06-learn')
+      if (learned === 0) {
+        await shot('06-learn')
+        // 示范读音：课程开始时在后台从音频包（/audio/…mp3）提前下载，点播放直接用本机缓存
+        await sleep(3000)
+        const played = await p.evaluate(async () => { const b = document.querySelector('.session-body .icon-btn'); b.click(); await new Promise((r) => setTimeout(r, 2500)); return document.querySelector('.toast')?.textContent ?? 'ok' })
+        log('音频包请求', audioHits.length, '条，例如', audioHits.slice(0, 3).join(' / '), '· 点播放', played)
+      }
       if (learned + known === 2) { await clickText('早就认识'); known++ } else { await clickText('记下了'); learned++ }
     } else if (kind.startsWith('复习')) {
       await clickText('看答案'); await clickText('记得'); reviews++
