@@ -1,6 +1,9 @@
 import * as ort from '../node_modules/onnxruntime-web/dist/ort.wasm.min.mjs'
 
 const out = document.getElementById('out')
+const step = document.getElementById('step')
+const say = (t) => { step.textContent = t }
+const CACHE = 'sayday-m0-v3'
 const log = (o) => {
   const runs = o.model?.runs || []
   const rtf = runs.length ? runs.reduce((a, r) => a + r.inferMs / 1000 / r.audioS, 0) / runs.length : null
@@ -25,17 +28,47 @@ async function runDb() {
 
 async function f32(url) { return new Float32Array(await (await fetch(url)).arrayBuffer()) }
 
+// 带进度下载；首次（离线服务还没接管）下完顺手写进缓存，离线服务安装时直接复用，不再下第二遍
+async function fetchModel(url) {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`模型下载失败：HTTP ${res.status}`)
+  const total = Number(res.headers.get('content-length')) || 0
+  const reader = res.body.getReader()
+  const chunks = []
+  let got = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    got += value.length
+    say(`第 2 步 / 共 4 步：下载模型 ${(got / 1048576).toFixed(0)}${total ? ` / ${(total / 1048576).toFixed(0)} MB（${Math.round((got / total) * 100)}%）` : ' MB'}`)
+  }
+  const buf = new Uint8Array(got)
+  let o = 0
+  for (const c of chunks) { buf.set(c, o); o += c.length }
+  if (!navigator.serviceWorker?.controller && self.caches) {
+    try {
+      const cache = await caches.open(CACHE)
+      await cache.put(new URL(url, location.href).href, new Response(buf, { headers: { 'content-type': 'application/octet-stream', 'content-length': String(got) } }))
+    } catch (e) { console.warn('写缓存失败', e) }
+  }
+  return buf
+}
+
 async function runModel(name) {
   ort.env.wasm.wasmPaths = new URL('../node_modules/onnxruntime-web/dist/', location.href).href
   ort.env.wasm.numThreads = self.crossOriginIsolated ? 2 : 1
   const t0 = performance.now()
-  const buf = await (await fetch(`./models/phone_ctc.${name}.onnx`)).arrayBuffer()
+  say('第 2 步 / 共 4 步：下载模型（约 120MB，只下一次）')
+  const buf = await fetchModel(`./models/phone_ctc.${name}.onnx`)
   const tFetch = performance.now() - t0
+  say('第 3 步 / 共 4 步：载入模型（手机上可能要十几秒）')
   const sess = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' })
   const tCreate = performance.now() - t0 - tFetch
   const meta = await (await fetch('./samples/meta.json')).json()
   const runs = []
   for (const m of meta) {
+    say(`第 4 步 / 共 4 步：试打分第 ${m.i + 1} 句，共 ${meta.length} 句`)
     const x = await f32(`./samples/u${m.i}.f32`)
     const ref = await f32(`./samples/u${m.i}.ref.f32`)
     // 先跑一次热身，再计时
@@ -63,13 +96,19 @@ async function runModel(name) {
 ;(async () => {
   const res = { online: navigator.onLine, swControlled: !!navigator.serviceWorker?.controller }
   try {
-    await navigator.serviceWorker.register('./sw.js')
-    await navigator.serviceWorker.ready
+    say('第 1 步 / 共 4 步：测试本地数据库')
     res.db = await runDb()
     res.model = await runModel(new URLSearchParams(location.search).get('m') || 'int8')
+    // 模型已在缓存里，这时再装离线服务，它只需补齐几个小文件
+    if (navigator.serviceWorker) {
+      say('收尾：准备离线缓存')
+      await navigator.serviceWorker.register('./sw.js')
+      await navigator.serviceWorker.ready
+    }
   } catch (e) {
     res.error = String(e && e.stack || e)
   }
   window.__result = res
+  say(res.error ? '出错了，请截图下面的内容发回' : '测完了，请截图下面的内容发回')
   log(res)
 })()
