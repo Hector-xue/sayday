@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "words": 12000,
+ "sentences": 15141,
+ "sentences_by_cefr": {
+  "A1": 5971,
+  "A2": 4922,
+  "B1": 2204,
+  "B2": 1321,
+  "C1": 618,
+  "C2": 105
+ },
+ "pseudowords": 120,
+ "cefr_note": "CEFR 为按词频排名的估算",
+ "sources": [
+  {
+   "name": "ECDICT",
+   "url": "https://github.com/skywind3000/ECDICT",
+   "license": "MIT"
+  },
+  {
+   "name": "Tatoeba（经 manythings.org 打包的中英句对）",
+   "url": "https://tatoeba.org",
+   "license": "CC BY 2.0 FR",
+   "attribution": "每条例句的 id 即 Tatoeba 英文原句编号：https://tatoeba.org/sentences/show/<id>"
+  },
+  {
+   "name": "CMUdict",
+   "url": "https://github.com/cmusphinx/cmudict",
+   "license": "BSD-2-Clause"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "sayday-audio-pack",
+  "private": true,
+  "type": "module",
+  "description": "示范音频包：用 Kokoro-82M 把内容包里的例句和单词预先合成成 mp3（CI 里分片跑）",
+  "dependencies": {
+    "kokoro-js": "1.2.1"
+  }
+}
