@@ -69,19 +69,21 @@ jobs:
           node-version: '22'
 
       # 先 init 再生成图标：icon 命令发现 gen/android 时会顺带写安卓启动图标
+      # 必须经 package.json 里的 CLI 调用：gradle 构建时会回调 `npm run tauri`，用 npx 临时跑会找不到 package.json
       - name: 初始化 Android 工程 + 图标
         working-directory: apps/native
         run: |
-          npx --yes @tauri-apps/cli@2.11.5 android init
+          npm ci --no-audit --no-fund
+          npm run tauri -- android init
           python3 ../../scripts/make-icon.py icon-src.png
-          npx --yes @tauri-apps/cli@2.11.5 icon icon-src.png
+          npm run tauri -- icon icon-src.png
 
       - name: 构建 debug APK（仅 arm64）
         working-directory: apps/native
         run: |
           sudo apt-get update && sudo apt-get install -y gradle
           unset NDK_HOME
-          npx --yes @tauri-apps/cli@2.11.5 android build --apk --debug --target aarch64
+          npm run tauri -- android build --apk --debug --target aarch64
           mkdir -p apk-out
           find src-tauri/gen/android -name "*.apk" -exec cp {} apk-out/ \;
           ls -la apk-out

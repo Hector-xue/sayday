@@ -44,6 +44,7 @@
   .g { background: var(--good-bg); color: var(--good); }
   .y { background: var(--warn-bg); color: var(--warn); }
   .r { background: var(--bad-bg); color: var(--bad); }
+  .tail { font-size: 11px; color: var(--warn); }
   .tips { margin: 14px 0 0; padding-left: 18px; color: var(--ink); }
   .meta { font: 12px/1.7 ui-monospace, Menlo, monospace; color: var(--muted); word-break: break-all; white-space: pre-wrap; }
   textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
@@ -72,7 +73,7 @@
 
   <section class="card" id="result" hidden>
     <div class="score" id="score"></div>
-    <div class="status">本句发音分（按中国学习者人工评分校准）</div>
+    <div class="status">本句发音分（按中国学习者人工评分校准，含尾音检查）</div>
     <div class="words" id="words"></div>
     <ul class="tips" id="tips"></ul>
   </section>

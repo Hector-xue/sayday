@@ -1,5 +1,5 @@
 // 跟读测评演示：录音 → 16k 重采样 → Worker 推理 + GOP → 校准（0~2 分）→ 红黄绿
-import { calibrate } from './calib.mjs'
+import { calibrate, tailPositions, uttScore } from './calib.mjs'
 const SENTENCES = [
   'I think three things are worth thanking for',
   'The weather this week is very wet and windy',
@@ -116,23 +116,30 @@ async function evaluate(blob) {
   const decodeMs = Math.round(performance.now() - t0)
   const known = target.words.filter((w) => w.phones)
   const phones = known.flatMap((w) => w.phones)
+  const tailPos = tailPositions(known)
   const r = await new Promise((resolve, reject) => {
     pending = { resolve, reject }
-    worker.postMessage({ type: 'score', id: 1, audio, phones }, [audio.buffer])
+    worker.postMessage({ type: 'score', id: 1, audio, phones, tailAt: tailPos.map((t) => t.at) }, [audio.buffer])
   })
   const seq = phones.map((p) => vocab[p])
-  render(known, calibrate(calib, r.gop, seq))
+  const scores = calibrate(calib, r.gop, seq)
+  render(known, scores, tailPos, r.tails, uttScore(calib, scores, r.tails, known.length, r.T))
   const totalMs = Math.round(performance.now() - t0)
   showMeta({ audioS: r.audioS, decodeMs, inferMs: r.inferMs, gopMs: r.gopMs, totalMs })
   $('status').textContent = `用时 ${(totalMs / 1000).toFixed(1)} 秒`
   return { ...r, decodeMs, totalMs }
 }
 
-function render(words, scores) {
+function render(words, scores, tailPos, tails, utt) {
   const { red, yellow } = calib.thresholds
   const cls = (g) => (g < red ? 'r' : g < yellow ? 'y' : 'g')
-  const s = (g) => Math.max(0, Math.min(1, g / 2))
-  const gop = scores
+  const note = new Map()
+  tails.forEach((t, i) => {
+    const w = tailPos[i].word
+    const last = w.phones[w.phones.length - 1].toLowerCase()
+    if (t.ins > calib.utt.insTh) note.set(w, `/${last}/ 后面多了个元音`)
+    else if (t.del > calib.utt.delTh) note.set(w, `尾音 /${last}/ 可能没读出来`)
+  })
   let k = 0
   const bad = new Map()
   $('words').innerHTML = ''
@@ -141,11 +148,13 @@ function render(words, scores) {
     el.className = 'w'
     const gs = w.phones.map(() => gop[k++])
     const min = Math.min(...gs)
-    el.innerHTML = `<b class="${cls(min) === 'g' ? '' : cls(min)}" style="background:none">${w.word}</b><span class="ps">${w.phones.map((p, i) => `<span class="p ${cls(gs[i])}" title="${gs[i].toFixed(2)}">${p.toLowerCase()}</span>`).join('')}</span>`
+    const tip = note.get(w)
+    const wc = tip ? 'y' : cls(min) === 'g' ? '' : cls(min)
+    el.innerHTML = `<b class="${wc}" style="background:none">${w.word}</b><span class="ps">${w.phones.map((p, i) => `<span class="p ${cls(gs[i])}" title="${gs[i].toFixed(2)}">${p.toLowerCase()}</span>`).join('')}</span>${tip ? `<span class="tail">${tip}</span>` : ''}`
     $('words').appendChild(el)
     w.phones.forEach((p, i) => { if (gs[i] < yellow && HINT[p]) bad.set(p, (bad.get(p) || 0) + 1) })
   }
-  $('score').textContent = Math.round((gop.reduce((a, g) => a + s(g), 0) / gop.length) * 100)
+  $('score').textContent = Math.round(utt * 10)
   $('tips').innerHTML = [...bad.keys()].slice(0, 3).map((p) => `<li><b>/${p.toLowerCase()}/</b> ${HINT[p]}</li>`).join('')
   $('result').hidden = false
 }
@@ -173,7 +182,7 @@ async function autoRun() {
   await startRec()
   await new Promise((r) => setTimeout(r, Number(params.get('auto')) || 5000))
   const r = await evaluate(await stopRec())
-  const words = [...$('words').children].map((el) => el.querySelector('b').textContent + ':' + [...el.querySelectorAll('.p')].map((p) => p.className.slice(2)).join(''))
+  const words = [...$('words').children].map((el) => el.querySelector('b').textContent + ':' + [...el.querySelectorAll('.p')].map((p) => p.className.slice(2)).join('') + (el.querySelector('.tail') ? '(' + el.querySelector('.tail').textContent + ')' : ''))
   window.__result = { ...r, score: $('score').textContent, words, meta }
 }
 

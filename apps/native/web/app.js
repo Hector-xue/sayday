@@ -1,6 +1,6 @@
 // 日日说 App（M1 验证）：原生录音 + 原生推理（onnxruntime-android）+ JS 评分（与网页版同一套 gop/calib）
-import { prepare, afGop } from './gop.mjs'
-import { calibrate } from './calib.mjs'
+import { prepare, afGop, tailLLR } from './gop.mjs'
+import { calibrate, tailPositions, uttScore, VOWELS } from './calib.mjs'
 
 const { invoke } = window.__TAURI__.core
 const $ = (id) => document.getElementById(id)
@@ -48,19 +48,27 @@ function setTarget(text) {
   $('result').hidden = true
 }
 
-function render(words, scores) {
+function render(words, scores, tailPos, tails, utt) {
   const { red, yellow } = calib.thresholds
   const cls = (g) => (g < red ? 'r' : g < yellow ? 'y' : 'g')
+  const note = new Map()
+  tails.forEach((t, i) => {
+    const w = tailPos[i].word
+    const last = w.phones[w.phones.length - 1].toLowerCase()
+    if (t.ins > calib.utt.insTh) note.set(w, `/${last}/ 后面多了个元音`)
+    else if (t.del > calib.utt.delTh) note.set(w, `尾音 /${last}/ 可能没读出来`)
+  })
   let k = 0
   $('words').innerHTML = ''
   for (const w of words) {
     const gs = w.phones.map(() => scores[k++])
     const el = document.createElement('div')
     el.className = 'w'
-    el.innerHTML = `<b>${w.word}</b><span class="ps">${w.phones.map((p, i) => `<span class="p ${cls(gs[i])}">${p.toLowerCase()}</span>`).join('')}</span>`
+    const tip = note.get(w)
+    el.innerHTML = `<b>${w.word}</b><span class="ps">${w.phones.map((p, i) => `<span class="p ${cls(gs[i])}">${p.toLowerCase()}</span>`).join('')}</span>${tip ? `<span class="tail">${tip}</span>` : ''}`
     $('words').appendChild(el)
   }
-  $('score').textContent = Math.round((scores.reduce((a, g) => a + Math.max(0, Math.min(1, g / 2)), 0) / scores.length) * 100)
+  $('score').textContent = Math.round(utt * 10)
   $('result').hidden = false
 }
 
@@ -86,10 +94,13 @@ $('rec').onclick = async () => {
     const known = target.words.filter((w) => w.phones)
     const seq = known.flatMap((w) => w.phones).map((p) => vocab[p])
     const t1 = performance.now()
-    const gop = afGop(prepare(r.logits, r.frames, r.vocab), r.frames, r.vocab, seq, phoneIds)
+    const lp = prepare(r.logits, r.frames, r.vocab)
+    const gop = afGop(lp, r.frames, r.vocab, seq, phoneIds)
     const scores = calibrate(calib, Array.from(gop), seq)
+    const tailPos = tailPositions(known)
+    const tails = tailLLR(lp, r.frames, r.vocab, seq, tailPos.map((t) => t.at), VOWELS.map((p) => vocab[p]))
     const gopMs = Math.round(performance.now() - t1)
-    render(known, scores)
+    render(known, scores, tailPos, tails, uttScore(calib, scores, tails, known.length, r.frames))
     $('status').textContent = `${(audio.length / 16000).toFixed(1)} 秒录音 · 原生推理 ${r.inferMs} ms · 通信 ${r.roundTripMs - r.inferMs} ms · 评分 ${gopMs} ms · 共 ${Math.round(performance.now() - t0)} ms`
   } catch (e) {
     recording = false

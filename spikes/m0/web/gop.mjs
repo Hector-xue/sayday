@@ -138,3 +138,60 @@ export function afGop(lp, T, V, seq, phoneIds) {
   }
   return out
 }
+
+/**
+ * 词尾检测：对给定的音素位置（通常是以辅音结尾的词的最后一个音素），返回
+ *   ins = log Σ_v P(在该音素后插入元音 v) − log P(标准读音)   → 加尾音
+ *   del = log P(删掉该音素) − log P(标准读音)                 → 漏尾音
+ * 与 afGop 共用前向/后向表的思路，单个变体 O(T)。
+ */
+export function tailLLR(lp, T, V, seq, positions, vowelIds) {
+  const N = seq.length
+  const ext = extend(seq)
+  const S = ext.length
+  const A = forward(lp, T, V, ext)
+  const B = backward(lp, T, V, ext)
+  const canon = lse(A[(T - 1) * S + S - 1], A[(T - 1) * S + S - 2])
+  const al = (t, s) => (t < 0 || s < 0 ? NEG : A[t * S + s])
+  const be = (t, s) => (t >= T || s >= S ? NEG : B[t * S + s])
+  const out = []
+  for (const i of positions) {
+    const tok = 2 * i + 1
+    const nextTok = i < N - 1 ? seq[i + 1] : -1
+    // 插入：新状态 v 夹在 seq[i] 与其后的 blank 之间
+    let ins = NEG
+    for (const v of vowelIds) {
+      let g = NEG, total = NEG
+      for (let t = 1; t < T; t++) {
+        let enter = lse(g, al(t - 1, tok + 1))
+        if (v !== seq[i]) enter = lse(enter, al(t - 1, tok))
+        g = enter === NEG ? NEG : enter + lp[t * V + v]
+        if (g === NEG) continue
+        let exit = be(t + 1, tok + 1)
+        if (v !== nextTok) exit = lse(exit, be(t + 1, tok + 2))
+        if (t === T - 1 && i === N - 1) exit = lse(exit, 0)
+        total = lse(total, g + exit)
+      }
+      ins = lse(ins, total)
+    }
+    // 删除：与 afGop 中的删除分支相同
+    const prevTok = i > 0 ? seq[i - 1] : -1
+    let del = NEG
+    if (N === 1) {
+      del = 0
+      for (let t = 0; t < T; t++) del += lp[t * V + BLANK]
+    } else if (i === N - 1) {
+      del = lse(al(T - 1, tok - 1), al(T - 1, tok - 2))
+    } else {
+      if (i === 0) del = be(0, tok + 2)
+      for (let t = 0; t < T - 1; t++) {
+        let pre = al(t, tok - 1)
+        if (i > 0 && prevTok !== nextTok) pre = lse(pre, al(t, tok - 2))
+        del = lse(del, pre + be(t + 1, tok + 2))
+      }
+    }
+    out.push({ pos: i, ins: ins - canon, del: del - canon })
+  }
+  return out
+}
+

@@ -1,6 +1,6 @@
 // 推理 Worker：模型加载 + 音素后验 + GOP，全部不占主线程
 import * as ort from '../node_modules/onnxruntime-web/dist/ort.wasm.min.mjs'
-import { prepare, afGop } from './gop.mjs'
+import { prepare, afGop, tailLLR } from './gop.mjs'
 
 const V = 42
 let session = null
@@ -30,7 +30,7 @@ async function load(modelUrl) {
   self.postMessage({ type: 'ready', createMs: Math.round(performance.now() - t0), threads: ort.env.wasm.numThreads })
 }
 
-async function score(audio, phones) {
+async function score(audio, phones, tailAt) {
   // 零均值单位方差归一化（与评测时一致）
   let m = 0
   for (const x of audio) m += x
@@ -50,15 +50,17 @@ async function score(audio, phones) {
   const seq = phones.map((p) => vocab[p])
   const phoneIds = Object.entries(vocab).filter(([k]) => !k.startsWith('[')).map(([, id]) => id)
   const gop = afGop(lp, T, V, seq, phoneIds)
+  const vowelIds = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH', 'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW'].map((p) => vocab[p])
+  const tails = tailLLR(lp, T, V, seq, tailAt, vowelIds)
   const gopMs = performance.now() - t1
-  return { gop: Array.from(gop), inferMs: Math.round(inferMs), gopMs: Math.round(gopMs), audioS: +(audio.length / 16000).toFixed(2) }
+  return { gop: Array.from(gop), tails, T, inferMs: Math.round(inferMs), gopMs: Math.round(gopMs), audioS: +(audio.length / 16000).toFixed(2) }
 }
 
 self.onmessage = async (e) => {
   const { type, id } = e.data
   try {
     if (type === 'load') await load(e.data.modelUrl)
-    else if (type === 'score') self.postMessage({ type: 'scored', id, ...(await score(e.data.audio, e.data.phones)) })
+    else if (type === 'score') self.postMessage({ type: 'scored', id, ...(await score(e.data.audio, e.data.phones, e.data.tailAt)) })
   } catch (err) {
     self.postMessage({ type: 'error', id, error: String(err && err.stack || err) })
   }
