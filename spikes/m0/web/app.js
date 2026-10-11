@@ -1,7 +1,20 @@
 import * as ort from '../node_modules/onnxruntime-web/dist/ort.wasm.min.mjs'
 
 const out = document.getElementById('out')
-const log = (o) => { out.textContent = JSON.stringify(o, null, 1) }
+const log = (o) => {
+  const runs = o.model?.runs || []
+  const rtf = runs.length ? runs.reduce((a, r) => a + r.inferMs / 1000 / r.audioS, 0) / runs.length : null
+  const head = [
+    `设备：${navigator.userAgent}`,
+    `CPU 核数：${navigator.hardwareConcurrency || '未知'}`,
+    rtf === null ? '推理：未完成' : `推理：每 1 秒音频约 ${rtf.toFixed(2)} 秒（3 秒的句子约 ${(3 * rtf).toFixed(1)} 秒）`,
+    o.model ? `模型载入 ${o.model.fetchMs} ms，建会话 ${o.model.createMs} ms` : '',
+    o.db ? (o.db.ok ? `本地数据库：写入 1 万条 ${o.db.insert10kMs} ms，累计 ${o.db.after} 条（刷新后应继续增加）` : `本地数据库出错：${o.db.error}`) : '',
+    `离线缓存：${o.swControlled ? '已接管（可断网刷新）' : '首次打开，刷新一次后生效'}`,
+    o.error ? `出错：${o.error}` : '',
+  ].filter(Boolean).join('\n')
+  out.textContent = head + '\n\n' + JSON.stringify(o, null, 1)
+}
 
 async function runDb() {
   const w = new Worker('./db-worker.js', { type: 'module' })
