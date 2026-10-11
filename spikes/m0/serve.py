@@ -24,6 +24,7 @@ H.extensions_map.update({".mjs": "text/javascript", ".js": "text/javascript", ".
 ap = argparse.ArgumentParser()
 ap.add_argument("--port", type=int, default=5287)
 ap.add_argument("--coi", action="store_true")
+ap.add_argument("--dir", default=str(Path(__file__).parent), help="站点根目录（默认 spikes/m0；验证部署产物时指向 deploy-demo.sh 的输出）")
 a = ap.parse_args()
 H.coi = a.coi
-ThreadingHTTPServer(("127.0.0.1", a.port), functools.partial(H, directory=str(Path(__file__).parent))).serve_forever()
+ThreadingHTTPServer(("127.0.0.1", a.port), functools.partial(H, directory=a.dir)).serve_forever()

@@ -3,30 +3,144 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>日日说</title>
+<title>日日说 Sayday · 每天开口说一点英语</title>
+<meta name="description" content="日日说：离线发音打分，逐个音标指出哪里读错。开源，可接入你自己的 AI。">
+<meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1320" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/brand/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/brand/icon-180.png">
+<meta property="og:title" content="日日说 Sayday">
+<meta property="og:description" content="每天开口说一点英语。离线发音打分，开源。">
+<meta property="og:image" content="/brand/icon-512.png">
 <style>
-  :root { --bg: #faf8f4; --surface: #fff; --ink: #1d1c1a; --muted: #77736b; --line: #e7e2d8; --accent: #2f4fa8; }
+  :root {
+    --bg: #f7f9fc; --surface: #ffffff; --ink: #0f1b33; --muted: #5d6779; --line: #e3e8f0;
+    --brand: #1a6dff; --brand-ink: #0b2a6b; --sun: #ffc940;
+    --good: #23864f; --good-bg: #e5f4ea; --warn: #a86f00; --warn-bg: #fdf1d6; --bad: #c2412d; --bad-bg: #fbe6e2;
+  }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg: #161614; --surface: #1f1f1c; --ink: #ecebe6; --muted: #9b978d; --line: #33322d; --accent: #8aa4ee; }
+    :root:not([data-theme="light"]) {
+      --bg: #0e1320; --surface: #161c2b; --ink: #e8ecf4; --muted: #96a0b3; --line: #262e40;
+      --brand: #5b95ff; --brand-ink: #c9d8ff;
+      --good: #6cc495; --good-bg: #17301f; --warn: #e2b54f; --warn-bg: #352a10; --bad: #ef7f6a; --bad-bg: #3a1f1a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1320; --surface: #161c2b; --ink: #e8ecf4; --muted: #96a0b3; --line: #262e40;
+    --brand: #5b95ff; --brand-ink: #c9d8ff;
+    --good: #6cc495; --good-bg: #17301f; --warn: #e2b54f; --warn-bg: #352a10; --bad: #ef7f6a; --bad-bg: #3a1f1a;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
-  main { max-width: 560px; margin: 0 auto; padding: 40px 16px 64px; }
-  h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: 13px; margin: 0 0 28px; }
-  a.card { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
-  a.card:active { border-color: var(--accent); }
-  .t { font-size: 17px; font-weight: 600; color: var(--accent); }
-  .d { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  a { color: inherit; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 18px; color: var(--brand-ink); }
+  .brand img { width: 34px; height: 34px; }
+  .brand small { font-weight: 500; font-size: 14px; color: var(--muted); letter-spacing: .02em; }
+  nav a { text-decoration: none; color: var(--muted); font-size: 14px; margin-left: 18px; }
+  nav a:hover { color: var(--ink); }
+
+  .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; padding: 56px 0 72px; }
+  h1 { font-size: 44px; line-height: 1.2; margin: 0 0 18px; font-weight: 700; color: var(--brand-ink); }
+  h1 em { font-style: normal; color: var(--brand); }
+  .lead { color: var(--muted); font-size: 17px; margin: 0 0 30px; max-width: 30em; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn:hover { filter: brightness(1.04); }
+  .note { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+  /* 示意：一次跟读的打分结果 */
+  .demo { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 26px 26px 22px; box-shadow: 0 20px 50px -30px rgba(15, 40, 100, .35); }
+  .demo .top { display: flex; align-items: baseline; justify-content: space-between; }
+  .demo .score { font: 700 52px/1 Georgia, "Times New Roman", serif; color: var(--brand-ink); }
+  .demo .score span { font-size: 15px; font-weight: 500; color: var(--muted); font-family: inherit; margin-left: 6px; }
+  .demo .tag { font-size: 12px; color: var(--muted); }
+  .words { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 18px; }
+  .w { display: flex; flex-direction: column; gap: 5px; }
+  .w b { font: 500 20px Georgia, "Times New Roman", serif; }
+  .ps { display: flex; gap: 3px; }
+  .p { font-size: 12px; padding: 1px 6px; border-radius: 6px; }
+  .g { background: var(--good-bg); color: var(--good); }
+  .y { background: var(--warn-bg); color: var(--warn); }
+  .r { background: var(--bad-bg); color: var(--bad); }
+  .tail { font-size: 12px; color: var(--warn); }
+  .tip { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  .tip b { color: var(--ink); font-weight: 600; }
+
+  section.points { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 72px; }
+  .pt { background: var(--surface); padding: 22px 20px; }
+  .pt h3 { margin: 0 0 6px; font-size: 16px; color: var(--brand-ink); }
+  .pt p { margin: 0; font-size: 14px; color: var(--muted); }
+  .soon { font-size: 11px; font-weight: 600; color: var(--warn); background: var(--warn-bg); border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding: 28px 0 48px; }
+    h1 { font-size: 34px; }
+    section.points { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) {
+    nav a.hide-s { display: none; }
+    h1 { font-size: 30px; }
+    .lead { font-size: 16px; }
+    .btn { flex: 1 1 100%; justify-content: center; }
+    .demo { padding: 20px; }
+    section.points { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>日日说</h1>
-  <p class="sub">技术验证版 · 发音打分全部在本机完成，录音不上传</p>
-  <a class="card" href="/web/demo.html"><div class="t">跟读测评</div><div class="d">读一句英文，逐个音标出红黄绿，并给整句分。第一次打开要下载约 120MB 的模型。</div></a>
-  <a class="card" href="/web/index.html"><div class="t">设备测速</div><div class="d">测本机打分速度、本地数据库和离线缓存。跑完截图发回即可。</div></a>
-  <a class="card" href="/download/sayday-bench.apk" download><div class="t">安卓 App 测速包</div><div class="d">约 130MB。安装时需允许“安装未知来源应用”。也可以在 GitHub 发布页下载。</div></a>
-</main>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/"><img src="/brand/icon-64.png" alt="" width="34" height="34">日日说 <small>Sayday</small></a>
+    <nav><a class="hide-s" href="https://github.com/Hector-xue/sayday/releases">下载</a><a href="https://github.com/Hector-xue/sayday">GitHub</a></nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>每天开口<br>说一点<em>英语</em></h1>
+        <p class="lead">读一句，马上知道哪个音没读准、尾音有没有吞掉或多加了。打分全在手机本机完成，没网也能练。</p>
+        <div class="cta">
+          <a class="btn primary" href="/web/demo.html">在线试一句</a>
+          <a class="btn" href="https://github.com/Hector-xue/sayday/releases">下载安卓版</a>
+        </div>
+        <p class="note">内测中：在线体验需要内测账号；安卓版目前是测速包。</p>
+      </div>
+
+      <div class="demo" aria-label="打分结果示意">
+        <div class="top"><div class="score">72<span>/ 100</span></div><div class="tag">示意</div></div>
+        <div class="words">
+          <div class="w"><b>I</b><span class="ps"><span class="p g">ay</span></span></div>
+          <div class="w"><b>think</b><span class="ps"><span class="p r">th</span><span class="p g">ih</span><span class="p g">ng</span><span class="p g">k</span></span></div>
+          <div class="w"><b>three</b><span class="ps"><span class="p y">th</span><span class="p g">r</span><span class="p g">iy</span></span></div>
+          <div class="w"><b>things</b><span class="ps"><span class="p g">th</span><span class="p g">ih</span><span class="p g">ng</span><span class="p g">z</span></span></div>
+          <div class="w"><b>are</b><span class="ps"><span class="p g">aa</span><span class="p g">r</span></span></div>
+          <div class="w"><b>worth</b><span class="ps"><span class="p g">w</span><span class="p g">er</span><span class="p y">th</span></span><span class="tail">/th/ 后面多了个元音</span></div>
+        </div>
+        <p class="tip"><b>/th/</b> 舌尖轻放上下齿之间送气，不要发成 s / f</p>
+      </div>
+    </div>
+
+    <section class="points">
+      <div class="pt"><h3>逐个音标纠音</h3><p>红黄绿标出每个音，按中国学习者常见问题给口型提示。</p></div>
+      <div class="pt"><h3>尾音检查</h3><p>“加尾音”和“吞尾音”是中式口音的老大难，单独揪出来。</p></div>
+      <div class="pt"><h3>离线可用</h3><p>模型下载一次，之后断网照样打分，录音不上传。</p></div>
+      <div class="pt"><h3>接你自己的 AI<span class="soon">规划中</span></h3><p>开源。自带 API 或接入你在微信里用的助手，每天被提醒着练。</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>日日说 Sayday · MIT 开源</span>
+    <span><a href="https://github.com/Hector-xue/sayday">源码</a> · <a href="https://github.com/Hector-xue/sayday/blob/main/README.md#第三方资源与授权">致谢与许可</a></span>
+  </footer>
+</div>
 </body>
 </html>

@@ -27,6 +27,15 @@ const HINT = {
 }
 
 const $ = (id) => document.getElementById(id)
+// 听示范：预置句子播预生成的 Kokoro 音频（离线可用）；自定义句子按需在本机合成
+const VOICE = { us: 'af_heart', gb: 'bf_emma' }
+let accent = 'us'
+try { accent = localStorage.getItem('sayday.accent') || 'us' } catch {}
+let ttsIndex = {}
+let ttsWorker = null
+let ttsSeq = 0
+const ttsPending = new Map()
+let audioEl = null
 const params = new URLSearchParams(location.search)
 const worker = new Worker('./infer-worker.js', { type: 'module' })
 let dict = null
@@ -167,12 +176,68 @@ $('rec').onclick = async () => {
     try { await startRec() } catch (e) { $('status').textContent = '无法使用麦克风：' + e.message }
   }
 }
-$('listen').onclick = () => {
-  const u = new SpeechSynthesisUtterance(target.text)
-  u.lang = 'en-GB'
-  u.rate = 0.9
-  speechSynthesis.cancel()
-  speechSynthesis.speak(u)
+function playUrl(url) {
+  if (audioEl) audioEl.pause()
+  audioEl = new Audio(url)
+  return audioEl.play()
+}
+
+function wavUrl(samples, rate) {
+  const n = samples.length
+  const b = new DataView(new ArrayBuffer(44 + n * 2))
+  const str = (o, t) => [...t].forEach((c, i) => b.setUint8(o + i, c.charCodeAt(0)))
+  str(0, 'RIFF'); b.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt ')
+  b.setUint32(16, 16, true); b.setUint16(20, 1, true); b.setUint16(22, 1, true); b.setUint32(24, rate, true)
+  b.setUint32(28, rate * 2, true); b.setUint16(32, 2, true); b.setUint16(34, 16, true); str(36, 'data'); b.setUint32(40, n * 2, true)
+  for (let i = 0; i < n; i++) b.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 32767, true)
+  return URL.createObjectURL(new Blob([b], { type: 'audio/wav' }))
+}
+
+function synth(text) {
+  if (!ttsWorker) {
+    ttsWorker = new Worker('./tts-worker.js', { type: 'module' })
+    ttsWorker.onmessage = (e) => {
+      const d = e.data
+      if (d.type === 'progress' && d.total) $('status').textContent = `首次使用自定义句子示范，正在下载语音模型 ${Math.round((d.got / d.total) * 100)}%（约 90MB，只下一次）`
+      else if (d.type === 'audio') { ttsPending.get(d.id)?.resolve(d); ttsPending.delete(d.id) }
+      else if (d.type === 'error') {
+        for (const p of ttsPending.values()) p.reject(new Error(d.error))
+        ttsPending.clear()
+      }
+    }
+  }
+  const id = ++ttsSeq
+  return new Promise((resolve, reject) => {
+    ttsPending.set(id, { resolve, reject })
+    ttsWorker.postMessage({ type: 'speak', id, text, voice: VOICE[accent] })
+  })
+}
+
+$('listen').onclick = async () => {
+  const pre = ttsIndex[target.text.trim().toLowerCase()]
+  const btn = $('listen')
+  try {
+    if (pre && pre[accent]) return await playUrl('./tts/samples/' + pre[accent])
+    btn.disabled = true
+    const keep = $('status').textContent
+    $('status').textContent = '正在生成示范读音…'
+    const r = await synth(target.text)
+    $('status').textContent = keep
+    showMeta({ ttsMs: r.ms })
+    await playUrl(wavUrl(r.audio, r.rate))
+  } catch (e) {
+    $('status').textContent = '示范读音生成失败：' + e.message.split('\n')[0]
+  } finally {
+    btn.disabled = false
+  }
+}
+for (const b of document.querySelectorAll('[data-accent]')) {
+  b.setAttribute('aria-pressed', String(b.dataset.accent === accent))
+  b.onclick = () => {
+    accent = b.dataset.accent
+    try { localStorage.setItem('sayday.accent', accent) } catch {}
+    for (const x of document.querySelectorAll('[data-accent]')) x.setAttribute('aria-pressed', String(x === b))
+  }
 }
 $('useCustom').onclick = () => { const t = $('custom').value.trim(); if (t) setTarget(t) }
 
@@ -189,6 +254,10 @@ async function autoRun() {
 const loadStart = performance.now()
 ;(async () => {
   ;[dict, vocab, calib] = await Promise.all(['./samples/cmudict.min.json', './models/charsiu_vocab.json', './samples/calib.json'].map(async (u) => (await fetch(u)).json()))
+  try {
+    const idx = await (await fetch('./tts/samples/index.json')).json()
+    for (const v of Object.values(idx)) ttsIndex[v.text.trim().toLowerCase()] = v
+  } catch (e) { console.warn('示范音频索引载入失败', e) }
   for (const s of SENTENCES) {
     const b = document.createElement('button')
     b.className = 'chip'

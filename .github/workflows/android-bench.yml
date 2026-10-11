@@ -75,7 +75,7 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm run tauri -- android init
-          python3 ../../scripts/make-icon.py icon-src.png
+          cat ../../assets/brand/icon-1024.png > icon-src.png
           npm run tauri -- icon icon-src.png
 
       - name: 构建 debug APK（仅 arm64）
