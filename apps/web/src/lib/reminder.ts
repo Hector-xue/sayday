@@ -4,7 +4,7 @@
 import { kvGet, kvSet, today } from './db'
 import { dayRow } from './lesson'
 import { dueCount } from './srs'
-import { getProgress, loadSeason, nextUp } from './episodes'
+import { getProgress, loadSeasons, nextUp } from './episodes'
 
 const tauri = (globalThis as any).__TAURI__?.core as { invoke: (cmd: string, args?: object) => Promise<any> } | undefined
 export const canRemind = !!tauri
@@ -26,8 +26,8 @@ export async function enableReminder(r: Reminder): Promise<string | null> {
 /** 提醒文案：有剧集就用剧集勾人，没有就说到期的词 */
 async function body(): Promise<string> {
   try {
-    const [s, p] = await Promise.all([loadSeason(), getProgress()])
-    const u = nextUp(s, p)
+    const [all, p] = await Promise.all([loadSeasons(), getProgress()])
+    const u = nextUp(all, p)
     if (u.state !== 'all-done') return `第 ${u.ep.id} 集《${u.ep.title}》在等你 · 忙的话 2 分钟也算数`
   } catch { /* 剧集没加载出来就用下面的 */ }
   const due = await dueCount(Date.now() + 86400_000)

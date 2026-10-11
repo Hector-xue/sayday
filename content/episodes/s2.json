@@ -1,0 +1,262 @@
+{
+  "season": 2,
+  "title": "Edinburgh",
+  "title_zh": "爱丁堡",
+  "cast": {
+    "Lin": { "zh": "林（你）", "voice": { "us": "af_heart", "gb": "bf_lily" }, "me": true },
+    "Sophie": { "zh": "Sophie · 小餐会主人", "voice": "bf_alice" },
+    "Callum": { "zh": "Callum · 导游", "voice": "bm_daniel" },
+    "Jake": { "zh": "Jake · 美国制作人", "voice": "am_michael" },
+    "Morag": { "zh": "Morag · Sophie 的姨妈", "voice": "bf_isabella" },
+    "Emma": { "zh": "Emma · 伦敦的室友", "voice": "bf_emma" }
+  },
+  "episodes": [
+    {
+      "id": 1, "level": "B1",
+      "title": "The Night Train", "title_zh": "夜车",
+      "scene_zh": "公司派你去爱丁堡艺术节做两周设计。你坐上了伦敦开往苏格兰的卧铺夜车。",
+      "lines": [
+        { "who": "Callum", "en": "Mind if I sit here? The lounge car is always packed on Fridays.", "zh": "介意我坐这儿吗？周五的休息车厢总是挤满了人。" },
+        { "who": "Lin", "en": "Not at all. Is it always this busy?", "zh": "一点也不介意。一直这么忙吗？" },
+        { "who": "Callum", "en": "In August, yes. Half of London is heading north for the festival.", "zh": "八月就是这样。半个伦敦的人都往北去看艺术节。" },
+        { "who": "Lin", "en": "That's why I'm going too. My company is sending me to design posters for a theatre.", "zh": "我也是为这个去的。公司派我去给一家剧院设计海报。" },
+        { "who": "Callum", "en": "A designer! I'm Callum, by the way. I run walking tours in the Old Town.", "zh": "设计师！对了，我叫 Callum。我在老城带徒步游。" },
+        { "who": "Lin", "en": "Nice to meet you. I'm Lin. Is this your first time on the sleeper train?", "zh": "很高兴认识你。我是林。你是第一次坐卧铺车吗？" },
+        { "who": "Callum", "en": "Far from it. I take it every month to visit my sister. You fall asleep in London and wake up in Scotland.", "zh": "远不止。我每个月都坐它去看我姐姐。在伦敦睡着，在苏格兰醒来。" },
+        { "who": "Lin", "en": "That sounds magical. I hope I can actually sleep, though. I'm a bit nervous about the job.", "zh": "听起来很神奇。不过希望我真能睡着。这份工作让我有点紧张。" },
+        { "who": "Callum", "en": "Why's that?", "zh": "为什么？" },
+        { "who": "Lin", "en": "The producer is American, and I've heard he changes his mind every five minutes.", "zh": "制作人是美国人，我听说他五分钟就改一次主意。" },
+        { "who": "Callum", "en": "Then you'll fit right in. Edinburgh in August is pure chaos.", "zh": "那你会很适应的。八月的爱丁堡就是一团乱。" },
+        { "who": "Lin", "en": "Great. Do you know a café called Sophie's Kitchen? A friend told me to go there.", "zh": "太好了。你知道一家叫 Sophie's Kitchen 的店吗？有个朋友叫我去那儿。" },
+        { "who": "Callum", "en": "Sophie's? Everyone knows Sophie's. But I heard it might be closing soon.", "zh": "Sophie's？谁都知道。不过我听说它可能快关门了。" }
+      ],
+      "quiz": [
+        { "q": "你为什么去爱丁堡？", "options": ["去旅游", "给剧院设计海报", "去看 Callum 的姐姐"], "answer": 1 },
+        { "q": "Callum 是做什么的？", "options": ["在老城带徒步游", "开卧铺列车", "剧院制作人"], "answer": 0 },
+        { "q": "Callum 听说 Sophie's Kitchen 怎么了？", "options": ["要扩张", "可能快关门了", "换了老板"], "answer": 1 }
+      ],
+      "next_zh": "第二天一早，你推开了 Sophie's Kitchen 的门。"
+    },
+    {
+      "id": 2, "level": "B1",
+      "title": "Sophie's Kitchen", "title_zh": "Sophie 的厨房",
+      "scene_zh": "你第一次见到 Sophie 本人。她的小餐会遇到了麻烦。",
+      "lines": [
+        { "who": "Sophie", "en": "Lin! You actually came. I've been looking forward to this since the reading night.", "zh": "林！你真的来了。读书夜之后我一直盼着这天。" },
+        { "who": "Lin", "en": "Me too. This place is lovely. It smells amazing in here.", "zh": "我也是。这里真好。闻起来太香了。" },
+        { "who": "Sophie", "en": "That's the soup for tonight's supper club. Twelve strangers, one long table.", "zh": "那是今晚小餐会的汤。十二个陌生人，一张长桌。" },
+        { "who": "Lin", "en": "Callum told me you might be closing. Is that true?", "zh": "Callum 说你可能要关门了。是真的吗？" },
+        { "who": "Sophie", "en": "Unfortunately, yes. The building has been sold, and the new owners want to turn it into flats.", "zh": "很遗憾，是的。这栋楼卖掉了，新房东想改成公寓。" },
+        { "who": "Lin", "en": "That's awful. How long have you got?", "zh": "太糟了。你还有多久？" },
+        { "who": "Sophie", "en": "Until the end of the festival. After that, I'll have to find somewhere else, or give up.", "zh": "到艺术节结束。之后要么找别的地方，要么放弃。" },
+        { "who": "Lin", "en": "You can't give up. People come here because of you, not because of the building.", "zh": "你不能放弃。大家是为你来的，不是为这栋楼。" },
+        { "who": "Sophie", "en": "That's kind of you to say. Anyway, enough about me. Tell me about your theatre job.", "zh": "你这么说真好。好了，别说我了。说说你剧院的工作吧。" },
+        { "who": "Lin", "en": "I start tomorrow. I have to finish three posters in five days.", "zh": "我明天开始。五天要做完三张海报。" },
+        { "who": "Sophie", "en": "Then you'll need feeding. Come to the supper club tonight. It's on the house.", "zh": "那你得吃好。今晚来小餐会吧，我请客。" },
+        { "who": "Lin", "en": "Only if you let me help with the washing-up afterwards.", "zh": "那你得让我饭后帮忙洗碗才行。" }
+      ],
+      "quiz": [
+        { "q": "Sophie 的店为什么可能关门？", "options": ["生意不好", "楼被卖了，要改成公寓", "她要回伦敦"], "answer": 1 },
+        { "q": "你要在五天里做完什么？", "options": ["三张海报", "一场演出", "十二道菜"], "answer": 0 },
+        { "q": "Sophie 邀请你今晚做什么？", "options": ["去看戏", "来小餐会，她请客", "一起去爬山"], "answer": 1 }
+      ],
+      "next_zh": "第一天上班，制作人 Jake 让你彻底懵了。"
+    },
+    {
+      "id": 3, "level": "B1",
+      "title": "First Floor, Second Thoughts", "title_zh": "一楼还是二楼",
+      "scene_zh": "剧院第一天。美国制作人 Jake 说的英语和你在伦敦学的不太一样。",
+      "lines": [
+        { "who": "Jake", "en": "You must be Lin! Great to have you. Our office is on the first floor, just up the stairs.", "zh": "你一定是林！太好了。我们办公室在“一楼”，上楼梯就是。" },
+        { "who": "Lin", "en": "Up the stairs? In London, the first floor is the one above the ground floor.", "zh": "上楼梯？在伦敦，“first floor”是地面层上面那层。" },
+        { "who": "Jake", "en": "Right, I keep forgetting. For me, the first floor is the ground floor. Welcome to the confusion.", "zh": "对，我老忘。对我来说一楼就是地面层。欢迎来到混乱现场。" },
+        { "who": "Lin", "en": "So, what do you have in mind for the posters?", "zh": "那么，海报你有什么想法？" },
+        { "who": "Jake", "en": "Something bold. Bright colors, big faces, maybe a bit of fire.", "zh": "要大胆。鲜艳的颜色，大大的人脸，也许来点火焰。" },
+        { "who": "Lin", "en": "Fire? I thought the play was a quiet love story.", "zh": "火焰？我以为这部戏是个安静的爱情故事。" },
+        { "who": "Jake", "en": "It is. But quiet doesn't sell tickets. Trust me, I've been doing this for twenty years.", "zh": "是啊。可安静卖不出票。相信我，我干这行二十年了。" },
+        { "who": "Lin", "en": "I understand. Could I show you two versions, one bold and one closer to the story?", "zh": "我明白。我能给你看两个版本吗？一个大胆的，一个更贴近故事的？" },
+        { "who": "Jake", "en": "Sure, as long as they're on my desk by Wednesday.", "zh": "行，只要周三前放到我桌上就好。" },
+        { "who": "Lin", "en": "Wednesday? I thought the deadline was Friday.", "zh": "周三？我以为截止是周五。" },
+        { "who": "Jake", "en": "It was. Then the printer called. Sorry, that's festival life.", "zh": "原来是。后来印刷厂打电话了。抱歉，艺术节就是这样。" },
+        { "who": "Lin", "en": "No problem. I'll work late tonight.", "zh": "没问题。我今晚加班。" }
+      ],
+      "quiz": [
+        { "q": "对 Jake 来说，first floor 指哪层？", "options": ["地面层", "地面层上面一层", "地下室"], "answer": 0 },
+        { "q": "Jake 想要什么样的海报？", "options": ["安静素雅", "大胆、鲜艳、有火焰", "只有文字"], "answer": 1 },
+        { "q": "截止日期为什么提前了？", "options": ["Jake 改了主意", "印刷厂打电话来", "演出提前了"], "answer": 1 }
+      ],
+      "next_zh": "熬夜两天，周三一早，Jake 看着两版海报沉默了很久……"
+    },
+    {
+      "id": 4, "level": "B1",
+      "title": "Arthur's Seat", "title_zh": "亚瑟王座",
+      "scene_zh": "交稿后的周末，Callum 带你去爬爱丁堡市中心的那座山。",
+      "lines": [
+        { "who": "Callum", "en": "Almost there! The view from the top is worth every step, I promise.", "zh": "快到了！山顶的风景绝对值得，我保证。" },
+        { "who": "Lin", "en": "You said that twenty minutes ago. My legs disagree.", "zh": "你二十分钟前就这么说了。我的腿不同意。" },
+        { "who": "Callum", "en": "Ha! So, how did the producer like your posters?", "zh": "哈！那制作人觉得你的海报怎么样？" },
+        { "who": "Lin", "en": "He chose the quiet one, which surprised me. He said it made him want to see the play.", "zh": "他选了安静的那版，让我挺意外的。他说那版让他想去看这部戏。" },
+        { "who": "Callum", "en": "Good for you. Sometimes people need to see the right answer before they know it's right.", "zh": "干得好。有时候人得先看到对的答案，才知道它是对的。" },
+        { "who": "Lin", "en": "That's very wise for someone who's out of breath.", "zh": "对一个喘不过气的人来说，这话挺有智慧。" },
+        { "who": "Callum", "en": "Here we are. On a clear day, you can see all the way to the sea.", "zh": "到了。天晴的时候，能一直看到海。" },
+        { "who": "Lin", "en": "Wow. It's beautiful. How's your tour business going, by the way?", "zh": "哇，真美。对了，你的导游生意怎么样？" },
+        { "who": "Callum", "en": "Honestly, not great. Everyone just follows the big companies with the umbrellas and microphones.", "zh": "说实话，不太好。大家都跟着那些举伞拿麦克风的大公司走。" },
+        { "who": "Lin", "en": "But your stories are much better than theirs. I've heard you on the train.", "zh": "可你讲的故事比他们好多了。我在火车上听过。" },
+        { "who": "Callum", "en": "Stories don't pay the rent, unfortunately.", "zh": "可惜，故事交不了房租。" },
+        { "who": "Lin", "en": "In London, they did. Let me tell you about a bookshop and a reading night.", "zh": "在伦敦，故事交上了房租。我给你讲讲一家书店和一个读书夜的事吧。" }
+      ],
+      "quiz": [
+        { "q": "Jake 最后选了哪版海报？", "options": ["大胆的那版", "安静的那版", "两版都不要"], "answer": 1 },
+        { "q": "天晴时从山顶能看到什么？", "options": ["海", "伦敦", "城堡里面"], "answer": 0 },
+        { "q": "Callum 的生意为什么不好？", "options": ["他讲得不好", "游客都跟大公司走", "下雨太多"], "answer": 1 }
+      ],
+      "next_zh": "首演之夜到了，第二天早上的一篇评论让所有人都笑不出来。"
+    },
+    {
+      "id": 5, "level": "B1",
+      "title": "One Star", "title_zh": "一颗星",
+      "scene_zh": "剧院首演后的第二天早上，报纸上的评论只给了一颗星。",
+      "lines": [
+        { "who": "Jake", "en": "One star. One single star. \"Beautiful posters, shame about the play.\"", "zh": "一颗星。就一颗星。“海报很美，戏可惜了。”" },
+        { "who": "Lin", "en": "At least they liked the posters? Sorry, that wasn't helpful.", "zh": "至少他们喜欢海报？抱歉，这话没什么用。" },
+        { "who": "Jake", "en": "Actually, it's the only good thing anyone has said all week.", "zh": "其实这是整个星期唯一一句好话。" },
+        { "who": "Lin", "en": "What did the reviewer not like about the play?", "zh": "评论员不喜欢这部戏的哪一点？" },
+        { "who": "Jake", "en": "He said it felt cold and distant, like watching people through a window.", "zh": "他说它冷冰冰、有距离感，像隔着窗户看人。" },
+        { "who": "Lin", "en": "Maybe the audience needs to feel closer to the actors before the show starts.", "zh": "也许观众需要在开演前就和演员亲近一些。" },
+        { "who": "Jake", "en": "Go on. What are you thinking?", "zh": "说下去。你在想什么？" },
+        { "who": "Lin", "en": "What if the audience had dinner with the cast before the performance? Like a supper club.", "zh": "要是观众在演出前和演员一起吃顿饭呢？像小餐会那样。" },
+        { "who": "Jake", "en": "Dinner with the cast? That's either brilliant or completely crazy.", "zh": "和演员一起吃饭？这要么是天才，要么是彻底疯了。" },
+        { "who": "Lin", "en": "I know someone who does exactly that. And she's about to lose her kitchen.", "zh": "我认识一个人正好就是做这个的。而且她马上就要失去她的厨房了。" },
+        { "who": "Jake", "en": "Set up a meeting. Today, if possible. We have two weeks left to save this show.", "zh": "约个见面。可能的话就今天。我们只剩两周来救这部戏。" }
+      ],
+      "quiz": [
+        { "q": "评论员给了几颗星？", "options": ["一颗", "三颗", "五颗"], "answer": 0 },
+        { "q": "评论员觉得这部戏有什么问题？", "options": ["太吵", "冷冰冰、有距离感", "太长"], "answer": 1 },
+        { "q": "你的点子是什么？", "options": ["换演员", "演出前观众和演员一起吃饭", "降低票价"], "answer": 1 }
+      ],
+      "next_zh": "Sophie 愿意吗？你还得先过她姨妈 Morag 这一关。"
+    },
+    {
+      "id": 6, "level": "B2",
+      "title": "Aunt Morag", "title_zh": "Morag 姨妈",
+      "scene_zh": "你和 Sophie 去找她的姨妈 Morag。她拥有城里一座老教堂改成的大厅。",
+      "lines": [
+        { "who": "Morag", "en": "So you want to feed sixty strangers in my hall every night for two weeks?", "zh": "所以你们想在我的大厅里，连续两周每晚喂饱六十个陌生人？" },
+        { "who": "Sophie", "en": "When you put it like that, it does sound a bit ambitious.", "zh": "你这么一说，听起来确实有点野心太大。" },
+        { "who": "Lin", "en": "We'd take care of everything, Mrs Mackenzie. Cleaning, tables, the lot.", "zh": "Mackenzie 太太，所有事我们都包了。打扫、桌子，全部。" },
+        { "who": "Morag", "en": "Call me Morag, dear. Mrs Mackenzie was my mother-in-law, and she was terrifying.", "zh": "叫我 Morag 就好，亲爱的。Mackenzie 太太是我婆婆，她可吓人了。" },
+        { "who": "Lin", "en": "Morag, then. The theatre would pay for the hall, and Sophie would cook.", "zh": "那就 Morag。剧院出场地费，Sophie 来做饭。" },
+        { "who": "Morag", "en": "And what happens to the hall after the festival? It's been empty for three years.", "zh": "那艺术节之后这个大厅怎么办？它已经空了三年了。" },
+        { "who": "Sophie", "en": "Honestly, I'd love to stay. It could be a permanent home for the supper club.", "zh": "说实话，我很想留下来。它可以成为小餐会的长期据点。" },
+        { "who": "Morag", "en": "Now that is something I could get excited about. This hall needs people in it.", "zh": "这倒是能让我兴奋起来的事。这个大厅需要有人气。" },
+        { "who": "Lin", "en": "Does that mean yes?", "zh": "这是答应了吗？" },
+        { "who": "Morag", "en": "It means yes, on one condition. On the last night, you hold a proper ceilidh.", "zh": "是答应了，但有一个条件。最后一晚，你们要办一场正宗的凯利舞会。" },
+        { "who": "Lin", "en": "A ceilidh? I'm sorry, I don't know that word.", "zh": "Ceilidh？抱歉，我不知道这个词。" },
+        { "who": "Sophie", "en": "It's a Scottish dance party. Don't worry, nobody knows the steps after the second song.", "zh": "是苏格兰的舞会。别担心，第二首歌之后谁都记不住舞步。" }
+      ],
+      "quiz": [
+        { "q": "Morag 的大厅空了多久？", "options": ["三个月", "三年", "三十年"], "answer": 1 },
+        { "q": "谁来做饭？", "options": ["Morag", "Sophie", "Jake"], "answer": 1 },
+        { "q": "Morag 的条件是什么？", "options": ["付双倍租金", "最后一晚办凯利舞会", "让她当主演"], "answer": 1 }
+      ],
+      "next_zh": "大厅有了，可是 Jake 那边的投资人还没点头。你要去做一次正式的提案。"
+    },
+    {
+      "id": 7, "level": "B2",
+      "title": "The Pitch", "title_zh": "提案",
+      "scene_zh": "你在投资人面前介绍“戏前晚餐”的计划。Jake 坐在旁边，比你还紧张。",
+      "lines": [
+        { "who": "Lin", "en": "Thank you for coming. I'll keep this short, because I know you're all busy.", "zh": "谢谢各位来。我长话短说，我知道大家都很忙。" },
+        { "who": "Lin", "en": "Our play received one star, mainly because the audience felt disconnected from the characters.", "zh": "我们的戏只拿到一颗星，主要因为观众觉得和角色之间有隔阂。" },
+        { "who": "Lin", "en": "Our solution is simple: before each show, the audience shares a meal with the cast.", "zh": "我们的办法很简单：每场演出前，观众和演员一起吃饭。" },
+        { "who": "Jake", "en": "The actors stay in character during dinner, so the story actually starts at the table.", "zh": "演员吃饭时保持角色身份，所以故事其实从餐桌就开始了。" },
+        { "who": "Lin", "en": "The meal is cooked by Sophie Grant, whose supper clubs sell out every week.", "zh": "饭由 Sophie Grant 来做，她的小餐会每周都爆满。" },
+        { "who": "Lin", "en": "Tickets would cost more, but our research suggests people will pay for an experience they can't get anywhere else.", "zh": "票价会更高，但我们的调查显示，人们愿意为别处得不到的体验付钱。" },
+        { "who": "Jake", "en": "We've already tested it with twenty people. Eighteen said they'd recommend it to a friend.", "zh": "我们已经找二十个人试过了。十八个人说会推荐给朋友。" },
+        { "who": "Lin", "en": "We're asking for enough money to cover the hall and the food for two weeks. Any questions?", "zh": "我们申请的金额够付两周的场地和食材。有什么问题吗？" },
+        { "who": "Jake", "en": "Nobody's saying anything. Is that good or bad?", "zh": "没人说话。这是好事还是坏事？" },
+        { "who": "Lin", "en": "In my experience, silence usually means they're doing the maths.", "zh": "按我的经验，安静通常说明他们在算账。" },
+        { "who": "Jake", "en": "Look, the woman at the end is smiling. I think we just did it.", "zh": "看，最边上那位女士在笑。我觉得我们成了。" }
+      ],
+      "quiz": [
+        { "q": "戏只拿一颗星的主要原因是什么？", "options": ["票太贵", "观众觉得和角色有隔阂", "演员迟到"], "answer": 1 },
+        { "q": "试吃的二十个人里，多少人愿意推荐？", "options": ["十个", "十二个", "十八个"], "answer": 2 },
+        { "q": "你认为投资人安静说明什么？", "options": ["他们不感兴趣", "他们在算账", "他们没听懂"], "answer": 1 }
+      ],
+      "next_zh": "钱到位了。可第一场“戏前晚餐”那天，天气预报说有暴雨……"
+    },
+    {
+      "id": 8, "level": "B2",
+      "title": "Rain on the Royal Mile", "title_zh": "皇家一英里的雨",
+      "scene_zh": "第一场戏前晚餐前三小时，暴雨把通往大厅的街道淹了一半。",
+      "lines": [
+        { "who": "Callum", "en": "Half of the Royal Mile is under water. The police have closed the bottom end of the street.", "zh": "皇家一英里一半都淹了。警察封了街道的下半段。" },
+        { "who": "Lin", "en": "But sixty people are supposed to walk from the theatre to the hall in three hours.", "zh": "可是三小时后六十个人要从剧院走到大厅。" },
+        { "who": "Callum", "en": "Not that way, they're not. Unless they fancy swimming.", "zh": "走那条路可不行。除非他们想游泳。" },
+        { "who": "Lin", "en": "Is there another route? You know these streets better than anyone.", "zh": "有别的路吗？这些街道你比谁都熟。" },
+        { "who": "Callum", "en": "There's a covered passage through the old closes. It's narrow and dark, but it stays dry.", "zh": "穿过老巷子有一条有顶的通道。又窄又暗，但淋不着雨。" },
+        { "who": "Lin", "en": "Narrow and dark sounds perfect for a play about secrets.", "zh": "又窄又暗，对一部讲秘密的戏来说太完美了。" },
+        { "who": "Callum", "en": "Are you suggesting what I think you're suggesting?", "zh": "你是在说我想的那个意思吗？" },
+        { "who": "Lin", "en": "You lead the audience through the closes and tell them the history on the way. The walk becomes part of the show.", "zh": "你带观众穿过小巷，路上给他们讲历史。这段路就变成演出的一部分。" },
+        { "who": "Callum", "en": "A tour, a dinner and a play in one evening. Jake will either love it or fire us both.", "zh": "一晚上有导游、晚餐和戏。Jake 要么爱死它，要么把我们俩都开了。" },
+        { "who": "Lin", "en": "He can't fire you. You don't work for him. Yet.", "zh": "他开不了你，你又不是他的员工。暂时还不是。" },
+        { "who": "Callum", "en": "Right. Give me ten minutes to find some torches, and we're in business.", "zh": "好。给我十分钟找几个手电筒，咱们就开工。" }
+      ],
+      "quiz": [
+        { "q": "暴雨造成了什么问题？", "options": ["大厅停电", "通往大厅的街道被淹", "演员病了"], "answer": 1 },
+        { "q": "Callum 知道哪条路？", "options": ["穿过老巷子的有顶通道", "坐船过去", "绕城外的高速"], "answer": 0 },
+        { "q": "你的新主意是什么？", "options": ["取消今晚的演出", "让这段路变成演出的一部分", "改成线上直播"], "answer": 1 }
+      ],
+      "next_zh": "那一晚之后，城里开始有人议论“雨夜里的那条小巷”。"
+    },
+    {
+      "id": 9, "level": "B2",
+      "title": "A Call from London", "title_zh": "来自伦敦的电话",
+      "scene_zh": "演出越来越火。深夜，Emma 从伦敦打来视频电话。",
+      "lines": [
+        { "who": "Emma", "en": "Lin! I've just read about your show in the newspaper. Four stars! Why didn't you tell me?", "zh": "林！我刚在报纸上看到你们的戏了。四颗星！你怎么都不告诉我？" },
+        { "who": "Lin", "en": "Because I haven't slept properly in a week. It's been absolutely mad up here.", "zh": "因为我一个星期都没好好睡过觉。这边简直疯了。" },
+        { "who": "Emma", "en": "The article mentions a tour guide, a supper club and a designer from London. That's you!", "zh": "文章里提到一个导游、一个小餐会，还有一位来自伦敦的设计师。那就是你！" },
+        { "who": "Lin", "en": "I just connected people who needed each other. They did the hard work.", "zh": "我只是把彼此需要的人连在了一起。辛苦的是他们。" },
+        { "who": "Emma", "en": "That's exactly what you did with my bookshop. You're very good at it, you know.", "zh": "你对我的书店做的就是这件事。你知道吗，你特别擅长这个。" },
+        { "who": "Lin", "en": "How is the shop, by the way? I miss our kitchen.", "zh": "对了，书店怎么样？我想我们的厨房了。" },
+        { "who": "Emma", "en": "Busier than ever. Tom keeps asking when you're coming back, and Arthur has started baking for us.", "zh": "比以前都忙。Tom 一直问你什么时候回来，Arthur 开始给我们烤点心了。" },
+        { "who": "Lin", "en": "Tell them I'll be back next Sunday, unless something unexpected happens.", "zh": "告诉他们我下周日回去，除非出什么意外。" },
+        { "who": "Emma", "en": "Something unexpected always happens to you. That's why your life is never boring.", "zh": "你身上总会出意外。所以你的生活从来不无聊。" },
+        { "who": "Lin", "en": "Funny you should say that. Jake asked me to stay and work on his next show. In New York.", "zh": "你这么说真巧。Jake 请我留下来做他下一部戏。在纽约。" },
+        { "who": "Emma", "en": "New York?! Lin, you can't drop a bomb like that at midnight!", "zh": "纽约？！林，你不能半夜扔下这样一颗炸弹！" }
+      ],
+      "quiz": [
+        { "q": "报纸给了这部戏几颗星？", "options": ["一颗", "三颗", "四颗"], "answer": 2 },
+        { "q": "Emma 说你特别擅长什么？", "options": ["设计海报", "把彼此需要的人连在一起", "做饭"], "answer": 1 },
+        { "q": "Jake 邀请你去哪里？", "options": ["纽约", "伦敦", "都柏林"], "answer": 0 }
+      ],
+      "next_zh": "最后一晚的凯利舞会上，你必须做出决定。"
+    },
+    {
+      "id": 10, "level": "B2",
+      "title": "The Ceilidh", "title_zh": "凯利舞会",
+      "scene_zh": "艺术节最后一晚。Morag 的大厅里挤满了跳舞的人。",
+      "lines": [
+        { "who": "Morag", "en": "Look at this hall! I haven't seen it this full since my wedding, and that was a long time ago.", "zh": "看看这个大厅！自从我结婚以后就没见它这么满过，那可是很久以前了。" },
+        { "who": "Sophie", "en": "And it's staying full. Morag has agreed to rent it to me for the next five years.", "zh": "而且会一直这么满。Morag 同意把它租给我五年。" },
+        { "who": "Callum", "en": "And the theatre wants my tour as part of the show next year. I might actually be able to pay my rent.", "zh": "剧院还想明年把我的导游路线加进演出里。我说不定真能交上房租了。" },
+        { "who": "Lin", "en": "I'm so happy for you both. This is the best ending I could have imagined.", "zh": "真替你们俩高兴。这是我能想象到的最好的结局。" },
+        { "who": "Jake", "en": "It's not an ending if you come to New York. It's a sequel.", "zh": "如果你来纽约，这就不是结局，而是续集。" },
+        { "who": "Lin", "en": "Jake, I've thought about it a lot, and I'd love to say yes, but not right now.", "zh": "Jake，我想了很多。我很想答应，但不是现在。" },
+        { "who": "Jake", "en": "Can I ask why? It's a big opportunity.", "zh": "能问为什么吗？这是个大机会。" },
+        { "who": "Lin", "en": "Because I've just started to feel at home in London, and I want to finish what I started there first.", "zh": "因为我才刚开始在伦敦有家的感觉，我想先把在那儿开始的事做完。" },
+        { "who": "Jake", "en": "Fair enough. The offer stands for a year. And I'm not good at taking no for an answer.", "zh": "合情合理。这个邀请一年内有效。而且我不太会接受别人拒绝。" },
+        { "who": "Morag", "en": "Enough talking! The band is starting the last dance, and nobody sits this one out.", "zh": "别聊了！乐队要奏最后一支舞了，这支谁都不许坐着。" },
+        { "who": "Lin", "en": "But I still don't know the steps!", "zh": "可我还是不会跳啊！" },
+        { "who": "Sophie", "en": "Nobody does, Lin. That's the whole point. Come on!", "zh": "谁都不会，林。重点就在这儿。来吧！" }
+      ],
+      "quiz": [
+        { "q": "Morag 同意把大厅租给 Sophie 多久？", "options": ["五个月", "一年", "五年"], "answer": 2 },
+        { "q": "你对 Jake 的邀请怎么回答？", "options": ["马上答应", "很想去，但不是现在", "直接拒绝"], "answer": 1 },
+        { "q": "Jake 的邀请有效期多长？", "options": ["一周", "一个月", "一年"], "answer": 2 }
+      ],
+      "next_zh": "第二季完。第三季：纽约？还是伦敦？由你在每天的练习里决定。"
+    }
+  ]
+}

@@ -160,8 +160,9 @@ try {
   log('剧集', (await text()).replace(/\s+/g, ' ').match(/明天解锁.{0,30}/)?.[0])
 
   // AI：接入（用本地假 AI 服务）→ 和 Emma 聊一句 → 写日记让 AI 改
-  const mock = startMockAi(5392)
-  try {
+  // 测线上（https）时跳过：Chrome 不让公网 https 页面访问本机回环地址上的假服务（Private Network Access）
+  const mock = process.env.PW ? null : startMockAi(5392)
+  if (mock) try {
     await clickText('今天', '.tab'); await sleep(300)
     await clickText('接入你自己的 AI'); await sleep(300)
     await clickText('其他（OpenAI 兼容）')
@@ -220,6 +221,7 @@ try {
     log('口语模考', (await text()).replace(/\s+/g, ' ').match(/总分.{0,60}/)?.[0], '· 识别', JSON.stringify(await p.evaluate(() => document.querySelector('.edit .en')?.textContent)))
     await clickText('好的'); await sleep(300)
   } finally { mock.close() }
+  else log('AI 部分', '线上测试跳过（假服务在本机回环地址）')
 
   // 改目标：改完要回到主界面（v0.0.3 的 bug：会卡在引导页出不来）
   await openSettings(); await clickText('修改'); await clickText('下一步'); await clickText('保存'); await sleep(500)

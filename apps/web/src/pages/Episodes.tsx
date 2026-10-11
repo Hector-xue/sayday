@@ -6,7 +6,7 @@ import { PlayButton } from '../components/PlayButton'
 import { Shadow } from '../components/Shadow'
 import { Tappable } from '../components/Tappable'
 import { useApp } from '../store'
-import { clipOf, episodeWords, finish, getProgress, loadSeason, nextUp, unlocked, type EpProgress, type Episode, type Season } from '../lib/episodes'
+import { clipOf, episodeWords, finish, getProgress, key, loadSeasons, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Season } from '../lib/episodes'
 import { play, prefetch, stopAudio } from '../lib/tts'
 import { addCard } from '../lib/srs'
 import { db } from '../lib/db'
@@ -14,32 +14,44 @@ import { markDay, saveAttempt } from '../lib/lesson'
 import { vocabLevel } from '../lib/calibrate'
 import type { Word } from '../lib/content'
 
-export function Episodes({ openId, onOpened }: { openId?: number | null; onOpened?: () => void }) {
+export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: number } | null; onOpened?: () => void }) {
   const { tick } = useApp()
-  const [s, setS] = useState<Season | null>(null)
+  const [all, setAll] = useState<Season[] | null>(null)
   const [p, setP] = useState<EpProgress | null>(null)
-  const [open, setOpen] = useState<Episode | null>(null)
-  useEffect(() => { loadSeason().then(setS); getProgress().then(setP) }, [tick, open])
-  useEffect(() => { if (s && openId) { setOpen(s.episodes.find((e) => e.id === openId) ?? null); onOpened?.() } }, [s, openId])
-  if (!s || !p) return <div className="loading">…</div>
-  const up = nextUp(s, p)
+  const [open, setOpen] = useState<{ s: Season; ep: Episode } | null>(null)
+  const [tab, setTab] = useState<number | null>(null)
+  useEffect(() => { loadSeasons().then(setAll); getProgress().then(setP) }, [tick, open])
+  useEffect(() => {
+    if (!all || !openId) return
+    const s = all.find((x) => x.season === openId.season)
+    const e = s?.episodes.find((x) => x.id === openId.ep)
+    if (s && e) setOpen({ s, ep: e })
+    onOpened?.()
+  }, [all, openId])
+  if (!all || !p) return <div className="loading">…</div>
+  const up = nextUp(all, p)
+  const cur = all.find((s) => s.season === (tab ?? up.season.season)) ?? all[0]
   return (
     <div className="page fade-in">
-      <div className="page-head"><h1>剧集</h1><span className="small muted">第 {s.season} 季 · {s.title}</span></div>
+      <div className="page-head"><h1>剧集</h1><span className="small muted">第 {up.season.season} 季 · {up.season.title}</span></div>
       <div className="card raised ep-hero">
-        <p className="small muted">{up.state === 'all-done' ? '这一季看完了' : up.state === 'tomorrow' ? '明天解锁' : `第 ${up.ep.id} 集 · ${up.ep.level}`}</p>
+        <p className="small muted">{up.state === 'all-done' ? '已经全部看完' : up.state === 'tomorrow' ? '明天解锁' : `第 ${up.season.season} 季 第 ${up.ep.id} 集 · ${up.ep.level}`}</p>
         <h2 className="en" style={{ margin: '6px 0 2px' }}>{up.ep.title}</h2>
         <p className="muted">{up.ep.title_zh}</p>
-        <p style={{ marginTop: 10 }}>{up.state === 'tomorrow' ? (s.episodes.find((e) => e.id === up.ep.id - 1)?.next_zh ?? '') : up.state === 'all-done' ? '第二季：爱丁堡，准备中。' : up.ep.scene_zh}</p>
-        {up.state === 'ready' && <button className="btn primary block" style={{ marginTop: 14 }} onClick={() => setOpen(up.ep)}>开始看</button>}
+        <p style={{ marginTop: 10 }}>{up.state === 'tomorrow' ? teaserFor(all, up.season.season, up.ep.id) : up.state === 'all-done' ? '下一季准备中。' : up.ep.scene_zh}</p>
+        {up.state === 'ready' && <button className="btn primary block" style={{ marginTop: 14 }} onClick={() => setOpen({ s: up.season, ep: up.ep })}>开始看</button>}
       </div>
-      <p className="section-title">全部 {s.episodes.length} 集</p>
+      <div className="row" style={{ margin: '22px 4px 10px' }}>
+        <p className="section-title" style={{ margin: 0 }}>第 {cur.season} 季 · {cur.title_zh}（{cur.episodes.length} 集）</p>
+        <div className="spacer" />
+        {all.length > 1 && <div className="seg">{all.map((s) => <button key={s.season} aria-pressed={s.season === cur.season} onClick={() => setTab(s.season)}>第 {s.season} 季</button>)}</div>}
+      </div>
       <div className="list">
-        {s.episodes.map((e) => {
-          const d = p.done[e.id]
-          const ok = unlocked(e.id, p)
+        {cur.episodes.map((e) => {
+          const d = p.done[key(cur.season, e.id)]
+          const ok = unlocked(all, cur.season, e.id, p)
           return (
-            <button className="list-row" key={e.id} disabled={!ok} onClick={() => setOpen(e)} style={{ opacity: ok ? 1 : 0.5 }}>
+            <button className="list-row" key={e.id} disabled={!ok} onClick={() => setOpen({ s: cur, ep: e })} style={{ opacity: ok ? 1 : 0.5 }}>
               <span className="ep-no">{d ? <Icon.check /> : e.id}</span>
               <span className="main"><b>{e.title}</b><span>{e.title_zh}{d ? ` · 理解 ${d.quiz}/${e.quiz.length}${d.act !== null ? ` · 跟读 ${d.act} 分` : ''}` : ok ? '' : ' · 看完上一集，第二天解锁'}</span></span>
             </button>
@@ -47,7 +59,7 @@ export function Episodes({ openId, onOpened }: { openId?: number | null; onOpene
         })}
       </div>
       <p className="small faint" style={{ margin: '14px 4px' }}>一天一集，像追剧一样学。人物配音为 AI 合成。</p>
-      {open && <Player s={s} ep={open} onClose={() => setOpen(null)} />}
+      {open && <Player s={open.s} ep={open.ep} onClose={() => setOpen(null)} />}
     </div>
   )
 }
@@ -108,7 +120,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
 
   const quizScore = answers.filter((a, k) => a === ep.quiz[k].answer).length
   const actAvg = Object.values(actScores).length ? Math.round(Object.values(actScores).reduce((a, b) => a + b, 0) / Object.values(actScores).length) : null
-  const done = async () => { await finish(ep.id, quizScore, actAvg); refresh(); setStage('done') }
+  const done = async () => { await finish(s.season, ep.id, quizScore, actAvg); refresh(); setStage('done') }
 
   const STAGES: [Stage, string][] = [['listen', '听'], ['act', '演'], ['quiz', '测'], ['words', '词']]
   const foot = stage === 'listen' ? (
@@ -126,7 +138,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
   useEffect(() => { if (stage === 'done' && !words.length) done() }, [stage])
 
   return (
-    <Overlay title={`第 ${ep.id} 集 · ${ep.title}`} sub={ep.title_zh} onClose={onClose} foot={foot}>
+    <Overlay title={`${s.season > 1 ? `第 ${s.season} 季 ` : ''}第 ${ep.id} 集 · ${ep.title}`} sub={ep.title_zh} onClose={onClose} foot={foot}>
       {stage !== 'done' && <div className="stage-tabs">{STAGES.map(([k, t]) => <span key={k} className={k === stage ? 'on' : ''}>{t}</span>)}</div>}
 
       {stage === 'listen' && (
@@ -203,7 +215,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
           <div className="card" style={{ marginTop: 22, textAlign: 'left' }}>
             <p className="small muted">下集预告</p>
             <p style={{ marginTop: 6 }}>{ep.next_zh}</p>
-            {ep.id < s.episodes.length && <p className="small faint" style={{ marginTop: 8 }}>明天解锁第 {ep.id + 1} 集</p>}
+            <p className="small faint" style={{ marginTop: 8 }}>{ep.id < s.episodes.length ? `明天解锁第 ${ep.id + 1} 集` : '明天解锁下一季'}</p>
           </div>
         </div>
       )}

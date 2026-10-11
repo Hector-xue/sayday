@@ -14,7 +14,7 @@ export const PROVIDERS: Provider[] = [
   { id: 'openai', name: 'OpenAI', base: 'https://api.openai.com/v1', kind: 'openai', prefer: [/^gpt-4\.1-mini$/, /^gpt-4o-mini$/], fallback: 'gpt-4o-mini', keyUrl: 'https://platform.openai.com/api-keys' },
   { id: 'anthropic', name: 'Claude', base: 'https://api.anthropic.com', kind: 'anthropic', prefer: [/haiku/, /sonnet/], fallback: 'claude-haiku-4-5', keyUrl: 'https://console.anthropic.com/settings/keys' },
   { id: 'openrouter', name: 'OpenRouter', base: 'https://openrouter.ai/api/v1', kind: 'openai', prefer: [/^deepseek\/deepseek-chat/, /^openai\/gpt-4o-mini$/], fallback: 'deepseek/deepseek-chat', keyUrl: 'https://openrouter.ai/keys' },
-  { id: 'ollama', name: '本机 Ollama', base: 'http://localhost:11434/v1', kind: 'openai', prefer: [/qwen/, /llama/], fallback: 'qwen2.5:7b', noKey: true, note: '网页版要先设置 OLLAMA_ORIGINS=* 再启动 Ollama' },
+  { id: 'ollama', name: '本机 Ollama', base: 'http://localhost:11434/v1', kind: 'openai', prefer: [/qwen/, /llama/], fallback: 'qwen2.5:7b', noKey: true, note: '要先设置 OLLAMA_ORIGINS=* 再启动 Ollama。Chrome 会拦截网页访问本机地址，网页版连不上就请用其他服务商' },
   { id: 'custom', name: '其他（OpenAI 兼容）', base: '', kind: 'openai', prefer: [], fallback: '' },
 ]
 export const providerOf = (id: string) => PROVIDERS.find((p) => p.id === id) ?? PROVIDERS[0]

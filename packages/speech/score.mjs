@@ -9,8 +9,12 @@ export const phoneIdsOf = (vocab) => Object.entries(vocab).filter(([k]) => !k.st
 export const tokenize = (text) => (text.normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).map((w) => w.toLowerCase())
 
 /** 英式拼写 → CMUdict（美式）里能查到的写法：practise/practising、colour、centre、travelled… */
+// 常见英式词：拼法规则推不出来的直接对照
+const UK = { maths: 'math', programme: 'program', programmes: 'programs', grey: 'gray', tyre: 'tire', tyres: 'tires', aeroplane: 'airplane', cheque: 'check', pyjamas: 'pajamas', aluminium: 'aluminum', jewellery: 'jewelry', plough: 'plow', sceptical: 'skeptical' }
+
 export function dictWord(dict, w) {
   if (dict[w]) return w
+  if (UK[w] && dict[UK[w]]) return UK[w]
   const tries = [
     w.replace(/is(e|es|ed|ing|ation|ations)$/, 'iz$1'), w.replace(/^practis/, 'practic'), w.replace(/our(s|ed|ing|ite|ful)?$/, 'or$1'),
     w.replace(/tre(s)?$/, 'ter$1'), w.replace(/ll(ed|ing|er)$/, 'l$1'), w.replace(/yse(s|d)?$/, 'yze$1'), w.replace(/ogue$/, 'og'), w.replace(/ence$/, 'ense'),
