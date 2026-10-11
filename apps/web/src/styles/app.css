@@ -127,6 +127,10 @@ p { margin: 0; }
 .example { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hair); }
 .example .en { font-size: 20px; line-height: 1.45; }
 .example .en mark { background: none; color: var(--brand); font-weight: 600; }
+.tap { cursor: pointer; border-radius: 4px; transition: background .15s; }
+.tap:active { background: var(--brand-soft); }
+.tap.hl { color: var(--brand); font-weight: 600; }
+.toast { white-space: pre-wrap; }
 .example .zh { font-size: 14px; color: var(--soft); margin-top: 6px; }
 .row { display: flex; align-items: center; gap: 10px; }
 .row.wrap { flex-wrap: wrap; }

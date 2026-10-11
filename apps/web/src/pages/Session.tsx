@@ -8,13 +8,13 @@ import { buildSession, markDay, saveAttempt, type Step } from '../lib/lesson'
 import { addCard, grade, preview, Rating } from '../lib/srs'
 import { prefetch } from '../lib/tts'
 import type { Sentence } from '../lib/content'
+import { Tappable } from '../components/Tappable'
 
 function Example({ s, word, showZh = true }: { s?: Sentence; word: string; showZh?: boolean }) {
   if (!s) return null
-  const parts = s.en.split(new RegExp(`\\b(${word}\\w*)`, 'i'))
   return (
     <div className="example">
-      <p className="en">{parts.map((p, i) => (i % 2 ? <mark key={i}>{p}</mark> : p))}</p>
+      <p className="en"><Tappable text={s.en} highlight={word} /></p>
       {showZh && <p className="zh">{s.zh}</p>}
     </div>
   )
@@ -132,7 +132,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
         {step.kind === 'shadow' && (
           <div className="fade-in">
             <p className="step-kind">跟读</p>
-            <p className="shadow-sentence en">{step.sentence.en}</p>
+            <p className="shadow-sentence en"><Tappable text={step.sentence.en} highlight={step.focus} /></p>
             <p className="shadow-zh">{step.sentence.zh}</p>
             <Shadow text={step.sentence.en} sentenceId={step.sentence.id} accent={accent} onScored={async (r) => {
               const phones = r.words.flatMap((w) => w.phones.map((p) => [p.p, +p.s.toFixed(2)] as [string, number]))
