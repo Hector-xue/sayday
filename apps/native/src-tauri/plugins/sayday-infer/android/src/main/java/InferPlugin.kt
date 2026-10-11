@@ -9,6 +9,9 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.SystemClock
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import java.util.Locale
 import android.util.Base64
 import app.tauri.PermissionState
 import app.tauri.annotation.Command
@@ -30,6 +33,13 @@ import kotlin.concurrent.thread
 @InvokeArg
 class LoadArgs {
   var threads: Int = 4
+}
+
+@InvokeArg
+class SpeakArgs {
+  lateinit var text: String
+  var lang: String = "en-GB"
+  var rate: Float = 0.95f
 }
 
 @InvokeArg
@@ -189,5 +199,57 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
       ret.put("samples", raw.size / 2)
       invoke.resolve(ret)
     }
+  }
+
+  // ---- 系统 TTS：AI 回复、日记这类现编的句子（例句和单词走预生成的音频包）----
+  private var tts: TextToSpeech? = null
+  private var ttsReady: Boolean? = null
+  private val ttsWaiting = mutableListOf<() -> Unit>()
+  private val speaking = mutableMapOf<String, Invoke>()
+
+  private fun withTts(invoke: Invoke, block: (TextToSpeech) -> Unit) {
+    when (ttsReady) {
+      true -> block(tts!!)
+      false -> invoke.reject("手机上没有可用的语音引擎：到系统设置 → 文字转语音 里装一个（例如 Google 语音服务）")
+      null -> {
+        synchronized(ttsWaiting) { ttsWaiting.add { withTts(invoke, block) } }
+        if (tts == null) {
+          tts = TextToSpeech(activity) { status ->
+            ttsReady = status == TextToSpeech.SUCCESS
+            tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+              override fun onStart(id: String) {}
+              override fun onDone(id: String) { speaking.remove(id)?.resolve(JSObject()) }
+              @Deprecated("旧接口") override fun onError(id: String) { speaking.remove(id)?.reject("朗读失败") }
+              override fun onStop(id: String, interrupted: Boolean) { speaking.remove(id)?.resolve(JSObject()) }
+            })
+            val q = synchronized(ttsWaiting) { ttsWaiting.toList().also { ttsWaiting.clear() } }
+            q.forEach { it() }
+          }
+        }
+      }
+    }
+  }
+
+  @Command
+  fun speak(invoke: Invoke) {
+    val args = invoke.parseArgs(SpeakArgs::class.java)
+    withTts(invoke) { t ->
+      val loc = Locale.forLanguageTag(args.lang)
+      val ok = t.setLanguage(loc)
+      if (ok == TextToSpeech.LANG_MISSING_DATA || ok == TextToSpeech.LANG_NOT_SUPPORTED) t.setLanguage(Locale.US)
+      t.setSpeechRate(args.rate)
+      val id = "u" + SystemClock.elapsedRealtimeNanos()
+      speaking[id] = invoke
+      if (t.speak(args.text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) {
+        speaking.remove(id)
+        invoke.reject("朗读失败")
+      }
+    }
+  }
+
+  @Command
+  fun speakStop(invoke: Invoke) {
+    tts?.stop()
+    invoke.resolve(JSObject())
   }
 }

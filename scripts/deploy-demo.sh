@@ -35,15 +35,12 @@ for f in phone_ctc.int8.onnx charsiu_vocab.json; do cat "$ROOT/.cache/models/$f"
 for f in ort.wasm.min.mjs ort-wasm-simd-threaded.mjs ort-wasm-simd-threaded.wasm; do cat "$NM/onnxruntime-web/dist/$f" > "$STAGE/node_modules/onnxruntime-web/dist/$f"; done
 for f in sqlite3-bundler-friendly.mjs sqlite3.wasm sqlite3-opfs-async-proxy.js; do cat "$NM/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/$f" > "$STAGE/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/$f"; done
 
-# 正式版网页（apps/web）→ /app/；大模型与演示页共用（软链接），不存两份
+# 正式版网页（apps/web）→ /app/；音素模型与演示页共用（软链接），不存两份
 ( cd "$ROOT/apps/web" && [ -d node_modules ] || npm ci --no-audit --no-fund )
 NATIVE=0 bash "$ROOT/scripts/prepare-web-assets.sh" >/dev/null
 ( cd "$ROOT/apps/web" && npx tsc --noEmit && npx vite build --logLevel warn )
 cp -r "$ROOT/apps/web/dist" "$STAGE/app"
 rm -f "$STAGE/app/models/phone_ctc.int8.onnx" && ln -s ../../web/models/phone_ctc.int8.onnx "$STAGE/app/models/phone_ctc.int8.onnx"
-if [ -d "$STAGE/app/tts/onnx-community" ] && [ -d "$STAGE/web/tts/onnx-community" ]; then
-  rm -rf "$STAGE/app/tts/onnx-community" && ln -s ../../web/tts/onnx-community "$STAGE/app/tts/onnx-community"
-fi
 
 # 先放到同级临时目录，再整体替换，避免发布中途页面读到半套文件
 NEW="$DEST.new.$$"

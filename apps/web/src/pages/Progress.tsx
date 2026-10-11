@@ -18,7 +18,7 @@ function PlayRec({ id }: { id: number }) {
   return <button className={`icon-btn ${on ? 'playing' : ''}`} aria-label="播放录音" onClick={async () => { setOn(true); try { await playRecording(id) } finally { setOn(false) } }}>{on ? <Icon.stop /> : <Icon.play />}</button>
 }
 
-export function Progress() {
+export function Progress({ onSettings }: { onSettings: () => void }) {
   const { profile, tick } = useApp()
   const [lv, setLv] = useState<{ cefr: Cefr; vocab: number; learned: number } | null>(null)
   const [st, setSt] = useState<Awaited<ReturnType<typeof stats>> | null>(null)
@@ -42,7 +42,7 @@ export function Progress() {
 
   return (
     <div className="page fade-in">
-      <div className="page-head"><h1>进步</h1></div>
+      <div className="page-head"><h1>进步</h1><button className="icon-btn ghost" aria-label="设置" onClick={onSettings}><Icon.settings /></button></div>
       <div className="card raised">
         <div className="row" style={{ alignItems: 'flex-end' }}>
           <div><p className="small muted">现在（估算）</p><div className="report-level" style={{ fontSize: 44 }}>{lv.cefr}</div></div>
@@ -57,7 +57,7 @@ export function Progress() {
       <p className="section-title">分项</p>
       <div className="list">
         <div className="set-row"><div className="k"><b>词汇</b><span>约 {lv.vocab.toLocaleString()} 词 · 每学会一个词都算上</span></div><b className="skill-lv">{lv.cefr}</b></div>
-        <div className="set-row"><div className="k"><b>听力</b><span>{ll && ll.cefr ? `听音选义 ${ll.n} 题，正确率 ${Math.round(ll.acc * 100)}%` : `每天练习里的听力题，再做 ${Math.max(1, 6 - (ll?.n ?? 0))} 题以上出结果`}</span></div><b className="skill-lv">{ll?.cefr ?? '—'}</b></div>
+        <div className="set-row"><div className="k"><b>听力</b><span>{ll && ll.cefr ? `听音选义 ${ll.n} 题，正确率 ${Math.round(ll.acc * 100)}%` : (ll?.n ?? 0) >= 6 ? `做了 ${ll!.n} 题，正确率 ${Math.round(ll!.acc * 100)}%，某一档稳定答对七成就出结果` : `每天练习里的听力题，再做 ${6 - (ll?.n ?? 0)} 题以上出结果`}</span></div><b className="skill-lv">{ll?.cefr ?? '—'}</b></div>
         <div className="set-row"><div className="k"><b>发音</b><span>{st.recentScore !== null ? '最近 20 句跟读的平均分' : '跟读几句就有'}</span></div><b className="skill-lv">{st.recentScore ?? '—'}</b></div>
       </div>
 

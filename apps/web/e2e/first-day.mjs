@@ -3,6 +3,7 @@
 //   站点用 spikes/m0/serve.py --dir apps/web/dist 起在 127.0.0.1；断网测试会直接停掉服务器进程（SERVER_PID）
 //   测线上：PW=<内测密码> node e2e/first-day.mjs https://sayday.ivyea.com/app/ <输出目录> [wav]
 import puppeteer from 'puppeteer-core'
+import { startMockAi } from './mock-ai.mjs'
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -34,6 +35,8 @@ try {
     await sleep(250)
   }
   const text = () => p.evaluate(() => document.body.innerText)
+  // 设置不在底栏：点“今天”右上角的齿轮
+  const openSettings = async () => { await clickText('今天', '.tab'); await p.waitForSelector('[aria-label="设置"]'); await p.click('[aria-label="设置"]'); await sleep(300) }
 
   await p.goto(BASE, { waitUntil: 'networkidle0' })
   await shot('01-welcome')
@@ -110,10 +113,11 @@ try {
   await shot('09-today-after')
   log('今天页（做完后）', (await text()).replace(/\s+/g, ' ').match(/今日练习.*?跟读.*?\d+\/\d+|今天的练习完成了.*?跟读.*?\d+\/\d+/)?.[0])
 
-  for (const [tab, name] of [['发音', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress'], ['设置', '12-settings']]) {
+  for (const [tab, name] of [['发音', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress']]) {
     await clickText(tab, '.tab'); await sleep(700); await shot(name)
   }
-  log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+ \S+/)?.[0])
+  await openSettings(); await sleep(400); await shot('12-settings')
+  log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+/)?.[0])
 
   // 发音实验室：音标口型卡、最小对立听辨两题
   await clickText('发音', '.tab'); await sleep(300)
@@ -125,24 +129,81 @@ try {
   for (let k = 0; k < 2; k++) { await p.evaluate(() => document.querySelector('.session .options .opt').click()); await sleep(300); await clickText('下一题') }
   await shot('10c-pairs')
   await p.click('.session-top .icon-btn'); await sleep(300)
-  log('最小对立统计', (await text()).replace(/\s+/g, ' ').match(/听辨 \S+/)?.[0])
+  log('最小对立统计', (await text()).replace(/\s+/g, ' ').match(/听辨 \d+%[^说]*说对 \S+/)?.[0])
+
+  // 剧集：第 1 集 听 → 演（录一句）→ 测 → 收词 → 完成；第 2 集要明天才解锁
+  await clickText('剧集', '.tab'); await sleep(500)
+  await shot('17-episodes')
+  await clickText('开始看'); await sleep(500)
+  for (let k = 0; k < 20; k++) {
+    const has = await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].some((b) => b.textContent.includes('轮到你演林')))
+    if (has) break
+    await clickText('下一句'); await sleep(150)
+  }
+  await shot('18-ep-listen')
+  await clickText('轮到你演林'); await sleep(400)
+  await p.click('.rec-btn'); await sleep(3000); await p.click('.rec-btn')
+  await p.waitForFunction(() => document.querySelector('.ring b') || /出错|没听清/.test(document.querySelector('.rec-label')?.textContent ?? ''), { timeout: 600000 })
+  await shot('19-ep-act')
+  for (let k = 0; k < 10; k++) {
+    if (await p.evaluate(() => document.querySelector('.step-kind')?.textContent?.startsWith('听懂了吗'))) break
+    await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].find((b) => /去答题|下一句|跳过/.test(b.textContent) && !b.disabled)?.click()); await sleep(300)
+  }
+  for (let k = 0; k < 3; k++) { await p.evaluate((k) => document.querySelectorAll('.session-body .options')[k].querySelector('.opt').click(), k); await sleep(150) }
+  await shot('20-ep-quiz')
+  await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].find((b) => /生词|完成/.test(b.textContent)).click()); await sleep(400)
+  if (await p.evaluate(() => document.body.innerText.includes('这一集的生词'))) { await clickText('全部加入').catch(() => {}); await clickText('完成这一集') }
+  await p.waitForFunction(() => document.body.innerText.includes('看完了'), { timeout: 10000 })
+  await shot('21-ep-done')
+  await clickText('好的'); await sleep(400)
+  log('剧集', (await text()).replace(/\s+/g, ' ').match(/明天解锁.{0,30}/)?.[0])
+
+  // AI：接入（用本地假 AI 服务）→ 和 Emma 聊一句 → 写日记让 AI 改
+  const mock = startMockAi(5392)
+  try {
+    await clickText('今天', '.tab'); await sleep(300)
+    await clickText('接入你自己的 AI'); await sleep(300)
+    await clickText('其他（OpenAI 兼容）')
+    await p.type('input[placeholder="https://…/v1"]', 'http://127.0.0.1:5392/v1')
+    await p.type('input[type="password"]', 'sk-test')
+    await clickText('连接')
+    await p.waitForFunction(() => /和 Emma 聊几句/.test(document.body.innerText), { timeout: 20000 })
+    log('接入 AI', (await text()).includes('写今天的日记') ? '成功' : '异常')
+    await p.click('.ai-grid .ai-card:nth-child(1)')
+    await p.waitForSelector('.bubble.assistant', { timeout: 20000 }); await sleep(800)
+    await p.type('.composer textarea', 'Yesterday I go to the park')
+    await clickText('发送')
+    await p.waitForSelector('.fix', { timeout: 20000 }); await sleep(500)
+    await shot('15-chat')
+    log('聊天', JSON.stringify(await p.evaluate(() => ({ bubbles: document.querySelectorAll('.bubble').length, fix: document.querySelector('.fix')?.textContent }))))
+    await p.click('.session-top .icon-btn'); await sleep(400)
+    await p.click('.ai-grid .ai-card:nth-child(2)')
+    await p.waitForSelector('.diary-edit', { timeout: 20000 })
+    await p.type('.diary-edit', 'Today is very busy. I have three meeting in the morning. 下班以后我和朋友去吃火锅。')
+    await clickText('帮我改')
+    await p.waitForSelector('.diary-res', { timeout: 20000 }); await sleep(400)
+    await shot('16-diary')
+    log('日记', JSON.stringify(await p.evaluate(() => ({ edits: document.querySelectorAll('.edit').length, natural: document.querySelectorAll('.nat').length, comment: document.querySelector('.diary-res .card p')?.textContent?.slice(0, 20) }))))
+    await p.click('.session-top .icon-btn'); await sleep(400)
+    log('今天页日记状态', (await text()).includes('今天写过了') ? '已写' : '未显示')
+  } finally { mock.close() }
 
   // 改目标：改完要回到主界面（v0.0.3 的 bug：会卡在引导页出不来）
-  await clickText('设置', '.tab'); await clickText('修改'); await clickText('下一步'); await clickText('保存'); await sleep(500)
+  await openSettings(); await clickText('修改'); await clickText('下一步'); await clickText('保存'); await sleep(500)
   log('改目标后回到主界面', await p.evaluate(() => !!document.querySelector('.tabbar')))
   log('词库', (await (async () => { await clickText('词库', '.tab'); await sleep(400); return (await text()).match(/学习中 \d+/)?.[0] })()))
 
   // 刷新：数据还在（OPFS）
   await p.reload({ waitUntil: 'networkidle0' })
   await p.waitForFunction(() => document.body.innerText.includes('今天'))
-  await clickText('设置', '.tab')
+  await openSettings()
   log('刷新后存储', (await text()).match(/保存在\s*(.+)/)?.[1])
   await clickText('今天', '.tab')
   log('刷新后今天页', (await text()).replace(/\s+/g, ' ').match(/新词.*?\d+\/\d+/)?.[0])
 
   // 深色
-  await clickText('设置', '.tab'); await clickText('深色'); await clickText('今天', '.tab'); await sleep(400); await shot('13-today-dark')
-  await clickText('设置', '.tab'); await clickText('跟随系统')
+  await openSettings(); await clickText('深色'); await clickText('今天', '.tab'); await sleep(400); await shot('13-today-dark')
+  await openSettings(); await clickText('跟随系统')
 
   // 断网：停掉服务器后刷新，应该从离线缓存打开
   if (process.env.SERVER_PID) {

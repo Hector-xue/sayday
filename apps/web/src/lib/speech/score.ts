@@ -16,13 +16,24 @@ export function speechAssets() {
   return assets
 }
 
-export const tokenize = (text: string) => (text.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).map((w) => w.toLowerCase())
+// café → cafe：先去掉重音符号再切词，否则会切成 caf
+export const tokenize = (text: string) => (text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).map((w) => w.toLowerCase())
+
+/** 英式拼写 → CMUdict（美式）里能查到的写法：practise/practising、colour、centre、travelled… */
+export function dictWord(dict: Record<string, string>, w: string): string | null {
+  if (dict[w]) return w
+  const tries = [
+    w.replace(/is(e|es|ed|ing|ation|ations)$/, 'iz$1'), w.replace(/^practis/, 'practic'), w.replace(/our(s|ed|ing|ite|ful)?$/, 'or$1'),
+    w.replace(/tre(s)?$/, 'ter$1'), w.replace(/ll(ed|ing|er)$/, 'l$1'), w.replace(/yse(s|d)?$/, 'yze$1'), w.replace(/ogue$/, 'og'), w.replace(/ence$/, 'ense'),
+  ]
+  return tries.find((t) => t !== w && dict[t]) ?? null
+}
 
 export async function score(text: string, r: Logits): Promise<ScoreResult> {
   const { dict, vocab, calib, phoneIds } = await speechAssets()
   const all = tokenize(text)
-  const known = all.filter((w) => dict[w]).map((w) => ({ word: w, phones: dict[w].split(' ') }))
-  const skipped = all.filter((w) => !dict[w])
+  const known = all.filter((w) => dictWord(dict, w)).map((w) => ({ word: w, phones: dict[dictWord(dict, w)!].split(' ') }))
+  const skipped = all.filter((w) => !dictWord(dict, w))
   const seq = known.flatMap((w) => w.phones).map((p) => vocab[p])
   const lp = prepare(r.logits, r.T, r.V)
   const scores: number[] = calibrate(calib, Array.from(afGop(lp, r.T, r.V, seq, phoneIds)), seq)

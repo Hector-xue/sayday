@@ -1,7 +1,7 @@
 [package]
 name = "sayday-native"
 version = "0.0.1"
-description = "日日说 App 外壳（M1 安卓原生推理验证）"
+description = "日日说 App 外壳"
 edition = "2021"
 
 [lib]
@@ -14,6 +14,8 @@ tauri-build = { version = "=2.6.3", features = [] }
 [dependencies]
 tauri = { version = "=2.11.5", features = [] }
 tauri-plugin-sayday-infer = { path = "plugins/sayday-infer" }
+# 每日提醒（本地定时通知）。2.5+ 要 tauri 2.12，和上面钉死的 2.11.5 不兼容
+tauri-plugin-notification = "=2.4.0"
 
 # 安卓 debug 包默认带完整调试信息，单个 .so 就 100MB+；测速包不需要，去掉后体积减半
 [profile.dev]

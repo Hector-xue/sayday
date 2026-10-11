@@ -33,7 +33,7 @@ export function pickSentence(sents: Sentence[] | undefined, rank: number, avoid 
 
 /** 点词查义：句子里的词形 → 词表词条（缩写拆开、常见词尾还原；查不到返回 undefined） */
 export function lookup(byWord: Map<string, Word>, token: string): Word | undefined {
-  let t = token.toLowerCase().replace(/[^a-z'-]/g, '')
+  let t = token.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z'-]/g, '')
   if (t.endsWith("n't")) t = t === "won't" ? 'will' : t === "can't" ? 'can' : t.slice(0, -3)
   else if (t.includes("'")) t = t.split("'")[0]
   if (t === 'i') return byWord.get('i')

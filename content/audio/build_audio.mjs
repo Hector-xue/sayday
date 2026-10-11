@@ -1,6 +1,7 @@
 // 示范音频包：content/pack 里的例句 + 单词 → Kokoro 合成 → mp3（32kbps 单声道）
-// 输出 <out>/<accent>/s/<Tatoeba句号>.mp3 与 <out>/<accent>/w/<单词>.mp3，外加 <out>/<accent>/shard-<i>.json（清单）
-// 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10]
+// 输出 <out>/<accent>/s/<Tatoeba句号>.mp3、<out>/<accent>/w/<单词>.mp3、<out>/<accent>/e/s<季>e<集>-<行>.mp3（剧集，每个角色自己的声音），
+// 外加 <out>/<accent>/shard-<i>.json（清单）
+// 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10] [--only s,w,e]
 // 没有 ffmpeg 时输出 wav（只用于本地验证；CI 里装 ffmpeg 出 mp3）
 import { KokoroTTS } from 'kokoro-js'
 import { spawnSync } from 'node:child_process'
@@ -14,20 +15,29 @@ const shards = Number(arg('shards', 1))
 const out = arg('out', 'out')
 const dtype = arg('dtype', 'q8')
 const limit = Number(arg('limit', 0))
+const only = new Set(arg('only', 's,w,e').split(','))
 const VOICE = { us: 'af_heart', gb: 'bf_emma' }[accent]
 const pack = new URL('../pack/', import.meta.url)
 const words = JSON.parse(readFileSync(new URL('words.json', pack)))
 const sents = JSON.parse(readFileSync(new URL('sentences.json', pack)))
 
-// 先句子后单词；按下标取模分片，每片的难度分布一致
+// 剧集：主角（“我”）的台词跟着口音换声音，其他角色固定用自己的声音
+const season = JSON.parse(readFileSync(new URL('../episodes/s1.json', import.meta.url)))
+const epItems = season.episodes.flatMap((ep) => ep.lines.map((l, i) => {
+  const v = season.cast[l.who].voice
+  return { kind: 'e', key: `s${season.season}e${ep.id}-${i}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
+}))
+
+// 先句子后单词再剧集；按下标取模分片，每片的难度分布一致
 const items = [
   ...sents.map((s) => ({ kind: 's', key: String(s[0]), text: s[1] })),
   ...words.map((w) => ({ kind: 'w', key: w[0], text: w[0] })),
-].filter((_, i) => i % shards === shard)
+  ...epItems,
+].filter((it) => only.has(it.kind)).filter((_, i) => i % shards === shard)
 const todo = limit ? items.slice(0, limit) : items
 const hasFfmpeg = spawnSync('ffmpeg', ['-version']).status === 0
 const ext = hasFfmpeg ? 'mp3' : 'wav'
-for (const k of ['s', 'w']) mkdirSync(join(out, accent, k), { recursive: true })
+for (const k of ['s', 'w', 'e']) mkdirSync(join(out, accent, k), { recursive: true })
 
 function wav16(samples, rate) {
   const b = Buffer.alloc(44 + samples.length * 2)
@@ -56,7 +66,7 @@ let audioSec = 0, i = 0
 for (const it of todo) {
   const file = join(out, accent, it.kind, `${it.kind === 'w' ? encodeURIComponent(it.key) : it.key}.${ext}`)
   if (existsSync(file)) { i++; continue }
-  const a = await tts.generate(it.text, { voice: VOICE, speed: it.kind === 'w' ? 0.9 : 0.95 })
+  const a = await tts.generate(it.text, { voice: it.voice ?? VOICE, speed: it.kind === 'w' ? 0.9 : 0.95 })
   const pcm = trim(a.audio, a.sampling_rate)
   const wav = wav16(pcm, a.sampling_rate)
   if (hasFfmpeg) {

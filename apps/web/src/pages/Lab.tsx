@@ -1,8 +1,7 @@
 // 发音实验室：弱项专项练习、最小对立（先听辨再说对）、音标口型
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useApp } from '../store'
-import { Icon } from '../components/icons'
+import { Overlay } from '../components/Overlay'
 import { PlayButton } from '../components/PlayButton'
 import { Shadow, HINT } from '../components/Shadow'
 import { Recorder } from '../components/Recorder'
@@ -88,21 +87,6 @@ async function drillItems(phone: string, frontier: number): Promise<{ words: Wor
   const used = new Set<number>()
   const sents = pick.map((w) => pickSentence(sentsByWord.get(w.w), w.rank, used)).filter((s): s is Sentence => { if (!s || used.has(s.id)) return false; used.add(s.id); return true }).slice(0, 2)
   return { words: pick, sents }
-}
-
-function Overlay({ title, onClose, children, foot }: { title: string; onClose: () => void; children: React.ReactNode; foot?: React.ReactNode }) {
-  // 挂到 body：页面容器有进场动画（transform），fixed 定位会被它困住、被底栏盖住
-  return createPortal(
-    <div className="session">
-      <div className="session-top">
-        <button className="icon-btn" onClick={onClose} aria-label="关闭"><Icon.close /></button>
-        <b style={{ flex: 1 }}>{title}</b>
-      </div>
-      <div className="session-body">{children}</div>
-      {foot && <div className="session-foot">{foot}</div>}
-    </div>,
-    document.body,
-  )
 }
 
 function Drill({ phone, accent, onClose, onPairs }: { phone: string; accent: Accent; onClose: () => void; onPairs: (s: PairSet) => void }) {

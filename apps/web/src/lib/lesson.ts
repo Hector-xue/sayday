@@ -144,6 +144,8 @@ export async function markDay(patch: Partial<Pick<DayRow, 'new_words' | 'shadows
   if (patch.seconds) await db.run('UPDATE day SET seconds = seconds + ? WHERE date = ?', [Math.round(patch.seconds), d])
   if (patch.minimum) await db.run('UPDATE day SET minimum = 1 WHERE date = ?', [d])
   if (patch.done) await db.run('UPDATE day SET done = 1 WHERE date = ?', [d])
+  // 今天练过了：把今天的提醒撤掉（只在 App 里有）
+  if (patch.new_words || patch.shadows || patch.done) import('./reminder').then((m) => m.reschedule()).catch(() => {})
 }
 
 export async function recentDays(n = 7): Promise<DayRow[]> {

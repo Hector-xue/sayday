@@ -12,6 +12,8 @@ export const Icon = {
   check: () => <svg viewBox="0 0 24 24" {...P} strokeWidth={2.4}><path d="M5 12.5l4.5 4.5L19 7" /></svg>,
   review: () => <svg viewBox="0 0 24 24" {...P}><path d="M3 12a9 9 0 1015.5-6.3L21 8" /><path d="M21 3v5h-5" /></svg>,
   plus: () => <svg viewBox="0 0 24 24" {...P}><path d="M12 5v14M5 12h14" /></svg>,
+  film: () => <svg viewBox="0 0 24 24" {...P}><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M10 9.5v5l4.5-2.5z" fill="currentColor" /></svg>,
+  back: () => <svg viewBox="0 0 24 24" {...P}><path d="M15 5l-7 7 7 7" /></svg>,
   ear: () => <svg viewBox="0 0 24 24" {...P}><path d="M6 9a6 6 0 1112 0c0 3-2 4-3 5.5S14 18 12 20a3 3 0 01-4-1" /><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-1.5 2-1.5 3" /></svg>,
   slow: () => <svg viewBox="0 0 24 24" {...P}><path d="M3 17h13a4 4 0 004-4 4 4 0 00-4-4h-1.5A4.5 4.5 0 006 9.5V12" /><circle cx="18" cy="13" r=".8" fill="currentColor" /></svg>,
 }

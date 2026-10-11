@@ -3,14 +3,16 @@ import { useApp } from '../store'
 import { Icon } from '../components/icons'
 import { dailySize, dayRow, recentDays, type DayRow } from '../lib/lesson'
 import { weeklyDue } from '../lib/calibrate'
-import { db } from '../lib/db'
+import { db, today } from '../lib/db'
+import { getAi } from '../lib/ai'
+import { getProgress, loadSeason, nextUp } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
 import { currentLevel } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => void; onRetest: () => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary') => void; onEpisode: (id: number) => void; onSettings: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -19,6 +21,11 @@ export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => vo
   const [size, setSize] = useState<Awaited<ReturnType<typeof dailySize>> | null>(null)
   const [check, setCheck] = useState(false)
   const [retest, setRetest] = useState(false)
+  const [hasAi, setHasAi] = useState(false)
+  const [wrote, setWrote] = useState(false)
+  const [chatted, setChatted] = useState(false)
+  const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
+  const [prevTeaser, setPrevTeaser] = useState('')
   useEffect(() => {
     if (profile) {
       dailySize(profile).then(setSize)
@@ -26,6 +33,10 @@ export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => vo
       // 每月可选一次完整复测：离上次完整定级满 30 天
       db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
     }
+    getAi().then((c) => setHasAi(!!c))
+    Promise.all([loadSeason(), getProgress()]).then(([s, p]) => { const u = nextUp(s, p); setEp(u); setPrevTeaser(s.episodes.find((e) => e.id === u.ep.id - 1)?.next_zh ?? '') })
+    db.one<{ n: number }>('SELECT count(*) n FROM diary WHERE date = ? AND result IS NOT NULL', [today()]).then((r) => setWrote(!!r?.n))
+    db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]).then((r) => setChatted(!!r?.n))
     dayRow().then(setD)
     dueCount().then(setDue)
     recentDays(7).then(setWeek)
@@ -47,7 +58,7 @@ export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => vo
     <div className="page fade-in">
       <div className="page-head">
         <h1>今天</h1>
-        <span className="small muted">{now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}</span>
+        <span className="row"><span className="small muted">{now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}</span><button className="icon-btn ghost" aria-label="设置" onClick={onSettings}><Icon.settings /></button></span>
       </div>
 
       <div className="card raised today-card">
@@ -81,6 +92,33 @@ export function Today({ onStart, onRetest }: { onStart: (minimum: boolean) => vo
             <p className="small muted">{e.hoursLeft === 0 ? '词汇量已经达标，接下来重点练听说。' : `已走完 ${Math.round(e.progress * 100)}% · 按每天 ${profile.minutes} 分钟，预计 ${e.date} 到达`}</p>
           </div>
         </>
+      )}
+
+      {ep && ep.state !== 'all-done' && (
+        <>
+          <p className="section-title">今日剧集</p>
+          <button className="card ai-card wide ep-today" onClick={() => ep.state === 'ready' && onEpisode(ep.ep.id)} disabled={ep.state !== 'ready'}>
+            <span className="small muted">第 {ep.ep.id} 集 · {ep.state === 'ready' ? ep.ep.level : '明天解锁'}</span>
+            <b className="en" style={{ fontSize: 18 }}>{ep.ep.title}</b>
+            <span>{ep.state === 'ready' ? ep.ep.scene_zh : prevTeaser}</span>
+          </button>
+        </>
+      )}
+
+      <p className="section-title">说和写</p>
+      {hasAi ? (
+        <div className="ai-grid">
+          <button className="card ai-card" onClick={() => onAi('chat')}>
+            <span className="ai-ico">💬</span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
+          </button>
+          <button className="card ai-card" onClick={() => onAi('diary')}>
+            <span className="ai-ico">✍️</span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
+          </button>
+        </div>
+      ) : (
+        <button className="card ai-card wide" onClick={() => onAi('setup')}>
+          <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
+        </button>
       )}
 
       {retest && (

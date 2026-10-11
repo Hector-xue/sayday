@@ -2,4 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 跟读录音 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- AI 回复、日记朗读用系统 TTS；安卓 11+ 要声明才能找到语音引擎 -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 </manifest>

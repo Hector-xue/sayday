@@ -1,0 +1,267 @@
+{
+  "season": 1,
+  "title": "Life in London",
+  "title_zh": "伦敦生活",
+  "cast": {
+    "Lin": { "zh": "林（你）", "voice": { "us": "af_heart", "gb": "bf_lily" }, "me": true },
+    "Emma": { "zh": "Emma · 室友", "voice": "bf_emma" },
+    "Tom": { "zh": "Tom · 同事", "voice": "bm_george" },
+    "Mrs Patel": { "zh": "Patel 太太 · 街角小店", "voice": "bf_isabella" },
+    "Arthur": { "zh": "Arthur · 蓝门咖啡馆", "voice": "bm_lewis" },
+    "Sophie": { "zh": "Sophie · 前房客", "voice": "bf_alice" }
+  },
+  "episodes": [
+    {
+      "id": 1, "level": "A2",
+      "title": "The Wrong Key", "title_zh": "钥匙不对",
+      "scene_zh": "你刚到伦敦，拖着箱子站在新家门口，钥匙却打不开门。",
+      "lines": [
+        { "who": "Lin", "en": "Excuse me, I think my key doesn't work.", "zh": "不好意思，我的钥匙好像打不开。" },
+        { "who": "Emma", "en": "Oh, you must be Lin! I'm Emma, your new flatmate.", "zh": "哦，你一定是林！我是 Emma，你的新室友。" },
+        { "who": "Emma", "en": "Don't worry, that door is always difficult. Let me try.", "zh": "别担心，那扇门一直不好开。我来试试。" },
+        { "who": "Lin", "en": "Thank you so much. It was a long flight.", "zh": "太谢谢了。飞了好久。" },
+        { "who": "Emma", "en": "Come in, come in. Would you like a cup of tea?", "zh": "快进来。要不要来杯茶？" },
+        { "who": "Lin", "en": "Yes, please. That sounds perfect.", "zh": "好呀，正合适。" },
+        { "who": "Emma", "en": "Your room is upstairs, the second door on the left.", "zh": "你的房间在楼上，左边第二个门。" },
+        { "who": "Emma", "en": "It's small, but it gets a lot of sun in the morning.", "zh": "不大，但早上阳光很好。" },
+        { "who": "Lin", "en": "Is the kitchen shared?", "zh": "厨房是公用的吗？" },
+        { "who": "Emma", "en": "Yes, we share everything except the biscuits. Those are mine!", "zh": "对，除了饼干什么都共用。饼干是我的！" },
+        { "who": "Lin", "en": "Ha! Deal. I'll buy my own.", "zh": "哈！成交。我自己买。" },
+        { "who": "Emma", "en": "Oh, one more thing. The girl who lived here before left a note in your room.", "zh": "哦，还有一件事。之前住这里的女孩在你房间留了张纸条。" },
+        { "who": "Lin", "en": "A note? What does it say?", "zh": "纸条？上面写了什么？" },
+        { "who": "Emma", "en": "I don't know. It says \"for the next person\" on the front.", "zh": "不知道。正面写着“给下一个人”。" }
+      ],
+      "quiz": [
+        { "q": "门为什么打不开？", "options": ["钥匙拿错了", "那扇门一直不好开", "Emma 换了锁"], "answer": 1 },
+        { "q": "Emma 不愿意分享什么？", "options": ["茶", "厨房", "饼干"], "answer": 2 },
+        { "q": "纸条正面写着什么？", "options": ["给下一个人", "欢迎来伦敦", "别开这扇门"], "answer": 0 }
+      ],
+      "next_zh": "纸条里写着一句奇怪的话……"
+    },
+    {
+      "id": 2, "level": "A2",
+      "title": "Find the Blue Door", "title_zh": "找到蓝色的门",
+      "scene_zh": "第二天早上，你打开纸条，然后去街角小店买早餐。",
+      "lines": [
+        { "who": "Lin", "en": "Emma, listen to this. \"Find the blue door. Ask for the book with no name.\"", "zh": "Emma，你听。“找到蓝色的门。要那本没有名字的书。”" },
+        { "who": "Emma", "en": "How mysterious! Sophie always liked little games.", "zh": "好神秘！Sophie 一直喜欢这种小游戏。" },
+        { "who": "Lin", "en": "Sophie? Was that her name?", "zh": "Sophie？她叫这个名字吗？" },
+        { "who": "Emma", "en": "Yes. She moved to Edinburgh in the summer.", "zh": "对。她夏天搬去爱丁堡了。" },
+        { "who": "Mrs Patel", "en": "Good morning, love! You're new, aren't you?", "zh": "早上好，亲爱的！你是新来的吧？" },
+        { "who": "Lin", "en": "Good morning. Yes, I just moved in next door.", "zh": "早上好。是的，我刚搬到隔壁。" },
+        { "who": "Mrs Patel", "en": "Welcome to the street. What can I get you?", "zh": "欢迎来到这条街。要点什么？" },
+        { "who": "Lin", "en": "A bottle of milk and some bread, please.", "zh": "一瓶牛奶和一些面包，谢谢。" },
+        { "who": "Mrs Patel", "en": "That's three pounds twenty. Do you need a bag?", "zh": "一共三镑二十。要袋子吗？" },
+        { "who": "Lin", "en": "No, thanks. Can I pay by card?", "zh": "不用了，谢谢。可以刷卡吗？" },
+        { "who": "Mrs Patel", "en": "Of course. Just tap it there.", "zh": "当然。在那儿碰一下就行。" },
+        { "who": "Lin", "en": "Do you know a place with a blue door around here?", "zh": "您知道这附近有个蓝门的地方吗？" },
+        { "who": "Mrs Patel", "en": "A blue door? Hmm. There's an old café near the canal, but it's often closed.", "zh": "蓝门？嗯……运河边有家老咖啡馆，不过经常关着。" }
+      ],
+      "quiz": [
+        { "q": "纸条让你找什么？", "options": ["一把钥匙", "一本没有名字的书", "Sophie 的电话"], "answer": 1 },
+        { "q": "Sophie 现在住在哪儿？", "options": ["爱丁堡", "伦敦", "曼彻斯特"], "answer": 0 },
+        { "q": "你在小店买了什么？", "options": ["茶和饼干", "牛奶和面包", "咖啡和报纸"], "answer": 1 }
+      ],
+      "next_zh": "运河边的咖啡馆为什么经常关门？明天你还要去新公司报到……"
+    },
+    {
+      "id": 3, "level": "A2",
+      "title": "First Day", "title_zh": "上班第一天",
+      "scene_zh": "新公司第一天，你被安排坐在一个很爱开玩笑的同事旁边。",
+      "lines": [
+        { "who": "Tom", "en": "Hiya! You must be the new designer. I'm Tom.", "zh": "嗨！你一定是新来的设计师。我是 Tom。" },
+        { "who": "Lin", "en": "Hi Tom, I'm Lin. Nice to meet you.", "zh": "嗨 Tom，我是林。很高兴认识你。" },
+        { "who": "Tom", "en": "Nice to meet you too. Where are you from?", "zh": "我也很高兴认识你。你是哪里人？" },
+        { "who": "Lin", "en": "I'm from Hangzhou, in China. And you?", "zh": "我是杭州人，在中国。你呢？" },
+        { "who": "Tom", "en": "Manchester. Don't worry, I'm friendlier than the weather.", "zh": "曼彻斯特。别担心，我比这儿的天气友好。" },
+        { "who": "Lin", "en": "Ha! I hope so. It's been raining all morning.", "zh": "哈！希望如此。下了一上午雨。" },
+        { "who": "Tom", "en": "Welcome to London. Right, let me show you the coffee machine. It's the most important thing here.", "zh": "欢迎来伦敦。好了，我带你看看咖啡机。这是这儿最重要的东西。" },
+        { "who": "Lin", "en": "Can I ask you something strange?", "zh": "我能问你个奇怪的问题吗？" },
+        { "who": "Tom", "en": "Strange is my favourite kind of question.", "zh": "奇怪的问题是我最喜欢的。" },
+        { "who": "Lin", "en": "Have you heard of a café with a blue door, near the canal?", "zh": "你听说过运河边一家蓝门的咖啡馆吗？" },
+        { "who": "Tom", "en": "The Blue Door? Old Arthur's place! It only opens on Saturday mornings.", "zh": "蓝门？老 Arthur 的店！只有周六上午开。" },
+        { "who": "Tom", "en": "Why do you ask?", "zh": "你问这个干嘛？" },
+        { "who": "Lin", "en": "It's a long story. I'll tell you over lunch.", "zh": "说来话长。午饭时告诉你。" }
+      ],
+      "quiz": [
+        { "q": "Tom 是哪里人？", "options": ["伦敦", "曼彻斯特", "爱丁堡"], "answer": 1 },
+        { "q": "Tom 说这里最重要的东西是什么？", "options": ["咖啡机", "电脑", "老板"], "answer": 0 },
+        { "q": "蓝门咖啡馆什么时候开？", "options": ["每天晚上", "周六上午", "周日下午"], "answer": 1 }
+      ],
+      "next_zh": "周六终于到了，可是那天下起了大雨……"
+    },
+    {
+      "id": 4, "level": "A2",
+      "title": "Saturday Rain", "title_zh": "周六的雨",
+      "scene_zh": "周六一早，你准备出门去蓝门咖啡馆，外面却下着大雨。",
+      "lines": [
+        { "who": "Lin", "en": "Emma, can I borrow your umbrella? Mine is still in my suitcase.", "zh": "Emma，能借你的伞吗？我的还在箱子里。" },
+        { "who": "Emma", "en": "Of course. Where are you going so early?", "zh": "当然。这么早去哪儿？" },
+        { "who": "Lin", "en": "To find the blue door. Do you want to come?", "zh": "去找蓝门。你要一起来吗？" },
+        { "who": "Emma", "en": "I'd love to, but I have to open the bookshop at ten.", "zh": "很想去，可是我十点要去开书店。" },
+        { "who": "Emma", "en": "Actually, it might be the last month for the shop.", "zh": "其实，这可能是书店的最后一个月了。" },
+        { "who": "Lin", "en": "What? Why? What happened?", "zh": "什么？为什么？出什么事了？" },
+        { "who": "Emma", "en": "The rent is going up again. We just don't sell enough books.", "zh": "房租又要涨了。我们卖的书就是不够多。" },
+        { "who": "Lin", "en": "I'm so sorry. Is there anything I can do?", "zh": "太遗憾了。我能帮上什么忙吗？" },
+        { "who": "Emma", "en": "That's sweet of you. Just bring me some good news from the café.", "zh": "你真好。从咖啡馆给我带点好消息回来就行。" },
+        { "who": "Lin", "en": "I'll try. See you tonight!", "zh": "我尽量。晚上见！" },
+        { "who": "Emma", "en": "Take the path along the canal. It's quicker, and it's lovely, even in the rain.", "zh": "走运河边那条路。更近，而且下雨也很美。" }
+      ],
+      "quiz": [
+        { "q": "你向 Emma 借了什么？", "options": ["钥匙", "伞", "书"], "answer": 1 },
+        { "q": "Emma 的书店遇到了什么问题？", "options": ["房租要涨", "着火了", "老板要卖掉"], "answer": 0 },
+        { "q": "Emma 建议你走哪条路？", "options": ["坐地铁", "运河边的路", "大马路"], "answer": 1 }
+      ],
+      "next_zh": "蓝门终于出现在眼前，门却是锁着的……"
+    },
+    {
+      "id": 5, "level": "A2",
+      "title": "The Book with No Name", "title_zh": "没有名字的书",
+      "scene_zh": "你找到了那扇蓝色的门，敲门后，一位老人探出头来。",
+      "lines": [
+        { "who": "Arthur", "en": "We're not open yet, I'm afraid. Come back at nine.", "zh": "恐怕我们还没开门。九点再来吧。" },
+        { "who": "Lin", "en": "Sorry to bother you. Are you Arthur?", "zh": "抱歉打扰了。您是 Arthur 吗？" },
+        { "who": "Arthur", "en": "That depends on who's asking.", "zh": "那得看是谁在问。" },
+        { "who": "Lin", "en": "I live in Sophie's old room. She left me a note.", "zh": "我住在 Sophie 原来的房间。她给我留了张纸条。" },
+        { "who": "Arthur", "en": "Sophie! Well, why didn't you say so? Come in out of the rain.", "zh": "Sophie！哎呀，你怎么不早说？快进来避避雨。" },
+        { "who": "Lin", "en": "The note says, \"Ask for the book with no name.\"", "zh": "纸条上说：“要那本没有名字的书。”" },
+        { "who": "Arthur", "en": "Ah, yes. She left it with me before she went to Scotland. Here you are.", "zh": "啊，对。她去苏格兰之前把它放在我这儿了。给你。" },
+        { "who": "Lin", "en": "It's a notebook. It's full of recipes and drawings.", "zh": "是个笔记本。里面全是菜谱和画。" },
+        { "who": "Arthur", "en": "Sophie used to cook here on Saturdays. People came from all over London.", "zh": "Sophie 以前周六在这儿做饭。人们从伦敦各地赶来。" },
+        { "who": "Lin", "en": "Why did she leave it for a stranger?", "zh": "她为什么把它留给一个陌生人？" },
+        { "who": "Arthur", "en": "She said the next person would need it more than she did. Read the last page.", "zh": "她说下一个人会比她更需要它。看最后一页。" }
+      ],
+      "quiz": [
+        { "q": "那本“没有名字的书”是什么？", "options": ["一本小说", "装满菜谱和画的笔记本", "一本字典"], "answer": 1 },
+        { "q": "Sophie 以前周六在咖啡馆做什么？", "options": ["做饭", "看书", "画画"], "answer": 0 },
+        { "q": "Arthur 让你看哪里？", "options": ["第一页", "封面", "最后一页"], "answer": 2 }
+      ],
+      "next_zh": "最后一页上写着一个计划……可你偏偏在这时候病倒了。"
+    },
+    {
+      "id": 6, "level": "B1",
+      "title": "Under the Weather", "title_zh": "身体不舒服",
+      "scene_zh": "淋了雨，你发烧了。周一早上，你给 Tom 打电话请假，又去看了家庭医生。",
+      "lines": [
+        { "who": "Lin", "en": "Hi Tom, I'm afraid I'm not feeling very well today.", "zh": "嗨 Tom，恐怕我今天不太舒服。" },
+        { "who": "Tom", "en": "Oh no, you sound terrible. Is it the rain from Saturday?", "zh": "哎呀，你声音听起来很糟。是周六淋雨了吧？" },
+        { "who": "Lin", "en": "Probably. I've got a sore throat and a bit of a temperature.", "zh": "可能吧。我嗓子疼，还有点发烧。" },
+        { "who": "Tom", "en": "Stay at home. I'll tell the boss and cover your meeting.", "zh": "待在家吧。我跟老板说，你的会我来顶。" },
+        { "who": "Lin", "en": "You're a lifesaver. Thank you.", "zh": "你真是救星。谢谢。" },
+        { "who": "Lin", "en": "Hello, I'd like to make an appointment with a doctor, please.", "zh": "您好，我想预约看医生。" },
+        { "who": "Mrs Patel", "en": "Lin? It's me, love. I work on reception here on Mondays.", "zh": "林？是我呀，亲爱的。我周一在这儿当前台。" },
+        { "who": "Lin", "en": "Mrs Patel! I didn't know you worked here too.", "zh": "Patel 太太！我不知道您也在这儿上班。" },
+        { "who": "Mrs Patel", "en": "Everyone on this street has three jobs. There's a free slot at eleven fifteen.", "zh": "这条街上每个人都打三份工。十一点一刻有空位。" },
+        { "who": "Lin", "en": "That's great. Do I need to bring anything?", "zh": "太好了。需要带什么吗？" },
+        { "who": "Mrs Patel", "en": "Just yourself. And drink lots of water before you come.", "zh": "人来就行。来之前多喝水。" },
+        { "who": "Lin", "en": "I will. By the way, I found the blue door.", "zh": "好的。对了，我找到蓝门了。" },
+        { "who": "Mrs Patel", "en": "Did you now? Then you'd better get well quickly. Something tells me you'll be busy.", "zh": "是吗？那你得快点好起来。我有预感你要忙起来了。" }
+      ],
+      "quiz": [
+        { "q": "你哪里不舒服？", "options": ["头疼和咳嗽", "嗓子疼、有点发烧", "胃疼"], "answer": 1 },
+        { "q": "Tom 答应帮你做什么？", "options": ["给你送药", "替你开会", "帮你预约医生"], "answer": 1 },
+        { "q": "你预约的是几点？", "options": ["十点", "十一点一刻", "十二点半"], "answer": 1 }
+      ],
+      "next_zh": "病好以后，你终于读懂了笔记本最后一页的计划。"
+    },
+    {
+      "id": 7, "level": "B1",
+      "title": "The Last Page", "title_zh": "最后一页",
+      "scene_zh": "晚上，你在厨房把笔记本的最后一页读给 Emma 听。",
+      "lines": [
+        { "who": "Lin", "en": "Listen. \"If a place you love is in trouble, invite people to dinner. Stories bring people together.\"", "zh": "你听。“如果你爱的地方有了麻烦，就请大家来吃饭。故事会把人们聚到一起。”" },
+        { "who": "Emma", "en": "That's lovely. But what does it have to do with us?", "zh": "说得真好。可这跟我们有什么关系？" },
+        { "who": "Lin", "en": "What if we held a reading night at your bookshop, with food from this notebook?", "zh": "要是我们在你的书店办一个读书夜，用这本笔记里的菜呢？" },
+        { "who": "Emma", "en": "A reading night? Do you really think people would come?", "zh": "读书夜？你真觉得会有人来吗？" },
+        { "who": "Lin", "en": "If we sell tickets, the money could help with the rent.", "zh": "如果我们卖票，这笔钱可以帮着交房租。" },
+        { "who": "Emma", "en": "It's a brilliant idea, but I've never organised anything like that.", "zh": "这主意太棒了，可我从没组织过这种事。" },
+        { "who": "Lin", "en": "Neither have I. But Tom is great at talking to people, and Arthur has a kitchen.", "zh": "我也没有。不过 Tom 特别会跟人打交道，Arthur 有厨房。" },
+        { "who": "Emma", "en": "And Mrs Patel knows absolutely everyone in Camden.", "zh": "Patel 太太认识卡姆登所有的人。" },
+        { "who": "Lin", "en": "So we already have a team. When could we do it?", "zh": "那我们已经有一个团队了。什么时候能办？" },
+        { "who": "Emma", "en": "The rent is due at the end of the month. That gives us three weeks.", "zh": "房租月底到期。我们有三个星期。" },
+        { "who": "Lin", "en": "Three weeks. That's tight, but it's possible.", "zh": "三个星期。挺紧的，但做得到。" },
+        { "who": "Emma", "en": "Lin, you've only been here for two weeks, and you're already saving my shop.", "zh": "林，你才来两个星期，就已经在拯救我的书店了。" }
+      ],
+      "quiz": [
+        { "q": "最后一页的建议是什么？", "options": ["请大家来吃饭", "把店卖掉", "去爱丁堡找 Sophie"], "answer": 0 },
+        { "q": "你想在书店办什么活动？", "options": ["音乐会", "读书夜", "跳蚤市场"], "answer": 1 },
+        { "q": "离交房租还有多久？", "options": ["一个星期", "两个星期", "三个星期"], "answer": 2 }
+      ],
+      "next_zh": "要办活动，就得先在公司做一次让你紧张的演讲……"
+    },
+    {
+      "id": 8, "level": "B1",
+      "title": "Not Bad at All", "title_zh": "一点都不差",
+      "scene_zh": "你在公司做了第一次演讲，结束后 Tom 的一句话让你很困惑。",
+      "lines": [
+        { "who": "Lin", "en": "So, how was my presentation? Be honest.", "zh": "那么，我的演讲怎么样？说实话。" },
+        { "who": "Tom", "en": "Honestly? Not bad.", "zh": "说实话？不差。" },
+        { "who": "Lin", "en": "Just \"not bad\"? Was it really that boring?", "zh": "就“不差”？真有那么无聊吗？" },
+        { "who": "Tom", "en": "No, no! In Manchester, \"not bad\" means it was really good.", "zh": "不不！在曼彻斯特，“不差”就是很好的意思。" },
+        { "who": "Lin", "en": "Then why didn't you just say \"really good\"?", "zh": "那你为什么不直接说“很好”？" },
+        { "who": "Tom", "en": "Because I'm British. We're not allowed to be too excited.", "zh": "因为我是英国人。我们不许太激动。" },
+        { "who": "Lin", "en": "That explains a lot. Emma said my cooking was \"quite nice\" yesterday.", "zh": "这就说得通了。Emma 昨天说我做的菜“挺不错”。" },
+        { "who": "Tom", "en": "\"Quite nice\" is a bit worrying, to be honest. What did you cook?", "zh": "说实话，“挺不错”有点让人担心。你做了什么？" },
+        { "who": "Lin", "en": "A recipe from Sophie's notebook. We're practising for the reading night.", "zh": "Sophie 笔记里的一道菜。我们在为读书夜练习。" },
+        { "who": "Tom", "en": "Right, the famous reading night. How can I help?", "zh": "对，那个著名的读书夜。我能帮什么？" },
+        { "who": "Lin", "en": "Could you design the posters with me and share them online?", "zh": "你能和我一起设计海报，再发到网上吗？" },
+        { "who": "Tom", "en": "I'd be delighted. And this time, I really mean it.", "zh": "非常乐意。这次我是真心的。" }
+      ],
+      "quiz": [
+        { "q": "Tom 说的 \"not bad\" 实际上是什么意思？", "options": ["很一般", "很好", "很无聊"], "answer": 1 },
+        { "q": "你请 Tom 帮什么忙？", "options": ["做饭", "设计海报并发到网上", "借钱交房租"], "answer": 1 },
+        { "q": "Emma 怎么评价你做的菜？", "options": ["quite nice", "amazing", "terrible"], "answer": 0 }
+      ],
+      "next_zh": "海报发出去了，可是第二天，你们只卖出了三张票。"
+    },
+    {
+      "id": 9, "level": "B1",
+      "title": "Only Three Tickets", "title_zh": "只卖出三张票",
+      "scene_zh": "离读书夜只剩一周，票卖得很差。大家在蓝门咖啡馆开紧急会议。",
+      "lines": [
+        { "who": "Emma", "en": "Only three tickets. And one of them was my mum.", "zh": "才三张票。其中一张还是我妈买的。" },
+        { "who": "Tom", "en": "The posters looked great online, but nobody clicked on the link.", "zh": "海报在网上看着挺好，可是没人点链接。" },
+        { "who": "Arthur", "en": "In my experience, people don't buy tickets. They follow a story.", "zh": "按我的经验，人们不是来买票的，是跟着故事来的。" },
+        { "who": "Lin", "en": "What do you mean by that?", "zh": "您这话是什么意思？" },
+        { "who": "Arthur", "en": "Tell them why it matters. Tell them about Sophie, and the note, and the shop.", "zh": "告诉他们为什么这件事重要。讲讲 Sophie、纸条，还有书店。" },
+        { "who": "Mrs Patel", "en": "And put a poster in my shop window. Half of Camden buys milk from me.", "zh": "再在我店的橱窗里贴张海报。半个卡姆登都在我这儿买牛奶。" },
+        { "who": "Lin", "en": "Maybe I could write the story myself, in simple English, and share it tonight.", "zh": "也许我可以自己把这个故事用简单的英语写出来，今晚发出去。" },
+        { "who": "Emma", "en": "Would you? Your English has improved so much since you arrived.", "zh": "你愿意吗？你来了以后英语进步太多了。" },
+        { "who": "Lin", "en": "Thanks. I've been writing a diary every day. It really helps.", "zh": "谢谢。我每天都写日记，真的很有用。" },
+        { "who": "Tom", "en": "Then it's settled. Lin writes, I share, and Mrs Patel tells the whole street.", "zh": "那就这么定了。林来写，我来转，Patel 太太告诉整条街。" },
+        { "who": "Arthur", "en": "And I'll make the scones. Nobody says no to my scones.", "zh": "我来做司康饼。没人能拒绝我的司康饼。" }
+      ],
+      "quiz": [
+        { "q": "Arthur 认为人们为什么会来？", "options": ["因为票便宜", "因为一个打动人的故事", "因为有名人"], "answer": 1 },
+        { "q": "Patel 太太提议把海报贴在哪儿？", "options": ["地铁站", "她店的橱窗", "书店门口"], "answer": 1 },
+        { "q": "你说什么对你的英语帮助很大？", "options": ["每天写日记", "看电视剧", "上补习班"], "answer": 0 }
+      ],
+      "next_zh": "故事发出去的那一夜，你几乎没睡。读书夜，终于到了。"
+    },
+    {
+      "id": 10, "level": "B1",
+      "title": "Reading Night", "title_zh": "读书夜",
+      "scene_zh": "读书夜当晚，书店里挤满了人。开场前，门口出现了一个熟悉又陌生的身影。",
+      "lines": [
+        { "who": "Emma", "en": "Lin, look! There must be a hundred people here!", "zh": "林，快看！这儿得有一百个人！" },
+        { "who": "Lin", "en": "I can't believe it. The story was shared more than two thousand times.", "zh": "真不敢相信。那个故事被转发了两千多次。" },
+        { "who": "Sophie", "en": "Excuse me. Is this the reading night from the blue door story?", "zh": "打扰一下。这就是蓝门故事里的读书夜吗？" },
+        { "who": "Arthur", "en": "Sophie! You came all the way from Edinburgh!", "zh": "Sophie！你从爱丁堡大老远赶来了！" },
+        { "who": "Sophie", "en": "Of course. Someone found my notebook and actually used it. I had to meet them.", "zh": "当然。有人找到了我的笔记本，还真的用上了。我一定得见见这个人。" },
+        { "who": "Lin", "en": "Hi, I'm Lin. Thank you for the note. It changed my first month in London.", "zh": "嗨，我是林。谢谢你的纸条。它改变了我在伦敦的第一个月。" },
+        { "who": "Sophie", "en": "No, thank you. You did the hard part. I just wrote a few recipes.", "zh": "不，该我谢你。难的部分是你做的。我只是写了几个菜谱。" },
+        { "who": "Emma", "en": "Everyone, can I have your attention, please? Thanks to all of you, the shop is staying open!", "zh": "各位，请注意一下好吗？多亏了大家，书店能继续开下去了！" },
+        { "who": "Tom", "en": "Now that's what I call really good. Not just not bad.", "zh": "这才叫真的很好。不只是“不差”。" },
+        { "who": "Lin", "en": "When I arrived, I couldn't even open the front door. Now this street feels like home.", "zh": "我刚来的时候连大门都打不开。现在这条街感觉就像家。" },
+        { "who": "Sophie", "en": "Then you're ready for the next adventure. Have you ever been to Edinburgh?", "zh": "那你已经准备好下一场冒险了。你去过爱丁堡吗？" },
+        { "who": "Lin", "en": "Not yet. But something tells me I'm going to.", "zh": "还没有。但我有预感，我会去的。" }
+      ],
+      "quiz": [
+        { "q": "大约来了多少人？", "options": ["二十个", "一百个", "两千个"], "answer": 1 },
+        { "q": "Sophie 是从哪儿来的？", "options": ["曼彻斯特", "杭州", "爱丁堡"], "answer": 2 },
+        { "q": "读书夜的结果是什么？", "options": ["书店能继续开下去", "书店搬家了", "Emma 辞职了"], "answer": 0 }
+      ],
+      "next_zh": "第一季完。第二季：爱丁堡。"
+    }
+  ]
+}

@@ -20,7 +20,7 @@ export function Tappable({ text, highlight, karaoke }: { text: string; highlight
   const [frac, setFrac] = useState<number | null>(null)
   useEffect(() => { loadContent().then((c) => setByWord(c.byWord)) }, [])
   useEffect(() => (karaoke ? onPlayback((p) => { if (p.text === text) setFrac(p.frac) }) : undefined), [karaoke, text])
-  const parts = text.split(/([A-Za-z]+(?:'[A-Za-z]+)?)/)
+  const parts = text.split(/([A-Za-zÀ-ÿ]+(?:'[A-Za-zÀ-ÿ]+)?)/)
   const starts = karaoke ? wordStarts(parts) : []
   const hl = highlight?.toLowerCase()
   return (

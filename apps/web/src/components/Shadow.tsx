@@ -4,7 +4,7 @@ import { Icon } from './icons'
 import { PlayButton } from './PlayButton'
 import { ensureEngine, engineStatus, onEngineStatus, infer, startRecording, stopRecording, cancelRecording, isNative } from '../lib/speech/engine'
 import { score, type ScoreResult } from '../lib/speech/score'
-import type { Accent } from '../lib/tts'
+import type { Accent, Clip } from '../lib/tts'
 import { Intonation } from './Intonation'
 import { ipa } from '../lib/phones'
 
@@ -51,7 +51,8 @@ export function ScoreView({ r }: { r: ScoreResult }) {
   )
 }
 
-export function Shadow({ text, sentenceId, accent, onScored }: { text: string; sentenceId?: number; accent: Accent; onScored?: (r: ScoreResult, audio: Float32Array) => void }) {
+export function Shadow({ text, sentenceId, clip: clipIn, accent, onScored }: { text: string; sentenceId?: number; clip?: Clip; accent: Accent; onScored?: (r: ScoreResult, audio: Float32Array) => void }) {
+  const clip = clipIn ?? { text, sentenceId }
   const [phase, setPhase] = useState<'idle' | 'rec' | 'busy'>('idle')
   const [result, setResult] = useState<ScoreResult | null>(null)
   const [heard, setHeard] = useState<Float32Array | null>(null)
@@ -100,8 +101,8 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
   return (
     <div>
       <div className="row" style={{ marginTop: 18 }}>
-        <PlayButton text={text} clip={{ text, sentenceId }} accent={accent} label="听示范" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
-        <PlayButton text={text} clip={{ text, sentenceId }} accent={accent} rate={0.75} label="慢速" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
+        <PlayButton text={text} clip={clip} accent={accent} label="听示范" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
+        <PlayButton text={text} clip={clip} accent={accent} rate={0.75} label="慢速" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
         <span className="small muted">先听一遍，再跟着读</span>
       </div>
       <div className="rec-zone">
@@ -113,7 +114,7 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
         </div>
       </div>
       {result && <ScoreView r={result} />}
-      {result && heard && (text.match(/[A-Za-z]+/g) || []).length >= 3 && <Intonation clip={{ text, sentenceId }} accent={accent} audio={heard} />}
+      {result && heard && (text.match(/[A-Za-z]+/g) || []).length >= 3 && <Intonation clip={clip} accent={accent} audio={heard} />}
     </div>
   )
 }

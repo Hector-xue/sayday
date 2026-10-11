@@ -1,6 +1,6 @@
 // 语调对比：示范（灰）和你（品牌色）的音高曲线叠在一起
 import { useEffect, useState } from 'react'
-import { getAudio, type Accent, type Clip } from '../lib/tts'
+import { getAudio, NoAudio, type Accent, type Clip } from '../lib/tts'
 import { decodeTo16k } from '../lib/speech/engine'
 import { advice, compare, contour, yin } from '../lib/pitch'
 
@@ -29,14 +29,14 @@ function path(c: (number | null)[], W: number, H: number, lo: number, hi: number
 
 export function Intonation({ clip, accent, audio }: { clip: Clip; accent: Accent; audio: Float32Array }) {
   const [data, setData] = useState<null | { ref: (number | null)[]; you: (number | null)[] }>(null)
-  const [err, setErr] = useState('')
+  const [err, setErr] = useState<string | null>('')
   useEffect(() => {
     let live = true
     setData(null)
-    refContour(clip, accent).then((ref) => { if (live) setData({ ref, you: contour(yin(audio)) }) }).catch(() => live && setErr('示范音频没下载下来，语调对比要联网一次'))
+    refContour(clip, accent).then((ref) => { if (live) setData({ ref, you: contour(yin(audio)) }) }).catch((e) => live && setErr(e instanceof NoAudio && !clip.sentenceId && !clip.ep ? null : '示范音频没下载下来，语调对比要联网一次'))
     return () => { live = false }
   }, [clip.text, accent, audio])
-  if (err) return <p className="small faint">{err}</p>
+  if (err !== '') return err === null ? null : <p className="small faint">{err}</p>
   if (!data) return <p className="small faint">正在画语调曲线…</p>
   if (data.you.length === 0 || data.ref.length === 0) return <p className="small faint">这次的录音太轻，画不出语调曲线</p>
   const all = [...data.ref, ...data.you].filter((v): v is number => v !== null)

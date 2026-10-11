@@ -31,4 +31,11 @@ export const MIGRATIONS: string[] = [
   CREATE TABLE recording(id INTEGER PRIMARY KEY, sentence_id INTEGER, text TEXT NOT NULL, score INTEGER NOT NULL, pcm BLOB NOT NULL, ts INTEGER NOT NULL);
   CREATE INDEX recording_text ON recording(text, ts);
   `,
+  // v0.0.5：AI 陪练对话、日记
+  `
+  CREATE TABLE chat(id INTEGER PRIMARY KEY, role TEXT NOT NULL, content TEXT NOT NULL, meta TEXT, ts INTEGER NOT NULL);
+  CREATE INDEX chat_ts ON chat(ts);
+  CREATE TABLE diary(id INTEGER PRIMARY KEY, date TEXT NOT NULL, text TEXT NOT NULL, result TEXT, ts INTEGER NOT NULL);
+  CREATE INDEX diary_date ON diary(date);
+  `,
 ]
