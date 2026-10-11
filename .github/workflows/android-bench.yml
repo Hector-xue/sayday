@@ -85,10 +85,14 @@ jobs:
           mkdir -p apk-out
           find src-tauri/gen/android -name "*.apk" -exec cp {} apk-out/ \;
           ls -la apk-out
+          # 把实际解析出的 Cargo.lock 一并带出来，回填到仓库后构建就完全可复现
+          cp src-tauri/Cargo.lock apk-out/Cargo.lock
 
       - name: 上传 APK
         uses: actions/upload-artifact@v4
         with:
           name: sayday-android-bench
-          path: apps/native/apk-out/*.apk
+          path: |
+            apps/native/apk-out/*.apk
+            apps/native/apk-out/Cargo.lock
           retention-days: 14
