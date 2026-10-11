@@ -14,3 +14,8 @@ tauri-build = { version = "=2.6.3", features = [] }
 [dependencies]
 tauri = { version = "=2.11.5", features = [] }
 tauri-plugin-sayday-infer = { path = "plugins/sayday-infer" }
+
+# 安卓 debug 包默认带完整调试信息，单个 .so 就 100MB+；测速包不需要，去掉后体积减半
+[profile.dev]
+debug = false
+strip = true
