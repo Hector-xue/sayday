@@ -3,7 +3,7 @@ import { useApp } from '../store'
 import { db } from '../lib/db'
 import { loadContent, pickSentence, type Word } from '../lib/content'
 import { PlayButton } from '../components/PlayButton'
-import { State } from '../lib/srs'
+import { State, addCard } from '../lib/srs'
 
 type Row = { word: string; due: number; state: number; reps: number; lapses: number; known: number; stability: number }
 type Filter = 'learning' | 'mastered' | 'known'
@@ -16,7 +16,8 @@ function nextLabel(due: number) {
 }
 
 export function Words() {
-  const { tick, profile } = useApp()
+  const { tick, profile, refresh, toast } = useApp()
+  const [allWords, setAllWords] = useState<Word[]>([])
   const [rows, setRows] = useState<Row[]>([])
   const [byWord, setByWord] = useState<Map<string, Word>>(new Map())
   const [q, setQ] = useState('')
@@ -25,7 +26,7 @@ export function Words() {
   const [sents, setSents] = useState<Awaited<ReturnType<typeof loadContent>>['sentsByWord'] | null>(null)
   useEffect(() => {
     db.all<Row>('SELECT word, due, state, reps, lapses, known, stability FROM card ORDER BY added DESC').then(setRows)
-    loadContent().then((c) => { setByWord(c.byWord); setSents(c.sentsByWord) })
+    loadContent().then((c) => { setByWord(c.byWord); setSents(c.sentsByWord); setAllWords(c.words) })
   }, [tick])
   const groups = useMemo(() => ({
     learning: rows.filter((r) => !r.known && (r.state !== State.Review || r.stability < 21)),
@@ -33,6 +34,15 @@ export function Words() {
     known: rows.filter((r) => r.known),
   }), [rows])
   const list = groups[f].filter((r) => !q || r.word.includes(q.toLowerCase().trim()) || byWord.get(r.word)?.zh.includes(q.trim()))
+  // 搜索时顺带查整本词典：还没学的词可以直接加入
+  const have = useMemo(() => new Set(rows.map((r) => r.word)), [rows])
+  const dict = useMemo(() => {
+    const t = q.trim().toLowerCase()
+    if (!t) return []
+    const en = /^[a-z'-]+$/.test(t)
+    return allWords.filter((w) => !have.has(w.w) && (en ? w.w.startsWith(t) : w.zh.includes(q.trim()))).slice(0, 20)
+  }, [q, allWords, have])
+  const addWord = async (w: Word) => { await addCard(w.w); toast(`已加入：${w.w}`); refresh() }
 
   return (
     <div className="page fade-in">
@@ -43,9 +53,9 @@ export function Words() {
           <button key={k} aria-pressed={f === k} onClick={() => setF(k)}>{t}</button>
         ))}
       </div>
-      {list.length === 0 ? (
+      {list.length === 0 && !(q && dict.length) ? (
         <div className="card"><p className="muted small">{rows.length ? '这里还没有词。' : '还没开始学。去“今天”开始第一组练习，学过的词会出现在这里。'}</p></div>
-      ) : (
+      ) : list.length === 0 ? null : (
         <div className="list">
           {list.slice(0, 300).map((r) => {
             const w = byWord.get(r.word)
@@ -59,6 +69,19 @@ export function Words() {
         </div>
       )}
       {list.length > 300 && <p className="small faint" style={{ marginTop: 8 }}>只显示前 300 个，用搜索找其他的。</p>}
+      {dict.length > 0 && (
+        <>
+          <p className="section-title">词典里的</p>
+          <div className="list">
+            {dict.map((w) => (
+              <div className="list-row" key={w.w}>
+                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => setOpen(w)}><b>{w.w}</b><span>{w.zh}</span></button>
+                <button className="btn small quiet" onClick={() => addWord(w)}>加入学习</button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       {open && profile && (
         <div className="sheet-mask" onClick={() => setOpen(null)}>
           <div className="sheet fade-in" onClick={(e) => e.stopPropagation()}>
