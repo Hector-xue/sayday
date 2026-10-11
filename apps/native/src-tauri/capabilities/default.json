@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/mobile-schema.json",
+  "identifier": "default",
+  "description": "主窗口：核心能力 + 原生推理/录音",
+  "windows": ["main"],
+  "permissions": ["core:default", "sayday-infer:default"]
+}

@@ -1,0 +1,16 @@
+[package]
+name = "tauri-plugin-sayday-infer"
+version = "0.1.0"
+description = "安卓原生音素推理（onnxruntime-android）与录音"
+edition = "2021"
+# tauri-plugin 的 build 脚本要求 links 与 package.name 一致
+links = "tauri-plugin-sayday-infer"
+
+[build-dependencies]
+tauri-plugin = { version = "=2.6.3", features = ["build"] }
+
+[dependencies]
+tauri = { version = "=2.11.5", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"

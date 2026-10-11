@@ -1,0 +1,16 @@
+[package]
+name = "sayday-native"
+version = "0.0.1"
+description = "日日说 App 外壳（M1 安卓原生推理验证）"
+edition = "2021"
+
+[lib]
+name = "sayday_native_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "=2.11.5", features = [] }
+tauri-plugin-sayday-infer = { path = "plugins/sayday-infer" }

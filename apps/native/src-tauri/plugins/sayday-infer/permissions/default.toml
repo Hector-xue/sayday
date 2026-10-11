@@ -1,0 +1,5 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "允许载入音素模型、推理和录音。"
+permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-stop"]

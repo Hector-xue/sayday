@@ -3,3 +3,9 @@
 node_modules/
 spikes/m0/web/models
 __pycache__/
+apps/native/dist/
+apps/native/src-tauri/gen/
+apps/native/src-tauri/target/
+apps/native/src-tauri/icons/
+apps/native/icon-src.png
+apps/native/apk-out/
