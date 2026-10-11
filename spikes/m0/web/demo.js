@@ -146,7 +146,7 @@ function render(words, scores, tailPos, tails, utt) {
   for (const w of words) {
     const el = document.createElement('div')
     el.className = 'w'
-    const gs = w.phones.map(() => gop[k++])
+    const gs = w.phones.map(() => scores[k++])
     const min = Math.min(...gs)
     const tip = note.get(w)
     const wc = tip ? 'y' : cls(min) === 'g' ? '' : cls(min)
