@@ -62,11 +62,11 @@ def normalize(wav: np.ndarray) -> np.ndarray:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", choices=["fp32", "int8"], default="int8")
+    ap.add_argument("--model", default="int8", help="读 .cache/models/phone_ctc.<model>.onnx")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--threads", type=int, default=1)
     ap.add_argument("--codec", choices=["none", "silk"], default="none")
-    ap.add_argument("--split", choices=["test", "train"], default="test")
+    ap.add_argument("--split", default="test", help="读 .cache/data/so762_<split>.parquet")
     ap.add_argument("--no-norm", action="store_true", help="不做零均值单位方差归一化")
     a = ap.parse_args()
 
@@ -95,7 +95,7 @@ def main() -> None:
         if i % 250 == 0:
             print(i, f"{len(wav)/sr:.1f}s audio -> {dt*1000:.0f}ms", flush=True)
 
-    tag = ("train_" if a.split == "train" else "") + a.model + ("" if a.codec == "none" else f"_{a.codec}") + ("_nonorm" if a.no_norm else "")
+    tag = ("" if a.split == "test" else a.split + "_") + a.model + ("" if a.codec == "none" else f"_{a.codec}") + ("_nonorm" if a.no_norm else "")
     np.savez_compressed(CACHE / f"logits_{tag}.npz", **out)
     audio = np.array([x["audio_s"] for x in lat])
     infer = np.array([x["infer_s"] for x in lat])

@@ -1,0 +1,134 @@
+# 中国口音微调（docs/口音微调方案.md）：在 GitHub 免费机器上用 CPU 训练
+#   bench：只跑几十步测速
+#   train：限时训练，存检查点到 artifact；到时间没训完就自己再触发一次接着跑（带上本次 run id），训完自动触发 eval
+#   eval：导出微调模型，和原模型在同一套校准 / 测试集上对比（spikes/ft/compare.py），结果写进运行摘要
+name: finetune
+
+on:
+  push:
+    branches: ['feat/finetune**']
+    paths: ['spikes/ft/**', '.github/workflows/finetune.yml']
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [bench, train, eval]
+        default: bench
+      resume_run:
+        description: 接着哪次 run 的检查点跑（留空 = 从头）
+        default: ''
+      epochs:
+        default: '10'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: finetune
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      MODE: ${{ inputs.mode || 'bench' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依赖
+        run: |
+          python -m pip install --quiet torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --quiet "numpy<2.1" transformers==4.46.3 pyarrow soundfile onnx onnxruntime==1.19.2 scipy scikit-learn
+          nproc; free -g; df -h .
+
+      - name: 数据缓存
+        uses: actions/cache@v4
+        with:
+          path: .cache/data
+          key: so762-v1
+
+      - name: 下载模型和数据
+        run: |
+          mkdir -p .cache/models .cache/data
+          HF=https://huggingface.co
+          curl -sSfL -o .cache/models/charsiu_ctc.bin     $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/pytorch_model.bin
+          curl -sSfL -o .cache/models/charsiu_config.json $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/config.json
+          curl -sSfL -o .cache/models/charsiu_vocab.json  $HF/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+          for s in train test; do
+            [ -s .cache/data/so762_$s.parquet ] || curl -sSfL -o .cache/data/so762_$s.parquet $HF/datasets/mispeech/speechocean762/resolve/main/data/$s-00000-of-00001.parquet
+          done
+          ls -la .cache/models .cache/data
+
+      - name: 测速
+        if: env.MODE == 'bench'
+        run: python spikes/ft/train.py --bench 30 --threads $(nproc)
+
+      - name: 取上次的检查点
+        if: (env.MODE == 'train' || env.MODE == 'eval') && inputs.resume_run != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ft-ckpt
+          path: .cache/ft
+          run-id: ${{ inputs.resume_run }}
+          github-token: ${{ github.token }}
+
+      - name: 训练
+        if: env.MODE == 'train'
+        run: |
+          R=""; [ -s .cache/ft/ckpt.pt ] && R="--resume .cache/ft/ckpt.pt"
+          python spikes/ft/train.py --minutes 320 --threads $(nproc) --epochs ${{ inputs.epochs }} $R
+          cat .cache/ft/state.json
+
+      - name: 存检查点
+        if: env.MODE == 'train'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ft-ckpt
+          path: |
+            .cache/ft/ckpt.pt
+            .cache/ft/state.json
+            .cache/ft/log.jsonl
+          retention-days: 14
+          compression-level: 0
+
+      - name: 没训完就接着跑
+        if: env.MODE == 'train'
+        run: |
+          if python -c "import json,sys; sys.exit(0 if json.load(open('.cache/ft/state.json'))['done'] else 1)"; then
+            gh workflow run finetune.yml -R ${{ github.repository }} --ref ${{ github.ref_name }} -f mode=eval -f resume_run=${{ github.run_id }}
+          else
+            gh workflow run finetune.yml -R ${{ github.repository }} --ref ${{ github.ref_name }} -f mode=train -f resume_run=${{ github.run_id }} -f epochs=${{ inputs.epochs }}
+          fi
+
+      - name: 评测
+        if: env.MODE == 'eval'
+        run: |
+          python spikes/m0/export_onnx.py
+          python spikes/m0/export_onnx.py --ckpt .cache/ft/ckpt.pt --name ft_
+          python spikes/ft/compare.py prep
+          for m in int8 ft_int8; do
+            for sp in test trainB; do
+              python spikes/m0/infer_so762.py --model $m --split $sp --threads 4 | tail -2
+              python spikes/m0/score_eval.py --logits $m --split $sp > /dev/null
+            done
+          done
+          python spikes/ft/compare.py report int8 ft_int8 | tee -a $GITHUB_STEP_SUMMARY
+          tail -3 .cache/ft/log.jsonl >> $GITHUB_STEP_SUMMARY
+
+      - name: 存微调模型
+        if: env.MODE == 'eval'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ft-model
+          path: |
+            .cache/models/phone_ctc.ft_int8.onnx
+            .cache/ft/compare.json
+            .cache/ft/log.jsonl
+          retention-days: 30

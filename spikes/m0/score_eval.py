@@ -142,9 +142,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--logits", default="int8")
     ap.add_argument("--limit", type=int)
-    ap.add_argument("--split", choices=["test", "train"], default="test")
+    ap.add_argument("--split", default="test")
     a = ap.parse_args()
-    pre = "train_" if a.split == "train" else ""
+    pre = "" if a.split == "test" else a.split + "_"
 
     z = np.load(CACHE / f"logits_{pre}{a.logits}.npz")
     rows = pq.read_table(CACHE / "data" / f"so762_{a.split}.parquet", columns=["accuracy", "words", "age", "speaker"]).to_pylist()
