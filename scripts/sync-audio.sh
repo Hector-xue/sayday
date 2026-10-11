@@ -24,6 +24,31 @@ for d in "$TMP"/dl/audio-*; do
   done
 done
 
+if [ "${ONLY:-}" = "e" ]; then
+  # 只换剧集目录 e/，句子 s/ 和单词 w/ 一个文件都不碰
+  [ "$n" -eq 2 ] || { echo "剧集产物不全：$n/2"; exit 1; }
+  for acc in us gb; do
+    c=$(ls "$TMP/audio/$acc/e" | wc -l)
+    [ "$c" -gt 0 ] || { echo "$acc 没有剧集音频"; exit 1; }
+    echo "$acc 剧集 $c"
+    chmod -R a+rX "$TMP/audio/$acc/e"
+    rm -rf "$DEST/$acc/e.new" && mv "$TMP/audio/$acc/e" "$DEST/$acc/e.new"
+    if [ -d "$DEST/$acc/e" ]; then mv "$DEST/$acc/e" "$DEST/$acc/e.old"; fi
+    mv "$DEST/$acc/e.new" "$DEST/$acc/e" && rm -rf "$DEST/$acc/e.old"
+  done
+  exit 0
+fi
+# 全量：必须 32 片齐全，而且句子、单词都不能是空的（防止拿错产物把整个音频包换空）
+[ "$n" -eq 32 ] || { echo "分片不全：$n/32"; exit 1; }
+for acc in us gb; do
+  echo "$acc 句子 $(ls "$TMP/audio/$acc/s" | wc -l) · 单词 $(ls "$TMP/audio/$acc/w" | wc -l) · 剧集 $(ls "$TMP/audio/$acc/e" | wc -l)"
+  [ "$(ls "$TMP/audio/$acc/s" | wc -l)" -gt 10000 ] && [ "$(ls "$TMP/audio/$acc/w" | wc -l)" -gt 10000 ] || { echo "$acc 句子或单词数量不对，不发布"; exit 1; }
+done
+# 全量产物里没有剧集时，保留线上已有的剧集音频
+for acc in us gb; do
+  if [ -z "$(ls -A "$TMP/audio/$acc/e")" ] && [ -d "$DEST/$acc/e" ]; then rmdir "$TMP/audio/$acc/e"; cp -r "$DEST/$acc/e" "$TMP/audio/$acc/e"; fi
+done
+chmod -R a+rX "$TMP/audio"
 rm -rf "$DEST.new" && mv "$TMP/audio" "$DEST.new"
 [ -d "$DEST" ] && mv "$DEST" "$DEST.old"
 mv "$DEST.new" "$DEST" && rm -rf "$DEST.old"
