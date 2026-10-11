@@ -74,9 +74,32 @@ fn record_stop<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("recordStop", serde_json::json!({}))
 }
 
+/// 系统 TTS 朗读任意英文（AI 回复、日记）；读完才返回
+#[tauri::command]
+async fn speak<R: Runtime>(app: tauri::AppHandle<R>, text: String, lang: Option<String>, rate: Option<f32>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call(
+        "speak",
+        serde_json::json!({ "text": text, "lang": lang.unwrap_or_else(|| "en-GB".into()), "rate": rate.unwrap_or(0.95) }),
+    )
+}
+
+#[tauri::command]
+fn speak_stop<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("speakStop", serde_json::json!({}))
+}
+
+/// 导出备份写进系统“下载”目录（WebView 不处理网页触发的下载）
+#[tauri::command]
+fn save_to_downloads<R: Runtime>(app: tauri::AppHandle<R>, name: String, mime: Option<String>, data: String) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call(
+        "saveToDownloads",
+        serde_json::json!({ "name": name, "mime": mime.unwrap_or_else(|| "application/json".into()), "data": data }),
+    )
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_stop])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_stop, speak, speak_stop, save_to_downloads])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

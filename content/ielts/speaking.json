@@ -1,0 +1,91 @@
+{
+  "note": "日日说原创的雅思口语风格练习题（话题方向参考常见考法，题目文字为原创，不是真题）",
+  "part1": [
+    { "topic": "Home", "topic_zh": "住所", "q": ["Do you live in a house or a flat?", "What do you like most about the place where you live?", "Is there anything you would like to change about your home?", "Do you plan to live there for a long time?"] },
+    { "topic": "Work or study", "topic_zh": "工作或学习", "q": ["Do you work or are you a student?", "Why did you choose that job or subject?", "What is the most interesting part of your day?", "Would you like to change your job or major in the future?"] },
+    { "topic": "Mornings", "topic_zh": "早晨", "q": ["Are you a morning person?", "What do you usually do first thing in the morning?", "Did you get up earlier when you were a child?", "How do you feel when you have to get up very early?"] },
+    { "topic": "Phones", "topic_zh": "手机", "q": ["How much time do you spend on your phone every day?", "What do you mostly use your phone for?", "Have you ever tried to use your phone less?", "Do you think children should have phones?"] },
+    { "topic": "Weather", "topic_zh": "天气", "q": ["What's the weather like where you live?", "What kind of weather do you like best?", "Does the weather ever change your plans?", "Do you check the weather forecast often?"] },
+    { "topic": "Food", "topic_zh": "食物", "q": ["What's your favourite kind of food?", "Do you like cooking?", "Is there any food you didn't like as a child but like now?", "Do you prefer eating at home or eating out?"] },
+    { "topic": "Music", "topic_zh": "音乐", "q": ["What kind of music do you listen to?", "When do you usually listen to music?", "Have you ever learned to play an instrument?", "Do you prefer live music or recorded music?"] },
+    { "topic": "Friends", "topic_zh": "朋友", "q": ["Do you have a lot of friends?", "How often do you see your friends?", "What do you usually do together?", "Is it easy for you to make new friends?"] },
+    { "topic": "Walking", "topic_zh": "散步", "q": ["Do you like walking?", "Where do you usually go for a walk?", "Did you walk more when you were younger?", "Do you think people walk less these days?"] },
+    { "topic": "Books", "topic_zh": "读书", "q": ["Do you enjoy reading?", "What was the last book you read?", "Do you prefer paper books or e-books?", "Did your parents read to you when you were a child?"] },
+    { "topic": "Shopping", "topic_zh": "购物", "q": ["Do you like shopping?", "Do you prefer shopping online or in shops?", "What was the last thing you bought?", "Do you ever buy things you don't need?"] },
+    { "topic": "Holidays", "topic_zh": "假期", "q": ["What do you usually do on holidays?", "Do you prefer relaxing or travelling on holidays?", "Where did you go on your last holiday?", "Which holiday do you enjoy most in your country?"] }
+  ],
+  "part2": [
+    {
+      "card": "Describe a person who has helped you a lot.",
+      "card_zh": "描述一个帮过你很多的人",
+      "points": ["who this person is", "how you know them", "how they helped you", "and explain why their help was important to you"],
+      "part3": ["Who usually helps young people more, family or friends?", "Do you think people today are less willing to help strangers?", "Should schools teach children how to help others?"]
+    },
+    {
+      "card": "Describe a place in your city that you like to visit.",
+      "card_zh": "描述你所在城市里你喜欢去的一个地方",
+      "points": ["where it is", "what it looks like", "what you do there", "and explain why you like going there"],
+      "part3": ["Why do people like to spend time in parks?", "How have cities in your country changed in the last twenty years?", "Should governments spend more money on public spaces?"]
+    },
+    {
+      "card": "Describe a skill you would like to learn.",
+      "card_zh": "描述一个你想学的技能",
+      "points": ["what the skill is", "how you would learn it", "how long it might take", "and explain why you want to learn it"],
+      "part3": ["Is it better to learn skills from a teacher or by yourself?", "Which skills will be most important in the future?", "Do older people find it harder to learn new things?"]
+    },
+    {
+      "card": "Describe a time when you were very busy.",
+      "card_zh": "描述一次你非常忙碌的经历",
+      "points": ["when it was", "why you were so busy", "how you managed your time", "and explain how you felt about it"],
+      "part3": ["Why are people so busy nowadays?", "Is it good for children to have a very busy schedule?", "How can people balance work and free time?"]
+    },
+    {
+      "card": "Describe a book or film that made you think.",
+      "card_zh": "描述一本让你深有感触的书或电影",
+      "points": ["what it was", "when you read or watched it", "what it was about", "and explain why it made you think"],
+      "part3": ["Do you think films can change people's opinions?", "Why do some people prefer books to films?", "Should young people read more classic books?"]
+    },
+    {
+      "card": "Describe a gift you gave to someone.",
+      "card_zh": "描述一件你送给别人的礼物",
+      "points": ["what the gift was", "who you gave it to", "why you chose it", "and explain how the person reacted"],
+      "part3": ["Why do people give gifts?", "Is it better to give money or a gift?", "Has gift-giving in your country changed over time?"]
+    },
+    {
+      "card": "Describe a journey you remember well.",
+      "card_zh": "描述一次让你印象深刻的旅程",
+      "points": ["where you went", "how you travelled", "who you were with", "and explain why you remember it"],
+      "part3": ["What are the advantages of travelling by train?", "How will transport change in the future?", "Do people travel too much these days?"]
+    },
+    {
+      "card": "Describe a time when you changed your mind about something.",
+      "card_zh": "描述一次你改变主意的经历",
+      "points": ["what the situation was", "what you thought at first", "what made you change your mind", "and explain how you felt afterwards"],
+      "part3": ["Is it a weakness to change your mind often?", "Who has more influence on young people's opinions, parents or the internet?", "Why do some people find it hard to admit they were wrong?"]
+    },
+    {
+      "card": "Describe a piece of technology you find useful.",
+      "card_zh": "描述一件你觉得很有用的科技产品",
+      "points": ["what it is", "how long you have had it", "how you use it", "and explain why it is useful to you"],
+      "part3": ["Has technology made people's lives easier or more stressful?", "Should older people be helped to use new technology?", "What jobs might disappear because of technology?"]
+    },
+    {
+      "card": "Describe a time when you learned something from a mistake.",
+      "card_zh": "描述一次你从错误中学到东西的经历",
+      "points": ["what the mistake was", "when it happened", "what you learned", "and explain how it changed what you do now"],
+      "part3": ["Do children learn more from mistakes or from being told?", "Why are some people afraid of making mistakes?", "Should teachers punish students for mistakes?"]
+    },
+    {
+      "card": "Describe a festival or celebration you enjoy.",
+      "card_zh": "描述一个你喜欢的节日或庆祝活动",
+      "points": ["what it is", "when it happens", "what people do", "and explain why you enjoy it"],
+      "part3": ["Why are traditional festivals important?", "Are festivals becoming too commercial?", "How do young people celebrate differently from older people?"]
+    },
+    {
+      "card": "Describe a goal you hope to achieve in the next few years.",
+      "card_zh": "描述一个你希望几年内实现的目标",
+      "points": ["what the goal is", "why you chose it", "what you are doing to achieve it", "and explain how you will feel when you achieve it"],
+      "part3": ["Is it important to set goals in life?", "Do young people today have different goals from their parents?", "What can people do when they fail to reach a goal?"]
+    }
+  ]
+}

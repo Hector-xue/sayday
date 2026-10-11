@@ -36,7 +36,7 @@ export default defineConfig({
   // 相对路径：同一份产物既能挂在 sayday.ivyea.com/app/ 下，也能直接塞进 Tauri
   base: './',
   plugins: [react(), precacheManifest()],
-  resolve: { alias: { '@speech': join(__dirname, '../../packages/speech') } },
+  resolve: { alias: { '@speech': join(__dirname, '../../packages/speech'), '@asr': join(__dirname, '../../packages/asr') } },
   optimizeDeps: { exclude: ['@sqlite.org/sqlite-wasm', 'onnxruntime-web'] },
   worker: { format: 'es' },
   server: { fs: { allow: ['../..'] } },

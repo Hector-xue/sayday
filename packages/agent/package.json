@@ -1,0 +1,19 @@
+{
+  "name": "sayday-agent",
+  "version": "0.0.4",
+  "description": "日日说给 AI 助手用的工具：MCP（stdio / Streamable HTTP）+ Skill + HTTP API，单一来源的工具定义",
+  "private": true,
+  "type": "module",
+  "bin": { "sayday-agent": "./cli.mjs" },
+  "scripts": {
+    "mcp": "node cli.mjs mcp",
+    "http": "node cli.mjs http",
+    "gen": "node cli.mjs gen",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "onnxruntime-node": "1.30.0",
+    "silk-wasm": "3.7.1"
+  }
+}

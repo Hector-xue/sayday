@@ -9,6 +9,13 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.SystemClock
+import android.content.ContentValues
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import java.util.Locale
 import android.util.Base64
 import app.tauri.PermissionState
 import app.tauri.annotation.Command
@@ -30,6 +37,21 @@ import kotlin.concurrent.thread
 @InvokeArg
 class LoadArgs {
   var threads: Int = 4
+}
+
+@InvokeArg
+class SaveArgs {
+  lateinit var name: String
+  var mime: String = "application/json"
+  /** 文件内容的 base64 */
+  lateinit var data: String
+}
+
+@InvokeArg
+class SpeakArgs {
+  lateinit var text: String
+  var lang: String = "en-GB"
+  var rate: Float = 0.95f
 }
 
 @InvokeArg
@@ -187,6 +209,86 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
       val ret = JSObject()
       ret.put("audio", Base64.encodeToString(out.array(), Base64.NO_WRAP))
       ret.put("samples", raw.size / 2)
+      invoke.resolve(ret)
+    }
+  }
+
+  // ---- 系统 TTS：AI 回复、日记这类现编的句子（例句和单词走预生成的音频包）----
+  private var tts: TextToSpeech? = null
+  private var ttsReady: Boolean? = null
+  private val ttsWaiting = mutableListOf<() -> Unit>()
+  private val speaking = mutableMapOf<String, Invoke>()
+
+  private fun withTts(invoke: Invoke, block: (TextToSpeech) -> Unit) {
+    when (ttsReady) {
+      true -> block(tts!!)
+      false -> invoke.reject("手机上没有可用的语音引擎：到系统设置 → 文字转语音 里装一个（例如 Google 语音服务）")
+      null -> {
+        synchronized(ttsWaiting) { ttsWaiting.add { withTts(invoke, block) } }
+        if (tts == null) {
+          tts = TextToSpeech(activity) { status ->
+            ttsReady = status == TextToSpeech.SUCCESS
+            tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+              override fun onStart(id: String) {}
+              override fun onDone(id: String) { speaking.remove(id)?.resolve(JSObject()) }
+              @Deprecated("旧接口") override fun onError(id: String) { speaking.remove(id)?.reject("朗读失败") }
+              override fun onStop(id: String, interrupted: Boolean) { speaking.remove(id)?.resolve(JSObject()) }
+            })
+            val q = synchronized(ttsWaiting) { ttsWaiting.toList().also { ttsWaiting.clear() } }
+            q.forEach { it() }
+          }
+        }
+      }
+    }
+  }
+
+  @Command
+  fun speak(invoke: Invoke) {
+    val args = invoke.parseArgs(SpeakArgs::class.java)
+    withTts(invoke) { t ->
+      val loc = Locale.forLanguageTag(args.lang)
+      val ok = t.setLanguage(loc)
+      if (ok == TextToSpeech.LANG_MISSING_DATA || ok == TextToSpeech.LANG_NOT_SUPPORTED) t.setLanguage(Locale.US)
+      t.setSpeechRate(args.rate)
+      val id = "u" + SystemClock.elapsedRealtimeNanos()
+      speaking[id] = invoke
+      if (t.speak(args.text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) {
+        speaking.remove(id)
+        invoke.reject("朗读失败")
+      }
+    }
+  }
+
+  @Command
+  fun speakStop(invoke: Invoke) {
+    tts?.stop()
+    invoke.resolve(JSObject())
+  }
+
+  // ---- 导出备份：WebView 不处理网页触发的下载，这里直接写进系统“下载”目录 ----
+  @Command
+  fun saveToDownloads(invoke: Invoke) {
+    val args = invoke.parseArgs(SaveArgs::class.java)
+    onWorker(invoke, "保存失败") {
+      val bytes = Base64.decode(args.data, Base64.DEFAULT)
+      val where: String
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val values = ContentValues().apply {
+          put(MediaStore.Downloads.DISPLAY_NAME, args.name)
+          put(MediaStore.Downloads.MIME_TYPE, args.mime)
+          put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Sayday")
+        }
+        val uri = activity.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: throw IllegalStateException("无法创建文件")
+        activity.contentResolver.openOutputStream(uri)!!.use { it.write(bytes) }
+        where = "下载/Sayday/" + args.name
+      } else {
+        // 安卓 9 及以下：写到 App 自己的外部目录（不用存储权限）
+        val dir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: activity.filesDir
+        File(dir, args.name).writeBytes(bytes)
+        where = File(dir, args.name).absolutePath
+      }
+      val ret = JSObject()
+      ret.put("path", where)
       invoke.resolve(ret)
     }
   }

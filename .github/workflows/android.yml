@@ -1,0 +1,167 @@
+# 安卓 App。本机不装 NDK/不编 APK（磁盘吃紧，曾把盘写满导致生产库宕机），安卓构建一律走这里。
+#  一律编 release 包，用仓库 Secret 里的固定密钥签名（开发包和正式包能互相覆盖安装）
+#  - feat/android** 分支 / 手动触发：挂在 workflow artifact 上，给开发自测；没配密钥时用临时密钥签（提示一声）
+#  - 推 v* 标签：必须有固定密钥，签完自动传到 GitHub Release
+#    （签名一旦固定就永远不换：换了钥匙，老用户升级会报“签名不一致”只能卸载重装，而卸载会丢学习记录）
+name: android
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/android**'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 模型不入库：CI 从 Hugging Face 下载原始权重现导出 int8 ONNX；导出脚本不变就复用缓存
+      - name: 模型缓存
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: .cache/models
+          key: phone-ctc-${{ hashFiles('spikes/m0/export_onnx.py') }}-v1
+
+      - name: 导出 int8 音素模型
+        if: steps.model.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --quiet "numpy<2.1" transformers==4.46.3 onnx onnxruntime==1.19.2
+          mkdir -p .cache/models
+          HF=https://huggingface.co
+          curl -sSfL -o .cache/models/charsiu_ctc.bin     $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/pytorch_model.bin
+          curl -sSfL -o .cache/models/charsiu_config.json $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/config.json
+          curl -sSfL -o .cache/models/charsiu_vocab.json  $HF/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+          python spikes/m0/export_onnx.py
+          rm -f .cache/models/charsiu_ctc.bin .cache/models/phone_ctc.fp32.onnx
+          ls -la .cache/models
+
+      - name: 模型放进插件 assets
+        run: |
+          D=apps/native/src-tauri/plugins/sayday-infer/android/src/main/assets/models
+          mkdir -p $D && cp .cache/models/phone_ctc.int8.onnx $D/
+          ls -la $D
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 前端就是 apps/web 的正式版界面（NATIVE=1：推理走原生插件，示范音频走音频包）
+      - name: 组装前端
+        run: scripts/build-native-web.sh
+
+      - name: Rust（Android arm64）
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/native/src-tauri
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 先 init 再生成图标：icon 命令发现 gen/android 时会顺带写安卓启动图标
+      # 必须经 package.json 里的 CLI 调用：gradle 构建时会回调 `npm run tauri`，用 npx 临时跑会找不到 package.json
+      - name: 初始化 Android 工程 + 图标
+        working-directory: apps/native
+        run: |
+          npm ci --no-audit --no-fund
+          npm run tauri -- android init
+          cat ../../assets/brand/icon-1024.png > icon-src.png
+          npm run tauri -- icon icon-src.png
+          # 自适应图标前景层换成留了安全区的版本（scripts/make-android-icon.py 生成）
+          for d in ../../assets/brand/android/mipmap-*; do cat "$d/ic_launcher_foreground.png" > "src-tauri/gen/android/app/src/main/res/$(basename "$d")/ic_launcher_foreground.png"; done
+
+      # 版本号跟标签走（tauri 按 x.y.z 推出 versionCode，升级包必须比旧包大）
+      - name: 版本号
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          for f in apps/native/src-tauri/tauri.conf.json apps/native/package.json; do
+            python3 -c "import json,sys; p=sys.argv[1]; d=json.load(open(p)); d['version']=sys.argv[2]; open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\\n')" "$f" "$V"
+          done
+          grep -n '"version"' apps/native/src-tauri/tauri.conf.json
+
+      - name: 构建 APK（仅 arm64）
+        working-directory: apps/native
+        run: |
+          sudo apt-get update && sudo apt-get install -y gradle
+          unset NDK_HOME
+          npm run tauri -- android build --apk --target aarch64
+          mkdir -p apk-out
+          find src-tauri/gen/android -name "*.apk" -exec cp {} apk-out/ \;
+          ls -la apk-out
+          # 把实际解析出的 Cargo.lock 一并带出来，回填到仓库后构建就完全可复现
+          cp src-tauri/Cargo.lock apk-out/Cargo.lock
+
+      - name: 签名（固定发布密钥）
+        working-directory: apps/native/apk-out
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          KS="$RUNNER_TEMP/sayday.keystore"; ALIAS="${KS_ALIAS:-sayday}"
+          if [ -z "${KS_B64:-}" ] || [ -z "${KS_PASS:-}" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+              echo "::error::缺少 ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD Secret：宁可不出包，也不能出一个签名会变的包"
+              exit 1
+            fi
+            echo "::warning::没配固定密钥，这个开发包用临时密钥签：装之前要先卸载旧版"
+            KS_PASS=temppass; ALIAS=sayday
+            keytool -genkeypair -keystore "$KS" -storepass "$KS_PASS" -keypass "$KS_PASS" -alias "$ALIAS" -keyalg RSA -keysize 2048 -validity 30 -dname "CN=Sayday dev" > /dev/null 2>&1
+          else
+            echo "$KS_B64" | base64 -d > "$KS"
+          fi
+          keytool -list -keystore "$KS" -storepass "$KS_PASS" -alias "$ALIAS" > /dev/null
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          hit="$(ls -d "$SDK"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)"
+          [ -n "$hit" ] || { echo "::error::找不到 apksigner"; exit 1; }
+          BT="$(dirname "$hit")"
+          V=$(python3 -c "import json; print(json.load(open('../src-tauri/tauri.conf.json'))['version'])")
+          src=$(ls *.apk | head -1)
+          "$BT/zipalign" -f -p 4 "$src" aligned.apk
+          "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$ALIAS" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
+            --out "sayday-v$V-arm64.apk" aligned.apk
+          rm -f aligned.apk "$src" "$KS" *.idsig
+          # 证书指纹进日志：以后有人报“签名不一致”，对一下各版本的 SHA-256 就知道
+          "$BT/apksigner" verify --print-certs "sayday-v$V-arm64.apk" | grep -i "SHA-256"
+          ls -la
+
+      - name: 传到 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          T="$GITHUB_REF_NAME"; N="docs/release-notes/$T.md"
+          [ -f "$N" ] || echo "$T" > "$N"
+          gh release view "$T" > /dev/null 2>&1 || gh release create "$T" --prerelease --title "$T" --notes-file "$N"
+          gh release upload "$T" apps/native/apk-out/*.apk --clobber
+
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sayday-android-bench
+          path: |
+            apps/native/apk-out/*.apk
+            apps/native/apk-out/Cargo.lock
+          retention-days: 14

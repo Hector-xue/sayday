@@ -4,16 +4,12 @@ import { Icon } from './icons'
 import { PlayButton } from './PlayButton'
 import { ensureEngine, engineStatus, onEngineStatus, infer, startRecording, stopRecording, cancelRecording, isNative } from '../lib/speech/engine'
 import { score, type ScoreResult } from '../lib/speech/score'
-import type { Accent } from '../lib/tts'
+import type { Accent, Clip } from '../lib/tts'
+import { Intonation } from './Intonation'
+import { ipa } from '../lib/phones'
+import { HINTS } from '@speech/hints.mjs'
 
-export const HINT: Record<string, string> = {
-  TH: '舌尖轻放上下齿之间送气，不要发成 s / f', DH: '舌尖放齿间并振动声带，不要发成 d / z', V: '上齿轻咬下唇并振动，不要发成 w',
-  W: '双唇收圆再展开，不要咬唇', R: '舌尖向后卷、不碰上颚，嘴唇略圆', L: '舌尖抵上齿龈，气流从舌两侧出', N: '舌尖抵上齿龈，气流从鼻腔出',
-  IY: '长音 /iː/，嘴角向两边拉开并拉长', IH: '短音 /ɪ/，放松、短促', AE: '/æ/ 嘴张大、舌位低，介于“啊”和“诶”之间', NG: '舌后部抵软腭，不要加 g 的爆破',
-  Z: '/z/ 要振动声带，不要发成 s', SH: '/ʃ/ 双唇前突，舌面抬高', S: '/s/ 舌尖靠近上齿龈，不要卷舌', UW: '长音 /uː/，双唇收圆前突', UH: '短音 /ʊ/，双唇微圆、放松',
-  ER: '/ɜː/ 舌身后缩、卷舌，不要发成“饿”', AH: '/ʌ/ 嘴自然张开、短促，像轻声的“啊”', EY: '/eɪ/ 从“诶”滑向“衣”', OW: '/əʊ/ 从“呃”滑向“乌”', D: '舌尖抵上齿龈后弹开，词尾不要带出元音',
-  T: '舌尖抵上齿龈后弹开，词尾不要带出元音', K: '舌后部抵软腭后放开，词尾轻收', JH: '/dʒ/ 舌尖贴上齿龈，双唇前突', CH: '/tʃ/ 舌尖贴上齿龈，双唇前突、送气',
-}
+export const HINT: Record<string, string> = HINTS
 
 export function ScoreView({ r }: { r: ScoreResult }) {
   const c = r.score >= 80 ? 'var(--good)' : r.score >= 60 ? 'var(--brand)' : 'var(--warn)'
@@ -34,21 +30,23 @@ export function ScoreView({ r }: { r: ScoreResult }) {
         {r.words.map((w, i) => (
           <div className="w" key={i}>
             <b>{w.word}</b>
-            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level}`}>{p.p.toLowerCase()}</span>)}</span>
-            {w.tail === 'ins' && <span className="tail">/{w.phones[w.phones.length - 1].p.toLowerCase()}/ 后面多了个元音</span>}
+            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level}`}>{ipa(p.p)}</span>)}</span>
+            {w.tail === 'ins' && <span className="tail">/{ipa(w.phones[w.phones.length - 1].p)}/ 后面多了个元音</span>}
             {w.tail === 'del' && <span className="tail">尾音可能没读出来</span>}
           </div>
         ))}
       </div>
-      {tips.length > 0 && <ul className="tips">{tips.map(([p]) => <li key={p}><b>/{p.toLowerCase()}/</b>{HINT[p]}</li>)}</ul>}
+      {tips.length > 0 && <ul className="tips">{tips.map(([p]) => <li key={p}><b>/{ipa(p)}/</b>{HINT[p]}</li>)}</ul>}
       {r.skipped.length > 0 && <p className="small faint" style={{ marginTop: 10 }}>词典里没有的词没打分：{r.skipped.join('、')}</p>}
     </div>
   )
 }
 
-export function Shadow({ text, sentenceId, accent, onScored }: { text: string; sentenceId?: number; accent: Accent; onScored?: (r: ScoreResult) => void }) {
+export function Shadow({ text, sentenceId, clip: clipIn, accent, onScored }: { text: string; sentenceId?: number; clip?: Clip; accent: Accent; onScored?: (r: ScoreResult, audio: Float32Array) => void }) {
+  const clip = clipIn ?? { text, sentenceId }
   const [phase, setPhase] = useState<'idle' | 'rec' | 'busy'>('idle')
   const [result, setResult] = useState<ScoreResult | null>(null)
+  const [heard, setHeard] = useState<Float32Array | null>(null)
   const [msg, setMsg] = useState('')
   const [eng, setEng] = useState(engineStatus())
   const recRef = useRef(false)
@@ -81,8 +79,9 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
       const lg = await infer(audio)
       const r = await score(text, lg)
       setResult(r)
+      setHeard(audio)
       setMsg('')
-      onScored?.(r)
+      onScored?.(r, audio)
     } catch (e) {
       setMsg('打分出错：' + ((e as Error).message || e))
     } finally {
@@ -93,8 +92,8 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
   return (
     <div>
       <div className="row" style={{ marginTop: 18 }}>
-        <PlayButton text={text} clip={{ text, sentenceId }} accent={accent} label="听示范" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
-        <PlayButton text={text} clip={{ text, sentenceId }} accent={accent} rate={0.75} label="慢速" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
+        <PlayButton text={text} clip={clip} accent={accent} label="听示范" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
+        <PlayButton text={text} clip={clip} accent={accent} rate={0.75} label="慢速" onError={(e) => setMsg('示范读音生成失败：' + e.message)} />
         <span className="small muted">先听一遍，再跟着读</span>
       </div>
       <div className="rec-zone">
@@ -106,6 +105,7 @@ export function Shadow({ text, sentenceId, accent, onScored }: { text: string; s
         </div>
       </div>
       {result && <ScoreView r={result} />}
+      {result && heard && (text.match(/[A-Za-z]+/g) || []).length >= 3 && <Intonation clip={clip} accent={accent} audio={heard} />}
     </div>
   )
 }

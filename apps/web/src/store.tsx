@@ -28,6 +28,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setT] = useState<Theme>('system')
   useEffect(() => {
     getProfile().then(setP).catch(() => setP(null))
+    // 每次打开 App 重排每日提醒（文案跟着进度更新）
+    import('./lib/reminder').then((m) => m.reschedule()).catch(() => {})
     kvGet<Theme>('theme', 'system').then((t) => { setT(t); applyTheme(t) })
   }, [])
   const setProfile = useCallback(async (p: Profile) => { await saveProfile(p); setP(p) }, [])
