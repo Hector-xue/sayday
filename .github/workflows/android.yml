@@ -1,12 +1,24 @@
-# 安卓 App（debug APK）：挂在 workflow artifact 上，发版时手动传到 GitHub Release。
-# 本机不装 NDK/不编 APK（磁盘吃紧，曾把盘写满导致生产库宕机），安卓构建一律走这里。
-name: android-bench
+# 安卓 App。本机不装 NDK/不编 APK（磁盘吃紧，曾把盘写满导致生产库宕机），安卓构建一律走这里。
+#  - feat/android** 分支 / 手动触发：debug APK，挂在 workflow artifact 上，给开发自测
+#  - 推 v* 标签：release APK，用仓库 Secret 里的固定密钥签名，自动传到 GitHub Release
+#    （签名一旦固定就永远不换：换了钥匙，老用户升级会报“签名不一致”只能卸载重装，而卸载会丢学习记录）
+name: android
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: '试编 release 包（不签名、不发版）'
+        type: boolean
+        default: false
   push:
     branches:
       - 'feat/android**'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -81,17 +93,72 @@ jobs:
           # 自适应图标前景层换成留了安全区的版本（scripts/make-android-icon.py 生成）
           for d in ../../assets/brand/android/mipmap-*; do cat "$d/ic_launcher_foreground.png" > "src-tauri/gen/android/app/src/main/res/$(basename "$d")/ic_launcher_foreground.png"; done
 
-      - name: 构建 debug APK（仅 arm64）
+      # 版本号跟标签走（tauri 按 x.y.z 推出 versionCode，升级包必须比旧包大）
+      - name: 版本号
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          for f in apps/native/src-tauri/tauri.conf.json apps/native/package.json; do
+            python3 -c "import json,sys; p=sys.argv[1]; d=json.load(open(p)); d['version']=sys.argv[2]; open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\\n')" "$f" "$V"
+          done
+          grep -n '"version"' apps/native/src-tauri/tauri.conf.json
+
+      - name: 构建 APK（仅 arm64）
         working-directory: apps/native
         run: |
           sudo apt-get update && sudo apt-get install -y gradle
           unset NDK_HOME
-          npm run tauri -- android build --apk --debug --target aarch64
+          if [[ "$GITHUB_REF" == refs/tags/v* || "${{ inputs.release }}" == "true" ]]; then
+            npm run tauri -- android build --apk --target aarch64
+          else
+            npm run tauri -- android build --apk --debug --target aarch64
+          fi
           mkdir -p apk-out
           find src-tauri/gen/android -name "*.apk" -exec cp {} apk-out/ \;
           ls -la apk-out
           # 把实际解析出的 Cargo.lock 一并带出来，回填到仓库后构建就完全可复现
           cp src-tauri/Cargo.lock apk-out/Cargo.lock
+
+      - name: 签名（固定发布密钥）
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: apps/native/apk-out
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KS_B64:-}" ] || [ -z "${KS_PASS:-}" ]; then
+            echo "::error::缺少 ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD Secret：宁可不出包，也不能出一个签名会变的包"
+            exit 1
+          fi
+          KS="$RUNNER_TEMP/sayday.keystore"; ALIAS="${KS_ALIAS:-sayday}"
+          echo "$KS_B64" | base64 -d > "$KS"
+          keytool -list -keystore "$KS" -storepass "$KS_PASS" -alias "$ALIAS" > /dev/null
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          hit="$(ls -d "$SDK"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)"
+          [ -n "$hit" ] || { echo "::error::找不到 apksigner"; exit 1; }
+          BT="$(dirname "$hit")"
+          V="${GITHUB_REF_NAME#v}"
+          src=$(ls *.apk | head -1)
+          "$BT/zipalign" -f -p 4 "$src" aligned.apk
+          "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$ALIAS" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
+            --out "sayday-v$V-arm64.apk" aligned.apk
+          rm -f aligned.apk "$src" "$KS"
+          # 证书指纹进日志：以后有人报“签名不一致”，对一下各版本的 SHA-256 就知道
+          "$BT/apksigner" verify --print-certs "sayday-v$V-arm64.apk" | grep -i "SHA-256"
+          ls -la
+
+      - name: 传到 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          T="$GITHUB_REF_NAME"; N="docs/release-notes/$T.md"
+          [ -f "$N" ] || echo "$T" > "$N"
+          gh release view "$T" > /dev/null 2>&1 || gh release create "$T" --prerelease --title "$T" --notes-file "$N"
+          gh release upload "$T" apps/native/apk-out/*.apk --clobber
 
       - name: 上传 APK
         uses: actions/upload-artifact@v4
