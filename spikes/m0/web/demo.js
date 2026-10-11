@@ -1,5 +1,5 @@
 // 跟读测评演示：录音 → 16k 重采样 → Worker 推理 + GOP → 校准（0~2 分）→ 红黄绿
-import { calibrate, tailPositions, uttScore } from './calib.mjs'
+import { calibrate, tailNote, tailPositions, uttScore } from './calib.mjs'
 const SENTENCES = [
   'I think three things are worth thanking for',
   'The weather this week is very wet and windy',
@@ -146,8 +146,9 @@ function render(words, scores, tailPos, tails, utt) {
   tails.forEach((t, i) => {
     const w = tailPos[i].word
     const last = w.phones[w.phones.length - 1].toLowerCase()
-    if (t.ins > calib.utt.insTh) note.set(w, `/${last}/ 后面多了个元音`)
-    else if (t.del > calib.utt.delTh) note.set(w, `尾音 /${last}/ 可能没读出来`)
+    const k = tailNote(calib, t, tailPos[i], words)
+    if (k === 'ins') note.set(w, `/${last}/ 后面多了个元音`)
+    else if (k === 'del') note.set(w, `尾音 /${last}/ 可能没读出来`)
   })
   let k = 0
   const bad = new Map()

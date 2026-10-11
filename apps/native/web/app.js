@@ -1,6 +1,6 @@
 // 日日说 App（M1 验证）：原生录音 + 原生推理（onnxruntime-android）+ JS 评分（与网页版同一套 gop/calib）
 import { prepare, afGop, tailLLR } from './gop.mjs'
-import { calibrate, tailPositions, uttScore, VOWELS } from './calib.mjs'
+import { calibrate, tailNote, tailPositions, uttScore, VOWELS } from './calib.mjs'
 
 const { invoke } = window.__TAURI__.core
 const $ = (id) => document.getElementById(id)
@@ -60,8 +60,9 @@ function render(words, scores, tailPos, tails, utt) {
   tails.forEach((t, i) => {
     const w = tailPos[i].word
     const last = w.phones[w.phones.length - 1].toLowerCase()
-    if (t.ins > calib.utt.insTh) note.set(w, `/${last}/ 后面多了个元音`)
-    else if (t.del > calib.utt.delTh) note.set(w, `尾音 /${last}/ 可能没读出来`)
+    const k = tailNote(calib, t, tailPos[i], words)
+    if (k === 'ins') note.set(w, `/${last}/ 后面多了个元音`)
+    else if (k === 'del') note.set(w, `尾音 /${last}/ 可能没读出来`)
   })
   let k = 0
   $('words').innerHTML = ''
