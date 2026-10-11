@@ -11,6 +11,11 @@ const SENTENCES = [
   'She sells sea shells by the sea shore',
 ]
 let dict, vocab, calib, phoneIds, target, loadInfo
+// 听示范：播放与网页版相同的预生成 Kokoro 音频（随安装包打进去，离线可用）
+let accent = 'us'
+try { accent = localStorage.getItem('sayday.accent') || 'us' } catch {}
+let ttsIndex = {}
+let audioEl = null
 
 const toB64 = (f32) => {
   const u8 = new Uint8Array(f32.buffer, f32.byteOffset, f32.byteLength)
@@ -170,6 +175,9 @@ $('bench').onclick = async () => {
       $('chips').appendChild(b)
     }
     setTarget(SENTENCES[0])
+    try {
+      for (const v of Object.values(await (await fetch('./tts/samples/index.json')).json())) ttsIndex[v.text.trim().toLowerCase()] = v
+    } catch (e) { console.warn('示范音频索引载入失败', e) }
     loadInfo = await invoke('plugin:sayday-infer|load_model', { threads: 4 })
     $('status').textContent = `准备好了（${loadInfo.device}），点“录音”开始，读完再点一次`
     $('rec').disabled = false
@@ -178,3 +186,19 @@ $('bench').onclick = async () => {
     $('status').textContent = '启动失败：' + e
   }
 })()
+
+$('listen').onclick = () => {
+  const v = ttsIndex[target.text.trim().toLowerCase()]
+  if (!v || !v[accent]) { $('status').textContent = '这句还没有示范读音'; return }
+  if (audioEl) audioEl.pause()
+  audioEl = new Audio('./tts/samples/' + v[accent])
+  audioEl.play().catch((e) => { $('status').textContent = '播放失败：' + e.message })
+}
+for (const b of document.querySelectorAll('[data-accent]')) {
+  b.setAttribute('aria-pressed', String(b.dataset.accent === accent))
+  b.onclick = () => {
+    accent = b.dataset.accent
+    try { localStorage.setItem('sayday.accent', accent) } catch {}
+    for (const x of document.querySelectorAll('[data-accent]')) x.setAttribute('aria-pressed', String(x === b))
+  }
+}

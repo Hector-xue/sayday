@@ -11,4 +11,6 @@ cp "$ROOT"/apps/native/web/* "$OUT/"
 cp "$SRC/gop.mjs" "$SRC/calib.mjs" "$OUT/"
 for f in calib.json cmudict.min.json cmudict.LICENSE meta.json u0.f32 u0.ref.f32 u1.f32 u1.ref.f32 u2.f32 u2.ref.f32; do cp "$SRC/samples/$f" "$OUT/samples/"; done
 cp "$ROOT/.cache/models/charsiu_vocab.json" "$OUT/samples/"
+mkdir -p "$OUT/tts/samples"
+cp "$SRC"/tts/samples/* "$OUT/tts/samples/"
 du -sh "$OUT"
