@@ -7,18 +7,9 @@ import { score, type ScoreResult } from '../lib/speech/score'
 import type { Accent, Clip } from '../lib/tts'
 import { Intonation } from './Intonation'
 import { ipa } from '../lib/phones'
+import { HINTS } from '@speech/hints.mjs'
 
-export const HINT: Record<string, string> = {
-  TH: '舌尖轻放上下齿之间送气，不要发成 s / f', DH: '舌尖放齿间并振动声带，不要发成 d / z', V: '上齿轻咬下唇并振动，不要发成 w',
-  W: '双唇收圆再展开，不要咬唇', R: '舌尖向后卷、不碰上颚，嘴唇略圆', L: '舌尖抵上齿龈，气流从舌两侧出', N: '舌尖抵上齿龈，气流从鼻腔出',
-  IY: '长音 /iː/，嘴角向两边拉开并拉长', IH: '短音 /ɪ/，放松、短促', AE: '/æ/ 嘴张大、舌位低，介于“啊”和“诶”之间', NG: '舌后部抵软腭，不要加 g 的爆破',
-  Z: '/z/ 要振动声带，不要发成 s', SH: '/ʃ/ 双唇前突，舌面抬高', S: '/s/ 舌尖靠近上齿龈，不要卷舌', UW: '长音 /uː/，双唇收圆前突', UH: '短音 /ʊ/，双唇微圆、放松',
-  ER: '/ɜː/ 舌身后缩、卷舌，不要发成“饿”', AH: '/ʌ/ 嘴自然张开、短促，像轻声的“啊”', EY: '/eɪ/ 从“诶”滑向“衣”', OW: '/əʊ/ 从“呃”滑向“乌”', D: '舌尖抵上齿龈后弹开，词尾不要带出元音',
-  T: '舌尖抵上齿龈后弹开，词尾不要带出元音', F: '上齿轻咬下唇送气，不要发成“夫”', P: '双唇闭紧再爆开，词尾不要带出元音', B: '双唇闭紧爆开并振动声带，词尾轻收',
-  M: '双唇闭紧，气流从鼻腔出', G: '舌后部抵软腭后放开并振动声带，词尾轻收', HH: '张嘴直接呼气，不要发成喉咙里的“喝”', Y: '舌前部贴近上颚，马上滑向后面的元音',
-  ZH: '/ʒ/ 像 /ʃ/ 但振动声带', EH: '/e/ 嘴半开，比“诶”更短更开', AA: '/ɑː/ 嘴张大、舌位低靠后，拉长', AO: '/ɔː/ 双唇收圆、舌位低靠后，拉长',
-  AW: '/aʊ/ 从“啊”滑向“乌”，嘴唇逐渐收圆', AY: '/aɪ/ 从“啊”滑向“衣”', OY: '/ɔɪ/ 从“奥”滑向“衣”', K: '舌后部抵软腭后放开，词尾轻收', JH: '/dʒ/ 舌尖贴上齿龈，双唇前突', CH: '/tʃ/ 舌尖贴上齿龈，双唇前突、送气',
-}
+export const HINT: Record<string, string> = HINTS
 
 export function ScoreView({ r }: { r: ScoreResult }) {
   const c = r.score >= 80 ? 'var(--good)' : r.score >= 60 ? 'var(--brand)' : 'var(--warn)'

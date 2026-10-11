@@ -1,0 +1,301 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "日日说 Sayday 工具 API",
+    "version": "0.0.4",
+    "description": "和 MCP 工具同一套定义。请求头 Authorization: Bearer <SAYDAY_TOKEN>"
+  },
+  "paths": {
+    "/api/score_pronunciation": {
+      "post": {
+        "summary": "发音打分",
+        "description": "给一段英文录音打发音分（0~100），指出读错的词、错在哪个音、怎么改，以及词尾多加元音 / 吞音。不给 text 时先自动识别说了什么再打分。录音只在运行这个工具的机器上处理。",
+        "operationId": "score_pronunciation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "audio": {
+                    "type": "string",
+                    "description": "录音：http(s) 链接、本机文件路径或 base64 都行。支持 WAV、微信语音（silk）；其他格式（mp3/m4a/ogg）需要本机装 ffmpeg"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "应该读的英文原文（跟读时给；自由说话时可不给）"
+                  }
+                },
+                "required": [
+                  "audio"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/transcribe": {
+      "post": {
+        "summary": "英文语音转文字",
+        "description": "把一段英文录音识别成文字（本机离线识别，模型 Moonshine）。口音重时会有错字。",
+        "operationId": "transcribe",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "audio": {
+                    "type": "string",
+                    "description": "录音：http(s) 链接、本机文件路径或 base64 都行。支持 WAV、微信语音（silk）；其他格式（mp3/m4a/ogg）需要本机装 ffmpeg"
+                  }
+                },
+                "required": [
+                  "audio"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/lookup_word": {
+      "post": {
+        "summary": "查词",
+        "description": "查英文单词：音标、中文释义、难度（CEFR，按词频估算）、一句带中文的例句。",
+        "operationId": "lookup_word",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "word": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "word"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/example_sentences": {
+      "post": {
+        "summary": "例句",
+        "description": "给一个词找几句真实例句（Tatoeba，带中文翻译），按难度从易到难。",
+        "operationId": "example_sentences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "word": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10,
+                    "default": 3
+                  }
+                },
+                "required": [
+                  "word"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/daily_words": {
+      "post": {
+        "summary": "今天学什么词",
+        "description": "按学习者水平挑一组该学的新词（从水平边界往上），每个带音标、释义和例句。目标是雅思时优先雅思词汇。",
+        "operationId": "daily_words",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "string",
+                    "enum": [
+                      "A1",
+                      "A2",
+                      "B1",
+                      "B2",
+                      "C1",
+                      "C2"
+                    ],
+                    "description": "学习者现在的 CEFR 档"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 8
+                  },
+                  "goal": {
+                    "type": "string",
+                    "enum": [
+                      "ielts",
+                      "general"
+                    ],
+                    "default": "general"
+                  },
+                  "exclude": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "已经学过的词，跳过"
+                  }
+                },
+                "required": [
+                  "level"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/speaking_question": {
+      "post": {
+        "summary": "雅思口语题",
+        "description": "出一道雅思口语风格练习题（日日说原创题库，不是真题）。part=1 日常问答，2 话题卡（带要点和后续第三部分讨论题），3 讨论题。",
+        "operationId": "speaking_question",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "part": {
+                    "type": "integer",
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    },
+    "/api/episode": {
+      "post": {
+        "summary": "剧集台词",
+        "description": "日日说原创剧集《Life in London》第一季（10 集，A2→B1）的一集台词，带中文和理解题；学习者在剧里演林（Lin）。适合陪读、分角色对练。",
+        "operationId": "episode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  }
+                },
+                "required": [
+                  "n"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "结果（JSON）"
+          },
+          "400": {
+            "description": "参数或处理出错，body.error 是中文原因"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}
