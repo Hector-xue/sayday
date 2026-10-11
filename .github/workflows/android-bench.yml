@@ -1,4 +1,4 @@
-# 安卓原生推理验证包：只出 debug APK 挂在 workflow artifact 上，不发版。
+# 安卓 App（debug APK）：挂在 workflow artifact 上，发版时手动传到 GitHub Release。
 # 本机不装 NDK/不编 APK（磁盘吃紧，曾把盘写满导致生产库宕机），安卓构建一律走这里。
 name: android-bench
 
@@ -46,6 +46,11 @@ jobs:
           mkdir -p $D && cp .cache/models/phone_ctc.int8.onnx $D/
           ls -la $D
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 前端就是 apps/web 的正式版界面（NATIVE=1：推理走原生插件，示范音频走音频包）
       - name: 组装前端
         run: scripts/build-native-web.sh
 
@@ -63,10 +68,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
 
       # 先 init 再生成图标：icon 命令发现 gen/android 时会顺带写安卓启动图标
       # 必须经 package.json 里的 CLI 调用：gradle 构建时会回调 `npm run tauri`，用 npx 临时跑会找不到 package.json

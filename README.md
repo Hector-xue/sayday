@@ -2,7 +2,7 @@
 
 一个让人能坚持下去的英语学习软件：离线可用、AI 可插拔、带逐音素的发音纠正。网页和手机 App 共用一套代码。
 
-> 状态：**M0 技术验证已完成，M1 进行中**（见 [docs/M1-进展.md](docs/M1-进展.md)）。目前仓库里是验证脚本、网页演示页和安卓测速 App，还没有正式产品代码。
+> 状态：**M1 进行中**（见 [docs/M1-进展.md](docs/M1-进展.md)）。正式版第一版已可用：定级 → 每日一课（FSRS 复习 + 新词 + 跟读打分）→ 词库 / 进步，网页（PWA，离线可用）与安卓 App 共用一套界面。
 
 ## 设计原则
 - **门槛降到最低**：每天保底 2 分钟就算学了；断签不惩罚。
@@ -19,18 +19,25 @@
 ## 目录
 | 路径 | 内容 |
 |---|---|
-| `docs/` | 技术验证报告 |
-| `spikes/m0/` | M0/M1 验证脚本、浏览器演示页（`web/demo.html`） |
-| `apps/native/` | Tauri 2 App 外壳 + 安卓原生推理插件 `sayday-infer`（CI 构建，见 `.github/workflows/android-bench.yml`） |
-| `scripts/` | 部署脚本 |
+| `apps/web/` | 正式版（React + TypeScript + Vite，PWA）：定级、每日一课、跟读打分、词库、进步、设置 |
+| `apps/native/` | Tauri 2 安卓外壳 + 原生推理插件 `sayday-infer`，界面就是 `apps/web`（CI 构建，见 `.github/workflows/android-bench.yml`） |
+| `packages/speech/` | 发音评分核心（CTC-GOP、校准、尾音检查、整句分），网页 / App / 演示页共用 |
+| `content/` | 内容包构建（`build_content.py`：ECDICT 词表 + Tatoeba 例句 + 定级假词）与示范音频包（`audio/`，CI 生成） |
+| `site/` | 门户 sayday.ivyea.com |
+| `docs/` | 技术验证报告、进展 |
+| `spikes/` | M0/M1 验证脚本、浏览器演示页 |
+| `scripts/` | 构建与部署脚本 |
 
 ## 第三方资源与授权
 | 资源 | 用途 | 授权 |
 |---|---|---|
 | [speechocean762](https://www.openslr.org/101/) | 评测与校准；`spikes/m0/web/samples/u*.f32` 是其中 3 条录音的派生数据 | CC BY 4.0（Junbo Zhang 等） |
 | [charsiu/en_w2v2_ctc_libris_and_cv](https://huggingface.co/charsiu/en_w2v2_ctc_libris_and_cv) | 音素识别模型（不在仓库内，需自行下载） | 模型页未标注；项目代码 MIT，**正式发版前需确认** |
-| [CMUdict](https://github.com/cmusphinx/cmudict) | 发音词典 | BSD，见 `spikes/m0/web/samples/cmudict.LICENSE` |
-| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)（[ONNX 版](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)） | 示范读音合成；`spikes/m0/web/tts/samples/*.wav` 由它生成 | Apache-2.0 |
+| [CMUdict](https://github.com/cmusphinx/cmudict) | 发音词典 | BSD，见 `packages/speech/cmudict.LICENSE` |
+| [ECDICT](https://github.com/skywind3000/ECDICT) | 词表、释义、音标、词频、考试标签（`content/pack/words.json`） | MIT |
+| [Tatoeba](https://tatoeba.org)（经 [manythings.org](https://www.manythings.org/anki/) 打包的中英句对） | 例句（`content/pack/sentences.json`，每句保留 Tatoeba 原句号） | CC BY 2.0 FR |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)（[ONNX 版](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)） | 示范读音合成：预置音频与音频包（`content/audio`）由它生成 | Apache-2.0 |
+| [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 间隔复习算法 | MIT |
 | [kokoro-js](https://github.com/hexgrad/kokoro/tree/main/kokoro.js) | 浏览器端合成自定义句子 | Apache-2.0；其中打包的 eSpeak NG 音素化为 **GPL-3.0，正式发版前需评估或替换** |
 | onnxruntime-web / SQLite WASM / silk-wasm | 运行时 | MIT / 公有领域 / MIT |
 | 品牌图标 `assets/brand/` | 应用与网站图标 | 本项目所有 |

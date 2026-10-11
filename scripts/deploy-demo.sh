@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 发布 sayday.ivyea.com：门户（site/）+ 演示页（spikes/m0/web + 运行时依赖 + 模型）。
+# 发布 sayday.ivyea.com：门户（site/）+ 正式版网页（apps/web → /app/）+ 演示页（spikes/m0/web → /web/）。
 # 用法: scripts/deploy-demo.sh /var/www/sayday.ivyea.com
 set -euo pipefail
 DEST=${1:?目标目录}
@@ -23,7 +23,7 @@ for s in 32 64 180 192 512; do cat "$ROOT/assets/brand/icon-$s.png" > "$STAGE/br
 cat "$ROOT/assets/brand/favicon.ico" > "$STAGE/favicon.ico"
 # 示范读音：预生成音频 + 自定义句子用的 Kokoro（模型由 spikes/tts 准备到 .cache/models/kokoro）
 TTS=$ROOT/.cache/models/kokoro/onnx-community/Kokoro-82M-v1.0-ONNX
-TNM=$ROOT/spikes/tts/node_modules
+TNM=$ROOT/content/audio/node_modules
 mkdir -p "$STAGE/web/tts/samples" "$STAGE/web/tts/onnx-community/Kokoro-82M-v1.0-ONNX/onnx" "$STAGE/web/tts/onnx-community/Kokoro-82M-v1.0-ONNX/voices" \
   "$STAGE/node_modules/kokoro-js/dist" "$STAGE/node_modules/kokoro-js/ort"
 for f in "$M0"/web/tts/samples/*; do cat "$f" > "$STAGE/web/tts/samples/$(basename "$f")"; done
@@ -35,12 +35,24 @@ for f in phone_ctc.int8.onnx charsiu_vocab.json; do cat "$ROOT/.cache/models/$f"
 for f in ort.wasm.min.mjs ort-wasm-simd-threaded.mjs ort-wasm-simd-threaded.wasm; do cat "$NM/onnxruntime-web/dist/$f" > "$STAGE/node_modules/onnxruntime-web/dist/$f"; done
 for f in sqlite3-bundler-friendly.mjs sqlite3.wasm sqlite3-opfs-async-proxy.js; do cat "$NM/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/$f" > "$STAGE/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/$f"; done
 
+# 正式版网页（apps/web）→ /app/；大模型与演示页共用（软链接），不存两份
+( cd "$ROOT/apps/web" && [ -d node_modules ] || npm ci --no-audit --no-fund )
+NATIVE=0 bash "$ROOT/scripts/prepare-web-assets.sh" >/dev/null
+( cd "$ROOT/apps/web" && npx tsc --noEmit && npx vite build --logLevel warn )
+cp -r "$ROOT/apps/web/dist" "$STAGE/app"
+rm -f "$STAGE/app/models/phone_ctc.int8.onnx" && ln -s ../../web/models/phone_ctc.int8.onnx "$STAGE/app/models/phone_ctc.int8.onnx"
+if [ -d "$STAGE/app/tts/onnx-community" ] && [ -d "$STAGE/web/tts/onnx-community" ]; then
+  rm -rf "$STAGE/app/tts/onnx-community" && ln -s ../../web/tts/onnx-community "$STAGE/app/tts/onnx-community"
+fi
+
 # 先放到同级临时目录，再整体替换，避免发布中途页面读到半套文件
 NEW="$DEST.new.$$"
 rm -rf "$NEW"
 cp -r "$STAGE" "$NEW"
-# download/（安装包 + version.json）由 scripts/sync-release.sh 管，替换时原样保留（cp -a 保留软链接）
-if [ -d "$DEST/download" ]; then cp -a "$DEST/download" "$NEW/download"; fi
+# download/（安装包 + version.json）由 scripts/sync-release.sh 管，替换时原样挪过去（含软链接）
+if [ -d "$DEST/download" ]; then mv "$DEST/download" "$NEW/download"; fi
+# audio/（示范音频包，scripts/sync-audio.sh 管）体积大：直接挪过去，不复制
+if [ -d "$DEST/audio" ]; then mv "$DEST/audio" "$NEW/audio"; fi
 if [ -d "$DEST" ]; then rm -rf "$DEST.old"; mv "$DEST" "$DEST.old"; fi
 mv "$NEW" "$DEST"
 rm -rf "$DEST.old"
