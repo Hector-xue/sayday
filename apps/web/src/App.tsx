@@ -26,7 +26,7 @@ function Main() {
   const [session, setSession] = useState<null | { minimum: boolean }>(null)
   const [redo, setRedo] = useState<null | 'goal' | 'place'>(null)
   const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary' | 'writing'>(null)
-  const [openEp, setOpenEp] = useState<number | null>(null)
+  const [openEp, setOpenEp] = useState<{ season: number; ep: number } | null>(null)
   const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing'>(null)
   const { refresh } = useApp()
   if (profile === undefined) return <div className="loading">…</div>

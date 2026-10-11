@@ -5,7 +5,7 @@
 // 没有 ffmpeg 时输出 wav（只用于本地验证；CI 里装 ffmpeg 出 mp3）
 import { KokoroTTS } from 'kokoro-js'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d }
@@ -21,12 +21,13 @@ const pack = new URL('../pack/', import.meta.url)
 const words = JSON.parse(readFileSync(new URL('words.json', pack)))
 const sents = JSON.parse(readFileSync(new URL('sentences.json', pack)))
 
-// 剧集：主角（“我”）的台词跟着口音换声音，其他角色固定用自己的声音
-const season = JSON.parse(readFileSync(new URL('../episodes/s1.json', import.meta.url)))
-const epItems = season.episodes.flatMap((ep) => ep.lines.map((l, i) => {
+// 剧集（content/episodes/s*.json，每季一个文件）：主角（“我”）的台词跟着口音换声音，其他角色固定用自己的声音
+const epDir = new URL('../episodes/', import.meta.url)
+const seasons = readdirSync(epDir).filter((f) => /^s\d+\.json$/.test(f)).map((f) => JSON.parse(readFileSync(new URL(f, epDir))))
+const epItems = seasons.flatMap((season) => season.episodes.flatMap((ep) => ep.lines.map((l, i) => {
   const v = season.cast[l.who].voice
   return { kind: 'e', key: `s${season.season}e${ep.id}-${i}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
-}))
+})))
 
 // 先句子后单词再剧集；按下标取模分片，每片的难度分布一致
 const items = [

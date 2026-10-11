@@ -5,14 +5,14 @@ import { dailySize, dayRow, recentDays, type DayRow } from '../lib/lesson'
 import { weeklyDue } from '../lib/calibrate'
 import { db, today } from '../lib/db'
 import { getAi } from '../lib/ai'
-import { getProgress, loadSeason, nextUp } from '../lib/episodes'
+import { getProgress, loadSeasons, nextUp, teaserFor } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
 import { currentLevel } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: number) => void; onSettings: () => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -34,7 +34,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onSt
       db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
     }
     getAi().then((c) => setHasAi(!!c))
-    Promise.all([loadSeason(), getProgress()]).then(([s, p]) => { const u = nextUp(s, p); setEp(u); setPrevTeaser(s.episodes.find((e) => e.id === u.ep.id - 1)?.next_zh ?? '') })
+    Promise.all([loadSeasons(), getProgress()]).then(([all, p]) => { const u = nextUp(all, p); setEp(u); setPrevTeaser(teaserFor(all, u.season.season, u.ep.id)) })
     db.one<{ n: number }>('SELECT count(*) n FROM diary WHERE date = ? AND result IS NOT NULL', [today()]).then((r) => setWrote(!!r?.n))
     db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]).then((r) => setChatted(!!r?.n))
     dayRow().then(setD)
@@ -97,8 +97,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onSt
       {ep && ep.state !== 'all-done' && (
         <>
           <p className="section-title">今日剧集</p>
-          <button className="card ai-card wide ep-today" onClick={() => ep.state === 'ready' && onEpisode(ep.ep.id)} disabled={ep.state !== 'ready'}>
-            <span className="small muted">第 {ep.ep.id} 集 · {ep.state === 'ready' ? ep.ep.level : '明天解锁'}</span>
+          <button className="card ai-card wide ep-today" onClick={() => ep.state === 'ready' && onEpisode({ season: ep.season.season, ep: ep.ep.id })} disabled={ep.state !== 'ready'}>
+            <span className="small muted">{ep.season.season > 1 ? `第 ${ep.season.season} 季 ` : ''}第 {ep.ep.id} 集 · {ep.state === 'ready' ? ep.ep.level : '明天解锁'}</span>
             <b className="en" style={{ fontSize: 18 }}>{ep.ep.title}</b>
             <span>{ep.state === 'ready' ? ep.ep.scene_zh : prevTeaser}</span>
           </button>

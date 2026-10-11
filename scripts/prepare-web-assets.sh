@@ -12,7 +12,7 @@ NM=$ROOT/apps/web/node_modules
 mkdir -p "$PUB/content" "$PUB/speech" "$PUB/ort"
 for f in words.json sentences.json pseudo.json meta.json; do cat "$ROOT/content/pack/$f" > "$PUB/content/$f"; done
 # 剧集台词（content/episodes，手写；配音由 content-episodes 工作流生成到音频包）
-cat "$ROOT/content/episodes/s1.json" > "$PUB/content/episodes-s1.json"
+for f in "$ROOT"/content/episodes/s*.json; do cat "$f" > "$PUB/content/episodes-$(basename "$f")"; done
 # 雅思口语模考题库（原创题目）
 cat "$ROOT/content/ielts/speaking.json" > "$PUB/content/ielts-speaking.json"
 cat "$ROOT/content/ielts/writing.json" > "$PUB/content/ielts-writing.json"

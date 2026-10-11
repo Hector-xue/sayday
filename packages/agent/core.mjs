@@ -1,6 +1,6 @@
 // 日日说给 AI 助手用的核心能力（Node）：音频解码 → 音素打分 / 语音识别，词典、例句、题库查询
 // 打分、识别和 App 是同一套代码（packages/speech、packages/asr），分数口径一致
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import * as ort from 'onnxruntime-node'
@@ -22,7 +22,7 @@ export function getContent() {
   const byWord = new Map(words.map((w) => [w.w, w]))
   const sentsByWord = new Map()
   for (const s of sents) for (const t of s.words) (sentsByWord.get(t) ?? sentsByWord.set(t, []).get(t)).push(s)
-  content = { words, sents, byWord, sentsByWord, episodes: json(join(ROOT, 'content/episodes/s1.json')), ielts: json(join(ROOT, 'content/ielts/speaking.json')) }
+  content = { words, sents, byWord, sentsByWord, seasons: readdirSync(join(ROOT, 'content/episodes')).filter((f) => /^s\d+\.json$/.test(f)).sort().map((f) => json(join(ROOT, 'content/episodes', f))), ielts: json(join(ROOT, 'content/ielts/speaking.json')) }
   return content
 }
 
