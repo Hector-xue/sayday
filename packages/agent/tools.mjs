@@ -106,7 +106,7 @@ export const TOOLS = [
   {
     name: 'episode',
     title: '剧集台词',
-    description: '日日说原创剧集的一集台词（第一季 Life in London A2→B1，第二季 Edinburgh B1→B2，每季 10 集），带中文和理解题；学习者在剧里演林（Lin）。适合陪读、分角色对练。',
+    description: '日日说原创剧集的一集台词（第一季 Life in London A2→B1，第二季 Edinburgh B1→B2，第三季 Back in London B2→C1，每季 10 集），带中文和理解题；学习者在剧里演林（Lin）。适合陪读、分角色对练。',
     input: { type: 'object', properties: { season: { type: 'integer', minimum: 1, default: 1 }, n: { type: 'integer', minimum: 1, maximum: 10 } }, required: ['n'] },
     async run({ season = 1, n }) {
       const s = getContent().seasons.find((x) => x.season === season)

@@ -10,7 +10,7 @@ type Done = { date: string; quiz: number; act: number | null }
 /** done 的键是 "季:集"（v0.0.4 第一版只有第一季，键是集号，读的时候换算） */
 export type EpProgress = { done: Record<string, Done> }
 
-export const SEASONS = [1, 2]
+export const SEASONS = [1, 2, 3]
 let cache: Promise<Season[]> | null = null
 export const loadSeasons = (): Promise<Season[]> => (cache ??= Promise.all(SEASONS.map((n) => fetch(`./content/episodes-s${n}.json`).then((r) => r.json()))))
 /** 兼容旧调用：第一季 */
