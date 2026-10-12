@@ -19,9 +19,12 @@ def main() -> None:
     ap.add_argument("--ckpt", type=Path, help="微调检查点（spikes/ft/train.py 的 ckpt.pt）；不给就导出原始 charsiu 权重")
     ap.add_argument("--name", default="", help="产物名前缀：phone_ctc.<name>fp32.onnx / phone_ctc.<name>int8.onnx")
     a = ap.parse_args()
-    cfg = Wav2Vec2Config.from_json_file(str(M / "charsiu_config.json"))
+    ck = torch.load(a.ckpt, map_location="cpu", weights_only=False) if a.ckpt else None
+    # 检查点里带了模型结构（xlsr 起步的微调）就用它的，否则是 charsiu 结构
+    cfg = Wav2Vec2Config.from_dict(ck["config"]) if ck and "config" in ck else Wav2Vec2Config.from_json_file(str(M / "charsiu_config.json"))
+    cfg.gradient_checkpointing = False
     model = Wav2Vec2ForCTC(cfg)
-    state = torch.load(a.ckpt, map_location="cpu", weights_only=False)["model"] if a.ckpt else torch.load(M / "charsiu_ctc.bin", map_location="cpu", weights_only=True)
+    state = ck["model"] if ck else torch.load(M / "charsiu_ctc.bin", map_location="cpu", weights_only=True)
     missing, unexpected = model.load_state_dict(state, strict=False)
     # 位置卷积的 weight_g/weight_v 在新版 torch 里改名为 parametrizations，这里显式检查真正缺失的权重
     real_missing = [k for k in missing if "pos_conv" not in k]
