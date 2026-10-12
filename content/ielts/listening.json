@@ -1625,6 +1625,802 @@
           ]
         }
       ]
+    },
+    {
+      "id": 3,
+      "parts": [
+        {
+          "n": 1,
+          "title": "Joining a leisure centre",
+          "context_zh": "第一部分：一位女士打电话办健身中心会员",
+          "cast": {
+            "R": {
+              "name": "Receptionist",
+              "voice": "bm_lewis"
+            },
+            "C": {
+              "name": "Caller",
+              "voice": "af_nicole"
+            }
+          },
+          "lines": [
+            {
+              "who": "R",
+              "en": "Good morning, Riverside Leisure Centre. How can I help?"
+            },
+            {
+              "who": "C",
+              "en": "Hi. I'm thinking of joining the gym, and I wanted to ask about membership."
+            },
+            {
+              "who": "R",
+              "en": "Of course. I can take your details over the phone and set everything up. Could I have your name?"
+            },
+            {
+              "who": "C",
+              "en": "Yes, it's Sarah Okafor."
+            },
+            {
+              "who": "R",
+              "en": "Could you spell your surname for me?"
+            },
+            {
+              "who": "C",
+              "en": "Sure. It's O-K-A-F-O-R.",
+              "say": "Sure. It's O. K. A. F. O. R."
+            },
+            {
+              "who": "R",
+              "en": "Thank you. And your date of birth?"
+            },
+            {
+              "who": "C",
+              "en": "The 14th of March, 1996.",
+              "say": "The fourteenth of March, nineteen ninety-six."
+            },
+            {
+              "who": "R",
+              "en": "And a phone number we can reach you on?"
+            },
+            {
+              "who": "C",
+              "en": "It's 07723 410 958.",
+              "say": "It's oh seven seven two three, four one oh, nine five eight."
+            },
+            {
+              "who": "R",
+              "en": "Lovely. Now, we have two main types of membership. Peak membership lets you come in at any time, and that's 39 pounds a month.",
+              "say": "Lovely. Now, we have two main types of membership. Peak membership lets you come in at any time, and that's thirty-nine pounds a month."
+            },
+            {
+              "who": "C",
+              "en": "Hmm, that's a bit more than I wanted to spend. Is there anything cheaper?"
+            },
+            {
+              "who": "R",
+              "en": "There's off-peak, which covers weekdays before five o'clock and all day at weekends. That's 29 pounds a month.",
+              "say": "There's off-peak, which covers weekdays before five o'clock and all day at weekends. That's twenty-nine pounds a month."
+            },
+            {
+              "who": "C",
+              "en": "I work from home, so off-peak would actually suit me fine. I'll go for that."
+            },
+            {
+              "who": "R",
+              "en": "Great. Is there anything in particular you're interested in? We run a lot of classes."
+            },
+            {
+              "who": "C",
+              "en": "I was going to try spinning, but a friend says it's really hard on the knees. I think I'd rather do Pilates."
+            },
+            {
+              "who": "R",
+              "en": "Pilates is very popular, so I'd recommend booking a week in advance."
+            },
+            {
+              "who": "C",
+              "en": "OK, good to know."
+            },
+            {
+              "who": "R",
+              "en": "Everyone has a short induction before using the gym. You'll need to bring a photo for your membership card, but you don't need to bring a towel. We provide those."
+            },
+            {
+              "who": "C",
+              "en": "Fine. When are the inductions?"
+            },
+            {
+              "who": "R",
+              "en": "We do them on Tuesdays and Thursdays. Tuesday's session is full this week, I'm afraid, so it would be Thursday."
+            },
+            {
+              "who": "C",
+              "en": "Thursday's fine. What time?"
+            },
+            {
+              "who": "R",
+              "en": "There's one at 6.30 in the evening.",
+              "say": "There's one at six thirty in the evening."
+            },
+            {
+              "who": "C",
+              "en": "Perfect. Oh, and is there parking?"
+            },
+            {
+              "who": "R",
+              "en": "Yes, members' parking is free for three hours. After that it's two pounds an hour."
+            },
+            {
+              "who": "C",
+              "en": "That's plenty. Thanks for your help."
+            }
+          ],
+          "groups": [
+            {
+              "type": "gap",
+              "limit": 1,
+              "number": true,
+              "instr": "Complete the form below. Write ONE WORD AND/OR A NUMBER for each answer.",
+              "instr_zh": "填表：每空一个词和 / 或一个数字",
+              "title": "Riverside Leisure Centre – Membership form",
+              "items": [
+                {
+                  "n": 1,
+                  "q": "Name: Sarah ___",
+                  "a": [
+                    "Okafor"
+                  ],
+                  "at": "Yes, it's Sarah Okafor.",
+                  "why": "姓氏拼读：O-K-A-F-O-R。"
+                },
+                {
+                  "n": 2,
+                  "q": "Date of birth: 14 ___ 1996",
+                  "a": [
+                    "March"
+                  ],
+                  "at": "The 14th of March, 1996.",
+                  "why": "三月十四日。"
+                },
+                {
+                  "n": 3,
+                  "q": "Phone: ___",
+                  "a": [
+                    "07723410958"
+                  ],
+                  "at": "It's 07723 410 958.",
+                  "why": "英国手机号，0 常读作 oh。"
+                },
+                {
+                  "n": 4,
+                  "q": "Membership type: ___",
+                  "a": [
+                    "off-peak",
+                    "off peak"
+                  ],
+                  "at": "There's off-peak, which covers weekdays before five o'clock",
+                  "why": "peak 太贵，她选了 off-peak（非高峰时段）。"
+                },
+                {
+                  "n": 5,
+                  "q": "Cost per month: £___",
+                  "a": [
+                    "29"
+                  ],
+                  "at": "That's 29 pounds a month.",
+                  "why": "peak 是 39 镑，off-peak 是 29 镑。"
+                },
+                {
+                  "n": 6,
+                  "q": "Class she wants to take: ___",
+                  "a": [
+                    "Pilates"
+                  ],
+                  "at": "I think I'd rather do Pilates.",
+                  "why": "本想上 spinning，怕伤膝盖，改选普拉提。"
+                },
+                {
+                  "n": 7,
+                  "q": "Bring to the induction: a ___",
+                  "a": [
+                    "photo"
+                  ],
+                  "at": "You'll need to bring a photo for your membership card",
+                  "why": "要带照片办卡，毛巾不用带。"
+                },
+                {
+                  "n": 8,
+                  "q": "Induction day: ___",
+                  "a": [
+                    "Thursday"
+                  ],
+                  "at": "so it would be Thursday.",
+                  "why": "周二满了，所以是周四。"
+                },
+                {
+                  "n": 9,
+                  "q": "Induction time: ___ pm",
+                  "a": [
+                    "6.30",
+                    "6:30"
+                  ],
+                  "at": "There's one at 6.30 in the evening.",
+                  "why": "晚上六点半。"
+                },
+                {
+                  "n": 10,
+                  "q": "Members' parking is free for ___ hours",
+                  "a": [
+                    "three",
+                    "3"
+                  ],
+                  "at": "members' parking is free for three hours",
+                  "why": "会员停车前三小时免费。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "title": "Millbrook Community Garden",
+          "context_zh": "第二部分：社区花园的负责人给新志愿者介绍花园",
+          "cast": {
+            "T": {
+              "name": "Coordinator",
+              "voice": "bm_daniel"
+            }
+          },
+          "lines": [
+            {
+              "who": "T",
+              "en": "Good morning, everyone, and welcome to Millbrook Community Garden. My name's Tom, and I coordinate the volunteers here. Before we start work, I'd like to tell you a little about the garden and show you around."
+            },
+            {
+              "who": "T",
+              "en": "The garden opened eight years ago on land that used to be a car park. The council originally planned to build flats here, but local residents campaigned to turn it into a garden instead, and in the end the council agreed to lease the land to us for a small fee."
+            },
+            {
+              "who": "T",
+              "en": "Today we have about sixty regular volunteers. Most of them live within walking distance, but quite a few come from the other side of the city, which always surprises visitors. What brings them here, they tell us, isn't really the vegetables. It's the chance to meet people."
+            },
+            {
+              "who": "T",
+              "en": "We grow food, of course, and most of it goes to a local food bank. We used to sell some of it at a weekly market, but we stopped doing that last year because it took up too much of the volunteers' time."
+            },
+            {
+              "who": "T",
+              "en": "A few safety points. Please wear gloves when you're working with the compost, and wash your hands before you eat. The tools are kept in the shed, and we ask you to clean them before you put them back. If you see anything broken, tell me rather than trying to repair it yourself."
+            },
+            {
+              "who": "T",
+              "en": "Right, let me tell you about the different areas, so you know where you'll be working. As you come in through the main gate, the first thing you'll see on your left is the herb garden. That's where we grow plants for cooking, and also some that attract bees."
+            },
+            {
+              "who": "T",
+              "en": "Next to the herb garden is the greenhouse. At this time of year it's full of tomato plants, and it's also where we raise young plants before they go outside."
+            },
+            {
+              "who": "T",
+              "en": "Behind the greenhouse, in the far corner, there's the pond. It was dug by a group of schoolchildren three years ago, and it's now home to frogs and dragonflies. Please don't let children go near it without an adult."
+            },
+            {
+              "who": "T",
+              "en": "In the middle of the garden are the raised beds. They're built at waist height, so that people who use wheelchairs or can't bend easily can garden comfortably."
+            },
+            {
+              "who": "T",
+              "en": "On the right-hand side is the orchard, with about twenty apple and pear trees. In the autumn we hold a harvest party there, and everyone's welcome to bring their families."
+            },
+            {
+              "who": "T",
+              "en": "And finally, next to the main gate on the right, there's the kitchen, where we make tea, and where the cookery classes take place on Saturday mornings. Today you'll be working in the greenhouse and the raised beds. Shall we go?"
+            }
+          ],
+          "groups": [
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B or C.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 11,
+                  "q": "What was the site used for before the garden opened?",
+                  "options": [
+                    "a car park",
+                    "a block of flats",
+                    "a school playground"
+                  ],
+                  "a": 0,
+                  "at": "on land that used to be a car park",
+                  "why": "原来是停车场；建公寓只是市政府原来的计划。"
+                },
+                {
+                  "n": 12,
+                  "q": "According to Tom, most volunteers come because they want to",
+                  "options": [
+                    "grow their own vegetables.",
+                    "meet other people.",
+                    "live nearer the garden."
+                  ],
+                  "a": 1,
+                  "at": "It's the chance to meet people.",
+                  "why": "他们说主要不是为了蔬菜，而是认识人。"
+                },
+                {
+                  "n": 13,
+                  "q": "What happens to most of the food grown in the garden?",
+                  "options": [
+                    "It is sold at a weekly market.",
+                    "It is given to a food bank.",
+                    "It is used in cookery classes."
+                  ],
+                  "a": 1,
+                  "at": "most of it goes to a local food bank",
+                  "why": "大部分送给本地的食物银行；市集已经不办了。"
+                },
+                {
+                  "n": 14,
+                  "q": "Why did the garden stop selling food?",
+                  "options": [
+                    "It took too much of the volunteers' time.",
+                    "The council did not allow it.",
+                    "There was not enough food."
+                  ],
+                  "a": 0,
+                  "at": "because it took up too much of the volunteers' time",
+                  "why": "太占志愿者的时间。"
+                },
+                {
+                  "n": 15,
+                  "q": "If volunteers find something broken, they should",
+                  "options": [
+                    "repair it themselves.",
+                    "put it back in the shed.",
+                    "tell Tom."
+                  ],
+                  "a": 2,
+                  "at": "tell me rather than trying to repair it yourself",
+                  "why": "告诉 Tom，不要自己修。"
+                }
+              ]
+            },
+            {
+              "type": "pick",
+              "instr": "What does Tom say about each area of the garden? Choose FIVE answers from the list, A–G.",
+              "instr_zh": "配对：每个区域对应哪一句（有多余选项）",
+              "options": [
+                "A. was made by local children",
+                "B. is designed for people who cannot bend easily",
+                "C. is used for classes at weekends",
+                "D. contains plants for bees",
+                "E. is where young plants are grown",
+                "F. hosts an event in the autumn",
+                "G. is closed to visitors"
+              ],
+              "items": [
+                {
+                  "n": 16,
+                  "q": "the herb garden",
+                  "a": 3,
+                  "at": "and also some that attract bees",
+                  "why": "香草园里也种吸引蜜蜂的植物。"
+                },
+                {
+                  "n": 17,
+                  "q": "the greenhouse",
+                  "a": 4,
+                  "at": "it's also where we raise young plants before they go outside",
+                  "why": "温室用来育苗。"
+                },
+                {
+                  "n": 18,
+                  "q": "the pond",
+                  "a": 0,
+                  "at": "It was dug by a group of schoolchildren three years ago",
+                  "why": "池塘是一群小学生挖的。"
+                },
+                {
+                  "n": 19,
+                  "q": "the raised beds",
+                  "a": 1,
+                  "at": "people who use wheelchairs or can't bend easily can garden comfortably",
+                  "why": "抬高的花床方便坐轮椅、不便弯腰的人。"
+                },
+                {
+                  "n": 20,
+                  "q": "the orchard",
+                  "a": 5,
+                  "at": "In the autumn we hold a harvest party there",
+                  "why": "秋天在果园办丰收聚会。周六的烹饪课在厨房，是干扰项。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "A presentation on food packaging",
+          "context_zh": "第三部分：两个学生讨论关于超市塑料包装的课堂展示",
+          "cast": {
+            "M": {
+              "name": "Mia",
+              "voice": "af_bella"
+            },
+            "B": {
+              "name": "Ben",
+              "voice": "am_michael"
+            }
+          },
+          "lines": [
+            {
+              "who": "M",
+              "en": "So, Ben, have you had a chance to look at the survey results for our presentation?"
+            },
+            {
+              "who": "B",
+              "en": "I have. I was surprised, actually. I thought most shoppers would say price was the main reason they bought food in plastic, but it was convenience."
+            },
+            {
+              "who": "M",
+              "en": "Yes, price came second. And hardly anyone mentioned freshness, which the supermarkets always give as their main reason."
+            },
+            {
+              "who": "B",
+              "en": "We should point that out in the presentation."
+            },
+            {
+              "who": "M",
+              "en": "Definitely. How many people did we survey in the end?"
+            },
+            {
+              "who": "B",
+              "en": "A hundred and twenty. We were aiming for two hundred, but we ran out of time."
+            },
+            {
+              "who": "M",
+              "en": "That's still enough to show some patterns. I think we should be honest about the size, though."
+            },
+            {
+              "who": "B",
+              "en": "Agreed. Now, the bit I'm less sure about is the section on alternatives. I was going to talk about paper bags, but I read that they actually need more energy to produce than plastic ones."
+            },
+            {
+              "who": "M",
+              "en": "Right, so they're not automatically better. What about the refill shops? I thought those were the most interesting part."
+            },
+            {
+              "who": "B",
+              "en": "They are, but there are only two in the whole city, so it's hard to say how much difference they make."
+            },
+            {
+              "who": "M",
+              "en": "Maybe we could present them as a possible future, rather than as a solution that's working now."
+            },
+            {
+              "who": "B",
+              "en": "Good idea. And for the conclusion, our tutor said we shouldn't just tell people to stop buying plastic."
+            },
+            {
+              "who": "M",
+              "en": "No, she wanted us to suggest something supermarkets could actually do. I liked the idea of charging for plastic-wrapped fruit."
+            },
+            {
+              "who": "B",
+              "en": "Me too. It worked for carrier bags."
+            },
+            {
+              "who": "M",
+              "en": "Let's go through the sources quickly. The government report on packaging waste. I found it really useful for the figures, but it's from 2015.",
+              "say": "Let's go through the sources quickly. The government report on packaging waste. I found it really useful for the figures, but it's from twenty fifteen."
+            },
+            {
+              "who": "B",
+              "en": "So it's a bit out of date. We'd better check if there's a newer one."
+            },
+            {
+              "who": "M",
+              "en": "Then there's the article by the supermarket industry group."
+            },
+            {
+              "who": "B",
+              "en": "I'd be careful with that. They obviously want to make plastic look good, so I don't think we can rely on it."
+            },
+            {
+              "who": "M",
+              "en": "Fair point. What about the documentary we watched?"
+            },
+            {
+              "who": "B",
+              "en": "It was great for getting people's attention. I think we should show a short clip at the start."
+            },
+            {
+              "who": "M",
+              "en": "And the book by Professor Hale?"
+            },
+            {
+              "who": "B",
+              "en": "Honestly, I found it really hard going. Lots of technical chemistry. I didn't understand half of it."
+            },
+            {
+              "who": "M",
+              "en": "Same. And the website with the shoppers' blog posts?"
+            },
+            {
+              "who": "B",
+              "en": "That was useful for real examples. We could quote a couple of them."
+            }
+          ],
+          "groups": [
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B or C.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 21,
+                  "q": "According to the survey, what was the main reason shoppers bought food in plastic?",
+                  "options": [
+                    "price",
+                    "convenience",
+                    "freshness"
+                  ],
+                  "a": 1,
+                  "at": "but it was convenience",
+                  "why": "最主要是方便，价格第二，几乎没人提新鲜。"
+                },
+                {
+                  "n": 22,
+                  "q": "How many people did the students survey?",
+                  "options": [
+                    "120",
+                    "150",
+                    "200"
+                  ],
+                  "a": 0,
+                  "at": "A hundred and twenty.",
+                  "why": "原计划 200 人，实际 120 人。"
+                },
+                {
+                  "n": 23,
+                  "q": "What does Ben say about paper bags?",
+                  "options": [
+                    "They are more expensive than plastic.",
+                    "They need more energy to produce.",
+                    "Shoppers do not like them."
+                  ],
+                  "a": 1,
+                  "at": "they actually need more energy to produce than plastic ones",
+                  "why": "纸袋生产耗能比塑料袋还多。"
+                },
+                {
+                  "n": 24,
+                  "q": "How will they present refill shops?",
+                  "options": [
+                    "as a solution that is already working",
+                    "as something that could happen in future",
+                    "as too expensive for most people"
+                  ],
+                  "a": 1,
+                  "at": "Maybe we could present them as a possible future",
+                  "why": "全市只有两家，所以当作“可能的未来”来讲。"
+                },
+                {
+                  "n": 25,
+                  "q": "What will the students suggest in their conclusion?",
+                  "options": [
+                    "Shoppers should stop buying plastic.",
+                    "Supermarkets should charge for plastic-wrapped fruit.",
+                    "Paper bags should replace plastic ones."
+                  ],
+                  "a": 1,
+                  "at": "I liked the idea of charging for plastic-wrapped fruit",
+                  "why": "导师要他们给超市提可行建议：对塑料包装的水果收费。"
+                }
+              ]
+            },
+            {
+              "type": "pick",
+              "instr": "What do the students say about each source? Choose FIVE answers from the list, A–F.",
+              "instr_zh": "配对：两人对每份资料的看法（有多余选项）",
+              "options": [
+                "A. contains too much technical detail",
+                "B. may not be reliable",
+                "C. is good for real examples",
+                "D. may have a more recent version",
+                "E. will be used to open the presentation",
+                "F. was recommended by their tutor"
+              ],
+              "items": [
+                {
+                  "n": 26,
+                  "q": "the government report",
+                  "a": 3,
+                  "at": "We'd better check if there's a newer one.",
+                  "why": "数据有用但是 2015 年的，要查有没有新版。"
+                },
+                {
+                  "n": 27,
+                  "q": "the industry group's article",
+                  "a": 1,
+                  "at": "I don't think we can rely on it",
+                  "why": "行业组织想把塑料说得好，不可靠。"
+                },
+                {
+                  "n": 28,
+                  "q": "the documentary",
+                  "a": 4,
+                  "at": "I think we should show a short clip at the start",
+                  "why": "开场放一小段吸引注意。"
+                },
+                {
+                  "n": 29,
+                  "q": "Professor Hale's book",
+                  "a": 0,
+                  "at": "Lots of technical chemistry.",
+                  "why": "化学术语太多，看不懂。"
+                },
+                {
+                  "n": 30,
+                  "q": "the shoppers' website",
+                  "a": 2,
+                  "at": "That was useful for real examples.",
+                  "why": "有真实的例子可以引用。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "title": "The history of street lighting",
+          "context_zh": "第四部分：讲座——路灯的历史",
+          "cast": {
+            "L": {
+              "name": "Lecturer",
+              "voice": "bf_isabella"
+            }
+          },
+          "lines": [
+            {
+              "who": "L",
+              "en": "Good morning. Today I'm going to talk about the history of street lighting, which is something most of us never think about, but which has changed the way cities work more than almost any other invention."
+            },
+            {
+              "who": "L",
+              "en": "For most of history, city streets were completely dark at night. In medieval London, people who went out after dark were expected to carry their own light, and in many towns there were rules requiring householders to hang a lantern outside their door on winter evenings. These lanterns usually burned candles, and they gave very little light."
+            },
+            {
+              "who": "L",
+              "en": "The first major change came with oil lamps in the seventeenth century. Paris introduced public lanterns in the 1660s, paid for by a special tax on residents. The lamps were lowered on ropes each evening so that they could be lit, and the men who did this job became a familiar sight.",
+              "say": "The first major change came with oil lamps in the seventeenth century. Paris introduced public lanterns in the sixteen-sixties, paid for by a special tax on residents. The lamps were lowered on ropes each evening so that they could be lit, and the men who did this job became a familiar sight."
+            },
+            {
+              "who": "L",
+              "en": "But the real revolution was gas. In 1807, Pall Mall in London became the first street in the world to be lit by gas. Gas lamps were far brighter than oil lamps, and within twenty years most large British cities had them. One of the most important effects was on crime. People felt safer walking at night, and shops could stay open later, which changed patterns of work and leisure.",
+              "say": "But the real revolution was gas. In eighteen-oh-seven, Pall Mall in London became the first street in the world to be lit by gas. Gas lamps were far brighter than oil lamps, and within twenty years most large British cities had them. One of the most important effects was on crime. People felt safer walking at night, and shops could stay open later, which changed patterns of work and leisure."
+            },
+            {
+              "who": "L",
+              "en": "Gas lighting also created a new job: the lamplighter. Every evening, lamplighters walked their routes with a long pole, turning on the gas and lighting each lamp, and every morning they returned to put them out. In some cities the lamplighter was also expected to act as a kind of watchman, reporting anything suspicious to the police."
+            },
+            {
+              "who": "L",
+              "en": "Electric street lighting arrived in the 1870s, first using arc lamps, which were extremely bright but also noisy and expensive to maintain. It was only in the twentieth century, with the development of better bulbs, that electric lighting completely replaced gas. Interestingly, a few streets in London still have working gas lamps today, mainly for historical reasons.",
+              "say": "Electric street lighting arrived in the eighteen-seventies, first using arc lamps, which were extremely bright but also noisy and expensive to maintain. It was only in the twentieth century, with the development of better bulbs, that electric lighting completely replaced gas. Interestingly, a few streets in London still have working gas lamps today, mainly for historical reasons."
+            },
+            {
+              "who": "L",
+              "en": "In the last twenty years, cities have begun replacing older lights with LEDs. These use much less energy, and they can be dimmed late at night when the streets are empty. However, they have also caused concern. Many LEDs give off a cold blue light, which researchers believe can disturb the sleep of people living nearby and confuse insects and birds."
+            },
+            {
+              "who": "L",
+              "en": "As a result, some cities now choose warmer colours for their street lights, and a few have introduced dark-sky zones, where lighting is reduced to protect wildlife and allow people to see the stars. So the history of street lighting may be turning full circle: after centuries of trying to make the night brighter, some cities are now deciding that a little darkness is worth keeping."
+            }
+          ],
+          "groups": [
+            {
+              "type": "gap",
+              "limit": 1,
+              "instr": "Complete the notes below. Write ONE WORD ONLY for each answer.",
+              "instr_zh": "笔记填空：每空只填一个词",
+              "title": "The history of street lighting",
+              "items": [
+                {
+                  "n": 31,
+                  "q": "Medieval rules: householders had to hang a ___ outside their door",
+                  "a": [
+                    "lantern"
+                  ],
+                  "at": "requiring householders to hang a lantern outside their door",
+                  "why": "中世纪规定住户冬夜在门外挂灯笼。"
+                },
+                {
+                  "n": 32,
+                  "q": "Paris paid for public lanterns with a special ___",
+                  "a": [
+                    "tax"
+                  ],
+                  "at": "paid for by a special tax on residents",
+                  "why": "向居民征专门的税。"
+                },
+                {
+                  "n": 33,
+                  "q": "Oil lamps were lowered on ___ so they could be lit",
+                  "a": [
+                    "ropes"
+                  ],
+                  "at": "The lamps were lowered on ropes each evening",
+                  "why": "每晚用绳子把灯放下来点。"
+                },
+                {
+                  "n": 34,
+                  "q": "First gas-lit street: Pall ___ in London",
+                  "a": [
+                    "Mall"
+                  ],
+                  "at": "Pall Mall in London became the first street",
+                  "why": "伦敦的 Pall Mall 是世界上第一条煤气灯街道。"
+                },
+                {
+                  "n": 35,
+                  "q": "An important effect of gas lighting was on ___",
+                  "a": [
+                    "crime"
+                  ],
+                  "at": "One of the most important effects was on crime.",
+                  "why": "煤气灯最重要的影响之一是减少犯罪，人们夜里更安心。"
+                },
+                {
+                  "n": 36,
+                  "q": "Lamplighters carried a long ___",
+                  "a": [
+                    "pole"
+                  ],
+                  "at": "lamplighters walked their routes with a long pole",
+                  "why": "点灯人拿着长杆。"
+                },
+                {
+                  "n": 37,
+                  "q": "In some cities the lamplighter also acted as a ___",
+                  "a": [
+                    "watchman"
+                  ],
+                  "at": "act as a kind of watchman",
+                  "why": "兼当巡夜人，看到可疑情况报警。"
+                },
+                {
+                  "n": 38,
+                  "q": "Arc lamps were very bright but ___ and expensive",
+                  "a": [
+                    "noisy"
+                  ],
+                  "at": "extremely bright but also noisy and expensive to maintain",
+                  "why": "弧光灯很亮，但吵、维护贵。"
+                },
+                {
+                  "n": 39,
+                  "q": "LED lights can be ___ when streets are empty",
+                  "a": [
+                    "dimmed"
+                  ],
+                  "at": "they can be dimmed late at night when the streets are empty",
+                  "why": "深夜街上没人时可以调暗。"
+                },
+                {
+                  "n": 40,
+                  "q": "Blue light may disturb people's ___",
+                  "a": [
+                    "sleep"
+                  ],
+                  "at": "can disturb the sleep of people living nearby",
+                  "why": "冷蓝光可能影响附近居民睡眠。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
