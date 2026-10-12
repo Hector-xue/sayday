@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { getProfile, saveProfile, type Profile } from './lib/lesson'
 import { kvGet, kvSet } from './lib/db'
+import { syncBars } from './lib/native-chrome'
 
 export type Theme = 'system' | 'light' | 'dark'
 // 风格：marker 荧光笔（默认）/ paper 纸与墨 / classic 经典。index.html 启动时先从 localStorage 读，避免先闪一下旧样式
@@ -37,7 +38,10 @@ const syncChrome = () => requestAnimationFrame(() => {
   document.documentElement.style.removeProperty('background')
   const bg = getComputedStyle(document.body).backgroundColor
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', bg))
+  syncBars(bg)
 })
+// 跟随系统深浅时，系统切换了也要同步状态栏颜色
+if (typeof matchMedia === 'function') matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => syncChrome())
 const applyStyle = (s: Style) => {
   document.documentElement.setAttribute('data-style', s)
   remember('sayday-style', s)

@@ -33,6 +33,9 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 
 @InvokeArg
 class LoadArgs {
@@ -63,6 +66,12 @@ class WidgetArgs {
   var sub: String = ""
   var word: String = ""
   var meaning: String = ""
+}
+
+@InvokeArg
+class BarsArgs {
+  /** 页面当前是深色底：状态栏 / 导航栏图标要用浅色 */
+  var dark: Boolean = false
 }
 
 @InvokeArg
@@ -217,6 +226,37 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
       invoke.resolve()
     } catch (e: Throwable) {
       invoke.reject("录音启动失败：${e.message}")
+    }
+  }
+
+  // 安卓 15 起 App 强制铺满全屏（画到状态栏、手势条后面），但 WebView 报给网页的 safe-area-inset 是 0。
+  // 网页启动和尺寸变化时来问这里：现查窗口的系统栏高度（单位 dp = CSS 像素），不挂监听、不改系统默认的分发
+  @Command
+  fun insets(invoke: Invoke) {
+    activity.runOnUiThread {
+      val ret = JSObject()
+      val wi = ViewCompat.getRootWindowInsets(activity.window.decorView)
+      val d = activity.resources.displayMetrics.density
+      if (wi != null) {
+        val b = wi.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+        ret.put("top", (b.top / d).toDouble())
+        ret.put("bottom", (b.bottom / d).toDouble())
+        ret.put("left", (b.left / d).toDouble())
+        ret.put("right", (b.right / d).toDouble())
+      }
+      invoke.resolve(ret)
+    }
+  }
+
+  /** 状态栏 / 导航栏图标颜色跟着页面深浅走（浅色底用深色图标） */
+  @Command
+  fun setBars(invoke: Invoke) {
+    val args = invoke.parseArgs(BarsArgs::class.java)
+    activity.runOnUiThread {
+      val c = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+      c.isAppearanceLightStatusBars = !args.dark
+      c.isAppearanceLightNavigationBars = !args.dark
+      invoke.resolve()
     }
   }
 

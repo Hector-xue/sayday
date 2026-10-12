@@ -44,7 +44,7 @@
 /* ---------- 字 ---------- */
 [data-style="marker"] h1, [data-style="marker"] h2, [data-style="marker"] h3 { font-weight: 800; }
 [data-style="marker"] a { color: var(--ink); text-decoration-color: var(--mark); text-decoration-thickness: 3px; text-underline-offset: 3px; }
-[data-style="marker"] .page { padding-top: 26px; }
+[data-style="marker"] .page { padding-top: calc(22px + var(--sat)); }
 [data-style="marker"] .page-head { margin: 6px 2px 22px; align-items: center; }
 [data-style="marker"] .page-head h1 { font-size: 34px; line-height: 1.2; color: var(--ink); background: var(--hl); padding: 0 .14em; margin-left: -.14em; border-radius: 3px; }
 [data-style="marker"] .section-title { font-size: 15px; font-weight: 800; color: var(--ink); margin: 32px 4px 12px; }
