@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 桌面小组件：浅色卡片，字少；点整块打开 App -->
+<!-- 桌面小组件：荧光笔配色（跟随系统深浅），字少；点整块打开 App -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/w_root"
     android:layout_width="match_parent"
@@ -13,18 +13,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="日日说"
-        android:textColor="#1A6DFF"
-        android:textSize="12sp"
+        android:textColor="@color/sayday_w_on_mark"
+        android:background="@drawable/sayday_widget_chip"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        android:textSize="11sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/w_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="6dp"
         android:text="打开 App 开始今天的练习"
-        android:textColor="#0F1B33"
-        android:textSize="18sp"
+        android:textColor="@color/sayday_w_ink"
+        android:textSize="19sp"
         android:textStyle="bold"
         android:maxLines="1"
         android:ellipsize="end" />
@@ -34,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:textColor="#5B6679"
+        android:textColor="@color/sayday_w_soft"
         android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end" />
@@ -51,16 +56,21 @@
             android:id="@+id/w_word"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#0F1B33"
-            android:textSize="16sp"
-            android:fontFamily="serif"
+            android:textColor="@color/sayday_w_on_mark"
+            android:background="@drawable/sayday_widget_mark"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-condensed"
             android:maxLines="1" />
 
         <TextView
             android:id="@+id/w_meaning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#8F99AA"
+            android:textColor="@color/sayday_w_faint"
+            android:layout_marginTop="2dp"
             android:textSize="12sp"
             android:maxLines="1"
             android:ellipsize="end" />

@@ -6,6 +6,7 @@ import { ensureEngine, engineStatus, onEngineStatus, infer, startRecording, stop
 import { score, type ScoreResult } from '../lib/speech/score'
 import type { Accent, Clip } from '../lib/tts'
 import { Intonation } from './Intonation'
+import { useCountUp, useMicLevel } from './motion'
 import { ipa } from '../lib/phones'
 import { HINTS } from '@speech/hints.mjs'
 
@@ -13,6 +14,8 @@ export const HINT: Record<string, string> = HINTS
 
 export function ScoreView({ r }: { r: ScoreResult }) {
   const c = r.score >= 80 ? 'var(--good)' : r.score >= 60 ? 'var(--brand)' : 'var(--warn)'
+  const shown = useCountUp(r.score)
+  let n = 0
   const bad = new Map<string, number>()
   for (const w of r.words) for (const p of w.phones) if (p.level !== 'g' && HINT[p.p]) bad.set(p.p, (bad.get(p.p) ?? 0) + (p.level === 'r' ? 2 : 1))
   const tips = [...bad.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3)
@@ -20,7 +23,7 @@ export function ScoreView({ r }: { r: ScoreResult }) {
   return (
     <div className="result fade-in">
       <div className="result-head">
-        <div className="ring" style={{ ['--p' as string]: r.score / 100, ['--c' as string]: c }}><b>{r.score}</b></div>
+        <div className="ring" style={{ ['--p' as string]: shown / 100, ['--c' as string]: c }}><b>{shown}</b></div>
         <div>
           <b>{r.score >= 85 ? '很好，就是这个感觉' : r.score >= 70 ? '不错，再练几个音' : r.score >= 50 ? '有进步空间，跟着示范再读一遍' : '先慢下来，一个词一个词跟'}</b>
           <p className="small muted">{tails ? `${tails} 个词尾多带了元音 · ` : ''}{r.words.filter((w) => w.level === 'r').length ? `${r.words.filter((w) => w.level === 'r').length} 个词要纠正` : '没有明显读错的词'}</p>
@@ -30,7 +33,7 @@ export function ScoreView({ r }: { r: ScoreResult }) {
         {r.words.map((w, i) => (
           <div className="w" key={i}>
             <b>{w.word}</b>
-            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level}`}>{ipa(p.p)}</span>)}</span>
+            <span className="ps">{w.phones.map((p, j) => <span key={j} className={`p ${p.level} pop`} style={{ animationDelay: `${Math.min(n++, 40) * 22}ms` }}>{ipa(p.p)}</span>)}</span>
             {w.tail === 'ins' && <span className="tail">/{ipa(w.phones[w.phones.length - 1].p)}/ 后面多了个元音</span>}
             {w.tail === 'del' && <span className="tail">尾音可能没读出来</span>}
           </div>
@@ -57,6 +60,7 @@ export function Shadow({ text, sentenceId, clip: clipIn, accent, onScored }: { t
   useEffect(() => { ensureEngine().catch(() => {}) }, [])
 
   const loadingModel = eng.state === 'loading'
+  const lv = useMicLevel(phase === 'rec')
   const toggle = async () => {
     if (phase === 'busy') return
     if (phase === 'idle') {
@@ -97,7 +101,7 @@ export function Shadow({ text, sentenceId, clip: clipIn, accent, onScored }: { t
         <span className="small muted">先听一遍，再跟着读</span>
       </div>
       <div className="rec-zone">
-        <button className={`rec-btn ${phase === 'rec' ? 'on' : ''}`} onClick={toggle} disabled={phase === 'busy'} aria-label={phase === 'rec' ? '停止录音' : '开始跟读'}>
+        <button className={`rec-btn ${phase === 'rec' ? 'on' : ''} ${phase === 'busy' ? 'busy' : ''}`} style={{ ['--lv' as string]: lv }} onClick={toggle} disabled={phase === 'busy'} aria-label={phase === 'rec' ? '停止录音' : '开始跟读'}>
           {phase === 'rec' ? <Icon.stop /> : <Icon.mic />}
         </button>
         <div className="rec-label">

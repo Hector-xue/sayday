@@ -432,3 +432,21 @@ p { margin: 0; }
 .style-opt { padding: 12px; }
 .season-head { display: grid; gap: 12px; margin: 24px 2px 10px; }
 .season-head .seg { justify-self: start; }
+
+/* 录音：外圈跟着音量（--lv 0~1）放大；打分中轻轻呼吸；出分时音标逐个弹出 */
+.rec-btn.on { animation: none; box-shadow: 0 0 0 calc(8px + var(--lv, 0) * 14px) color-mix(in srgb, var(--bad) 16%, transparent); transition: box-shadow .08s linear; }
+.rec-btn.busy { animation: breathe 1.2s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(.94); opacity: .75; } }
+.p.pop { animation: pop .32s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .rec-btn.busy, .p.pop { animation: none; } }
+.rec-zone { margin: 32px 0 10px; gap: 24px; }
+
+/* 剧集海报：大号集数 + 开场第一句台词 */
+.ep-hero { overflow: hidden; }
+.poster { position: relative; margin: -20px -20px 18px; padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px;
+  background: linear-gradient(135deg, var(--brand-2), var(--brand)); color: #fff; }
+.poster-no { font: 800 96px/.82 var(--num); opacity: .9; margin-left: -4px; }
+.poster-s { position: absolute; top: 18px; right: 20px; font: 600 12px var(--num); letter-spacing: .12em; opacity: .85; }
+.poster-quote { font-size: 20px; line-height: 1.35; }
+.poster-quote small { display: block; margin-top: 6px; font: 500 12px var(--font); opacity: .75; }

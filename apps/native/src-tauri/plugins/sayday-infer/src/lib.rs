@@ -69,6 +69,12 @@ fn record_start<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("recordStart", serde_json::json!({}))
 }
 
+/// 录音中的当前音量（0~1），界面轮询它让话筒外圈跟着声音跳
+#[tauri::command]
+fn record_level<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("recordLevel", serde_json::json!({}))
+}
+
 #[tauri::command]
 fn record_stop<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("recordStop", serde_json::json!({}))
@@ -105,7 +111,7 @@ fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_stop, speak, speak_stop, save_to_downloads, update_widget])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, speak, speak_stop, save_to_downloads, update_widget])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

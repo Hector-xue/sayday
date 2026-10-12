@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sayday_w_bg">#1C1C1A</color>
+    <color name="sayday_w_hair">#1AF3F2EC</color>
+    <color name="sayday_w_ink">#F3F2EC</color>
+    <color name="sayday_w_soft">#AAA9A1</color>
+    <color name="sayday_w_faint">#7F7E77</color>
+    <color name="sayday_w_mark">#F7D93F</color>
+    <color name="sayday_w_on_mark">#121211</color>
+</resources>

@@ -133,7 +133,6 @@
 /* 跟读：朱红话筒，外面一圈纸色留白再一圈细线，像印章 */
 [data-style="paper"] .shadow-sentence { font: 400 30px/1.35 var(--serif); }
 [data-style="paper"] .rec-btn { background: var(--brand); color: var(--brand-ink); box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--hair); }
-[data-style="paper"] .rec-btn.on { background: var(--bad); color: #fff; box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--bad); }
 [data-style="paper"] .ring { background: conic-gradient(var(--c, var(--brand)) calc(var(--p) * 360deg), var(--hair) 0); }
 [data-style="paper"] .ring b { background: var(--bg); font: italic 400 28px var(--serif); }
 [data-style="paper"] .w b { font: 400 20px var(--serif); }
@@ -202,3 +201,13 @@
 [data-style="paper"] .opt.wrong { border-color: var(--bad); background: var(--bad-bg); box-shadow: none; }
 /* 吸顶的切换条要有实底，不然滚动时下面的字会透上来 */
 [data-style="paper"] .sticky-seg { background: var(--bg); }
+
+/* 录音时：印章外的细线圈随声音向外扩 */
+[data-style="paper"] .rec-btn.on { background: var(--bad); color: #fff; box-shadow: 0 0 0 8px var(--bg), 0 0 0 calc(9px + var(--lv, 0) * 14px) color-mix(in srgb, var(--bad) 30%, transparent); }
+
+/* 剧集海报：像书的扉页——大号斜体朱红集数，衬线台词，细线分隔 */
+[data-style="paper"] .poster { background: transparent; color: var(--ink); margin: -20px -20px 16px; padding: 24px 20px 18px; border-bottom: 1px solid var(--hair); }
+[data-style="paper"] .poster-no { color: var(--brand); opacity: 1; font: italic 300 112px/.8 var(--serif); }
+[data-style="paper"] .poster-s { font: italic 14px var(--serif); letter-spacing: .04em; color: var(--soft); opacity: 1; }
+[data-style="paper"] .poster-quote { font: italic 400 23px/1.35 var(--serif); }
+[data-style="paper"] .poster-quote small { font-style: normal; color: var(--soft); opacity: 1; }

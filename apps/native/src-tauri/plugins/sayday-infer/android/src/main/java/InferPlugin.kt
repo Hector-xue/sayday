@@ -86,6 +86,8 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   private var threads = 0
 
   @Volatile private var recording = false
+  // 录音中最近一段（0.1 秒）的音量，0~1，给话筒外圈的跳动用
+  @Volatile private var level = 0f
   private var recorder: AudioRecord? = null
   private var pcm = ByteArrayOutputStream()
   private var recThread: Thread? = null
@@ -203,7 +205,13 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
         val buf = ByteArray(3200)
         while (recording) {
           val n = r.read(buf, 0, buf.size)
-          if (n > 0) synchronized(pcm) { pcm.write(buf, 0, n) }
+          if (n > 0) {
+            synchronized(pcm) { pcm.write(buf, 0, n) }
+            var sum = 0.0
+            var i = 0
+            while (i + 1 < n) { val s = ((buf[i + 1].toInt() shl 8) or (buf[i].toInt() and 0xff)).toShort() / 32768.0; sum += s * s; i += 2 }
+            level = Math.sqrt(sum / (n / 2)).toFloat()
+          }
         }
       }
       invoke.resolve()
@@ -213,9 +221,17 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   }
 
   @Command
+  fun recordLevel(invoke: Invoke) {
+    val ret = JSObject()
+    ret.put("level", if (recording) level.toDouble() else 0.0)
+    invoke.resolve(ret)
+  }
+
+  @Command
   fun recordStop(invoke: Invoke) {
     onWorker(invoke, "录音停止失败") {
       recording = false
+      level = 0f
       recThread?.join(1000)
       recorder?.run { stop(); release() }
       recorder = null

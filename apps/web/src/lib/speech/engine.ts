@@ -84,6 +84,19 @@ export async function infer(audio16k: Float32Array): Promise<Logits> {
 // ---- 录音：App 用原生 AudioRecord（语音识别音源，关掉自动增益和降噪）；网页用 MediaRecorder ----
 let mediaRec: MediaRecorder | null = null
 let chunks: Blob[] = []
+// 网页录音时另接一个分析节点读音量（话筒外圈跟着声音跳）；App 里问原生插件
+let meter: { ctx: AudioContext; an: AnalyserNode; buf: Float32Array<ArrayBuffer> } | null = null
+const closeMeter = () => { meter?.ctx.close().catch(() => {}); meter = null }
+
+/** 录音中的当前音量（均方根，安静约 0.005，正常说话 0.03~0.2）；没在录就是 0 */
+export async function recordLevel(): Promise<number> {
+  if (tauri) { try { return (await tauri.invoke('plugin:sayday-infer|record_level'))?.level ?? 0 } catch { return 0 } }
+  if (!meter) return 0
+  meter.an.getFloatTimeDomainData(meter.buf)
+  let s = 0
+  for (const v of meter.buf) s += v * v
+  return Math.sqrt(s / meter.buf.length)
+}
 
 export async function startRecording(): Promise<void> {
   if (tauri) return tauri.invoke('plugin:sayday-infer|record_start')
@@ -92,6 +105,14 @@ export async function startRecording(): Promise<void> {
   chunks = []
   mediaRec.ondataavailable = (e) => chunks.push(e.data)
   mediaRec.start()
+  try {
+    closeMeter()
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const an = ctx.createAnalyser()
+    an.fftSize = 1024
+    ctx.createMediaStreamSource(stream).connect(an)
+    meter = { ctx, an, buf: new Float32Array(an.fftSize) }
+  } catch { meter = null }
 }
 
 export async function stopRecording(): Promise<Float32Array> {
@@ -100,6 +121,7 @@ export async function stopRecording(): Promise<Float32Array> {
     return fromB64(r.audio)
   }
   const rec = mediaRec!
+  closeMeter()
   const blob: Blob = await new Promise((resolve) => {
     rec.onstop = () => { rec.stream.getTracks().forEach((t) => t.stop()); resolve(new Blob(chunks, { type: rec.mimeType })) }
     rec.stop()
@@ -110,6 +132,7 @@ export async function stopRecording(): Promise<Float32Array> {
 
 export function cancelRecording() {
   if (tauri) { tauri.invoke('plugin:sayday-infer|record_stop').catch(() => {}); return }
+  closeMeter()
   if (mediaRec) { mediaRec.stream.getTracks().forEach((t) => t.stop()); try { mediaRec.stop() } catch {} mediaRec = null }
 }
 

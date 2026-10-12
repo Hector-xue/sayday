@@ -1,12 +1,14 @@
 // 录音按钮：点一下开始、再点一下结束，交出 16kHz 音频（发音实验室用；跟读面板有自己的一套带打分的）
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './icons'
+import { useMicLevel } from './motion'
 import { cancelRecording, ensureEngine, startRecording, stopRecording } from '../lib/speech/engine'
 
 export function Recorder({ onAudio, disabled, hint }: { onAudio: (a: Float32Array) => Promise<void> | void; disabled?: boolean; hint?: string }) {
   const [phase, setPhase] = useState<'idle' | 'rec' | 'busy'>('idle')
   const [msg, setMsg] = useState('')
   const recRef = useRef(false)
+  const lv = useMicLevel(phase === 'rec')
   useEffect(() => { ensureEngine().catch(() => {}) }, [])
   useEffect(() => () => { if (recRef.current) cancelRecording() }, [])
   const toggle = async () => {
@@ -30,7 +32,7 @@ export function Recorder({ onAudio, disabled, hint }: { onAudio: (a: Float32Arra
   }
   return (
     <div className="rec-zone">
-      <button className={`rec-btn ${phase === 'rec' ? 'on' : ''}`} onClick={toggle} disabled={disabled || phase === 'busy'} aria-label={phase === 'rec' ? '停止录音' : '开始录音'}>
+      <button className={`rec-btn ${phase === 'rec' ? 'on' : ''} ${phase === 'busy' ? 'busy' : ''}`} style={{ ['--lv' as string]: lv }} onClick={toggle} disabled={disabled || phase === 'busy'} aria-label={phase === 'rec' ? '停止录音' : '开始录音'}>
         {phase === 'rec' ? <Icon.stop /> : <Icon.mic />}
       </button>
       <div className="rec-label">{msg || hint || '点一下开始读'}</div>
