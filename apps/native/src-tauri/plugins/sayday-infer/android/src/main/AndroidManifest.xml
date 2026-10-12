@@ -8,4 +8,18 @@
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
+    <application>
+        <!-- 桌面小组件（内容由 App 推送，见 SaydayWidget.kt） -->
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayWidget"
+            android:exported="true"
+            android:label="日日说">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_widget_info" />
+        </receiver>
+    </application>
 </manifest>

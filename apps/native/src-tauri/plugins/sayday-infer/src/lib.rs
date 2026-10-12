@@ -97,9 +97,15 @@ fn save_to_downloads<R: Runtime>(app: tauri::AppHandle<R>, name: String, mime: O
     )
 }
 
+/// 桌面小组件的内容（网页算好：连续天数、今天练没练、一个在学的词），原样交给 Kotlin
+#[tauri::command]
+fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("updateWidget", widget)
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_stop, speak, speak_stop, save_to_downloads])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_stop, speak, speak_stop, save_to_downloads, update_widget])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);
