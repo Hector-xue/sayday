@@ -16,7 +16,7 @@
 ## 准备
 ```bash
 cd packages/agent && npm ci
-../../scripts/fetch-phone-model.sh   # 音素打分模型（从最新 Release 安装包里取，约 120MB）
+../../scripts/fetch-phone-model.sh   # 音素打分模型（从 Release model-phone-ft1 下载并校验，约 120MB）
 ../../scripts/fetch-asr-model.sh     # 语音识别模型（约 63MB）
 npm test                             # 4 项自检：silk 解码打分、MCP stdio、HTTP 鉴权
 ```

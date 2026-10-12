@@ -1,10 +1,11 @@
 """句子级评分 v2：音素校准分统计 + 词尾似然比（加尾音/漏尾音）+ 语速 → 线性模型，导出给前端。
 
 特征全部是前端能算出来的（gop.mjs 的 afGop/tailLLR + calib.mjs），所以线性权重可以直接写进 calib.json。
-用法: .venv/bin/python spikes/m0/utt_v2.py
+用法: .venv/bin/python spikes/m0/utt_v2.py [--model int8] [--train train]（微调模型：--model ft_int8 --train trainB）
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -45,14 +46,14 @@ def phone_preds(tr, te):
     return ptr, full.predict(lite(te))
 
 
-def table(split: str, feats, pred) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    cache = CACHE / f"utt_v2_{split}.npz"
-    pre = "train_" if split == "train" else ""
+def table(split: str, feats, pred, model: str = "int8") -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    cache = CACHE / (f"utt_v2_{split}.npz" if model == "int8" else f"utt_v2_{split}_{model}.npz")
+    pre = "" if split == "test" else split + "_"
     rows = pq.read_table(CACHE / "data" / f"so762_{split}.parquet", columns=["accuracy", "words", "age"]).to_pylist()
     if cache.exists():
         tail = dict(np.load(cache, allow_pickle=True))["tail"].item()
     else:
-        z = np.load(CACHE / f"logits_{pre}int8.npz")
+        z = np.load(CACHE / f"logits_{pre}{model}.npz")
         tail = {}
         for i in np.unique(feats["utt"]):
             ref, wo = [], []
@@ -80,11 +81,15 @@ def table(split: str, feats, pred) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def main() -> None:
-    tr = np.load(CACHE / "feats_train_int8.npz")
-    te = np.load(CACHE / "feats_int8.npz")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default="int8")
+    ap.add_argument("--train", default="train")
+    a = ap.parse_args()
+    tr = np.load(CACHE / f"feats_{a.train}_{a.model}.npz")
+    te = np.load(CACHE / f"feats_{a.model}.npz")
     ptr, pte = phone_preds(tr, te)
-    Xtr, ytr, _ = table("train", tr, ptr)
-    Xte, yte, age = table("test", te, pte)
+    Xtr, ytr, _ = table(a.train, tr, ptr, a.model)
+    Xte, yte, age = table("test", te, pte, a.model)
     res = {}
     for name, cols in [("仅音素分均值", [0]), ("音素分统计", [0, 1, 2]), ("+词尾检测", [0, 1, 2, 3, 4, 5]), ("+语速（全部）", list(range(7)))]:
         r = Ridge(alpha=1.0).fit(Xtr[:, cols], ytr)
@@ -99,7 +104,7 @@ def main() -> None:
     calib = json.loads(p.read_text())
     calib["utt"] = model
     p.write_text(json.dumps(calib, separators=(",", ":")))
-    (CACHE / "utt_v2_result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+    (CACHE / f"utt_v2_result_{a.model}.json" if a.model != "int8" else CACHE / "utt_v2_result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
     print(json.dumps(res, ensure_ascii=False, indent=1))
     print(json.dumps(model, ensure_ascii=False))
 
