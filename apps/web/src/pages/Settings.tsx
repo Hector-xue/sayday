@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { STYLES, useApp, type Theme } from '../store'
+import { SPEEDS, STYLES, useApp, type TextSize, type Theme } from '../store'
+import { cachedAudioCount, clearAudioCache } from '../lib/tts'
 import { Icon } from '../components/icons'
 import { db } from '../lib/db'
 import { goalLabel } from '../lib/levels'
@@ -10,7 +11,7 @@ import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/
 import { UpdateCard } from '../components/UpdateCard'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
-  const { profile, setProfile, theme, setTheme, style, setStyle, toast } = useApp()
+  const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
   const [storage, setStorage] = useState<string>('')
   const [ai, setAiCfg] = useState<AiConfig | null>(null)
   const { tick } = useApp()
@@ -20,6 +21,21 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [ver, setVer] = useState('')
   const [upd, setUpd] = useState<UpdateInfo | null>(null)
   const [checking, setChecking] = useState(false)
+  const [privacy, setPrivacy] = useState(false)
+  const [cache, setCache] = useState<{ clips: number; used: number } | null>(null)
+  const loadCache = async () => {
+    const clips = await cachedAudioCount()
+    let used = 0
+    try { used = (await navigator.storage?.estimate?.())?.usage ?? 0 } catch { /* 拿不到就不显示 */ }
+    setCache({ clips, used })
+  }
+  useEffect(() => { loadCache() }, [])
+  const clearCache = async () => {
+    if (!confirm('清理已下载的示范音频？学习记录不受影响，之后播放时会重新下载。')) return
+    await clearAudioCache()
+    await loadCache()
+    toast('已清理')
+  }
   useEffect(() => { currentVersion().then(setVer).catch(() => {}) }, [])
   const check = async () => {
     setChecking(true)
@@ -103,6 +119,10 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="k"><b>示范口音</b><span>听示范和例句用的声音</span></div>
           <div className="seg"><button aria-pressed={profile.accent === 'us'} onClick={() => setProfile({ ...profile, accent: 'us' })}>美音</button><button aria-pressed={profile.accent === 'gb'} onClick={() => setProfile({ ...profile, accent: 'gb' })}>英音</button></div>
         </div>
+        <div className="set-row">
+          <div className="k"><b>示范语速</b><span>{speed < 1 ? '放慢一点，听清每个音' : speed > 1 ? '快一点，接近真实语速' : '正常语速'}</span></div>
+          <div className="seg">{SPEEDS.map((s) => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s === 1 ? '1×' : `${s}×`}</button>)}</div>
+        </div>
         {canRemind && rem && (
           <div className="set-row">
             <div className="k"><b>每日提醒</b><span>{rem.on ? '当天练过就不打扰' : '到点提醒你练一会儿'}</span></div>
@@ -132,11 +152,18 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="k"><b>深浅</b></div>
           <div className="seg">{([['system', '跟随系统'], ['light', '浅色'], ['dark', '深色']] as [Theme, string][]).map(([k, t]) => <button key={k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{t}</button>)}</div>
         </div>
+        <div className="set-row">
+          <div className="k"><b>字号</b></div>
+          <div className="seg">{([['md', '标准'], ['lg', '大'], ['xl', '特大']] as [TextSize, string][]).map(([k, t]) => <button key={k} aria-pressed={textSize === k} onClick={() => setTextSize(k)}>{t}</button>)}</div>
+        </div>
       </div>
 
       <p className="section-title">数据</p>
       <div className="list">
         <div className="set-row"><div className="k"><b>保存在</b><span>{storage}{isNative ? ' · App' : ''}</span></div></div>
+        {cache && (
+          <div className="set-row"><div className="k"><b>离线缓存</b><span>已下载示范音频 {cache.clips.toLocaleString()} 条{cache.used ? ` · 本机共占 ${Math.round(cache.used / 1048576)} MB（含学习记录和语音模型）` : ''}</span></div><button className="btn small quiet" disabled={!cache.clips} onClick={clearCache}>清理</button></div>
+        )}
         <div className="set-row"><div className="k"><b>导出备份</b><span>全部学习记录，JSON 文件</span></div><button className="btn small quiet" onClick={exportData}>导出</button></div>
         <div className="set-row"><div className="k"><b>导入备份</b><span>换手机、重装后用导出的文件恢复</span></div><label className="btn small quiet" style={{ display: 'inline-grid', placeItems: 'center' }}>选择文件<input type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importData(f) }} /></label></div>
         <div className="set-row"><div className="k"><b>清空记录</b><span>从头开始</span></div><button className="btn small quiet" style={{ color: 'var(--bad)' }} onClick={reset}>清空</button></div>
@@ -149,6 +176,21 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
         </div>
       )}
       {upd && <div style={{ marginBottom: 12 }}><UpdateCard info={upd} /></div>}
+      <div className="list" style={{ marginBottom: 12 }}>
+        <div className="set-row"><div className="k"><b>隐私</b><span>学习记录和录音只存在这台设备上</span></div><button className="btn small quiet" onClick={() => setPrivacy((x) => !x)}>{privacy ? '收起' : '详情'}</button></div>
+        {privacy && (
+          <div className="privacy">
+            <p>不需要注册，没有账号，也不收集任何统计数据。</p>
+            <p>录音只在本机打分，不上传；学习记录存在本机，换手机请用“导出备份”。</p>
+            <p>会联网的只有这几件事：</p>
+            <ul>
+              <li>下载示范音频、语音识别模型（只下载，不上传任何东西）</li>
+              <li>检查新版本（只读取版本号）</li>
+              <li>你自己接入 AI 后，陪练聊天、日记和写作批改、口语模考评分会把文字发给你选的 AI 服务商（口语发的是本机转写出的文字，不是录音）</li>
+            </ul>
+          </div>
+        )}
+      </div>
       <div className="card">
         <p className="small muted">日日说 · MIT 开源 · 所有练习数据只在你的设备上，录音不上传。</p>
         <p className="small muted" style={{ marginTop: 8 }}>词典 ECDICT（MIT）· 例句 Tatoeba（CC BY 2.0 FR）· 发音词典 CMUdict（BSD）· 评测数据 speechocean762（CC BY 4.0）· 示范语音 Kokoro（Apache-2.0，预先生成）· 音素识别 Charsiu（Zhu 等，2022）· 语音识别 Moonshine（MIT）· 字体 Bricolage Grotesque、Newsreader、Noto Serif SC（OFL）</p>

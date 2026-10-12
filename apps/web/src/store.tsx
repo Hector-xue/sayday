@@ -2,9 +2,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { getProfile, saveProfile, type Profile } from './lib/lesson'
 import { kvGet, kvSet } from './lib/db'
+import { setSpeed as setTtsSpeed } from './lib/tts'
 import { syncBars } from './lib/native-chrome'
 
 export type Theme = 'system' | 'light' | 'dark'
+// 字号：整页内容一起放大（底栏不变）。启动脚本先从 localStorage 读，避免先闪一下小字
+export type TextSize = 'md' | 'lg' | 'xl'
+export const SPEEDS = [0.8, 0.9, 1, 1.1] as const
 // 风格：marker 荧光笔（默认）/ paper 纸与墨 / classic 经典。index.html 启动时先从 localStorage 读，避免先闪一下旧样式
 export type Style = 'marker' | 'paper' | 'classic'
 export const STYLES: { k: Style; name: string; desc: string }[] = [
@@ -22,6 +26,10 @@ type Ctx = {
   setTheme: (t: Theme) => void
   style: Style
   setStyle: (s: Style) => void
+  speed: number
+  setSpeed: (s: number) => void
+  textSize: TextSize
+  setTextSize: (s: TextSize) => void
 }
 const C = createContext<Ctx>(null as unknown as Ctx)
 export const useApp = () => useContext(C)
@@ -42,6 +50,11 @@ const syncChrome = () => requestAnimationFrame(() => {
 })
 // 跟随系统深浅时，系统切换了也要同步状态栏颜色
 if (typeof matchMedia === 'function') matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => syncChrome())
+const applyTextSize = (s: TextSize) => {
+  if (s === 'md') document.documentElement.removeAttribute('data-text')
+  else document.documentElement.setAttribute('data-text', s)
+  remember('sayday-text', s)
+}
 const applyStyle = (s: Style) => {
   document.documentElement.setAttribute('data-style', s)
   remember('sayday-style', s)
@@ -54,6 +67,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg] = useState<string | null>(null)
   const [theme, setT] = useState<Theme>('system')
   const [style, setS] = useState<Style>(() => (document.documentElement.getAttribute('data-style') as Style) || 'marker')
+  const [speed, setSp] = useState(1)
+  const [textSize, setTs] = useState<TextSize>(() => (document.documentElement.getAttribute('data-text') as TextSize) || 'md')
   useEffect(() => {
     getProfile().then(setP).catch(() => setP(null))
     // 每次打开 App 重排每日提醒（文案跟着进度更新）
@@ -61,14 +76,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     kvGet<Theme>('theme', 'system').then((t) => { setT(t); applyTheme(t) })
     // 数据库里还没存过：沿用启动脚本从本机缓存读到的（默认荧光笔）
     const boot = (document.documentElement.getAttribute('data-style') as Style) || 'marker'
+    kvGet<number>('speed', 1).then((x) => { const v = SPEEDS.includes(x as never) ? x : 1; setSp(v); setTtsSpeed(v) })
+    kvGet<TextSize>('text_size', (document.documentElement.getAttribute('data-text') as TextSize) || 'md').then((x) => { const v = ['md', 'lg', 'xl'].includes(x) ? x : 'md'; setTs(v); applyTextSize(v) })
     kvGet<Style>('style', boot).then((x) => { const v = STYLES.some((y) => y.k === x) ? x : 'marker'; setS(v); applyStyle(v) })
   }, [])
   const setProfile = useCallback(async (p: Profile) => { await saveProfile(p); setP(p) }, [])
   const toast = useCallback((m: string) => { setMsg(m); setTimeout(() => setMsg((x) => (x === m ? null : x)), 2600) }, [])
   const setTheme = useCallback((t: Theme) => { setT(t); applyTheme(t); kvSet('theme', t) }, [])
   const setStyle = useCallback((x: Style) => { setS(x); applyStyle(x); kvSet('style', x) }, [])
+  const setSpeed = useCallback((x: number) => { setSp(x); setTtsSpeed(x); kvSet('speed', x) }, [])
+  const setTextSize = useCallback((x: TextSize) => { setTs(x); applyTextSize(x); kvSet('text_size', x) }, [])
   return (
-    <C.Provider value={{ profile, setProfile, tick, refresh: () => setTick((x) => x + 1), toast, theme, setTheme, style, setStyle }}>
+    <C.Provider value={{ profile, setProfile, tick, refresh: () => setTick((x) => x + 1), toast, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize }}>
       {children}
       {msg && <div className="toast fade-in" role="status">{msg}</div>}
     </C.Provider>
