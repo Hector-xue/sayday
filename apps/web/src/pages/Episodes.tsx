@@ -41,10 +41,9 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
         <p style={{ marginTop: 10 }}>{up.state === 'tomorrow' ? teaserFor(all, up.season.season, up.ep.id) : up.state === 'all-done' ? '下一季准备中。' : up.ep.scene_zh}</p>
         {up.state === 'ready' && <button className="btn primary block" style={{ marginTop: 14 }} onClick={() => setOpen({ s: up.season, ep: up.ep })}>开始看</button>}
       </div>
-      <div className="row" style={{ margin: '22px 4px 10px' }}>
-        <p className="section-title" style={{ margin: 0 }}>第 {cur.season} 季 · {cur.title_zh}（{cur.episodes.length} 集）</p>
-        <div className="spacer" />
+      <div className="season-head">
         {all.length > 1 && <div className="seg">{all.map((s) => <button key={s.season} aria-pressed={s.season === cur.season} onClick={() => setTab(s.season)}>第 {s.season} 季</button>)}</div>}
+        <p className="section-title" style={{ margin: 0 }}>{all.length > 1 ? '' : `第 ${cur.season} 季 · `}{cur.title_zh} · {cur.episodes.length} 集</p>
       </div>
       <div className="list">
         {cur.episodes.map((e) => {

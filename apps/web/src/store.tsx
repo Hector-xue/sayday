@@ -4,10 +4,11 @@ import { getProfile, saveProfile, type Profile } from './lib/lesson'
 import { kvGet, kvSet } from './lib/db'
 
 export type Theme = 'system' | 'light' | 'dark'
-// 风格：marker 荧光笔（默认）/ classic 经典。index.html 启动时先从 localStorage 读，避免先闪一下旧样式
-export type Style = 'marker' | 'classic'
+// 风格：marker 荧光笔（默认）/ paper 纸与墨 / classic 经典。index.html 启动时先从 localStorage 读，避免先闪一下旧样式
+export type Style = 'marker' | 'paper' | 'classic'
 export const STYLES: { k: Style; name: string; desc: string }[] = [
   { k: 'marker', name: '荧光笔', desc: '白纸黑字，重点用荧光黄划出来' },
+  { k: 'paper', name: '纸与墨', desc: '暖纸色、宋体标题，像一本读本' },
   { k: 'classic', name: '经典', desc: '蓝色，最早的样子' },
 ]
 type Ctx = {
@@ -54,7 +55,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // 每次打开 App 重排每日提醒（文案跟着进度更新）
     import('./lib/reminder').then((m) => m.reschedule()).catch(() => {})
     kvGet<Theme>('theme', 'system').then((t) => { setT(t); applyTheme(t) })
-    kvGet<Style>('style', 'marker').then((x) => { const v = STYLES.some((y) => y.k === x) ? x : 'marker'; setS(v); applyStyle(v) })
+    // 数据库里还没存过：沿用启动脚本从本机缓存读到的（默认荧光笔）
+    const boot = (document.documentElement.getAttribute('data-style') as Style) || 'marker'
+    kvGet<Style>('style', boot).then((x) => { const v = STYLES.some((y) => y.k === x) ? x : 'marker'; setS(v); applyStyle(v) })
   }, [])
   const setProfile = useCallback(async (p: Profile) => { await saveProfile(p); setP(p) }, [])
   const toast = useCallback((m: string) => { setMsg(m); setTimeout(() => setMsg((x) => (x === m ? null : x)), 2600) }, [])
