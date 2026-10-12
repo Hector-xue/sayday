@@ -132,3 +132,14 @@ jobs:
             .cache/ft/compare.json
             .cache/ft/log.jsonl
           retention-days: 30
+
+      # 换模型时重算 App 的校准表（calib.json）要用：微调模型在 B 半 / 测试集上的输出和特征
+      - name: 存微调模型的评测输出
+        if: env.MODE == 'eval'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ft-feats
+          path: |
+            .cache/logits_*ft_int8.npz
+            .cache/feats_*ft_int8.npz
+          retention-days: 30
