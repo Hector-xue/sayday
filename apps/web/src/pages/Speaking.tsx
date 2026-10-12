@@ -127,7 +127,7 @@ export function Speaking({ onClose, onSetupAi }: { onClose: () => void; onSetupA
         <p className="small muted" style={{ marginTop: 12 }}>考官用英音提问（系统语音）。录音只在本机识别和打分，不上传。</p>
         <div className="card" style={{ marginTop: 14 }}>
           {cfg ? <p className="small">答完后由你接入的 AI（{cfg.model}）按雅思四项标准评分：流利连贯、词汇、语法、发音。</p>
-            : <p className="small">没接入 AI：只能给出<b>流利度</b>和<b>发音</b>两项的客观参考。<button className="btn small quiet" style={{ marginLeft: 6 }} onClick={onSetupAi}>接入 AI</button></p>}
+            : <div className="row" style={{ gap: 12 }}><p className="small" style={{ flex: 1 }}>没接入 AI：只能给出<b>流利度</b>和<b>发音</b>两项的客观参考；接入后按雅思四项标准评分。</p><button className="btn small quiet" onClick={onSetupAi}>接入 AI</button></div>}
         </div>
         <p className="small faint" style={{ marginTop: 12 }}>题目为日日说原创的雅思风格练习题，不是真题；分数是练习参考。</p>
       </div>
