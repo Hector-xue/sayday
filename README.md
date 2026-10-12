@@ -4,6 +4,15 @@
 
 > 状态：**M2 进行中**（见 [docs/M2-进展.md](docs/M2-进展.md)）。已可用：定级与持续校准 → 每日一课（FSRS 复习 + 新词 + 听力 + 跟读打分）→ 原创剧集三季 30 集（A2→C1）→ 发音实验室（最小对立、口型图、语调曲线）→ 雅思听力 / 阅读整套练习（本机判分）、口语模考、写作批改 → 接入自己的 AI 后的陪练聊天与日记批改；安卓有每日提醒和桌面小组件。网页（PWA，离线可用）与安卓 App 共用一套界面。
 
+<p>
+<img src="site/assets/shots/marker-today.webp" width="190" alt="今天">
+<img src="site/assets/shots/marker-shadow.webp" width="190" alt="跟读打分">
+<img src="site/assets/shots/marker-episodes.webp" width="190" alt="剧集">
+<img src="site/assets/shots/paper-reading.webp" width="190" alt="雅思阅读（纸与墨）">
+</p>
+
+三种界面风格（荧光笔 / 纸与墨 / 经典），各有深色版；发音打分用中国学习者录音微调过（[口音微调方案](docs/口音微调方案.md)）。
+
 ## 设计原则
 - **门槛降到最低**：每天保底 2 分钟就算学了；断签不惩罚。
 - **进步看得见**：水平按 CEFR 分项估计，录音可前后对比。

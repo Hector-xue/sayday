@@ -18,6 +18,8 @@ cat "$ROOT/site/index.html" > "$STAGE/index.html"
 mkdir -p "$STAGE/assets/audio"
 for f in site.css site.js; do cat "$ROOT/site/assets/$f" > "$STAGE/assets/$f"; done
 for f in "$ROOT"/site/assets/audio/*; do cat "$f" > "$STAGE/assets/audio/$(basename "$f")"; done
+mkdir -p "$STAGE/assets/fonts" "$STAGE/assets/shots"
+for d in fonts shots; do for f in "$ROOT"/site/assets/$d/*; do cat "$f" > "$STAGE/assets/$d/$(basename "$f")"; done; done
 mkdir -p "$STAGE/brand"
 for s in 32 64 180 192 512; do cat "$ROOT/assets/brand/icon-$s.png" > "$STAGE/brand/icon-$s.png"; done
 cat "$ROOT/assets/brand/favicon.ico" > "$STAGE/favicon.ico"
