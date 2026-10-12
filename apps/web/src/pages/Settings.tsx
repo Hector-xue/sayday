@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useApp, type Theme } from '../store'
+import { STYLES, useApp, type Theme } from '../store'
 import { Icon } from '../components/icons'
 import { db } from '../lib/db'
 import { goalLabel } from '../lib/levels'
@@ -8,7 +8,7 @@ import { getAi, providerOf, type AiConfig } from '../lib/ai'
 import { canRemind, enableReminder, getReminder, type Reminder } from '../lib/reminder'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
-  const { profile, setProfile, theme, setTheme, toast } = useApp()
+  const { profile, setProfile, theme, setTheme, style, setStyle, toast } = useApp()
   const [storage, setStorage] = useState<string>('')
   const [ai, setAiCfg] = useState<AiConfig | null>(null)
   const { tick } = useApp()
@@ -104,9 +104,17 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       </div>
 
       <p className="section-title">外观</p>
-      <div className="list">
+      <div className="style-pick">
+        {STYLES.map((x) => (
+          <button key={x.k} className="style-opt" data-preview={x.k} aria-pressed={style === x.k} onClick={() => setStyle(x.k)}>
+            <span className="style-swatch" aria-hidden><i /><i /><i /></span>
+            <b>{x.name}</b><span>{x.desc}</span>
+          </button>
+        ))}
+      </div>
+      <div className="list" style={{ marginTop: 12 }}>
         <div className="set-row">
-          <div className="k"><b>主题</b></div>
+          <div className="k"><b>深浅</b></div>
           <div className="seg">{([['system', '跟随系统'], ['light', '浅色'], ['dark', '深色']] as [Theme, string][]).map(([k, t]) => <button key={k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{t}</button>)}</div>
         </div>
       </div>
@@ -122,7 +130,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       <p className="section-title">关于</p>
       <div className="card">
         <p className="small muted">日日说 · MIT 开源 · 所有练习数据只在你的设备上，录音不上传。</p>
-        <p className="small muted" style={{ marginTop: 8 }}>词典 ECDICT（MIT）· 例句 Tatoeba（CC BY 2.0 FR）· 发音词典 CMUdict（BSD）· 评测数据 speechocean762（CC BY 4.0）· 示范语音 Kokoro（Apache-2.0，预先生成）· 音素识别 Charsiu（Zhu 等，2022）· 语音识别 Moonshine（MIT）</p>
+        <p className="small muted" style={{ marginTop: 8 }}>词典 ECDICT（MIT）· 例句 Tatoeba（CC BY 2.0 FR）· 发音词典 CMUdict（BSD）· 评测数据 speechocean762（CC BY 4.0）· 示范语音 Kokoro（Apache-2.0，预先生成）· 音素识别 Charsiu（Zhu 等，2022）· 语音识别 Moonshine（MIT）· 字体 Bricolage Grotesque、Newsreader（OFL）</p>
         <p className="small" style={{ marginTop: 8 }}><a href="https://github.com/Hector-xue/sayday" style={{ color: 'var(--brand)' }}>源码与完整致谢</a></p>
       </div>
     </div>

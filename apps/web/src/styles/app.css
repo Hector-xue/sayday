@@ -389,3 +389,39 @@ p { margin: 0; }
 .q-res.wrong .q-n { background: var(--bad-bg); color: var(--bad); }
 .transcript-line { align-items: flex-start; gap: 8px; padding: 6px 0; }
 .transcript-line p { margin: 6px 0 0; line-height: 1.6; }
+
+/* 图标块 / 完成标记 / 风格选择（各风格共用的骨架，颜色走变量） */
+.ai-card .ai-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); font-size: 0; margin-bottom: 8px; }
+.ai-card .ai-ico svg { width: 22px; height: 22px; }
+.done-banner .big { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--good-bg); color: var(--good); font-size: 0; flex: none; }
+.done-banner .big svg { width: 26px; height: 26px; }
+.done-mark { width: 84px; height: 84px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; background: var(--good-bg); color: var(--good); }
+.done-mark svg { width: 42px; height: 42px; }
+.style-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.style-opt { text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 14px; border-radius: 16px; border: 1.5px solid var(--hair); background: var(--surface); color: var(--ink); }
+.style-opt b { font-size: 15px; margin-top: 10px; }
+.style-opt > span:last-child { font-size: 12px; color: var(--soft); line-height: 1.45; }
+.style-opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.style-swatch { display: flex; gap: 0; height: 40px; border-radius: 10px; overflow: hidden; border: 1px solid var(--hair); }
+.style-swatch i { flex: 1; }
+.style-opt[data-preview="marker"] .style-swatch i:nth-child(1) { background: #f7f6f2; }
+.style-opt[data-preview="marker"] .style-swatch i:nth-child(2) { background: #121212; }
+.style-opt[data-preview="marker"] .style-swatch i:nth-child(3) { background: #ffe14a; }
+.style-opt[data-preview="classic"] .style-swatch i:nth-child(1) { background: #f6f8fc; }
+.style-opt[data-preview="classic"] .style-swatch i:nth-child(2) { background: #0b2a6b; }
+.style-opt[data-preview="classic"] .style-swatch i:nth-child(3) { background: linear-gradient(135deg, #2fabfd, #1a6dff); }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn { white-space: nowrap; }
+.btn.block { white-space: normal; }
+.seg button { white-space: nowrap; }
+.ladder .rung b.goal { color: var(--brand); }
+.ladder .rung b small { font-size: 11px; font-weight: 600; }
+.done-mark + h2 { margin-top: 18px !important; }
+/* 今天页顶部：连续天数 + 最近 7 天 */
+.streak-hero { display: flex; align-items: center; gap: 16px; margin: -6px 2px 18px; }
+.streak-num { display: grid; flex: none; min-width: 64px; }
+.streak-num b { font: 700 40px/1 var(--num); color: var(--navy); }
+.streak-num span { font-size: 12px; color: var(--soft); margin-top: 4px; }
+.streak-hero .week { flex: 1; gap: 2px; }
+.streak-hero .week .dot { width: 28px; height: 28px; font-size: 11px; }
+.hero-en { display: none; }

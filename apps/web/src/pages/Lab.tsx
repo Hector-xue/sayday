@@ -1,4 +1,5 @@
 // 发音实验室：弱项专项练习、最小对立（先听辨再说对）、音标口型
+import { Icon } from '../components/icons'
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
 import { Overlay } from '../components/Overlay'
@@ -140,7 +141,7 @@ function Drill({ phone, accent, onClose, onPairs }: { phone: string; accent: Acc
         </div>
       ) : (
         <div className="fade-in" style={{ textAlign: 'center', paddingTop: 40 }}>
-          <div style={{ fontSize: 44 }} aria-hidden>🎯</div>
+          <div className="done-mark" aria-hidden><Icon.check /></div>
           <h2 style={{ margin: '10px 0 6px' }}>这一组练完了</h2>
           <p className="muted small">弱项排行会跟着你最近的跟读更新。</p>
           {sets.length > 0 && <div className="row" style={{ justifyContent: 'center', marginTop: 18, flexWrap: 'wrap' }}>{sets.map((s) => <button key={s.id} className="btn small quiet" onClick={() => onPairs(s)}>再练最小对立 {s.title}</button>)}</div>}
