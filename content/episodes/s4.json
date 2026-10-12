@@ -1,0 +1,1045 @@
+{
+  "season": 4,
+  "title": "New York",
+  "title_zh": "纽约",
+  "cast": {
+    "Lin": {
+      "zh": "林（你）",
+      "voice": {
+        "us": "af_heart",
+        "gb": "bf_lily"
+      },
+      "me": true
+    },
+    "Jake": {
+      "zh": "Jake · 制作人",
+      "voice": "am_michael"
+    },
+    "Dana": {
+      "zh": "Dana · 创意总监",
+      "voice": "af_sarah"
+    },
+    "Marcus": {
+      "zh": "Marcus · 同事",
+      "voice": "am_adam"
+    },
+    "Mrs Alvarez": {
+      "zh": "Alvarez 太太 · 房东",
+      "voice": "af_nicole"
+    },
+    "Ana": {
+      "zh": "Ana · 图书馆里的女孩",
+      "voice": "af_bella"
+    },
+    "Mr Brooks": {
+      "zh": "Brooks 先生 · 图书馆馆长",
+      "voice": "bm_george"
+    },
+    "Emma": {
+      "zh": "Emma · 伦敦的室友",
+      "voice": "bf_emma"
+    }
+  },
+  "episodes": [
+    {
+      "id": 1,
+      "level": "B2",
+      "title": "The Other Side",
+      "title_zh": "大洋彼岸",
+      "scene_zh": "你在纽约落地。Jake 举着一块写错了你名字的牌子在机场等你。",
+      "lines": [
+        {
+          "who": "Jake",
+          "en": "Lin! Welcome to New York! Sorry about the sign. My assistant spelled it with two Ns.",
+          "zh": "林！欢迎来纽约！牌子的事抱歉，我助理多写了一个 N。"
+        },
+        {
+          "who": "Lin",
+          "en": "Don't worry. After eight hours on a plane, I'm just happy someone came to meet me.",
+          "zh": "没关系。坐了八个小时飞机，有人来接我就很开心了。"
+        },
+        {
+          "who": "Jake",
+          "en": "Of course! Let's grab your bags. The car's waiting outside, and traffic's going to be brutal.",
+          "zh": "当然！拿上行李吧。车在外面等，路上肯定堵得要命。"
+        },
+        {
+          "who": "Lin",
+          "en": "Is it far to the flat? Sorry, the apartment. I'll have to start speaking American now.",
+          "zh": "到公寓远吗？抱歉，是 apartment。我现在得开始说美式英语了。"
+        },
+        {
+          "who": "Jake",
+          "en": "Ha! About an hour. You're in Brooklyn, third floor, no elevator. I hope you packed light.",
+          "zh": "哈！一个小时左右。你住布鲁克林，三楼，没电梯。希望你行李不多。"
+        },
+        {
+          "who": "Lin",
+          "en": "Two suitcases and a notebook. The notebook is the important one.",
+          "zh": "两个箱子和一本笔记本。笔记本最重要。"
+        },
+        {
+          "who": "Jake",
+          "en": "Sophie's notebook? She told me about that. 'For the next person', right?",
+          "zh": "Sophie 那本？她跟我说过。“给下一个人”，对吧？"
+        },
+        {
+          "who": "Lin",
+          "en": "That's right. I'm supposed to find someone who needs it more than I do.",
+          "zh": "对。我应该找到一个比我更需要它的人。"
+        },
+        {
+          "who": "Jake",
+          "en": "Well, this city has eight million people. Somebody's bound to need it.",
+          "zh": "嗯，这座城市有八百万人，总会有人需要的。"
+        },
+        {
+          "who": "Lin",
+          "en": "No pressure, then. What's the plan for tomorrow?",
+          "zh": "那就没压力了。明天什么安排？"
+        },
+        {
+          "who": "Jake",
+          "en": "Team meeting at nine. Dana, our creative director, wants to touch base before we kick things off.",
+          "zh": "九点开团队会。我们的创意总监 Dana 想在项目启动前先碰个头。"
+        },
+        {
+          "who": "Lin",
+          "en": "Touch base. Is that good or bad?",
+          "zh": "Touch base？这是好事还是坏事？"
+        },
+        {
+          "who": "Jake",
+          "en": "It just means a quick chat. Trust me, you'll hear a lot of phrases like that.",
+          "zh": "就是简单聊聊。相信我，这种说法你会听到很多。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "机场的接机牌出了什么问题？",
+          "options": [
+            "写成了 Jake 的名字",
+            "林的名字拼错了",
+            "牌子忘带了"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林住在哪里？",
+          "options": [
+            "曼哈顿",
+            "布鲁克林三楼，没有电梯",
+            "公司楼上"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "“touch base” 在这里是什么意思？",
+          "options": [
+            "简单聊一聊",
+            "开除某人",
+            "去打棒球"
+          ],
+          "answer": 0
+        }
+      ],
+      "next_zh": "第二天一早就要去公司开会。会上的英语，你一半都没听懂……"
+    },
+    {
+      "id": 2,
+      "level": "B2",
+      "title": "Touch Base",
+      "title_zh": "碰个头",
+      "scene_zh": "公司第一天。Dana 的会议节奏很快，满是你在伦敦从没听过的说法。",
+      "lines": [
+        {
+          "who": "Dana",
+          "en": "Morning, everyone. Let's make this quick. Lin, welcome aboard. We're thrilled to have you.",
+          "zh": "大家早。我们快点开。林，欢迎加入，很高兴你来。"
+        },
+        {
+          "who": "Lin",
+          "en": "Thank you. I'm really glad to be here.",
+          "zh": "谢谢，我真的很高兴来到这里。"
+        },
+        {
+          "who": "Dana",
+          "en": "So, the big picture. We've got three new clients this quarter, and our bandwidth is pretty limited.",
+          "zh": "先说大局。这个季度有三个新客户，我们的人手很紧。"
+        },
+        {
+          "who": "Marcus",
+          "en": "Ballpark, how many hours are we talking for the first project?",
+          "zh": "大概估一下，第一个项目要多少小时？"
+        },
+        {
+          "who": "Dana",
+          "en": "Ballpark? Two hundred. But let's circle back on that once we've seen the brief.",
+          "zh": "大概两百小时。不过看完需求说明再回头细谈。"
+        },
+        {
+          "who": "Lin",
+          "en": "Sorry, can I check something? When you say bandwidth, you mean time, not internet?",
+          "zh": "抱歉，我能确认一下吗？你说 bandwidth，是指时间，不是网速？"
+        },
+        {
+          "who": "Marcus",
+          "en": "Ha, yeah. Time and energy. Don't worry, I had to learn all this too. I'm from Ohio.",
+          "zh": "哈，对。指时间和精力。别担心，这些我也是学来的。我是俄亥俄来的。"
+        },
+        {
+          "who": "Dana",
+          "en": "Good question, Lin. Always ask. I'd much rather you ask than guess.",
+          "zh": "问得好，林。随时问。我宁可你问，也不要你猜。"
+        },
+        {
+          "who": "Lin",
+          "en": "In that case, what does 'circle back' mean? It sounds like we're going around in circles.",
+          "zh": "那我再问一个，circle back 是什么意思？听起来像是在原地打转。"
+        },
+        {
+          "who": "Dana",
+          "en": "It means we'll come back to it later. Although, honestly, sometimes we do go around in circles.",
+          "zh": "意思是晚点再回来讨论。不过说实话，有时候我们确实在打转。"
+        },
+        {
+          "who": "Marcus",
+          "en": "Welcome to corporate America. Want me to make you a cheat sheet?",
+          "zh": "欢迎来到美国职场。要不要我给你做张小抄？"
+        },
+        {
+          "who": "Lin",
+          "en": "Yes, please. I'll take any help I can get.",
+          "zh": "好啊，拜托了。有帮助我都要。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Dana 说的 bandwidth 指什么？",
+          "options": [
+            "网速",
+            "时间和精力",
+            "预算"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "Dana 希望林遇到不懂的时候怎么做？",
+          "options": [
+            "自己猜",
+            "直接问",
+            "下班后查词典"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "Marcus 主动提出帮林做什么？",
+          "options": [
+            "一张常用说法的小抄",
+            "带她去吃饭",
+            "替她开会"
+          ],
+          "answer": 0
+        }
+      ],
+      "next_zh": "晚上回到公寓，房东 Alvarez 太太已经在楼梯口等着你了。"
+    },
+    {
+      "id": 3,
+      "level": "B2",
+      "title": "The Landlady",
+      "title_zh": "房东太太",
+      "scene_zh": "你拎着购物袋爬上三楼。Alvarez 太太在楼梯口等你，好像有话要说。",
+      "lines": [
+        {
+          "who": "Mrs Alvarez",
+          "en": "There you are! You must be Lin. I'm Rosa Alvarez. I live on the first floor.",
+          "zh": "你回来了！你一定是林吧。我是 Rosa Alvarez，住一楼。"
+        },
+        {
+          "who": "Lin",
+          "en": "Nice to meet you, Mrs Alvarez. Is everything all right?",
+          "zh": "很高兴认识您，Alvarez 太太。一切都好吗？"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "Oh, everything's fine. I just wanted to warn you about the radiator. It makes a terrible noise at night.",
+          "zh": "哦，都好。我只是想提醒你暖气片的事，它晚上响得厉害。"
+        },
+        {
+          "who": "Lin",
+          "en": "I did hear something last night. I thought someone was hitting the pipes with a hammer.",
+          "zh": "我昨晚确实听到了动静，还以为有人拿锤子敲水管。"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "That's just New York. The super is coming on Tuesday to take a look.",
+          "zh": "那就是纽约特色。管理员周二会来看看。"
+        },
+        {
+          "who": "Lin",
+          "en": "The super? Is that like a manager?",
+          "zh": "Super？是类似物业经理吗？"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "The superintendent. He fixes things, takes out the trash, and complains about everybody.",
+          "zh": "就是 superintendent。他修东西、倒垃圾，还爱抱怨所有人。"
+        },
+        {
+          "who": "Lin",
+          "en": "We'd call that a caretaker in London. Without the complaining, usually.",
+          "zh": "在伦敦我们叫 caretaker。一般不抱怨。"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "Ha! You're funny. Where are you from originally?",
+          "zh": "哈！你真有意思。你原来是哪里人？"
+        },
+        {
+          "who": "Lin",
+          "en": "China, but I lived in London for almost two years before this.",
+          "zh": "中国，不过来这儿之前在伦敦住了将近两年。"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "My parents came from Puerto Rico. When they arrived, they didn't speak a word of English. Now look at me, I never stop talking.",
+          "zh": "我父母是从波多黎各来的。刚来的时候一句英语都不会。现在看看我，一开口就停不下来。"
+        },
+        {
+          "who": "Lin",
+          "en": "That gives me hope. If you ever need anything, I'm on the third floor.",
+          "zh": "这让我有信心了。您要是需要帮忙，我就在三楼。"
+        },
+        {
+          "who": "Mrs Alvarez",
+          "en": "I know, honey. I'm the landlady. Now go and eat something, you look exhausted.",
+          "zh": "我知道，亲爱的，我是房东。快去吃点东西吧，你看起来累坏了。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Alvarez 太太想提醒林什么？",
+          "options": [
+            "暖气片晚上很吵",
+            "房租要涨",
+            "楼下有狗"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "纽约的 super 是什么人？",
+          "options": [
+            "超市店员",
+            "大楼管理员，负责维修和倒垃圾",
+            "邻居"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "Alvarez 太太的父母刚到美国时英语怎么样？",
+          "options": [
+            "说得很好",
+            "一句也不会",
+            "只会读不会说"
+          ],
+          "answer": 1
+        }
+      ],
+      "next_zh": "周末，Jake 和 Marcus 约你去吃早午餐。账单来的时候，你不知道该给多少小费。"
+    },
+    {
+      "id": 4,
+      "level": "B2",
+      "title": "Brunch",
+      "title_zh": "早午餐",
+      "scene_zh": "周日上午，Jake 和 Marcus 带你去布鲁克林一家很火的早午餐店。",
+      "lines": [
+        {
+          "who": "Marcus",
+          "en": "Okay, this place has the best pancakes in Brooklyn. Don't let the line scare you.",
+          "zh": "好，这家的松饼是布鲁克林最好的。别被排队吓到。"
+        },
+        {
+          "who": "Lin",
+          "en": "In London, a queue this long would be for a concert, not breakfast.",
+          "zh": "在伦敦，排这么长的队应该是买演唱会门票，不是吃早饭。"
+        },
+        {
+          "who": "Jake",
+          "en": "Brunch, Lin. In New York, brunch is basically a religion.",
+          "zh": "是早午餐，林。在纽约，早午餐差不多算是一种信仰。"
+        },
+        {
+          "who": "Lin",
+          "en": "I'll have the eggs, please. Scrambled. And a coffee.",
+          "zh": "我要鸡蛋，炒蛋。再来一杯咖啡。"
+        },
+        {
+          "who": "Marcus",
+          "en": "Two eggs over easy, bacon, and a stack of pancakes. And keep the coffee coming.",
+          "zh": "两个单面嫩煎蛋、培根、一叠松饼。咖啡给我续着。"
+        },
+        {
+          "who": "Lin",
+          "en": "Over easy? I'm going to add that to the cheat sheet.",
+          "zh": "Over easy？我要把这个加进小抄里。"
+        },
+        {
+          "who": "Jake",
+          "en": "So, one week in. How's the Big Apple treating you?",
+          "zh": "来了一周了，纽约对你怎么样？"
+        },
+        {
+          "who": "Lin",
+          "en": "Honestly? Everyone asks how I am, but nobody waits for the answer. It took me a few days to realise it's just hello.",
+          "zh": "说实话？每个人都问我好不好，但没人等我回答。我过了好几天才明白，那其实就是打招呼。"
+        },
+        {
+          "who": "Marcus",
+          "en": "That's the most New York thing I've ever heard. Okay, here's the check.",
+          "zh": "这是我听过最纽约的事了。好，账单来了。"
+        },
+        {
+          "who": "Lin",
+          "en": "How much should I leave? In London, I'd just round it up a little.",
+          "zh": "我该给多少？在伦敦我就把零头凑整一下。"
+        },
+        {
+          "who": "Jake",
+          "en": "Here it's usually twenty percent. The servers depend on tips. Their basic pay is really low.",
+          "zh": "这里一般给百分之二十。服务员靠小费生活，他们的底薪很低。"
+        },
+        {
+          "who": "Lin",
+          "en": "Twenty percent. Okay. I think I just learned more about America than in a whole week at work.",
+          "zh": "百分之二十，好。我觉得这顿饭让我对美国的了解，比上一整周班还多。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "林点了什么样的鸡蛋？",
+          "options": [
+            "单面嫩煎",
+            "炒蛋",
+            "水煮蛋"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林发现纽约人问 “How are you?” 其实是什么意思？",
+          "options": [
+            "真的想知道她过得怎样",
+            "只是打招呼",
+            "在邀请她吃饭"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "为什么在美国一般要给 20% 的小费？",
+          "options": [
+            "法律规定",
+            "服务员底薪很低，靠小费",
+            "为了表示不满意"
+          ],
+          "answer": 1
+        }
+      ],
+      "next_zh": "周一，Dana 交给你一个大项目：为一家社区图书馆做全新的形象设计。"
+    },
+    {
+      "id": 5,
+      "level": "C1",
+      "title": "The Library",
+      "title_zh": "图书馆",
+      "scene_zh": "新项目的客户是皇后区的一家社区图书馆。馆长 Brooks 先生带你参观。",
+      "lines": [
+        {
+          "who": "Mr Brooks",
+          "en": "Welcome to the Jackson Heights library. Forgive the mess. We've been meaning to repaint for about fifteen years.",
+          "zh": "欢迎来到杰克逊高地图书馆。有点乱，请见谅。我们说要重新粉刷已经说了十五年了。"
+        },
+        {
+          "who": "Lin",
+          "en": "It's lovely. It feels like people actually use it, which is more than you can say for some libraries.",
+          "zh": "这里很好。感觉是真的有人在用，不是每个图书馆都能做到这一点。"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "Oh, they use it. People here speak over a hundred and fifty languages. For a lot of them, this is the first place they come when they arrive.",
+          "zh": "他们确实在用。这一带的人说一百五十多种语言。对很多人来说，这是他们刚到这里时第一个来的地方。"
+        },
+        {
+          "who": "Lin",
+          "en": "Why the first place?",
+          "zh": "为什么是第一个？"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "Free internet, free classes, and nobody asks you for papers. It's warm, and it's quiet. That matters when everything else is new.",
+          "zh": "免费上网、免费上课，没人查你的证件。这里暖和、安静。当别的一切都陌生的时候，这些很重要。"
+        },
+        {
+          "who": "Lin",
+          "en": "I know that feeling. When I first moved to London, a little café did the same thing for me.",
+          "zh": "我懂那种感觉。我刚到伦敦的时候，一家小咖啡馆对我也是这样的。"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "Then you understand the brief better than most designers. We want people to see this place from the street and think, that's for me.",
+          "zh": "那你比大多数设计师更懂我们的需求。我们希望人们在街上看到这里就会想：这是为我准备的。"
+        },
+        {
+          "who": "Lin",
+          "en": "What's the budget?",
+          "zh": "预算是多少？"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "That's the difficult part. Let's just say it's smaller than the coffee budget at your office.",
+          "zh": "这就是难办的地方了。这么说吧，比你们公司的咖啡预算还少。"
+        },
+        {
+          "who": "Lin",
+          "en": "Then we'll have to be creative. Who's that girl in the corner? She's been reading the same page for ten minutes.",
+          "zh": "那我们只能想办法了。角落里那个女孩是谁？她盯着同一页看了十分钟了。"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "That's Ana. She arrived from Brazil a few months ago. She comes every day after school, but she hardly says a word.",
+          "zh": "那是 Ana，几个月前从巴西来的。她每天放学都来，但几乎不说话。"
+        },
+        {
+          "who": "Lin",
+          "en": "She reminds me of someone. Me, about two years ago.",
+          "zh": "她让我想起一个人。两年前的我。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "为什么很多新移民来到这里先去图书馆？",
+          "options": [
+            "那里有工作机会",
+            "免费上网上课、不查证件、温暖安静",
+            "离机场近"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "馆长希望新形象达到什么效果？",
+          "options": [
+            "让人在街上看到就觉得“这是给我的”",
+            "吸引游客拍照",
+            "看起来更昂贵"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "关于 Ana，哪一项正确？",
+          "options": [
+            "她在图书馆工作",
+            "她几个月前从巴西来，几乎不说话",
+            "她是馆长的女儿"
+          ],
+          "answer": 1
+        }
+      ],
+      "next_zh": "预算少得可怜。而那个总坐在角落里看书的女孩，你总觉得在哪儿见过她的眼神。"
+    },
+    {
+      "id": 6,
+      "level": "C1",
+      "title": "Small Budget, Big Idea",
+      "title_zh": "小预算，大点子",
+      "scene_zh": "回到公司，你向 Dana 和 Marcus 汇报图书馆项目。预算实在太少了。",
+      "lines": [
+        {
+          "who": "Dana",
+          "en": "So, how bad is the budget? Give it to me straight.",
+          "zh": "预算到底有多糟？直说吧。"
+        },
+        {
+          "who": "Lin",
+          "en": "It's tiny. If we design it the usual way, we can afford a new sign and maybe some paint.",
+          "zh": "非常少。按常规方式做，只够做一块新招牌，也许再加点油漆。"
+        },
+        {
+          "who": "Marcus",
+          "en": "So we're talking a logo and a prayer.",
+          "zh": "也就是说，一个标志加一句祈祷。"
+        },
+        {
+          "who": "Lin",
+          "en": "Not necessarily. What if the community designs it with us? The library is used by people who speak over a hundred languages.",
+          "zh": "不一定。如果让社区和我们一起设计呢？用这个图书馆的人说一百多种语言。"
+        },
+        {
+          "who": "Dana",
+          "en": "Go on. I'm listening.",
+          "zh": "继续说，我在听。"
+        },
+        {
+          "who": "Lin",
+          "en": "We ask people to write one word, in their own language, that means 'welcome' or 'home' to them. Then we paint those words across the front of the building.",
+          "zh": "我们请大家用自己的语言写一个对他们来说意味着“欢迎”或“家”的词，然后把这些词画满整个大楼正面。"
+        },
+        {
+          "who": "Marcus",
+          "en": "Okay, that's actually kind of brilliant. And the paint's cheap.",
+          "zh": "好吧，这其实挺妙的。而且油漆便宜。"
+        },
+        {
+          "who": "Dana",
+          "en": "I love it, but I can see a problem. The building belongs to the city. Any change to the outside has to be approved at a public meeting.",
+          "zh": "我很喜欢，但我看到一个问题。大楼归市政府所有，外观的任何改动都要在公开会议上通过。"
+        },
+        {
+          "who": "Lin",
+          "en": "A public meeting. With an audience?",
+          "zh": "公开会议？有观众的那种？"
+        },
+        {
+          "who": "Dana",
+          "en": "A town hall. Usually a few hundred people, a microphone, and at least one person who's angry about everything.",
+          "zh": "市民大会。通常几百人、一个麦克风，至少一个对什么都不满的人。"
+        },
+        {
+          "who": "Lin",
+          "en": "And who presents the idea?",
+          "zh": "那谁来介绍这个方案？"
+        },
+        {
+          "who": "Dana",
+          "en": "It's your idea, Lin. You present it. I'll be in the front row.",
+          "zh": "这是你的点子，林。你来讲，我坐第一排。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "按常规方式，预算只够做什么？",
+          "options": [
+            "整栋楼翻新",
+            "一块招牌，也许再加点油漆",
+            "一场开幕派对"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林的点子是什么？",
+          "options": [
+            "请名人代言",
+            "让社区居民用自己的语言写“欢迎”或“家”，画在大楼正面",
+            "把图书馆搬到新地方"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "为什么方案要在公开会议上通过？",
+          "options": [
+            "大楼归市政府所有",
+            "Dana 想看林演讲",
+            "图书馆要收门票"
+          ],
+          "answer": 0
+        }
+      ],
+      "next_zh": "方案要在社区听证会上公开介绍。三百个人，一个麦克风。"
+    },
+    {
+      "id": 7,
+      "level": "C1",
+      "title": "Town Hall",
+      "title_zh": "市民大会",
+      "scene_zh": "社区市民大会。台下坐满了人，你站在麦克风前。",
+      "lines": [
+        {
+          "who": "Mr Brooks",
+          "en": "Our next speaker is Lin, from the design team working on the library. Lin, the floor is yours.",
+          "zh": "下一位发言的是林，来自负责图书馆项目的设计团队。林，请。"
+        },
+        {
+          "who": "Lin",
+          "en": "Thank you. I'd like to start with a question. What was the first word you learned in English?",
+          "zh": "谢谢。我想先问一个问题：你学会的第一个英语单词是什么？"
+        },
+        {
+          "who": "Lin",
+          "en": "Mine was 'sorry'. I said it about fifty times on my first day in London.",
+          "zh": "我的是“sorry”。我在伦敦的第一天说了大概五十遍。"
+        },
+        {
+          "who": "Lin",
+          "en": "Our idea is simple. We want to cover the front of the library with your words, in your languages, for 'welcome' and 'home'.",
+          "zh": "我们的想法很简单：用你们的语言，把你们心中表示“欢迎”和“家”的词，画满图书馆的正面。"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "Thank you, Lin. Are there any questions? Yes, the gentleman at the back.",
+          "zh": "谢谢林。有问题吗？好，后排那位先生。"
+        },
+        {
+          "who": "Marcus",
+          "en": "Playing devil's advocate here, but isn't this just decoration? People need books and computers, not paint.",
+          "zh": "我来唱个反调：这不就是装饰吗？大家需要的是书和电脑，不是油漆。"
+        },
+        {
+          "who": "Lin",
+          "en": "That's a fair point, and I'd be worried too if this money came out of the book budget. It doesn't.",
+          "zh": "这个问题提得有道理，如果这笔钱是从买书的预算里出的，我也会担心。但不是。"
+        },
+        {
+          "who": "Lin",
+          "en": "But I'd also argue that a building has to invite you in before its books can help you. A lot of people walk past this library every day without realising it's for them.",
+          "zh": "而且我想说，一栋楼得先请你进门，里面的书才帮得上你。很多人每天路过这家图书馆，却没意识到它是为他们开的。"
+        },
+        {
+          "who": "Mr Brooks",
+          "en": "Shall we take a vote? All those in favour?",
+          "zh": "那我们表决吧？赞成的请举手？"
+        },
+        {
+          "who": "Dana",
+          "en": "That's a lot of hands. Lin, I think you just won over a room full of New Yorkers.",
+          "zh": "好多手。林，我觉得你刚刚说服了一屋子纽约人。"
+        },
+        {
+          "who": "Lin",
+          "en": "Was that Marcus asking the difficult question?",
+          "zh": "刚才提尖锐问题的是 Marcus 吗？"
+        },
+        {
+          "who": "Dana",
+          "en": "Of course. Every town hall needs someone to disagree. We just made sure it was a friendly one.",
+          "zh": "当然。每场市民大会都需要有人唱反调，我们只是确保那个人是自己人。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "林演讲开头问了大家什么？",
+          "options": [
+            "你最喜欢哪本书",
+            "你学会的第一个英语单词是什么",
+            "你来纽约多久了"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "面对“这只是装饰”的质疑，林怎么回答？",
+          "options": [
+            "承认方案没用",
+            "钱不是从买书预算里出的，而且楼要先吸引人进门",
+            "说那个人不懂设计"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "提出尖锐问题的人其实是谁？",
+          "options": [
+            "Marcus，提前安排好的",
+            "馆长",
+            "一位陌生居民"
+          ],
+          "answer": 0
+        }
+      ],
+      "next_zh": "会后，人都散了。那个总是不说话的女孩，却朝你走了过来。"
+    },
+    {
+      "id": 8,
+      "level": "C1",
+      "title": "Ana",
+      "title_zh": "Ana",
+      "scene_zh": "大会散场后，Ana 鼓起勇气走到你面前。",
+      "lines": [
+        {
+          "who": "Ana",
+          "en": "Excuse me. Sorry. You said your first word was 'sorry'. Mine too.",
+          "zh": "打扰一下，对不起。你说你的第一个词是 sorry。我也是。"
+        },
+        {
+          "who": "Lin",
+          "en": "Hi! You're Ana, aren't you? I've seen you reading in the corner.",
+          "zh": "嗨！你是 Ana 吧？我见过你在角落看书。"
+        },
+        {
+          "who": "Ana",
+          "en": "Yes. I read a lot. But I don't speak. When I speak, people say 'what?' and I feel stupid.",
+          "zh": "是的。我读很多书，但我不说话。我一说话，别人就说“什么？”，我就觉得自己很笨。"
+        },
+        {
+          "who": "Lin",
+          "en": "Can I tell you a secret? In London, I once asked for a 'bag of chips' and the man gave me crisps. I was too embarrassed to correct him.",
+          "zh": "我能告诉你一个秘密吗？在伦敦，我有一次要“一袋 chips”，那人给了我薯片。我不好意思纠正他。"
+        },
+        {
+          "who": "Ana",
+          "en": "Really? But your English is perfect.",
+          "zh": "真的吗？可你的英语很完美。"
+        },
+        {
+          "who": "Lin",
+          "en": "It isn't perfect. It's just practised. There's a big difference.",
+          "zh": "不是完美，只是练得多。这差别可大了。"
+        },
+        {
+          "who": "Ana",
+          "en": "How did you practise? Nobody talks to me except my teachers.",
+          "zh": "你怎么练的？除了老师，没人跟我说话。"
+        },
+        {
+          "who": "Lin",
+          "en": "I practised a little every day. I read sentences out loud, I talked to shopkeepers, and I made a lot of mistakes in front of very kind people.",
+          "zh": "我每天练一点。把句子大声读出来，跟店主聊天，在很友善的人面前犯了很多错。"
+        },
+        {
+          "who": "Ana",
+          "en": "I don't know any kind people here yet.",
+          "zh": "我在这里还不认识什么友善的人。"
+        },
+        {
+          "who": "Lin",
+          "en": "You know Mr Brooks. And now you know me. How about this? Every Thursday after school, we talk for half an hour. In English, with mistakes allowed.",
+          "zh": "你认识 Brooks 先生，现在也认识我了。这样吧：每周四放学后，我们聊半小时。说英语，允许犯错。"
+        },
+        {
+          "who": "Ana",
+          "en": "Mistakes allowed? Okay. I can do mistakes.",
+          "zh": "允许犯错？好。犯错我会。"
+        },
+        {
+          "who": "Lin",
+          "en": "Then you're already ahead of where I was. See you on Thursday.",
+          "zh": "那你已经比当年的我强了。周四见。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Ana 为什么不敢说英语？",
+          "options": [
+            "她不会读写",
+            "别人一说“什么？”她就觉得自己笨",
+            "她家里不让她说"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林说她的英语为什么好？",
+          "options": [
+            "天生就会",
+            "不是完美，而是练得多",
+            "上了很贵的课"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林和 Ana 约定了什么？",
+          "options": [
+            "每周四放学后用英语聊半小时，允许犯错",
+            "一起去伦敦",
+            "让 Ana 来公司实习"
+          ],
+          "answer": 0
+        }
+      ],
+      "next_zh": "开幕前一周，Emma 打来视频电话：她要来纽约了。"
+    },
+    {
+      "id": 9,
+      "level": "C1",
+      "title": "Visitors",
+      "title_zh": "客人",
+      "scene_zh": "Emma 从伦敦飞来看你，正好赶上图书馆的开幕。Jake 坚持要亲自带她逛纽约。",
+      "lines": [
+        {
+          "who": "Emma",
+          "en": "Lin! I can't believe I'm actually here. Everything is so big. Even the coffee.",
+          "zh": "林！我真不敢相信我来了。什么都好大，连咖啡都是。"
+        },
+        {
+          "who": "Jake",
+          "en": "You must be the famous Emma. Lin talks about you constantly.",
+          "zh": "你一定就是大名鼎鼎的 Emma。林总提起你。"
+        },
+        {
+          "who": "Emma",
+          "en": "Only good things, I hope. You must be Jake, the man who stole my flatmate.",
+          "zh": "希望都是好话。你一定是 Jake，抢走我室友的人。"
+        },
+        {
+          "who": "Jake",
+          "en": "Guilty. Though in my defence, Lin chose to come.",
+          "zh": "认罪。不过替自己辩解一句，是林自己选择来的。"
+        },
+        {
+          "who": "Lin",
+          "en": "Be nice, both of you. Emma, how's Arthur? And the Blue Door?",
+          "zh": "你们俩客气点。Emma，Arthur 怎么样？蓝门呢？"
+        },
+        {
+          "who": "Emma",
+          "en": "Busier than ever. He's started a Thursday conversation night. He says he got the idea from you.",
+          "zh": "比以前还忙。他办了个周四会话之夜，说是从你那儿学来的点子。"
+        },
+        {
+          "who": "Lin",
+          "en": "That's funny. I've just started Thursday conversations with a girl here. Her name's Ana.",
+          "zh": "真巧。我刚在这里和一个女孩开始了周四对话，她叫 Ana。"
+        },
+        {
+          "who": "Emma",
+          "en": "The next person? From the notebook?",
+          "zh": "下一个人？笔记本里说的那个？"
+        },
+        {
+          "who": "Lin",
+          "en": "Maybe. I haven't given it to her yet. I want to wait for the right moment.",
+          "zh": "也许吧。我还没给她，想等一个合适的时机。"
+        },
+        {
+          "who": "Jake",
+          "en": "Speaking of moments, Lin, I need to ask you something. The studio wants you to stay another year. Dana's already written the offer.",
+          "zh": "说到时机，林，我有件事要问你。公司希望你再留一年，Dana 已经把聘书写好了。"
+        },
+        {
+          "who": "Emma",
+          "en": "Another year? Lin, you don't have to decide now.",
+          "zh": "再留一年？林，你不用现在就决定。"
+        },
+        {
+          "who": "Lin",
+          "en": "I know. Let's get through the opening first. Then I'll think about the rest.",
+          "zh": "我知道。先把开幕办完，其他的之后再想。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Arthur 在伦敦办了什么新活动？",
+          "options": [
+            "周四会话之夜",
+            "读书俱乐部",
+            "咖啡课"
+          ],
+          "answer": 0
+        },
+        {
+          "q": "林为什么还没把笔记本给 Ana？",
+          "options": [
+            "忘带了",
+            "想等一个合适的时机",
+            "Ana 不想要"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "Jake 带来了什么消息？",
+          "options": [
+            "项目被取消了",
+            "公司希望林再留一年",
+            "Sophie 要来纽约"
+          ],
+          "answer": 1
+        }
+      ],
+      "next_zh": "开幕那天，Ana 要站到台上，用英语读一段她自己写的文字。"
+    },
+    {
+      "id": 10,
+      "level": "C1",
+      "title": "For the Next Person",
+      "title_zh": "给下一个人",
+      "scene_zh": "图书馆开幕。正面墙上画满了一百多种语言的“欢迎”和“家”。Ana 走上了台。",
+      "lines": [
+        {
+          "who": "Mr Brooks",
+          "en": "Welcome, everyone, to the new Jackson Heights library. Before we cut the ribbon, a young reader would like to say a few words.",
+          "zh": "欢迎大家来到焕然一新的杰克逊高地图书馆。剪彩之前，一位年轻的读者想说几句话。"
+        },
+        {
+          "who": "Ana",
+          "en": "Hello. My name is Ana. I am fourteen, and I came from Brazil seven months ago.",
+          "zh": "大家好，我叫 Ana，十四岁，七个月前从巴西来。"
+        },
+        {
+          "who": "Ana",
+          "en": "When I arrived, I did not speak. Not because I had no words, but because I was afraid of the wrong ones.",
+          "zh": "刚来的时候，我不说话。不是因为我没有词，而是因为我怕说错。"
+        },
+        {
+          "who": "Ana",
+          "en": "Every Thursday, a friend told me that mistakes are allowed. So today I am making mistakes in front of all of you.",
+          "zh": "每个星期四，一个朋友告诉我：可以犯错。所以今天，我在你们所有人面前犯错。"
+        },
+        {
+          "who": "Ana",
+          "en": "The word I wrote on the wall is 'casa'. It means home. This library was my first one here.",
+          "zh": "我写在墙上的词是 casa，意思是家。这座图书馆是我在这里的第一个家。"
+        },
+        {
+          "who": "Emma",
+          "en": "Lin, are you crying?",
+          "zh": "林，你在哭吗？"
+        },
+        {
+          "who": "Lin",
+          "en": "Absolutely not. It's the paint. My eyes are sensitive to paint.",
+          "zh": "绝对没有。是油漆。我的眼睛对油漆过敏。"
+        },
+        {
+          "who": "Lin",
+          "en": "Ana, that was wonderful. I have something for you. It was given to me by someone in Edinburgh.",
+          "zh": "Ana，你讲得太好了。我有样东西给你。这是爱丁堡的一个人给我的。"
+        },
+        {
+          "who": "Ana",
+          "en": "A notebook? There's writing on the first page. 'For the next person, who needs it more than I do.'",
+          "zh": "一本笔记本？第一页写着字：“给下一个人，他比我更需要它。”"
+        },
+        {
+          "who": "Lin",
+          "en": "Fill it with your mistakes and your new words. And one day, when you meet someone who's afraid to speak, you'll know what to do with it.",
+          "zh": "把你的错误和新学的词都写进去。有一天，当你遇到一个不敢开口的人，你就知道该怎么做了。"
+        },
+        {
+          "who": "Jake",
+          "en": "So, Lin. The offer. Have you decided?",
+          "zh": "那么，林，聘书的事，你决定了吗？"
+        },
+        {
+          "who": "Lin",
+          "en": "I have. I'll stay another year. I've got a Thursday appointment I'm not ready to give up.",
+          "zh": "决定了。我再留一年。我有个周四的约，还不想放弃。"
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Ana 写在墙上的词是什么意思？",
+          "options": [
+            "欢迎",
+            "家",
+            "书"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林把什么交给了 Ana？",
+          "options": [
+            "一封推荐信",
+            "那本写着“给下一个人”的笔记本",
+            "图书馆的钥匙"
+          ],
+          "answer": 1
+        },
+        {
+          "q": "林最后的决定是什么？",
+          "options": [
+            "回伦敦",
+            "去爱丁堡",
+            "在纽约再留一年"
+          ],
+          "answer": 2
+        }
+      ],
+      "next_zh": "第四季完。新的剧集会继续更新。"
+    }
+  ]
+}
