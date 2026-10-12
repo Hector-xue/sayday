@@ -156,23 +156,25 @@ function ListeningView({ test, p, answers, set, full }: { test: number; p: Part;
   const [exam, setExam] = useState(true)
   const [state, setState] = useState<'ready' | 'playing' | 'paused' | 'done'>('ready')
   const [cur, setCur] = useState(0)
-  const stop = useRef(false)
+  // 每次开始播放领一个轮次号；暂停、重听、换到下一部分都会让旧的播放循环看到号变了自己退出（不会和新的抢着放）
+  const round = useRef(0)
   const pos = useRef(0)
   useEffect(() => { kvGet<boolean>('listening_exam', true).then(setExam); prefetch(p.lines.map((l, k) => clipOfLine(test, p.n, k, l)), accent) }, [])
+  useEffect(() => () => { round.current++; stopAudio() }, [])
   const go = async (from: number) => {
-    stop.current = false
+    const my = ++round.current
     setState('playing')
     for (let k = from; k < p.lines.length; k++) {
       pos.current = k
       setCur(k)
       try { await play(clipOfLine(test, p.n, k, p.lines[k]), accent) } catch { /* 这句没音频：跳过 */ }
-      if (stop.current) return
+      if (my !== round.current) return
       await new Promise((r) => setTimeout(r, p.lines[k + 1]?.who !== p.lines[k].who ? 450 : 250))
-      if (stop.current) return
+      if (my !== round.current) return
     }
     setState('done')
   }
-  const pause = () => { stop.current = true; stopAudio(); setState('paused') }
+  const pause = () => { round.current++; stopAudio(); setState('paused') }
   const toggleExam = () => { const v = !exam; setExam(v); kvSet('listening_exam', v) }
   return (
     <>
@@ -194,7 +196,7 @@ function ListeningView({ test, p, answers, set, full }: { test: number; p: Part;
               <div className="spacer" />
               {!exam && !full && state !== 'done' && (
                 <>
-                  <button className="icon-btn" aria-label="上一句" onClick={() => { pause(); setTimeout(() => go(Math.max(0, pos.current - 1)), 50) }}><Icon.back /></button>
+                  <button className="icon-btn" aria-label="上一句" onClick={() => { stopAudio(); go(Math.max(0, pos.current - 1)) }}><Icon.back /></button>
                   {state === 'playing'
                     ? <button className="icon-btn" aria-label="暂停" onClick={pause}><Icon.stop /></button>
                     : <button className="icon-btn" aria-label="继续" onClick={() => go(pos.current)}><Icon.play /></button>}
