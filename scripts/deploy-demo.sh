@@ -23,6 +23,7 @@ for d in fonts shots; do for f in "$ROOT"/site/assets/$d/*; do cat "$f" > "$STAG
 mkdir -p "$STAGE/brand"
 for s in 32 64 180 192 512; do cat "$ROOT/assets/brand/icon-$s.png" > "$STAGE/brand/icon-$s.png"; done
 cat "$ROOT/assets/brand/favicon.ico" > "$STAGE/favicon.ico"
+cat "$ROOT/assets/brand/og.png" > "$STAGE/brand/og.png"
 # 示范读音：预生成音频 + 自定义句子用的 Kokoro（模型由 spikes/tts 准备到 .cache/models/kokoro）
 TTS=$ROOT/.cache/models/kokoro/onnx-community/Kokoro-82M-v1.0-ONNX
 TNM=$ROOT/content/audio/node_modules

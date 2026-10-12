@@ -1,3 +1,5 @@
+<img src="assets/brand/icon-192.png" width="72" alt="日日说">
+
 # 日日说 Sayday
 
 一个让人能坚持下去的英语学习软件：离线可用、AI 可插拔、带逐音素的发音纠正。网页和手机 App 共用一套代码。

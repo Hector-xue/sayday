@@ -19,7 +19,7 @@ cat "$ROOT/content/ielts/writing.json" > "$PUB/content/ielts-writing.json"
 for k in reading listening; do cat "$ROOT/content/ielts/$k.json" > "$PUB/content/ielts-$k.json"; done
 for f in calib.json cmudict.min.json cmudict.LICENSE; do cat "$ROOT/packages/speech/$f" > "$PUB/speech/$f"; done
 cat "$ROOT/.cache/models/charsiu_vocab.json" > "$PUB/speech/charsiu_vocab.json"
-for f in icon-180.png icon-192.png icon-512.png; do cat "$ROOT/assets/brand/$f" > "$ROOT/apps/web/public/$f"; done
+for f in icon-180.png icon-192.png icon-512.png icon-maskable-512.png; do cat "$ROOT/assets/brand/$f" > "$ROOT/apps/web/public/$f"; done
 # App 里也要：音素打分走原生插件，但语音识别（Moonshine）在 WebView 里用 wasm 跑
 for f in ort-wasm-simd-threaded.wasm ort-wasm-simd-threaded.mjs; do cat "$NM/onnxruntime-web/dist/$f" > "$PUB/ort/$f"; done
 if [ "${NATIVE:-0}" != "1" ]; then
