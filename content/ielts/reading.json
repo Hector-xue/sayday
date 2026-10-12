@@ -958,6 +958,485 @@
           ]
         }
       ]
+    },
+    {
+      "id": 3,
+      "passages": [
+        {
+          "n": 1,
+          "title": "Half Asleep",
+          "title_zh": "只睡一半的大脑",
+          "minutes": 20,
+          "paras": [
+            "For most of the twentieth century, scientists assumed that sleep was an all-or-nothing state: an animal was either awake, with its whole brain alert, or asleep, with its whole brain at rest. In the 1960s, however, researchers recording the brain activity of dolphins noticed something that did not fit this picture. While one half of the dolphin's brain showed the slow, regular waves typical of deep sleep, the other half remained fully awake. A few hours later, the two halves swapped roles.",
+            "This pattern, now known as unihemispheric slow-wave sleep, has since been found in many marine mammals and in a large number of birds. In each case, the eye connected to the waking half of the brain usually stays open, while the other eye closes. A sleeping dolphin can therefore keep watching its surroundings, and it can continue to swim slowly and rise to the surface to breathe. Unlike humans, dolphins do not breathe automatically; each breath is a deliberate action, so a fully unconscious dolphin would drown.",
+            "Birds appear to use half-brain sleep mainly for protection. In a well-known experiment published in 1999, researchers placed four mallard ducks in a row and filmed them as they slept. The two birds at the ends of the row spent far more time sleeping with one eye open than the birds in the middle, and they almost always kept the open eye pointed away from the group, towards the direction from which a predator would be most likely to come. When the end birds were moved to the middle, their behaviour changed within minutes.",
+            "The most remarkable evidence, though, comes from birds that sleep in the air. For decades it was suspected that frigatebirds, which can stay over the ocean for weeks at a time without landing, must sleep while flying, but nobody could prove it. In 2016 a team fitted small recording devices to the heads of fifteen frigatebirds in the Galapagos Islands. The data showed that the birds did indeed sleep in flight, sometimes with one half of the brain and sometimes with both, usually while gliding upwards on rising currents of warm air.",
+            "What surprised the researchers was how little the birds slept. On land, a frigatebird sleeps for more than twelve hours a day. In flight, the same birds slept for an average of only 42 minutes a day, in short periods lasting around twelve seconds each. How they manage to stay alert on so little sleep is still unknown, and it raises the question of whether the long hours that many animals spend sleeping are really as necessary as we think.",
+            "Humans cannot sleep with half a brain, but a milder version of the same effect may affect anyone who has spent a night in an unfamiliar place. Many people sleep badly on the first night in a hotel or a friend's house, a phenomenon that sleep researchers call the 'first-night effect'. In 2016, a study at Brown University found that during the first night in a sleep laboratory, the left half of the volunteers' brains slept less deeply than the right and responded more strongly to unusual sounds. On the second night, the difference disappeared.",
+            "The researchers suggest that this lighter sleep acts as a kind of night watchman, keeping part of the brain ready to wake the sleeper if something is wrong. The finding has a practical consequence for science itself: because the first night in a laboratory is unusual, many sleep studies now ignore the data from it and begin their measurements on the second night.",
+            "Half-brain sleep also raises questions that are not yet answered. If one half of the brain can rest while the other stays on guard, what exactly is being restored during sleep, and why do most animals, including humans, normally switch off both halves at once? Some scientists believe the answer lies in the high cost of keeping a whole brain awake; others think that some functions of sleep simply cannot be carried out by one half alone. Either way, the dolphins and frigatebirds suggest that sleep is far more flexible than was once believed."
+          ],
+          "groups": [
+            {
+              "type": "tfng",
+              "instr": "Do the following statements agree with the information given in the passage? Write TRUE, FALSE or NOT GIVEN.",
+              "instr_zh": "判断：和原文一致选 TRUE，矛盾选 FALSE，原文没提选 NOT GIVEN",
+              "items": [
+                {
+                  "n": 1,
+                  "q": "Early research on dolphin sleep supported the idea that sleep involves the whole brain.",
+                  "a": "F",
+                  "at": "noticed something that did not fit this picture",
+                  "why": "1960 年代对海豚的记录“不符合”全脑睡眠的看法，正好相反。"
+                },
+                {
+                  "n": 2,
+                  "q": "Dolphins have to stay partly awake in order to breathe.",
+                  "a": "T",
+                  "at": "each breath is a deliberate action, so a fully unconscious dolphin would drown",
+                  "why": "海豚每次呼吸都要主动完成，完全睡着会淹死。"
+                },
+                {
+                  "n": 3,
+                  "q": "Half-brain sleep has been found in every species of bird that has been studied.",
+                  "a": "NG",
+                  "at": "in a large number of birds",
+                  "why": "原文只说“很多鸟”，没说研究过的每一种鸟都有。"
+                },
+                {
+                  "n": 4,
+                  "q": "In the duck experiment, the birds at the ends of the row slept with one eye open more often than the others.",
+                  "a": "T",
+                  "at": "The two birds at the ends of the row spent far more time sleeping with one eye open than the birds in the middle",
+                  "why": "两头的鸭子睁一只眼睡的时间远多于中间的。"
+                },
+                {
+                  "n": 5,
+                  "q": "The ducks needed several days to change their behaviour after they were moved.",
+                  "a": "F",
+                  "at": "their behaviour changed within minutes",
+                  "why": "几分钟内就变了，不是几天。"
+                },
+                {
+                  "n": 6,
+                  "q": "The 2016 study was the first to prove that frigatebirds sleep while flying.",
+                  "a": "T",
+                  "at": "must sleep while flying, but nobody could prove it",
+                  "why": "此前只是猜测、没人能证明；2016 年的研究证实了。"
+                },
+                {
+                  "n": 7,
+                  "q": "Frigatebirds sleep for longer when they are flying than when they are on land.",
+                  "a": "F",
+                  "at": "In flight, the same birds slept for an average of only 42 minutes a day",
+                  "why": "陆地上超过 12 小时，飞行时每天平均只有 42 分钟。"
+                }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 1,
+              "instr": "Complete the notes below. Choose ONE WORD ONLY from the passage for each answer.",
+              "instr_zh": "笔记填空：每空只填原文里的一个词",
+              "title": "Sleeping with half a brain",
+              "items": [
+                {
+                  "n": 8,
+                  "q": "The eye linked to the waking half of the brain usually stays ___",
+                  "a": [
+                    "open"
+                  ],
+                  "at": "the eye connected to the waking half of the brain usually stays open",
+                  "why": "醒着的那半脑连着的眼睛通常睁着。"
+                },
+                {
+                  "n": 9,
+                  "q": "Ducks at the end of a row keep the open eye facing the direction a ___ would probably come from",
+                  "a": [
+                    "predator"
+                  ],
+                  "at": "towards the direction from which a predator would be most likely to come",
+                  "why": "睁着的眼睛朝着捕食者最可能来的方向。"
+                },
+                {
+                  "n": 10,
+                  "q": "Frigatebirds can stay over the ocean for ___ without landing",
+                  "a": [
+                    "weeks"
+                  ],
+                  "at": "can stay over the ocean for weeks at a time without landing",
+                  "why": "军舰鸟可以连续几周不落地。"
+                },
+                {
+                  "n": 11,
+                  "q": "In flight, each period of sleep lasts about twelve ___",
+                  "a": [
+                    "seconds"
+                  ],
+                  "at": "in short periods lasting around twelve seconds each",
+                  "why": "每段睡眠大约 12 秒。"
+                },
+                {
+                  "n": 12,
+                  "q": "Poor sleep in an unfamiliar place is called the 'first-night ___'",
+                  "a": [
+                    "effect"
+                  ],
+                  "at": "a phenomenon that sleep researchers call the 'first-night effect'",
+                  "why": "first-night effect：第一晚效应。"
+                },
+                {
+                  "n": 13,
+                  "q": "Many sleep studies now start taking measurements on the ___ night",
+                  "a": [
+                    "second"
+                  ],
+                  "at": "begin their measurements on the second night",
+                  "why": "第一晚的数据不用，从第二晚开始测。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "title": "The Science of Waiting in Line",
+          "title_zh": "排队的学问",
+          "minutes": 20,
+          "lettered": true,
+          "paras": [
+            "Few everyday experiences are as universally disliked as waiting in a queue. Surveys in several countries suggest that the average adult spends the equivalent of several days a year standing in lines, whether at supermarket checkouts, airport security or the doctor's surgery. Yet the frustration people feel has surprisingly little to do with the actual length of the wait. A queue that lasts ten minutes can feel perfectly acceptable on one occasion and unbearable on another, and the businesses that manage queues best are the ones that understand why this happens.",
+            "One of the first people to study this question seriously was the American researcher David Maister, who in 1985 set out a number of principles of the psychology of waiting. The most famous of these is that unoccupied time feels longer than occupied time. Maister described a hotel in which guests constantly complained about slow lifts. Rather than install faster lifts, which would have been very expensive, the managers put mirrors next to the lift doors. The complaints almost stopped, because people waiting for the lift now had something to look at: themselves.",
+            "A second principle concerns uncertainty. People find a wait much easier to accept when they know how long it will last. This is why many theme parks display estimated waiting times at the start of each queue, and why some parks deliberately overestimate them. A visitor who is told to expect a forty-minute wait but reaches the front in thirty minutes feels pleased rather than annoyed, even though half an hour is still a long time to stand in the sun. An unexplained delay, by contrast, makes even a short wait feel endless.",
+            "Fairness matters too, often more than speed. In a study of supermarket shoppers, researchers found that customers were more irritated by seeing someone who had arrived later being served first than by the length of the queue itself. For this reason, many banks and post offices have replaced several parallel lines with a single 'serpentine' queue that feeds all the counters. On average, a single queue is not much faster, but it guarantees that people are served in the order in which they arrived, and customers consistently rate it as better.",
+            "The mathematics of queues is a field of its own, known as queueing theory, which began in 1909 with the work of the Danish engineer Agner Krarup Erlang on telephone exchanges. One of its most important findings is that waiting times do not increase steadily as a system gets busier. When a service is working at around half its capacity, queues are short; but as it approaches full capacity, the average wait rises extremely quickly. A checkout that is busy 95 per cent of the time will have far longer queues than one that is busy 85 per cent of the time, even though the difference in workload is small.",
+            "Technology is now changing the experience of waiting altogether. Many restaurants and clinics send a text message when it is a customer's turn, allowing people to wait somewhere more comfortable, and some airports show live waiting times for security on their websites. Such systems do not make the wait itself any shorter, but they turn empty time into free time that people can use as they like. If Maister's principles are correct, that may turn out to be the most effective improvement of all."
+          ],
+          "groups": [
+            {
+              "type": "pick",
+              "instr": "The passage has six paragraphs, A–F. Choose the correct heading for each paragraph from the list of headings below.",
+              "instr_zh": "段落标题：给每段选一个标题（有多余）",
+              "options": [
+                "i. Waiting without standing in line",
+                "ii. The high cost of faster equipment",
+                "iii. Why order can matter more than speed",
+                "iv. Why the length of a wait is not the main problem",
+                "v. The surprising effect of a busy system",
+                "vi. Keeping people busy while they wait",
+                "vii. How queues differ between countries",
+                "viii. The benefit of telling people what to expect"
+              ],
+              "items": [
+                {
+                  "n": 14,
+                  "q": "Paragraph A",
+                  "a": 3,
+                  "at": "has surprisingly little to do with the actual length of the wait",
+                  "why": "A 段：让人烦的并不是等待的实际长度。"
+                },
+                {
+                  "n": 15,
+                  "q": "Paragraph B",
+                  "a": 5,
+                  "at": "unoccupied time feels longer than occupied time",
+                  "why": "B 段：无事可做的时间显得更长，电梯旁装镜子让人有事可做。"
+                },
+                {
+                  "n": 16,
+                  "q": "Paragraph C",
+                  "a": 7,
+                  "at": "People find a wait much easier to accept when they know how long it will last",
+                  "why": "C 段：知道要等多久就容易接受。"
+                },
+                {
+                  "n": 17,
+                  "q": "Paragraph D",
+                  "a": 2,
+                  "at": "Fairness matters too, often more than speed",
+                  "why": "D 段：公平（先来先服务）往往比快更重要。"
+                },
+                {
+                  "n": 18,
+                  "q": "Paragraph E",
+                  "a": 4,
+                  "at": "waiting times do not increase steadily as a system gets busier",
+                  "why": "E 段：系统接近满负荷时等待时间急剧上升。"
+                },
+                {
+                  "n": 19,
+                  "q": "Paragraph F",
+                  "a": 0,
+                  "at": "allowing people to wait somewhere more comfortable",
+                  "why": "F 段：短信叫号，人可以不站在队里等。"
+                }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 2,
+              "instr": "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
+              "instr_zh": "填空：每空不超过两个词，用原文的词",
+              "items": [
+                {
+                  "n": 20,
+                  "q": "Instead of buying faster lifts, the hotel managers put ___ beside the lift doors.",
+                  "a": [
+                    "mirrors"
+                  ],
+                  "at": "the managers put mirrors next to the lift doors",
+                  "why": "经理在电梯门旁装了镜子。"
+                },
+                {
+                  "n": 21,
+                  "q": "Some theme parks deliberately ___ the waiting times they display.",
+                  "a": [
+                    "overestimate"
+                  ],
+                  "at": "why some parks deliberately overestimate them",
+                  "why": "故意把等待时间报得长一点。"
+                },
+                {
+                  "n": 22,
+                  "q": "Many banks now use a single ___ queue for all their counters.",
+                  "a": [
+                    "serpentine"
+                  ],
+                  "at": "a single 'serpentine' queue that feeds all the counters",
+                  "why": "一条蛇形队通向所有柜台。"
+                },
+                {
+                  "n": 23,
+                  "q": "Queueing theory began with Erlang's work on ___.",
+                  "a": [
+                    "telephone exchanges"
+                  ],
+                  "at": "on telephone exchanges",
+                  "why": "爱尔朗研究的是电话交换局。"
+                }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 24,
+                  "q": "What does the writer say about an unexplained delay?",
+                  "options": [
+                    "It is less annoying than a long queue.",
+                    "It makes even a short wait feel very long.",
+                    "It is common in theme parks.",
+                    "It is usually shorter than expected."
+                  ],
+                  "a": 1,
+                  "at": "An unexplained delay, by contrast, makes even a short wait feel endless",
+                  "why": "不知道原因的延误让很短的等待也显得没完没了。"
+                },
+                {
+                  "n": 25,
+                  "q": "Customers prefer a single queue mainly because",
+                  "options": [
+                    "it is much faster.",
+                    "it needs fewer staff.",
+                    "people are served in the order they arrived.",
+                    "it takes up less space."
+                  ],
+                  "a": 2,
+                  "at": "it guarantees that people are served in the order in which they arrived",
+                  "why": "一条队保证先来先服务，速度其实差不多。"
+                },
+                {
+                  "n": 26,
+                  "q": "According to queueing theory, what happens as a system approaches full capacity?",
+                  "options": [
+                    "Waiting times rise steadily.",
+                    "Waiting times rise very quickly.",
+                    "Queues become shorter.",
+                    "Workload falls."
+                  ],
+                  "a": 1,
+                  "at": "as it approaches full capacity, the average wait rises extremely quickly",
+                  "why": "接近满负荷时平均等待时间急剧上升。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "Can Machines Translate Poetry?",
+          "title_zh": "机器能翻译诗吗？",
+          "minutes": 20,
+          "paras": [
+            "When the first computer translation systems were demonstrated in the 1950s, their creators predicted that the problem of translation would be solved within a few years. It took rather longer. For decades, machine translation produced text that was understandable at best and ridiculous at worst. In the last ten years, however, systems based on neural networks have improved so dramatically that, for many everyday purposes, their output is now difficult to distinguish from the work of a competent human translator. It is natural to ask whether there is anything left that machines cannot do.",
+            "Poetry is often offered as the obvious answer, and I think the claim deserves more careful examination than it usually receives. Those who make it tend to argue that poetry depends on qualities that cannot be reduced to rules: sound, rhythm, ambiguity and the associations that words carry for a particular culture. A machine, they say, translates meaning, and a poem is more than its meaning. There is something in this argument, but it is weaker than it first appears, because it assumes that human translators succeed where machines fail. Often they do not.",
+            "Translators of poetry have always disagreed about what a good translation is. Some believe that the translator's first duty is to the literal sense of the original; others argue that a poem should be recreated as a poem in the new language, even if this means changing its images or its argument. The Russian-American novelist Vladimir Nabokov famously insisted that the only honest translation of Pushkin's verse novel Eugene Onegin was a literal one, and produced a version so faithful that many readers found it almost unreadable. His critics produced versions that rhymed beautifully but said things Pushkin had never said.",
+            "If skilled human beings cannot agree on what success looks like, it is hard to claim that machines have clearly failed. In a small experiment carried out at a European university in 2021, readers were shown pairs of translations of short poems, one by a professional translator and one by a machine, without being told which was which. When asked which they preferred, the readers chose the human version only slightly more often than the machine version. When asked to identify the human translation, they did little better than chance.",
+            "None of this means that machines are good poets. What the experiment shows, I would argue, is that readers judge translated poetry largely on whether it reads naturally, and modern systems are extremely good at producing natural-sounding text. They are much less good at the decisions that make a translation interesting: when to keep a strange image, when to sacrifice a rhyme, when to leave an ambiguity unresolved. These are choices, and a machine does not make choices in the way that a translator does; it selects the most probable option.",
+            "That difference matters most for the poems that matter most. A great poem is rarely the most probable arrangement of its words; it surprises us. A system trained to produce likely sentences will tend to smooth out exactly the features that make the original unusual, and the result may be fluent but flat. Several translators who have tested these systems report the same experience: the machine version is a useful first draft, but the real work begins when they start to disagree with it.",
+            "The future of poetry translation is therefore likely to be neither purely human nor purely mechanical. Already, many professional translators use machine output to check their understanding of a difficult line or to see options they had not considered. Some readers will regret this. I do not. A tool that makes the translator's choices more visible, rather than making them for her, could make translation a more thoughtful art, not a less human one."
+          ],
+          "groups": [
+            {
+              "type": "ynng",
+              "instr": "Do the following statements agree with the claims of the writer? Write YES, NO or NOT GIVEN.",
+              "instr_zh": "判断作者观点：和作者观点一致选 YES，相反选 NO，作者没表态选 NOT GIVEN",
+              "items": [
+                {
+                  "n": 27,
+                  "q": "The first developers of machine translation underestimated how difficult the task would be.",
+                  "a": "Y",
+                  "at": "predicted that the problem of translation would be solved within a few years",
+                  "why": "他们以为几年就能解决，结果花了长得多的时间。"
+                },
+                {
+                  "n": 28,
+                  "q": "The claim that machines cannot translate poetry is usually examined carefully.",
+                  "a": "N",
+                  "at": "the claim deserves more careful examination than it usually receives",
+                  "why": "作者认为这个说法通常没被认真审视。"
+                },
+                {
+                  "n": 29,
+                  "q": "Human translators of poetry generally agree about the aims of translation.",
+                  "a": "N",
+                  "at": "Translators of poetry have always disagreed about what a good translation is",
+                  "why": "译诗的人一向对“好翻译”意见不一。"
+                },
+                {
+                  "n": 30,
+                  "q": "Nabokov's own novels were influenced by his work on Pushkin.",
+                  "a": "NG",
+                  "at": "The Russian-American novelist Vladimir Nabokov famously insisted",
+                  "why": "原文只说他坚持直译，没提他自己的小说受没受影响。"
+                },
+                {
+                  "n": 31,
+                  "q": "Machine output can help translators think more carefully about their decisions.",
+                  "a": "Y",
+                  "at": "A tool that makes the translator's choices more visible, rather than making them for her, could make translation a more thoughtful art",
+                  "why": "作者认为让选择更清楚的工具能让翻译更用心。"
+                }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 32,
+                  "q": "In the 2021 experiment, readers",
+                  "options": [
+                    "always preferred the human translations.",
+                    "could easily tell which translation was human.",
+                    "found it hard to identify the human translation.",
+                    "were told which version was produced by a machine."
+                  ],
+                  "a": 2,
+                  "at": "they did little better than chance",
+                  "why": "让读者认出人译的版本，结果和瞎猜差不多。"
+                },
+                {
+                  "n": 33,
+                  "q": "According to the writer, readers mainly judge translated poems by",
+                  "options": [
+                    "how closely they follow the original.",
+                    "whether they read naturally.",
+                    "whether they rhyme.",
+                    "who translated them."
+                  ],
+                  "a": 1,
+                  "at": "readers judge translated poetry largely on whether it reads naturally",
+                  "why": "读者主要看译诗读起来是否自然。"
+                },
+                {
+                  "n": 34,
+                  "q": "What does the writer say a machine does instead of making choices?",
+                  "options": [
+                    "It copies human translators.",
+                    "It keeps every image.",
+                    "It selects the most probable option.",
+                    "It leaves ambiguities unresolved."
+                  ],
+                  "a": 2,
+                  "at": "it selects the most probable option",
+                  "why": "机器不做选择，只挑最可能的那个。"
+                },
+                {
+                  "n": 35,
+                  "q": "Translators who have tested machine systems say the machine version",
+                  "options": [
+                    "is ready to publish.",
+                    "is a useful starting point.",
+                    "is too literal to use.",
+                    "is worse than a dictionary."
+                  ],
+                  "a": 1,
+                  "at": "the machine version is a useful first draft",
+                  "why": "机器译稿是有用的初稿。"
+                }
+              ]
+            },
+            {
+              "type": "pick",
+              "instr": "Complete the summary using the list of words, A–I, below.",
+              "instr_zh": "摘要填空：从下面 A~I 里选词（有多余）",
+              "options": [
+                "A. surprise",
+                "B. fluent",
+                "C. rules",
+                "D. rhythm",
+                "E. draft",
+                "F. meaning",
+                "G. probable",
+                "H. choices",
+                "I. culture"
+              ],
+              "items": [
+                {
+                  "n": 36,
+                  "q": "Critics of machine translation argue that a poem is more than its ___.",
+                  "a": 5,
+                  "at": "a poem is more than its meaning",
+                  "why": "诗不只是意思（meaning）。"
+                },
+                {
+                  "n": 37,
+                  "q": "Modern systems can produce translations that are natural and ___,",
+                  "a": 1,
+                  "at": "the result may be fluent but flat",
+                  "why": "机器译文流畅（fluent）但平淡。"
+                },
+                {
+                  "n": 38,
+                  "q": "but a great poem is rarely the most ___ arrangement of its words.",
+                  "a": 6,
+                  "at": "A great poem is rarely the most probable arrangement of its words",
+                  "why": "好诗很少是“最可能”的词序。"
+                },
+                {
+                  "n": 39,
+                  "q": "Instead, it creates a sense of ___.",
+                  "a": 0,
+                  "at": "it surprises us",
+                  "why": "好诗让人意外（surprise）。"
+                },
+                {
+                  "n": 40,
+                  "q": "The writer hopes machines will make translators' ___ more visible.",
+                  "a": 7,
+                  "at": "makes the translator's choices more visible",
+                  "why": "让译者的选择（choices）更清楚。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
