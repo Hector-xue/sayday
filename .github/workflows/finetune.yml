@@ -139,6 +139,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ft-feats
+          # .cache 是隐藏目录：通配符匹配到的文件默认会被跳过
+          include-hidden-files: true
           path: |
             .cache/logits_*ft_int8.npz
             .cache/feats_*ft_int8.npz
