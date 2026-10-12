@@ -11,6 +11,8 @@ import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/
 import { UpdateCard } from '../components/UpdateCard'
 import { MeEditor } from '../components/MeEditor'
 import { DEFAULT_ME, getMe, type Me } from '../lib/episodes'
+import { getSupport, type SupportState } from '../lib/support'
+import { SupportSheet } from '../components/SupportSheet'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -27,6 +29,9 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [me, setMe] = useState<Me>(DEFAULT_ME)
   const [editMe, setEditMe] = useState(false)
   useEffect(() => { getMe().then(setMe) }, [tick])
+  const [support, setSupport] = useState<SupportState>({})
+  const [showSupport, setShowSupport] = useState(false)
+  useEffect(() => { getSupport().then(setSupport) }, [tick])
   const [cache, setCache] = useState<{ clips: number; used: number } | null>(null)
   const loadCache = async () => {
     const clips = await cachedAudioCount()
@@ -183,6 +188,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       )}
       {upd && <div style={{ marginBottom: 12 }}><UpdateCard info={upd} /></div>}
       <div className="list" style={{ marginBottom: 12 }}>
+        <div className="set-row"><div className="k"><b>支持日日说</b><span>{support.since ? '已支持 · 谢谢' : '¥1 · 不付也一样用'}</span></div><button className="btn small quiet" onClick={() => setShowSupport(true)}>{support.since ? '看看' : '支持'}</button></div>
         <div className="set-row"><div className="k"><b>隐私</b><span>学习记录和录音只存在这台设备上</span></div><button className="btn small quiet" onClick={() => setPrivacy((x) => !x)}>{privacy ? '收起' : '详情'}</button></div>
         {privacy && (
           <div className="privacy">
@@ -203,6 +209,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
         <p className="small" style={{ marginTop: 8 }}><a href="https://github.com/Hector-xue/sayday" style={{ color: 'var(--brand)' }}>源码与完整致谢</a></p>
       </div>
       {editMe && <MeEditor me={me} onClose={() => setEditMe(false)} />}
+      {showSupport && <SupportSheet state={support} onChange={setSupport} onClose={() => setShowSupport(false)} />}
     </div>
   )
 }

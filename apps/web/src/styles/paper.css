@@ -107,11 +107,6 @@
 [data-style="paper"] .ep-today span, [data-style="paper"] .ep-today .muted { color: var(--on-solid-soft) !important; }
 
 /* ---------- 底栏：纸色、细墨线，当前项一枚朱红小点 ---------- */
-[data-style="paper"] .tabbar { background: color-mix(in srgb, var(--bg) 94%, transparent); border-top: 1px solid var(--ink); }
-[data-style="paper"] .tab { color: var(--faint); position: relative; }
-[data-style="paper"] .tab svg { stroke-width: 1.4; }
-[data-style="paper"] .tab[aria-current="page"] { color: var(--ink); font-weight: 600; }
-[data-style="paper"] .tab[aria-current="page"]::before { content: ''; position: absolute; top: -4px; width: 5px; height: 5px; border-radius: 50%; background: var(--brand); }
 
 /* ---------- 练习（全屏）：单词像词典里的词条 ---------- */
 [data-style="paper"] .step-kind { color: var(--brand); letter-spacing: .14em; font-size: 12px; }
@@ -211,3 +206,7 @@
 [data-style="paper"] .poster-s { font: italic 14px var(--serif); letter-spacing: .04em; color: var(--soft); opacity: 1; }
 [data-style="paper"] .poster-quote { font: italic 400 23px/1.35 var(--serif); }
 [data-style="paper"] .poster-quote small { font-style: normal; color: var(--soft); opacity: 1; }
+
+/* 底栏：纸色胶囊、细墨线描边，选中块是一块实墨 */
+[data-style="paper"] .tabbar { --dock-bg: color-mix(in srgb, var(--bg) 86%, transparent); --dock-line: var(--ink); --dock-shadow: 0 10px 26px -12px color-mix(in srgb, #000 30%, transparent); --dock-pill: var(--solid); --dock-rim: transparent; --dock-on: var(--on-solid); }
+[data-style="paper"] .tab svg { stroke-width: 1.4; }

@@ -105,11 +105,6 @@
 [data-style="marker"] .ep-today span, [data-style="marker"] .ep-today .muted { color: var(--on-feature-soft) !important; }
 
 /* ---------- 底栏：当前项的图标落在一枚荧光胶囊里 ---------- */
-[data-style="marker"] .tabbar { background: color-mix(in srgb, var(--surface) 90%, transparent); border-top: 0; box-shadow: 0 -1px 0 var(--hair); }
-[data-style="marker"] .tab { color: var(--faint); font-weight: 600; gap: 3px; }
-[data-style="marker"] .tab svg { width: 56px; height: 30px; padding: 3px 16px; border-radius: 99px; box-sizing: border-box; transition: background .2s; }
-[data-style="marker"] .tab[aria-current="page"] { color: var(--ink); font-weight: 700; }
-[data-style="marker"] .tab[aria-current="page"] svg { background: var(--mark); color: var(--on-mark); }
 
 /* ---------- 练习（全屏） ---------- */
 [data-style="marker"] .step-kind { align-self: flex-start; width: fit-content; color: var(--on-mark); background: var(--mark); padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
@@ -215,3 +210,8 @@
 [data-style="marker"] .poster-s { font-family: var(--display); font-weight: 700; color: var(--on-feature-soft); }
 [data-style="marker"] .poster-quote { font: 700 22px/1.25 var(--display); }
 [data-style="marker"] .poster-quote small { color: var(--on-feature-soft); opacity: 1; }
+
+/* 底栏：选中块就是一笔荧光黄 */
+[data-style="marker"] .tabbar { --dock-bg: color-mix(in srgb, var(--surface) 80%, transparent); --dock-pill: var(--mark); --dock-rim: transparent; --dock-on: var(--on-mark); }
+[data-style="marker"] .tab { font-weight: 600; }
+[data-style="marker"] .tab[aria-current="page"] { font-weight: 700; }

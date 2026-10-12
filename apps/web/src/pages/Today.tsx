@@ -7,11 +7,13 @@ import { db, today } from '../lib/db'
 import { getAi } from '../lib/ai'
 import { getProgress, loadSeasons, nextUp, teaserFor } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
-import { currentLevel } from '../lib/progress'
+import { currentLevel, stats } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
 import { currentStreak } from '../lib/widget'
 import { checkUpdate, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
+import { SupportSheet } from '../components/SupportSheet'
+import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -32,6 +34,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
   const [prevTeaser, setPrevTeaser] = useState('')
   const [streak, setStreak] = useState(0)
+  const [support, setSupport] = useState<{ s: SupportState; show: boolean } | null>(null)
+  const [supportOpen, setSupportOpen] = useState(false)
   useEffect(() => {
     if (profile) {
       dailySize(profile).then(setSize)
@@ -47,6 +51,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
     dueCount().then(setDue)
     recentDays(7).then(setWeek)
     currentStreak().then(setStreak)
+    Promise.all([getSupport(), stats()]).then(([s, st]) => setSupport({ s, show: shouldPrompt(s, st.days) }))
     if (profile) currentLevel(profile).then(setLv)
   }, [tick, profile])
   if (!profile || !d || !size) return <div className="loading">…</div>
@@ -165,6 +170,13 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
         </button>
       )}
+
+      {support?.show && (
+        <div className="card support-nudge" style={{ marginTop: 12 }}>
+          <div className="row"><div><b>喜欢日日说吗？</b><p className="small muted">一个人写的、没有广告。¥1 支持一下，这条就不再出现</p></div><div className="spacer" /><button className="btn small quiet" onClick={() => setSupportOpen(true)}>看看</button></div>
+        </div>
+      )}
+      {supportOpen && support && <SupportSheet state={support.s} prompted onChange={(s) => setSupport({ s, show: shouldPrompt(s, Infinity) })} onClose={() => setSupportOpen(false)} />}
 
       {retest && (
         <div className="card" style={{ marginTop: 12 }}>
