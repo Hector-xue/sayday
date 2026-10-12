@@ -77,7 +77,7 @@ jobs:
           npm run tauri -- android init
           cat ../../assets/brand/icon-1024.png > icon-src.png
           npm run tauri -- icon icon-src.png
-          # 自适应图标前景层换成留了安全区的版本（scripts/make-android-icon.py 生成）
+          # 自适应图标前景层换成留了安全区的版本（scripts/make-brand-icons.py 生成）
           for d in ../../assets/brand/android/mipmap-*; do cat "$d/ic_launcher_foreground.png" > "src-tauri/gen/android/app/src/main/res/$(basename "$d")/ic_launcher_foreground.png"; done
 
       # 版本号跟标签走（tauri 按 x.y.z 推出 versionCode，升级包必须比旧包大）

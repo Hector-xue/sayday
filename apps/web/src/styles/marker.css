@@ -200,8 +200,8 @@
 [data-style="marker"] .streak-num span { font-weight: 700; color: var(--ink); font-size: 13px; }
 [data-style="marker"] .streak-hero .week .dot { width: 30px; height: 30px; }
 /* 欢迎页：不放图标，一句大字 */
-[data-style="marker"] .hero-logo { display: none; }
-[data-style="marker"] .hero-en { display: block; margin: 12vh 0 28px; font: 800 64px/1.02 var(--display); color: var(--ink); }
+[data-style="marker"] .hero-logo { display: block; width: 64px; height: 64px; margin: 10vh 0 0; }
+[data-style="marker"] .hero-en { display: block; margin: 22px 0 28px; font: 800 64px/1.02 var(--display); color: var(--ink); }
 [data-style="marker"] .hero-en mark { color: var(--on-mark); background: var(--hl); padding: 0 .06em; margin-left: -.06em; }
 [data-style="marker"] .onb .hero-en + h1 { font-size: 24px; margin-top: 0; }
 [data-style="marker"] .onb > .onb-body { text-align: left !important; }
