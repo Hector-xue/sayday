@@ -12,7 +12,7 @@ import { eta, goalLabel, type Cefr } from '../lib/levels'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -105,6 +105,26 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onSt
         </>
       )}
 
+      {profile.goal.kind === 'ielts' && (
+        <>
+          <p className="section-title">雅思专项</p>
+          <div className="ai-grid">
+            <button className="card ai-card" onClick={() => onIelts('listening')}>
+              <span className="ai-ico">🎧</span><b>听力</b><span>四个部分，和真考一样只放一遍</span>
+            </button>
+            <button className="card ai-card" onClick={() => onIelts('reading')}>
+              <span className="ai-ico">📖</span><b>阅读</b><span>学术类文章，判断、填空、配对</span>
+            </button>
+            <button className="card ai-card" onClick={() => onIelts('speaking')}>
+              <span className="ai-ico">🎙️</span><b>口语模考</b><span>三个部分完整走一遍</span>
+            </button>
+            <button className="card ai-card" onClick={() => onAi('writing')}>
+              <span className="ai-ico">📝</span><b>写作</b><span>{hasAi ? '大作文 / 书信，AI 批改' : '需要先接入 AI'}</span>
+            </button>
+          </div>
+        </>
+      )}
+
       <p className="section-title">说和写</p>
       {hasAi ? (
         <div className="ai-grid">
@@ -114,11 +134,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings }: { onSt
           <button className="card ai-card" onClick={() => onAi('diary')}>
             <span className="ai-ico">✍️</span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
           </button>
-          {profile.goal.kind === 'ielts' && (
-            <button className="card ai-card wide-2" onClick={() => onAi('writing')}>
-              <span className="ai-ico">📝</span><b>雅思写作</b><span>大作文 / 书信，AI 按四项标准批改、逐句改错</span>
-            </button>
-          )}
         </div>
       ) : (
         <button className="card ai-card wide" onClick={() => onAi('setup')}>

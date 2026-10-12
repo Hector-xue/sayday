@@ -1,0 +1,175 @@
+{
+  "note": "日日说原创的雅思学术类阅读练习（不是真题）。每套 3 篇、40 题；at = 答案在原文里的依据（原文片段，逐字）",
+  "tests": [
+    {
+      "id": 1,
+      "passages": [
+        {
+          "n": 1,
+          "title": "The Return of the Red Kite",
+          "title_zh": "赤鸢归来",
+          "minutes": 20,
+          "paras": [
+            "For anyone driving along the motorway between London and Oxford today, the sight of a large, rust-coloured bird of prey circling above the fields is unremarkable. Yet only a few decades ago, the red kite had vanished entirely from England. Its return is widely regarded as one of the most successful wildlife reintroductions in British history, and it offers useful lessons for conservationists working with other species.",
+            "In the Middle Ages, red kites were common in towns as well as in the countryside. They were valued as scavengers: by feeding on rubbish and dead animals in the streets, they helped to keep settlements clean, and for a time it was even an offence to harm them. Attitudes changed from the sixteenth century onwards, when laws encouraged people to kill birds and animals that were thought to threaten crops and livestock. Later, the rise of large shooting estates in the nineteenth century made matters worse. Gamekeepers, whose job was to protect young pheasants and grouse, saw all birds of prey as competitors and shot, trapped or poisoned them in large numbers.",
+            "By the end of the nineteenth century, the red kite had been wiped out in England and Scotland. A small population survived only in the remote valleys of central Wales, where a few local landowners and volunteers protected nests from egg collectors. Even there, numbers remained dangerously low for most of the twentieth century, partly, it is thought, because the Welsh birds produced relatively few young.",
+            "In 1989, conservation organisations began a programme to bring the species back to England and Scotland. Rather than taking birds from the fragile Welsh population, they collected young kites from nests in Spain, and later from Sweden, where the species was still relatively common. The birds were released at carefully chosen sites, including the Chiltern Hills north-west of London. Before release, each bird was kept for several weeks in a large cage, or aviary, so that it could become familiar with its new surroundings. Each was also fitted with a small radio transmitter, which allowed scientists to follow its movements.",
+            "The choice of the Chilterns was not accidental. The area combined open farmland, where the birds could search for food, with patches of woodland that provided safe places to nest. Equally important, there were relatively few shooting estates nearby, which reduced the risk of illegal persecution. The results exceeded expectations. Within a few years the released birds had begun to breed, and their offspring spread steadily outwards. Today, red kites are a familiar sight across much of southern England, and the total UK population is estimated to be in the thousands of breeding pairs.",
+            "Not every release site was as successful. In some parts of northern Scotland, kite numbers grew far more slowly than expected, and examinations of dead birds revealed that many had died from eating poisoned bait that had been put out illegally to kill foxes or crows. The contrast between regions shows that habitat alone is not enough: a reintroduction depends just as much on how local people behave.",
+            "The red kite's comeback has also created some unexpected problems. In certain villages, residents began putting out meat in their gardens to attract the birds, and in some areas this has led to large groups of kites gathering over houses. Some people worry that the birds have become too dependent on human food, while others complain that kites occasionally snatch food from people's hands. Conservationists generally advise against feeding the birds, pointing out that there is plenty of natural food in the countryside.",
+            "Nevertheless, the project is now used as a model elsewhere. Supporters argue that its success came from three things: long-term funding, careful scientific monitoring and, above all, the support of farmers and landowners, who were consulted from the very beginning. Without that support, they say, even the best-planned release would have failed."
+          ],
+          "groups": [
+            {
+              "type": "tfng",
+              "instr": "Do the following statements agree with the information given in the passage? Write TRUE, FALSE or NOT GIVEN.",
+              "instr_zh": "判断：和原文一致选 TRUE，矛盾选 FALSE，原文没提选 NOT GIVEN",
+              "items": [
+                { "n": 1, "q": "In medieval times, red kites helped to keep towns clean.", "a": "T", "at": "they helped to keep settlements clean", "why": "第二段：中世纪赤鸢吃街上的垃圾和死动物，帮城镇保持清洁。Middle Ages = medieval times。" },
+                { "n": 2, "q": "In the sixteenth century, red kites were protected by law.", "a": "F", "at": "laws encouraged people to kill birds and animals", "why": "从 16 世纪起，法律反而鼓励人们杀掉被认为威胁庄稼和牲畜的鸟兽；受保护是更早的事。" },
+                { "n": 3, "q": "Gamekeepers regarded red kites as a threat to the birds they were protecting.", "a": "T", "at": "saw all birds of prey as competitors", "why": "猎场看守要保护雉鸡和松鸡，把所有猛禽都看作竞争者。competitors ≈ threat。" },
+                { "n": 4, "q": "Egg collectors were responsible for the decline of red kites in Scotland.", "a": "NG", "at": "protected nests from egg collectors", "why": "原文只说威尔士有人保护鸟巢不被收集鸟蛋的人拿走，没说苏格兰的减少是谁造成的。" },
+                { "n": 5, "q": "Birds from Wales were used in the first releases in England.", "a": "F", "at": "Rather than taking birds from the fragile Welsh population", "why": "原文明确说没有从脆弱的威尔士种群取鸟，而是从西班牙取。" },
+                { "n": 6, "q": "The Chiltern Hills were chosen partly because there were few shooting estates nearby.", "a": "T", "at": "there were relatively few shooting estates nearby", "why": "第五段列了选址理由：农田、林地，以及附近狩猎庄园少。" },
+                { "n": 7, "q": "Red kites now outnumber all other birds of prey in southern England.", "a": "NG", "at": "red kites are a familiar sight across much of southern England", "why": "只说赤鸢在英格兰南部很常见，没和其他猛禽比数量。" }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 1,
+              "instr": "Complete the summary below. Choose ONE WORD ONLY from the passage for each answer.",
+              "instr_zh": "填空：每空只填原文里的一个词",
+              "title": "Bringing the red kite back",
+              "items": [
+                { "n": 8, "q": "Before being released, young kites were kept for several weeks in an ___.", "a": ["aviary"], "at": "in a large cage, or aviary", "why": "放飞前每只鸟在大笼子（aviary）里待几周熟悉环境。" },
+                { "n": 9, "q": "Each bird carried a small radio ___ so that scientists could follow it.", "a": ["transmitter"], "at": "fitted with a small radio transmitter", "why": "每只鸟戴着小型无线电发射器（radio transmitter）。" },
+                { "n": 10, "q": "The Chilterns offered farmland for finding food and ___ for nesting.", "a": ["woodland"], "at": "patches of woodland that provided safe places to nest", "why": "林地提供安全的筑巢地点。" },
+                { "n": 11, "q": "In parts of northern Scotland, many birds died after eating ___ bait.", "a": ["poisoned"], "at": "eating poisoned bait", "why": "北苏格兰很多鸟吃了非法投放的毒饵死亡。" },
+                { "n": 12, "q": "In some villages, people began to put out ___ in their gardens.", "a": ["meat"], "at": "putting out meat in their gardens", "why": "一些村民在花园里放肉吸引赤鸢。" },
+                { "n": 13, "q": "Supporters say the most important factor was the support of ___ and landowners.", "a": ["farmers"], "at": "above all, the support of farmers and landowners", "why": "above all（最重要的是）后面就是农民和土地所有者的支持。题目已给出 landowners，所以填 farmers。" }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "title": "The Box That Changed the World",
+          "title_zh": "改变世界的箱子",
+          "minutes": 20,
+          "lettered": true,
+          "paras": [
+            "For most of history, loading a ship was a slow, labour-intensive business. Goods arrived at the docks in sacks, barrels, crates and bundles of every shape and size, and each item had to be lifted on board by teams of dock workers, known in Britain as dockers and in the United States as longshoremen. Fitting thousands of differently shaped objects into a ship's hold was a skilled job, and it could take longer to load and unload a vessel than to sail it across an ocean. Damage was common, and so was theft: dock work had a reputation for goods going missing somewhere between the ship and the warehouse.",
+            "The man usually credited with changing this was Malcom McLean, an American who owned a large trucking company rather than a shipping line. According to a story he often told, the idea came to him while he sat in his truck at a port in the 1930s, waiting for hours while his cargo was moved onto a ship piece by piece. Why, he wondered, could the whole trailer not simply be lifted on board? Two decades later he put the idea into practice. In April 1956, a converted oil tanker called the Ideal-X sailed from Newark, New Jersey, to Houston, Texas, carrying 58 metal containers on its deck.",
+            "The economic effects were immediate. McLean calculated that loading cargo in the traditional way cost around $5.86 per ton, while loading the Ideal-X had cost less than 16 cents per ton. Because containers could be packed at the factory and sealed, they also reduced theft and damage, which in turn lowered insurance costs. Ships spent days rather than weeks in port, which meant that each vessel could make more voyages a year.",
+            "Not everyone welcomed the change. For dock workers, containerisation threatened the jobs on which whole communities depended. A task that had once required a gang of twenty men could now be done by a single crane operator. Unions in several countries organised strikes, and in some ports long negotiations were needed before agreements were reached that protected the incomes of existing workers, even though fewer new workers would be hired.",
+            "A further obstacle was technical. In the early years, each shipping company designed its own containers, and the boxes of one company often could not be stacked on the ships, lorries or trains of another. A container that suited one firm's equipment might be a few inches too long for its rival's. It was not until the late 1960s that international standards for container sizes and corner fittings were agreed, allowing any box to be handled at any port in the world. The 20-foot container became the basic unit of measurement for the industry, and the capacity of ships is still expressed in 'twenty-foot equivalent units'.",
+            "Once standardisation was in place, the container transformed world trade. Because transport became so cheap, it was no longer necessary for factories to be close to their customers. Manufacturers could buy parts from one country, assemble them in another and sell the finished products on a third continent. Some economists now argue that the container did more to encourage globalisation than all the trade agreements signed in the same period.",
+            "The new system also had less visible consequences. Container ports need vast areas of flat land for storing boxes and deep water for giant ships, so cargo handling moved away from the old harbours in city centres to new sites, often many miles away. In cities such as London and New York, the traditional docks closed, and the neighbourhoods around them lost their main source of employment. Some of these areas were later redeveloped as offices and expensive housing, but for many former dock workers the change came too late."
+          ],
+          "groups": [
+            {
+              "type": "pick",
+              "instr": "The passage has seven paragraphs, A–G. Choose the correct heading for each paragraph from the list of headings below.",
+              "instr_zh": "段落标题配对：给 A~G 每段选一个标题（有两个多余）",
+              "options": [
+                "i. A difficult problem of incompatible designs",
+                "ii. The slow and costly way goods used to travel",
+                "iii. Why some workers opposed the new system",
+                "iv. A businessman's first experiment at sea",
+                "v. How cities lost their traditional harbours",
+                "vi. Dramatic savings in time and money",
+                "vii. A change in where products are made",
+                "viii. The role of governments in paying for new ports",
+                "ix. Early failures of container ships in bad weather"
+              ],
+              "items": [
+                { "n": 14, "q": "Paragraph A", "a": 1, "at": "loading a ship was a slow, labour-intensive business", "why": "A 段讲集装箱出现前装船又慢又费人工，还常损坏、失窃。" },
+                { "n": 15, "q": "Paragraph B", "a": 3, "at": "In April 1956, a converted oil tanker called the Ideal-X sailed", "why": "B 段讲卡车公司老板 McLean 的想法和 1956 年第一次海上试运。" },
+                { "n": 16, "q": "Paragraph C", "a": 5, "at": "The economic effects were immediate", "why": "C 段：每吨装船成本从 5.86 美元降到不到 16 美分，在港时间从几周缩到几天。" },
+                { "n": 17, "q": "Paragraph D", "a": 2, "at": "Not everyone welcomed the change", "why": "D 段讲码头工人担心失业、罢工。" },
+                { "n": 18, "q": "Paragraph E", "a": 0, "at": "the boxes of one company often could not be stacked on the ships, lorries or trains of another", "why": "E 段讲各公司的箱子尺寸不兼容，直到制定国际标准。" },
+                { "n": 19, "q": "Paragraph F", "a": 6, "at": "it was no longer necessary for factories to be close to their customers", "why": "F 段讲运输变便宜后，工厂不必靠近顾客，生产地发生转移。" },
+                { "n": 20, "q": "Paragraph G", "a": 4, "at": "the traditional docks closed", "why": "G 段讲港口迁出市中心，伦敦、纽约的老码头关闭。" }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                { "n": 21, "q": "According to paragraph B, McLean got his idea from", "options": ["his experience of working on ships.", "a long wait at a port.", "a suggestion from a dock worker.", "studying the design of oil tankers."], "a": 1, "at": "waiting for hours while his cargo was moved onto a ship piece by piece", "why": "他在港口卡车里等了好几个小时，看着货物一件件搬上船，才想到整车吊上去。" },
+                { "n": 22, "q": "Containers lowered insurance costs because", "options": ["ships became larger.", "fewer goods were stolen or damaged.", "voyages became shorter.", "cranes were safer than dock workers."], "a": 1, "at": "they also reduced theft and damage, which in turn lowered insurance costs", "why": "集装箱在工厂装好封箱，失窃和损坏少了，所以保险费降了。" },
+                { "n": 23, "q": "What did the agreements with dock workers in some ports achieve?", "options": ["They prevented the use of cranes.", "They guaranteed jobs for new workers.", "They protected the pay of existing workers.", "They delayed containerisation for several years."], "a": 2, "at": "protected the incomes of existing workers", "why": "协议保护了现有工人的收入，但新工人会招得更少——所以 B 错。" }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 2,
+              "instr": "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
+              "instr_zh": "填空：每空不超过两个词，用原文的词",
+              "items": [
+                { "n": 24, "q": "The Ideal-X was a converted ___.", "a": ["oil tanker", "tanker"], "at": "a converted oil tanker called the Ideal-X", "why": "Ideal-X 是改装的油轮。" },
+                { "n": 25, "q": "The international standards covered the sizes of containers and their ___.", "a": ["corner fittings"], "at": "international standards for container sizes and corner fittings", "why": "国际标准规定了尺寸和角件（corner fittings）。" },
+                { "n": 26, "q": "Container ports need large areas of ___ as well as deep water.", "a": ["flat land"], "at": "vast areas of flat land for storing boxes", "why": "集装箱港口需要大片平地堆箱，还需要深水。" }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "The Value of Boredom",
+          "title_zh": "无聊的价值",
+          "minutes": 20,
+          "paras": [
+            "Boredom has a poor reputation. Parents try to protect children from it, employers see it as a threat to productivity, and an entire industry of apps, streaming services and games competes to make sure that we never have to experience it. Yet in recent years a number of psychologists have begun to argue that boredom is not simply an unpleasant state to be avoided. Some go further, suggesting that it may perform a useful function – and that our increasing ability to escape it could be doing us harm.",
+            "Part of the difficulty in studying boredom is defining it. Researchers generally agree that it involves a desire to be engaged in some satisfying activity combined with an inability to find one. This distinguishes it from relaxation, in which a person is content to do nothing, and from apathy, in which the desire to act is itself missing. Boredom, in other words, is not a lack of feeling but an uncomfortable state of wanting – and, like hunger or pain, it may exist to push us towards a change of behaviour.",
+            "How strongly people wish to avoid that discomfort was shown in a well-known series of experiments published in 2014. Participants were asked to sit alone in a plain room for between six and fifteen minutes with nothing to do but think. Many found the experience unpleasant. More strikingly, when given the option of pressing a button that delivered a mild electric shock, a considerable number chose to shock themselves rather than simply sit with their thoughts – even though, earlier in the study, they had said they would pay money to avoid such a shock. Men were considerably more likely than women to press the button.",
+            "If boredom is so unwelcome, what might be its value? One answer comes from research on creativity. In a study carried out in Britain, one group of volunteers was given a deliberately dull task – copying numbers out of a telephone directory – before being asked to think of as many uses as possible for a pair of plastic cups. A second group went straight to the creative task. The volunteers who had been bored first produced more ideas, and the effect was even stronger for a third group who had only read the numbers rather than copying them. The researchers suggested that boredom encourages the mind to wander, and that daydreaming allows unusual connections to be made.",
+            "This explanation fits with a broader body of work on what is sometimes called the 'default mode' of the brain, a pattern of activity that appears when a person is not focused on the outside world. During these periods, the brain is far from idle: it seems to be reviewing memories, imagining the future and making sense of experience. If every quiet moment is immediately filled with a phone or a screen, the argument goes, this kind of internal processing is crowded out.",
+            "It would be a mistake, however, to conclude that boredom is always beneficial. Chronic boredom – a frequent, long-lasting tendency to feel bored – has been linked to a range of problems, including poor performance at school, overeating and risky behaviour. In such cases, boredom seems less a spur to creativity than a sign that something in a person's life or environment needs to change. Nor does the creativity research show that bored people produce better ideas, only more of them; whether those ideas are useful is a separate question.",
+            "In my view, the most reasonable conclusion lies somewhere between the extremes. The occasional experience of boredom is not a problem to be solved but a signal worth listening to. When we feel bored, we are being told that our current activity is not meeting our needs. The healthy response is neither to suffer in silence nor to reach automatically for distraction, but to ask what we actually want to be doing. Children, in particular, may benefit from being left to find their own entertainment from time to time, since learning to cope with empty time is itself a skill.",
+            "What seems clear is that the technology which allows us to avoid boredom so easily has arrived far faster than our understanding of its effects. It would be foolish to blame smartphones for every modern problem. But it would be equally foolish to assume that a mind which is never allowed to be bored loses nothing in the process."
+          ],
+          "groups": [
+            {
+              "type": "ynng",
+              "instr": "Do the following statements agree with the claims of the writer? Write YES, NO or NOT GIVEN.",
+              "instr_zh": "判断作者观点：和作者观点一致选 YES，相反选 NO，作者没表态选 NOT GIVEN",
+              "items": [
+                { "n": 27, "q": "Boredom is essentially a lack of any feeling.", "a": "N", "at": "Boredom, in other words, is not a lack of feeling", "why": "作者明确说无聊不是没有感觉，而是一种难受的“想要”。" },
+                { "n": 28, "q": "People who are bored want to be doing something satisfying.", "a": "Y", "at": "a desire to be engaged in some satisfying activity combined with an inability to find one", "why": "无聊 = 想做点有意思的事，但找不到。" },
+                { "n": 29, "q": "The experiments published in 2014 were poorly designed.", "a": "NG", "at": "a well-known series of experiments published in 2014", "why": "作者只介绍了实验内容，没有评价实验设计好坏。" },
+                { "n": 30, "q": "Children should sometimes be left to amuse themselves.", "a": "Y", "at": "Children, in particular, may benefit from being left to find their own entertainment from time to time", "why": "作者认为孩子有时自己找乐子是有益的。amuse themselves ≈ find their own entertainment。" },
+                { "n": 31, "q": "Smartphones are the main cause of today's psychological problems.", "a": "N", "at": "It would be foolish to blame smartphones for every modern problem", "why": "作者说把所有现代问题都怪到手机上是愚蠢的，和题目观点相反。" }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                { "n": 32, "q": "According to the writer, how is boredom different from apathy?", "options": ["Apathy is more unpleasant.", "In apathy, there is no wish to act.", "Boredom lasts for a longer time.", "Apathy is a form of relaxation."], "a": 1, "at": "apathy, in which the desire to act is itself missing", "why": "冷漠（apathy）是连行动的愿望都没有；无聊是有愿望但找不到事做。" },
+                { "n": 33, "q": "What was most surprising about the 2014 experiments?", "options": ["Many participants enjoyed sitting alone.", "Some participants chose a shock they had earlier said they would pay to avoid.", "Women pressed the button more often than men.", "The sessions lasted much longer than planned."], "a": 1, "at": "even though, earlier in the study, they had said they would pay money to avoid such a shock", "why": "More strikingly 后面：很多人宁愿电击自己——而之前他们说过愿意花钱避免电击。C 反了，是男性更多。" },
+                { "n": 34, "q": "In the British study, which group produced the most ideas?", "options": ["those who went straight to the creative task", "those who copied numbers first", "those who read numbers first", "those who were given plastic cups first"], "a": 2, "at": "the effect was even stronger for a third group who had only read the numbers", "why": "只读号码（更无聊）的那组效果更强。" },
+                { "n": 35, "q": "The writer mentions the 'default mode' of the brain in order to suggest that", "options": ["the brain stops working when we are bored.", "quiet moments may allow useful mental processing.", "using a phone improves memory.", "daydreaming is a sign of chronic boredom."], "a": 1, "at": "During these periods, the brain is far from idle", "why": "安静时大脑在整理记忆、想象未来；时间都被屏幕占满，这种处理就被挤掉了。" }
+              ]
+            },
+            {
+              "type": "pick",
+              "instr": "Complete the summary using the list of words, A–I, below.",
+              "instr_zh": "摘要填空：从下面 A~I 里选词（有多余）",
+              "options": ["A. useful", "B. reward", "C. long-lasting", "D. avoid", "E. number", "F. want", "G. rare", "H. sign", "I. quality"],
+              "items": [
+                { "n": 36, "q": "Chronic boredom is a frequent and ___ tendency, linked with problems such as poor performance at school.", "a": 2, "at": "a frequent, long-lasting tendency to feel bored", "why": "慢性无聊的定义：经常的、持久的（long-lasting）。" },
+                { "n": 37, "q": "In such cases, boredom may be a ___ that something in a person's life needs to change.", "a": 7, "at": "a sign that something in a person's life or environment needs to change", "why": "这时无聊更像一个信号（sign）。" },
+                { "n": 38, "q": "The creativity research only shows that bored people produce a greater ___ of ideas,", "a": 4, "at": "only more of them", "why": "研究只说明无聊的人想法更多（数量），没说更好。" },
+                { "n": 39, "q": "not that their ideas are more ___.", "a": 0, "at": "whether those ideas are useful is a separate question", "why": "想法是否有用（useful）是另一回事。I quality 是名词，放在 more ___ 里语法不通。" },
+                { "n": 40, "q": "The writer believes we should respond to boredom by asking what we really ___ to do.", "a": 5, "at": "to ask what we actually want to be doing", "why": "作者建议问问自己真正想做什么（want）。" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
