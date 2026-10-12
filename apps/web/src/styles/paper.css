@@ -1,0 +1,204 @@
+/* 风格「纸与墨」：像一本排得很好的英文读本。暖纸色底、墨色字、宋体标题、书籍衬线英文，只有一支朱红批改笔点睛。
+   只在 <html data-style="paper"> 下生效；深色版是“夜读”（暖黑底、米色字），纸纹保留。
+   字体：中文标题 Noto Serif SC Bold 子集（scripts/subset-title-font.py），英文 Newsreader（正体 + 斜体），都是 OFL */
+@font-face { font-family: 'Sayday Serif SC'; font-style: normal; font-weight: 700; font-display: swap; src: url(./fonts/noto-serif-sc-700-subset.woff2) format('woff2'); }
+@font-face { font-family: 'Newsreader'; font-style: italic; font-weight: 200 800; font-display: swap; src: url(./fonts/newsreader-latin-opsz-italic.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* 正体 Newsreader 在 marker.css 里已声明（同一个文件），这里不重复 */
+
+:root[data-style="paper"] {
+  --bg: #f3efe6; --surface: #faf8f2; --surface-2: #ebe5d8; --ink: #1d1c1a; --soft: #67625a; --faint: #8c867b; --hair: rgba(29, 28, 26, .13);
+  --brand: #c13f27; --brand-2: #c13f27; --brand-ink: #faf8f2; --brand-soft: #f2ddd3; --navy: #1d1c1a; --sun: #c13f27; --sun-ink: #faf8f2;
+  --good: #44743a; --good-bg: #e1e9d4; --warn: #94600f; --warn-bg: #f1e3c6; --bad: #b0371f; --bad-bg: #f3dad1;
+  --solid: #1d1c1a; --on-solid: #f3efe6; --on-solid-soft: rgba(243, 239, 230, .66);
+  --shadow: none; --r: 6px;
+  --title: 'Sayday Serif SC', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
+  --serif: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --num: 'Newsreader', Georgia, serif;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .18 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-style="paper"]:not([data-theme="light"]) {
+    --bg: #1b1916; --surface: #23211d; --surface-2: #2e2b26; --ink: #ece6da; --soft: #a69f92; --faint: #7e786d; --hair: rgba(236, 230, 218, .13);
+    --brand: #e2694d; --brand-2: #e2694d; --brand-ink: #1b1916; --brand-soft: rgba(226, 105, 77, .16);
+    --good: #8cbf73; --good-bg: rgba(140, 191, 115, .14); --warn: #e0b260; --warn-bg: rgba(224, 178, 96, .14); --bad: #f07a62; --bad-bg: rgba(240, 122, 98, .15);
+    --solid: #ece6da; --on-solid: #1b1916; --on-solid-soft: rgba(27, 25, 22, .66);
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .85 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color-scheme: dark;
+  }
+}
+:root[data-style="paper"][data-theme="dark"] {
+  --bg: #1b1916; --surface: #23211d; --surface-2: #2e2b26; --ink: #ece6da; --soft: #a69f92; --faint: #7e786d; --hair: rgba(236, 230, 218, .13);
+  --brand: #e2694d; --brand-2: #e2694d; --brand-ink: #1b1916; --brand-soft: rgba(226, 105, 77, .16);
+  --good: #8cbf73; --good-bg: rgba(140, 191, 115, .14); --warn: #e0b260; --warn-bg: rgba(224, 178, 96, .14); --bad: #f07a62; --bad-bg: rgba(240, 122, 98, .15);
+  --solid: #ece6da; --on-solid: #1b1916; --on-solid-soft: rgba(27, 25, 22, .66);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .85 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+/* ---------- 纸 ---------- */
+[data-style="paper"] body, [data-style="paper"] .session, [data-style="paper"] .sheet { background-color: var(--bg); background-image: var(--grain); }
+
+/* ---------- 字：中文标题宋体，不加负字距 ---------- */
+[data-style="paper"] h1, [data-style="paper"] h2, [data-style="paper"] h3 { font-family: var(--title); font-weight: 700; }
+[data-style="paper"] a { color: var(--brand); text-underline-offset: 3px; }
+[data-style="paper"] .page { padding-top: 28px; }
+[data-style="paper"] .page-head { margin: 4px 0 22px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); align-items: flex-end; }
+[data-style="paper"] .page-head h1 { font: 700 32px/1.15 var(--title); color: var(--ink); }
+[data-style="paper"] .page-head .small { font: italic 15px var(--serif); color: var(--soft); }
+[data-style="paper"] .section-title { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: .16em; color: var(--soft); margin: 34px 0 12px; }
+[data-style="paper"] .section-title::after { content: ''; flex: 1; height: 1px; background: var(--hair); }
+
+/* ---------- 卡片：不浮起来，靠发丝线和留白 ---------- */
+[data-style="paper"] .card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r); box-shadow: none; }
+[data-style="paper"] .card.raised { box-shadow: none; }
+[data-style="paper"] .list { border-radius: var(--r); border-color: var(--hair); background: var(--surface); }
+[data-style="paper"] .list-row .main b { font: 500 19px var(--serif); }
+[data-style="paper"] .sheet { border-radius: 14px 14px 0 0; }
+[data-style="paper"] .toast { background: var(--ink); color: var(--bg); border-radius: 4px; }
+
+/* ---------- 按钮：墨色实底，朱红只在点睛处 ---------- */
+[data-style="paper"] .btn { border-radius: 999px; border-color: var(--hair); background: transparent; font-weight: 600; }
+[data-style="paper"] .btn.primary { background: var(--solid); color: var(--on-solid); border-color: transparent; box-shadow: none; min-height: 54px; letter-spacing: .04em; }
+[data-style="paper"] .btn.ghost { border-color: transparent; color: var(--soft); }
+[data-style="paper"] .btn.quiet { background: transparent; border: 1px solid var(--ink); }
+[data-style="paper"] .icon-btn { background: transparent; border: 1px solid var(--hair); color: var(--ink); }
+[data-style="paper"] .icon-btn.ghost { border-color: transparent; color: var(--soft); }
+[data-style="paper"] .icon-btn.brand, [data-style="paper"] .icon-btn.playing { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+[data-style="paper"] .mini-btn { background: transparent; border: 1px solid var(--hair); }
+[data-style="paper"] .mini-btn.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+
+/* ---------- 进度：一条细墨线，朱红走过 ---------- */
+[data-style="paper"] .bar { height: 3px; border-radius: 0; background: var(--hair); }
+[data-style="paper"] .bar > i { border-radius: 0; background: var(--brand); }
+
+/* ---------- 今天 ---------- */
+[data-style="paper"] .streak-hero { margin: 0 0 22px; }
+[data-style="paper"] .streak-num b { font: italic 400 58px/.9 var(--serif); color: var(--ink); }
+[data-style="paper"] .streak-num span { font-size: 12px; letter-spacing: .1em; }
+[data-style="paper"] .week .d { font-family: var(--title); }
+[data-style="paper"] .week .dot { background: transparent; border: 1px solid var(--hair); color: var(--faint); font: 400 13px var(--serif); }
+[data-style="paper"] .week .dot.done { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+[data-style="paper"] .week .dot.min { background: var(--brand-soft); border-color: transparent; color: var(--brand); }
+[data-style="paper"] .week .dot.today { outline: 1.5px solid var(--brand); outline-offset: 2px; }
+[data-style="paper"] .today-card { background: transparent; border: 0; border-top: 3px solid var(--ink); border-radius: 0; padding: 18px 0 6px; }
+[data-style="paper"] .today-card > div > b { font: 700 22px/1.3 var(--title) !important; }
+[data-style="paper"] .today-list { margin: 16px 0 24px; }
+[data-style="paper"] .today-list li { padding: 14px 0; border-bottom: 1px solid var(--hair); }
+[data-style="paper"] .today-list li:last-child { border-bottom: 1px solid var(--hair); }
+[data-style="paper"] .today-list .ico { background: transparent; color: var(--ink); border: 1px solid var(--hair); border-radius: 50%; }
+[data-style="paper"] .today-list .t b { font: 700 16px var(--title); }
+[data-style="paper"] .today-list .n { font: italic 400 23px var(--serif); color: var(--ink); }
+[data-style="paper"] .today-list li.done .ico { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+[data-style="paper"] .today-list li.done .n { color: var(--soft); text-decoration: line-through var(--brand) 2px; }
+[data-style="paper"] .level-line b { font: 600 18px var(--serif); }
+[data-style="paper"] .done-banner .big, [data-style="paper"] .done-mark { background: transparent; border: 1px solid var(--ink); color: var(--ink); }
+
+/* 双栏入口：排成一张有格线的表 */
+[data-style="paper"] .ai-grid { gap: 0; border-top: 1px solid var(--hair); border-left: 1px solid var(--hair); }
+[data-style="paper"] .ai-grid .card { border: 0; border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); border-radius: 0; background: transparent; }
+[data-style="paper"] .ai-card { padding: 18px 16px; }
+[data-style="paper"] .ai-card b { font: 700 17px var(--title); }
+[data-style="paper"] .ai-card .ai-ico { width: auto; height: auto; background: none; color: var(--brand); justify-content: start; margin-bottom: 10px; }
+[data-style="paper"] .ai-card .ai-ico svg { width: 24px; height: 24px; stroke-width: 1.4; }
+[data-style="paper"] .ai-card.wide { border-style: solid; }
+[data-style="paper"] .ep-today { background: var(--solid); color: var(--on-solid); border: 0; padding: 22px 20px; }
+[data-style="paper"] .ep-today b.en { font: italic 500 30px/1.12 var(--serif) !important; color: var(--on-solid); margin: 4px 0 4px; }
+[data-style="paper"] .ep-today span, [data-style="paper"] .ep-today .muted { color: var(--on-solid-soft) !important; }
+
+/* ---------- 底栏：纸色、细墨线，当前项一枚朱红小点 ---------- */
+[data-style="paper"] .tabbar { background: color-mix(in srgb, var(--bg) 94%, transparent); border-top: 1px solid var(--ink); }
+[data-style="paper"] .tab { color: var(--faint); position: relative; }
+[data-style="paper"] .tab svg { stroke-width: 1.4; }
+[data-style="paper"] .tab[aria-current="page"] { color: var(--ink); font-weight: 600; }
+[data-style="paper"] .tab[aria-current="page"]::before { content: ''; position: absolute; top: -4px; width: 5px; height: 5px; border-radius: 50%; background: var(--brand); }
+
+/* ---------- 练习（全屏）：单词像词典里的词条 ---------- */
+[data-style="paper"] .step-kind { color: var(--brand); letter-spacing: .14em; font-size: 12px; }
+[data-style="paper"] .word-big { font: 400 64px/1.02 var(--serif); margin-top: 14px; }
+[data-style="paper"] .ipa { font: italic 18px var(--serif); margin-top: 8px; }
+[data-style="paper"] .zh-mean { font-size: 17px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hair); }
+[data-style="paper"] .example { border-top: 0; margin-top: 20px; }
+[data-style="paper"] .example .en { font-size: 23px; line-height: 1.5; }
+[data-style="paper"] .example .en mark, [data-style="paper"] .tap.hl { color: var(--brand); font-style: italic; font-weight: 500; background: none; }
+[data-style="paper"] .tap:active { background: var(--brand-soft); }
+[data-style="paper"] .tap.sung { color: var(--brand); }
+[data-style="paper"] .grade button { border-radius: var(--r); background: transparent; }
+[data-style="paper"] .grade .good { background: var(--solid); color: var(--on-solid); }
+[data-style="paper"] .grade .good small { color: var(--on-solid-soft); }
+[data-style="paper"] .opt { border-radius: var(--r); border: 1px solid var(--hair); background: var(--surface); }
+[data-style="paper"] .opt[aria-pressed="true"] { border-color: var(--ink); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--ink); }
+[data-style="paper"] .opt[aria-pressed="true"] b { color: var(--ink); }
+
+/* 跟读：朱红话筒，外面一圈纸色留白再一圈细线，像印章 */
+[data-style="paper"] .shadow-sentence { font: 400 30px/1.35 var(--serif); }
+[data-style="paper"] .rec-btn { background: var(--brand); color: var(--brand-ink); box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--hair); }
+[data-style="paper"] .rec-btn.on { background: var(--bad); color: #fff; box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--bad); }
+[data-style="paper"] .ring { background: conic-gradient(var(--c, var(--brand)) calc(var(--p) * 360deg), var(--hair) 0); }
+[data-style="paper"] .ring b { background: var(--bg); font: italic 400 28px var(--serif); }
+[data-style="paper"] .w b { font: 400 20px var(--serif); }
+[data-style="paper"] .tips { background: transparent; border-left: 2px solid var(--brand); border-radius: 0; padding: 4px 0 4px 14px; }
+[data-style="paper"] .tips b { color: var(--brand); }
+
+/* 欢迎页：一句斜体大字 */
+[data-style="paper"] .hero-logo { display: none; }
+[data-style="paper"] .hero-en { display: block; margin: 12vh 0 26px; font: italic 400 60px/1.02 var(--serif); color: var(--ink); }
+[data-style="paper"] .hero-en mark { background: none; color: var(--brand); }
+[data-style="paper"] .onb > .onb-body { text-align: left !important; }
+[data-style="paper"] .onb h1 { font: 700 26px/1.35 var(--title); color: var(--ink); }
+[data-style="paper"] .onb .hero-en + h1 { font-size: 22px; margin-top: 0; }
+
+/* 定级 / 报告 / 进步 */
+[data-style="paper"] .quiz-word { font: 400 56px/1.1 var(--serif); }
+[data-style="paper"] .report-level { font: italic 400 76px/1 var(--serif); color: var(--ink); }
+[data-style="paper"] .stat b { font: italic 400 34px/1.1 var(--serif); color: var(--ink); }
+[data-style="paper"] .skill-lv { font: italic 500 22px var(--serif); color: var(--ink); }
+[data-style="paper"] .chart .col i { background: var(--ink); border-radius: 0; }
+[data-style="paper"] .ladder .track { border-radius: 0; height: 4px; background: var(--hair); }
+[data-style="paper"] .ladder .track i { background: var(--brand); border-radius: 0; }
+[data-style="paper"] .ladder .rung b.goal { color: var(--brand); }
+[data-style="paper"] .band-rows div { background: transparent; border: 1px solid var(--hair); border-radius: var(--r); }
+[data-style="paper"] .band-rows b { font: italic 400 24px var(--serif); color: var(--ink); }
+
+/* 分段选择 / 输入 */
+[data-style="paper"] .seg { background: transparent; border: 1px solid var(--hair); border-radius: 999px; }
+[data-style="paper"] .seg button { border-radius: 999px; }
+[data-style="paper"] .seg button[aria-pressed="true"] { background: var(--solid); color: var(--on-solid); box-shadow: none; }
+[data-style="paper"] .input, [data-style="paper"] .search, [data-style="paper"] .composer textarea, [data-style="paper"] .diary-edit { background: var(--surface); border-color: var(--hair); border-radius: var(--r); }
+[data-style="paper"] .input:focus, [data-style="paper"] .search:focus, [data-style="paper"] .composer textarea:focus, [data-style="paper"] .diary-edit:focus { outline: 1.5px solid var(--ink); outline-offset: 0; }
+[data-style="paper"] .style-opt { border-radius: var(--r); }
+
+/* 剧集 / 对话 */
+[data-style="paper"] .ep-hero h2 { font: italic 500 32px/1.12 var(--serif); color: var(--ink); }
+[data-style="paper"] .ep-no { background: transparent; border: 1px solid var(--hair); font: italic 15px var(--serif); }
+[data-style="paper"] .stage-tabs span { background: transparent; border: 1px solid var(--hair); }
+[data-style="paper"] .stage-tabs span.on { background: var(--solid); border-color: var(--solid); color: var(--on-solid); }
+[data-style="paper"] .bubble.ep:not(.me), [data-style="paper"] .bubble.assistant { background: var(--surface); border-color: var(--hair); }
+[data-style="paper"] .bubble.ep.me { background: var(--surface-2); }
+[data-style="paper"] .bubble.user { background: var(--solid); color: var(--on-solid); }
+[data-style="paper"] .natural .nat.on { background: var(--brand-soft); }
+
+/* 发音 */
+[data-style="paper"] .phone-badge { background: transparent; border: 1px solid var(--brand); color: var(--brand); font: italic 500 18px var(--serif); }
+[data-style="paper"] .phone-chips button { background: transparent; border-color: var(--hair); border-radius: 999px; }
+[data-style="paper"] .pair-card.hot { border-color: var(--brand); }
+[data-style="paper"] .examiner { border-radius: var(--r); }
+[data-style="paper"] .examiner .ex-ico { background: transparent; border: 1px solid var(--hair); color: var(--brand); }
+[data-style="paper"] .intonation { background: transparent; border: 1px solid var(--hair); border-radius: var(--r); }
+[data-style="paper"] .intonation path.you { stroke: var(--brand); }
+[data-style="paper"] .mic-in { background: transparent; border: 1px solid var(--hair); }
+
+/* 雅思阅读 / 听力：文章就是书页 */
+[data-style="paper"] .passage h3 { font: 600 23px/1.3 var(--serif); }
+[data-style="paper"] .passage p { font: 18px/1.72 var(--serif); }
+[data-style="paper"] .passage mark, [data-style="paper"] .transcript-line mark { background: var(--brand-soft); color: inherit; }
+[data-style="paper"] .para-letter { font: italic 600 18px var(--serif); color: var(--brand); }
+[data-style="paper"] .q-n { background: transparent; border: 1px solid var(--hair); font: italic 14px var(--serif); color: var(--ink); border-radius: 50%; }
+[data-style="paper"] .chip { border-radius: 999px; border-width: 1px; background: transparent; }
+[data-style="paper"] .chip[aria-pressed="true"] { background: var(--solid); border-color: var(--solid); color: var(--on-solid); }
+[data-style="paper"] .gap-input { background: transparent; border-bottom: 1.5px solid var(--ink); border-radius: 0; font-family: var(--serif); font-size: 18px; }
+[data-style="paper"] .gap-input:focus { background: var(--brand-soft); }
+[data-style="paper"] .opt.right { border-color: var(--good); background: var(--good-bg); box-shadow: none; }
+[data-style="paper"] .opt.wrong { border-color: var(--bad); background: var(--bad-bg); box-shadow: none; }
+/* 吸顶的切换条要有实底，不然滚动时下面的字会透上来 */
+[data-style="paper"] .sticky-seg { background: var(--bg); }

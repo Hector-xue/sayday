@@ -25,6 +25,8 @@ try {
   if (process.env.PW) await p.authenticate({ username: 'sayday', password: process.env.PW })
   p.on('pageerror', (e) => errors.push('pageerror ' + e.message))
   p.on('dialog', (d) => d.accept())
+  // STYLE=paper 之类：用指定风格跑一遍（截图检查用）
+  if (process.env.STYLE) await p.evaluateOnNewDocument((s) => { try { localStorage.setItem('sayday-style', s) } catch {} }, process.env.STYLE)
   const audioHits = []
   p.on('response', (r) => { if (r.url().includes('/audio/')) audioHits.push(`${r.status()} ${r.url().replace(/^.*\/audio\//, '')}`) })
   p.on('console', (m) => { if (m.type() === 'error') errors.push('console ' + m.text().slice(0, 200)) })
