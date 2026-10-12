@@ -1,8 +1,10 @@
 """训练前端用的校准模型（仅免对齐特征：af、句内 af 均值、音素 id），导出为 JSON 供 JS 推理。
 
-用法: .venv/bin/python spikes/m0/export_calib.py
+用法: .venv/bin/python spikes/m0/export_calib.py [--model int8] [--train train]
+  换成微调模型：--model ft_int8 --train trainB（微调只用了 A 半说话人，校准必须用没见过的 B 半）
 产物: spikes/m0/web/samples/calib.json，.cache/calib_check.json（JS 对拍用的测试集样本）
 """
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -21,8 +23,12 @@ def lite(z):
     return np.c_[X[:, 2], X[:, 4], X[:, 5:]]
 
 
-tr = np.load(ROOT / ".cache" / "feats_train_int8.npz")
-te = np.load(ROOT / ".cache" / "feats_int8.npz")
+ap = argparse.ArgumentParser()
+ap.add_argument("--model", default="int8")
+ap.add_argument("--train", default="train")
+a = ap.parse_args()
+tr = np.load(ROOT / ".cache" / f"feats_{a.train}_{a.model}.npz")
+te = np.load(ROOT / ".cache" / f"feats_{a.model}.npz")
 m = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0).fit(lite(tr), tr["human"])
 
 trees = []

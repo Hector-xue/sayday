@@ -17,11 +17,13 @@ tok=$(printf 'protocol=https\nhost=github.com\n' | git credential fill 2>/dev/nu
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-# releases/latest 不含预发布，取列表第一条（按发布时间倒序）
-curl -fsSL --max-time 30 "${auth[@]}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/releases?per_page=1" > "$tmp/list.json"
+# releases/latest 不含预发布，取列表里第一条 App 版本（按发布时间倒序；只认 v 开头的 tag，模型等其他 Release 跳过）
+curl -fsSL --max-time 30 "${auth[@]}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/releases?per_page=20" > "$tmp/list.json"
 python3 - "$tmp/list.json" > "$tmp/plan" <<'PY'
 import json, sys
-r = json.load(open(sys.argv[1]))[0]
+r = next((x for x in json.load(open(sys.argv[1])) if x["tag_name"].startswith("v") and not x.get("draft")), None)
+if not r:
+    sys.exit("没有 App 版本的 Release")
 apk = next((a for a in r["assets"] if a["name"].endswith(".apk")), None)
 if not apk:
     sys.exit("最新 Release 没有 apk")
