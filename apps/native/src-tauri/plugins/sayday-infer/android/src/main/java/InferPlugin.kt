@@ -100,13 +100,20 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
+  // 模型从 APK 拷到私有目录才能按文件路径加载。拷的时候记下 App 的安装时间：
+  // 升级 App 后（可能换了模型，评分校准表也跟着换）安装时间变了，就重新拷一次
   private fun modelFile(): File {
     val f = File(activity.filesDir, "models/phone_ctc.int8.onnx")
-    if (!f.exists()) {
+    val stamp = File(activity.filesDir, "models/phone_ctc.stamp")
+    @Suppress("DEPRECATION")
+    val installed = activity.packageManager.getPackageInfo(activity.packageName, 0).lastUpdateTime.toString()
+    if (!f.exists() || !stamp.exists() || stamp.readText() != installed) {
       f.parentFile?.mkdirs()
       val tmp = File(f.path + ".tmp")
       activity.assets.open("models/phone_ctc.int8.onnx").use { input -> tmp.outputStream().use { input.copyTo(it, 1 shl 20) } }
-      tmp.renameTo(f)
+      f.delete()
+      if (!tmp.renameTo(f)) throw IllegalStateException("模型文件替换失败")
+      stamp.writeText(installed)
     }
     return f
   }
