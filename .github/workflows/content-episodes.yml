@@ -1,4 +1,4 @@
-# 剧集 + 雅思听力配音：content/episodes/*.json、content/ielts/listening.json 的台词 → Kokoro（每个角色自己的声音）→ mp3。美音 / 英音各一个任务，几分钟
+# 剧集 + 雅思听力配音：content/episodes/*.json、content/ielts/listening.json 的台词 → Kokoro（每个角色自己的声音）→ mp3。美音 / 英音各一个任务（四季 + 三套听力约 40~70 分钟）
 # 服务器用 ONLY=e scripts/sync-audio.sh <run_id> 发布到 sayday.ivyea.com/audio/{us,gb}/e/
 name: content-episodes
 
@@ -11,7 +11,7 @@ on:
 jobs:
   gen:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
