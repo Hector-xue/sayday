@@ -217,7 +217,7 @@ function Questions({ groups, answers, set }: { groups: Group[]; answers: Record<
         <div key={gi} className="q-group">
           <p className="section-title">第 {g.items[0].n}–{g.items.at(-1)!.n} 题 · {g.instr_zh}</p>
           <p className="small muted en" style={{ margin: '0 4px 10px' }}>{g.instr}</p>
-          {g.options && <div className="card q-options">{g.options.map((o) => <p key={o} className="en small">{o}</p>)}</div>}
+          {g.options?.some((o) => o.length > 2) && <div className="card q-options">{g.options.map((o) => <p key={o} className="en small">{o}</p>)}</div>}
           {g.title && <p className="en q-title">{g.title}</p>}
           {g.items.map((it) => <Q key={it.n} g={g} it={it} v={answers[it.n] ?? null} set={(v) => set(it.n, v)} />)}
         </div>

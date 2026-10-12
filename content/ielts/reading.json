@@ -25,13 +25,55 @@
               "instr": "Do the following statements agree with the information given in the passage? Write TRUE, FALSE or NOT GIVEN.",
               "instr_zh": "判断：和原文一致选 TRUE，矛盾选 FALSE，原文没提选 NOT GIVEN",
               "items": [
-                { "n": 1, "q": "In medieval times, red kites helped to keep towns clean.", "a": "T", "at": "they helped to keep settlements clean", "why": "第二段：中世纪赤鸢吃街上的垃圾和死动物，帮城镇保持清洁。Middle Ages = medieval times。" },
-                { "n": 2, "q": "In the sixteenth century, red kites were protected by law.", "a": "F", "at": "laws encouraged people to kill birds and animals", "why": "从 16 世纪起，法律反而鼓励人们杀掉被认为威胁庄稼和牲畜的鸟兽；受保护是更早的事。" },
-                { "n": 3, "q": "Gamekeepers regarded red kites as a threat to the birds they were protecting.", "a": "T", "at": "saw all birds of prey as competitors", "why": "猎场看守要保护雉鸡和松鸡，把所有猛禽都看作竞争者。competitors ≈ threat。" },
-                { "n": 4, "q": "Egg collectors were responsible for the decline of red kites in Scotland.", "a": "NG", "at": "protected nests from egg collectors", "why": "原文只说威尔士有人保护鸟巢不被收集鸟蛋的人拿走，没说苏格兰的减少是谁造成的。" },
-                { "n": 5, "q": "Birds from Wales were used in the first releases in England.", "a": "F", "at": "Rather than taking birds from the fragile Welsh population", "why": "原文明确说没有从脆弱的威尔士种群取鸟，而是从西班牙取。" },
-                { "n": 6, "q": "The Chiltern Hills were chosen partly because there were few shooting estates nearby.", "a": "T", "at": "there were relatively few shooting estates nearby", "why": "第五段列了选址理由：农田、林地，以及附近狩猎庄园少。" },
-                { "n": 7, "q": "Red kites now outnumber all other birds of prey in southern England.", "a": "NG", "at": "red kites are a familiar sight across much of southern England", "why": "只说赤鸢在英格兰南部很常见，没和其他猛禽比数量。" }
+                {
+                  "n": 1,
+                  "q": "In medieval times, red kites helped to keep towns clean.",
+                  "a": "T",
+                  "at": "they helped to keep settlements clean",
+                  "why": "第二段：中世纪赤鸢吃街上的垃圾和死动物，帮城镇保持清洁。Middle Ages = medieval times。"
+                },
+                {
+                  "n": 2,
+                  "q": "In the sixteenth century, red kites were protected by law.",
+                  "a": "F",
+                  "at": "laws encouraged people to kill birds and animals",
+                  "why": "从 16 世纪起，法律反而鼓励人们杀掉被认为威胁庄稼和牲畜的鸟兽；受保护是更早的事。"
+                },
+                {
+                  "n": 3,
+                  "q": "Gamekeepers regarded red kites as a threat to the birds they were protecting.",
+                  "a": "T",
+                  "at": "saw all birds of prey as competitors",
+                  "why": "猎场看守要保护雉鸡和松鸡，把所有猛禽都看作竞争者。competitors ≈ threat。"
+                },
+                {
+                  "n": 4,
+                  "q": "Egg collectors were responsible for the decline of red kites in Scotland.",
+                  "a": "NG",
+                  "at": "protected nests from egg collectors",
+                  "why": "原文只说威尔士有人保护鸟巢不被收集鸟蛋的人拿走，没说苏格兰的减少是谁造成的。"
+                },
+                {
+                  "n": 5,
+                  "q": "Birds from Wales were used in the first releases in England.",
+                  "a": "F",
+                  "at": "Rather than taking birds from the fragile Welsh population",
+                  "why": "原文明确说没有从脆弱的威尔士种群取鸟，而是从西班牙取。"
+                },
+                {
+                  "n": 6,
+                  "q": "The Chiltern Hills were chosen partly because there were few shooting estates nearby.",
+                  "a": "T",
+                  "at": "there were relatively few shooting estates nearby",
+                  "why": "第五段列了选址理由：农田、林地，以及附近狩猎庄园少。"
+                },
+                {
+                  "n": 7,
+                  "q": "Red kites now outnumber all other birds of prey in southern England.",
+                  "a": "NG",
+                  "at": "red kites are a familiar sight across much of southern England",
+                  "why": "只说赤鸢在英格兰南部很常见，没和其他猛禽比数量。"
+                }
               ]
             },
             {
@@ -41,12 +83,60 @@
               "instr_zh": "填空：每空只填原文里的一个词",
               "title": "Bringing the red kite back",
               "items": [
-                { "n": 8, "q": "Before being released, young kites were kept for several weeks in an ___.", "a": ["aviary"], "at": "in a large cage, or aviary", "why": "放飞前每只鸟在大笼子（aviary）里待几周熟悉环境。" },
-                { "n": 9, "q": "Each bird carried a small radio ___ so that scientists could follow it.", "a": ["transmitter"], "at": "fitted with a small radio transmitter", "why": "每只鸟戴着小型无线电发射器（radio transmitter）。" },
-                { "n": 10, "q": "The Chilterns offered farmland for finding food and ___ for nesting.", "a": ["woodland"], "at": "patches of woodland that provided safe places to nest", "why": "林地提供安全的筑巢地点。" },
-                { "n": 11, "q": "In parts of northern Scotland, many birds died after eating ___ bait.", "a": ["poisoned"], "at": "eating poisoned bait", "why": "北苏格兰很多鸟吃了非法投放的毒饵死亡。" },
-                { "n": 12, "q": "In some villages, people began to put out ___ in their gardens.", "a": ["meat"], "at": "putting out meat in their gardens", "why": "一些村民在花园里放肉吸引赤鸢。" },
-                { "n": 13, "q": "Supporters say the most important factor was the support of ___ and landowners.", "a": ["farmers"], "at": "above all, the support of farmers and landowners", "why": "above all（最重要的是）后面就是农民和土地所有者的支持。题目已给出 landowners，所以填 farmers。" }
+                {
+                  "n": 8,
+                  "q": "Before being released, young kites were kept for several weeks in an ___.",
+                  "a": [
+                    "aviary"
+                  ],
+                  "at": "in a large cage, or aviary",
+                  "why": "放飞前每只鸟在大笼子（aviary）里待几周熟悉环境。"
+                },
+                {
+                  "n": 9,
+                  "q": "Each bird carried a small radio ___ so that scientists could follow it.",
+                  "a": [
+                    "transmitter"
+                  ],
+                  "at": "fitted with a small radio transmitter",
+                  "why": "每只鸟戴着小型无线电发射器（radio transmitter）。"
+                },
+                {
+                  "n": 10,
+                  "q": "The Chilterns offered farmland for finding food and ___ for nesting.",
+                  "a": [
+                    "woodland"
+                  ],
+                  "at": "patches of woodland that provided safe places to nest",
+                  "why": "林地提供安全的筑巢地点。"
+                },
+                {
+                  "n": 11,
+                  "q": "In parts of northern Scotland, many birds died after eating ___ bait.",
+                  "a": [
+                    "poisoned"
+                  ],
+                  "at": "eating poisoned bait",
+                  "why": "北苏格兰很多鸟吃了非法投放的毒饵死亡。"
+                },
+                {
+                  "n": 12,
+                  "q": "In some villages, people began to put out ___ in their gardens.",
+                  "a": [
+                    "meat"
+                  ],
+                  "at": "putting out meat in their gardens",
+                  "why": "一些村民在花园里放肉吸引赤鸢。"
+                },
+                {
+                  "n": 13,
+                  "q": "Supporters say the most important factor was the support of ___ and landowners.",
+                  "a": [
+                    "farmers"
+                  ],
+                  "at": "above all, the support of farmers and landowners",
+                  "why": "above all（最重要的是）后面就是农民和土地所有者的支持。题目已给出 landowners，所以填 farmers。"
+                }
               ]
             }
           ]
@@ -83,13 +173,55 @@
                 "ix. Early failures of container ships in bad weather"
               ],
               "items": [
-                { "n": 14, "q": "Paragraph A", "a": 1, "at": "loading a ship was a slow, labour-intensive business", "why": "A 段讲集装箱出现前装船又慢又费人工，还常损坏、失窃。" },
-                { "n": 15, "q": "Paragraph B", "a": 3, "at": "In April 1956, a converted oil tanker called the Ideal-X sailed", "why": "B 段讲卡车公司老板 McLean 的想法和 1956 年第一次海上试运。" },
-                { "n": 16, "q": "Paragraph C", "a": 5, "at": "The economic effects were immediate", "why": "C 段：每吨装船成本从 5.86 美元降到不到 16 美分，在港时间从几周缩到几天。" },
-                { "n": 17, "q": "Paragraph D", "a": 2, "at": "Not everyone welcomed the change", "why": "D 段讲码头工人担心失业、罢工。" },
-                { "n": 18, "q": "Paragraph E", "a": 0, "at": "the boxes of one company often could not be stacked on the ships, lorries or trains of another", "why": "E 段讲各公司的箱子尺寸不兼容，直到制定国际标准。" },
-                { "n": 19, "q": "Paragraph F", "a": 6, "at": "it was no longer necessary for factories to be close to their customers", "why": "F 段讲运输变便宜后，工厂不必靠近顾客，生产地发生转移。" },
-                { "n": 20, "q": "Paragraph G", "a": 4, "at": "the traditional docks closed", "why": "G 段讲港口迁出市中心，伦敦、纽约的老码头关闭。" }
+                {
+                  "n": 14,
+                  "q": "Paragraph A",
+                  "a": 1,
+                  "at": "loading a ship was a slow, labour-intensive business",
+                  "why": "A 段讲集装箱出现前装船又慢又费人工，还常损坏、失窃。"
+                },
+                {
+                  "n": 15,
+                  "q": "Paragraph B",
+                  "a": 3,
+                  "at": "In April 1956, a converted oil tanker called the Ideal-X sailed",
+                  "why": "B 段讲卡车公司老板 McLean 的想法和 1956 年第一次海上试运。"
+                },
+                {
+                  "n": 16,
+                  "q": "Paragraph C",
+                  "a": 5,
+                  "at": "The economic effects were immediate",
+                  "why": "C 段：每吨装船成本从 5.86 美元降到不到 16 美分，在港时间从几周缩到几天。"
+                },
+                {
+                  "n": 17,
+                  "q": "Paragraph D",
+                  "a": 2,
+                  "at": "Not everyone welcomed the change",
+                  "why": "D 段讲码头工人担心失业、罢工。"
+                },
+                {
+                  "n": 18,
+                  "q": "Paragraph E",
+                  "a": 0,
+                  "at": "the boxes of one company often could not be stacked on the ships, lorries or trains of another",
+                  "why": "E 段讲各公司的箱子尺寸不兼容，直到制定国际标准。"
+                },
+                {
+                  "n": 19,
+                  "q": "Paragraph F",
+                  "a": 6,
+                  "at": "it was no longer necessary for factories to be close to their customers",
+                  "why": "F 段讲运输变便宜后，工厂不必靠近顾客，生产地发生转移。"
+                },
+                {
+                  "n": 20,
+                  "q": "Paragraph G",
+                  "a": 4,
+                  "at": "the traditional docks closed",
+                  "why": "G 段讲港口迁出市中心，伦敦、纽约的老码头关闭。"
+                }
               ]
             },
             {
@@ -97,9 +229,45 @@
               "instr": "Choose the correct letter, A, B, C or D.",
               "instr_zh": "单选",
               "items": [
-                { "n": 21, "q": "According to paragraph B, McLean got his idea from", "options": ["his experience of working on ships.", "a long wait at a port.", "a suggestion from a dock worker.", "studying the design of oil tankers."], "a": 1, "at": "waiting for hours while his cargo was moved onto a ship piece by piece", "why": "他在港口卡车里等了好几个小时，看着货物一件件搬上船，才想到整车吊上去。" },
-                { "n": 22, "q": "Containers lowered insurance costs because", "options": ["ships became larger.", "fewer goods were stolen or damaged.", "voyages became shorter.", "cranes were safer than dock workers."], "a": 1, "at": "they also reduced theft and damage, which in turn lowered insurance costs", "why": "集装箱在工厂装好封箱，失窃和损坏少了，所以保险费降了。" },
-                { "n": 23, "q": "What did the agreements with dock workers in some ports achieve?", "options": ["They prevented the use of cranes.", "They guaranteed jobs for new workers.", "They protected the pay of existing workers.", "They delayed containerisation for several years."], "a": 2, "at": "protected the incomes of existing workers", "why": "协议保护了现有工人的收入，但新工人会招得更少——所以 B 错。" }
+                {
+                  "n": 21,
+                  "q": "According to paragraph B, McLean got his idea from",
+                  "options": [
+                    "his experience of working on ships.",
+                    "a long wait at a port.",
+                    "a suggestion from a dock worker.",
+                    "studying the design of oil tankers."
+                  ],
+                  "a": 1,
+                  "at": "waiting for hours while his cargo was moved onto a ship piece by piece",
+                  "why": "他在港口卡车里等了好几个小时，看着货物一件件搬上船，才想到整车吊上去。"
+                },
+                {
+                  "n": 22,
+                  "q": "Containers lowered insurance costs because",
+                  "options": [
+                    "ships became larger.",
+                    "fewer goods were stolen or damaged.",
+                    "voyages became shorter.",
+                    "cranes were safer than dock workers."
+                  ],
+                  "a": 1,
+                  "at": "they also reduced theft and damage, which in turn lowered insurance costs",
+                  "why": "集装箱在工厂装好封箱，失窃和损坏少了，所以保险费降了。"
+                },
+                {
+                  "n": 23,
+                  "q": "What did the agreements with dock workers in some ports achieve?",
+                  "options": [
+                    "They prevented the use of cranes.",
+                    "They guaranteed jobs for new workers.",
+                    "They protected the pay of existing workers.",
+                    "They delayed containerisation for several years."
+                  ],
+                  "a": 2,
+                  "at": "protected the incomes of existing workers",
+                  "why": "协议保护了现有工人的收入，但新工人会招得更少——所以 B 错。"
+                }
               ]
             },
             {
@@ -108,9 +276,34 @@
               "instr": "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
               "instr_zh": "填空：每空不超过两个词，用原文的词",
               "items": [
-                { "n": 24, "q": "The Ideal-X was a converted ___.", "a": ["oil tanker", "tanker"], "at": "a converted oil tanker called the Ideal-X", "why": "Ideal-X 是改装的油轮。" },
-                { "n": 25, "q": "The international standards covered the sizes of containers and their ___.", "a": ["corner fittings"], "at": "international standards for container sizes and corner fittings", "why": "国际标准规定了尺寸和角件（corner fittings）。" },
-                { "n": 26, "q": "Container ports need large areas of ___ as well as deep water.", "a": ["flat land"], "at": "vast areas of flat land for storing boxes", "why": "集装箱港口需要大片平地堆箱，还需要深水。" }
+                {
+                  "n": 24,
+                  "q": "The Ideal-X was a converted ___.",
+                  "a": [
+                    "oil tanker",
+                    "tanker"
+                  ],
+                  "at": "a converted oil tanker called the Ideal-X",
+                  "why": "Ideal-X 是改装的油轮。"
+                },
+                {
+                  "n": 25,
+                  "q": "The international standards covered the sizes of containers and their ___.",
+                  "a": [
+                    "corner fittings"
+                  ],
+                  "at": "international standards for container sizes and corner fittings",
+                  "why": "国际标准规定了尺寸和角件（corner fittings）。"
+                },
+                {
+                  "n": 26,
+                  "q": "Container ports need large areas of ___ as well as deep water.",
+                  "a": [
+                    "flat land"
+                  ],
+                  "at": "vast areas of flat land for storing boxes",
+                  "why": "集装箱港口需要大片平地堆箱，还需要深水。"
+                }
               ]
             }
           ]
@@ -136,11 +329,41 @@
               "instr": "Do the following statements agree with the claims of the writer? Write YES, NO or NOT GIVEN.",
               "instr_zh": "判断作者观点：和作者观点一致选 YES，相反选 NO，作者没表态选 NOT GIVEN",
               "items": [
-                { "n": 27, "q": "Boredom is essentially a lack of any feeling.", "a": "N", "at": "Boredom, in other words, is not a lack of feeling", "why": "作者明确说无聊不是没有感觉，而是一种难受的“想要”。" },
-                { "n": 28, "q": "People who are bored want to be doing something satisfying.", "a": "Y", "at": "a desire to be engaged in some satisfying activity combined with an inability to find one", "why": "无聊 = 想做点有意思的事，但找不到。" },
-                { "n": 29, "q": "The experiments published in 2014 were poorly designed.", "a": "NG", "at": "a well-known series of experiments published in 2014", "why": "作者只介绍了实验内容，没有评价实验设计好坏。" },
-                { "n": 30, "q": "Children should sometimes be left to amuse themselves.", "a": "Y", "at": "Children, in particular, may benefit from being left to find their own entertainment from time to time", "why": "作者认为孩子有时自己找乐子是有益的。amuse themselves ≈ find their own entertainment。" },
-                { "n": 31, "q": "Smartphones are the main cause of today's psychological problems.", "a": "N", "at": "It would be foolish to blame smartphones for every modern problem", "why": "作者说把所有现代问题都怪到手机上是愚蠢的，和题目观点相反。" }
+                {
+                  "n": 27,
+                  "q": "Boredom is essentially a lack of any feeling.",
+                  "a": "N",
+                  "at": "Boredom, in other words, is not a lack of feeling",
+                  "why": "作者明确说无聊不是没有感觉，而是一种难受的“想要”。"
+                },
+                {
+                  "n": 28,
+                  "q": "People who are bored want to be doing something satisfying.",
+                  "a": "Y",
+                  "at": "a desire to be engaged in some satisfying activity combined with an inability to find one",
+                  "why": "无聊 = 想做点有意思的事，但找不到。"
+                },
+                {
+                  "n": 29,
+                  "q": "The experiments published in 2014 were poorly designed.",
+                  "a": "NG",
+                  "at": "a well-known series of experiments published in 2014",
+                  "why": "作者只介绍了实验内容，没有评价实验设计好坏。"
+                },
+                {
+                  "n": 30,
+                  "q": "Children should sometimes be left to amuse themselves.",
+                  "a": "Y",
+                  "at": "Children, in particular, may benefit from being left to find their own entertainment from time to time",
+                  "why": "作者认为孩子有时自己找乐子是有益的。amuse themselves ≈ find their own entertainment。"
+                },
+                {
+                  "n": 31,
+                  "q": "Smartphones are the main cause of today's psychological problems.",
+                  "a": "N",
+                  "at": "It would be foolish to blame smartphones for every modern problem",
+                  "why": "作者说把所有现代问题都怪到手机上是愚蠢的，和题目观点相反。"
+                }
               ]
             },
             {
@@ -148,23 +371,588 @@
               "instr": "Choose the correct letter, A, B, C or D.",
               "instr_zh": "单选",
               "items": [
-                { "n": 32, "q": "According to the writer, how is boredom different from apathy?", "options": ["Apathy is more unpleasant.", "In apathy, there is no wish to act.", "Boredom lasts for a longer time.", "Apathy is a form of relaxation."], "a": 1, "at": "apathy, in which the desire to act is itself missing", "why": "冷漠（apathy）是连行动的愿望都没有；无聊是有愿望但找不到事做。" },
-                { "n": 33, "q": "What was most surprising about the 2014 experiments?", "options": ["Many participants enjoyed sitting alone.", "Some participants chose a shock they had earlier said they would pay to avoid.", "Women pressed the button more often than men.", "The sessions lasted much longer than planned."], "a": 1, "at": "even though, earlier in the study, they had said they would pay money to avoid such a shock", "why": "More strikingly 后面：很多人宁愿电击自己——而之前他们说过愿意花钱避免电击。C 反了，是男性更多。" },
-                { "n": 34, "q": "In the British study, which group produced the most ideas?", "options": ["those who went straight to the creative task", "those who copied numbers first", "those who read numbers first", "those who were given plastic cups first"], "a": 2, "at": "the effect was even stronger for a third group who had only read the numbers", "why": "只读号码（更无聊）的那组效果更强。" },
-                { "n": 35, "q": "The writer mentions the 'default mode' of the brain in order to suggest that", "options": ["the brain stops working when we are bored.", "quiet moments may allow useful mental processing.", "using a phone improves memory.", "daydreaming is a sign of chronic boredom."], "a": 1, "at": "During these periods, the brain is far from idle", "why": "安静时大脑在整理记忆、想象未来；时间都被屏幕占满，这种处理就被挤掉了。" }
+                {
+                  "n": 32,
+                  "q": "According to the writer, how is boredom different from apathy?",
+                  "options": [
+                    "Apathy is more unpleasant.",
+                    "In apathy, there is no wish to act.",
+                    "Boredom lasts for a longer time.",
+                    "Apathy is a form of relaxation."
+                  ],
+                  "a": 1,
+                  "at": "apathy, in which the desire to act is itself missing",
+                  "why": "冷漠（apathy）是连行动的愿望都没有；无聊是有愿望但找不到事做。"
+                },
+                {
+                  "n": 33,
+                  "q": "What was most surprising about the 2014 experiments?",
+                  "options": [
+                    "Many participants enjoyed sitting alone.",
+                    "Some participants chose a shock they had earlier said they would pay to avoid.",
+                    "Women pressed the button more often than men.",
+                    "The sessions lasted much longer than planned."
+                  ],
+                  "a": 1,
+                  "at": "even though, earlier in the study, they had said they would pay money to avoid such a shock",
+                  "why": "More strikingly 后面：很多人宁愿电击自己——而之前他们说过愿意花钱避免电击。C 反了，是男性更多。"
+                },
+                {
+                  "n": 34,
+                  "q": "In the British study, which group produced the most ideas?",
+                  "options": [
+                    "those who went straight to the creative task",
+                    "those who copied numbers first",
+                    "those who read numbers first",
+                    "those who were given plastic cups first"
+                  ],
+                  "a": 2,
+                  "at": "the effect was even stronger for a third group who had only read the numbers",
+                  "why": "只读号码（更无聊）的那组效果更强。"
+                },
+                {
+                  "n": 35,
+                  "q": "The writer mentions the 'default mode' of the brain in order to suggest that",
+                  "options": [
+                    "the brain stops working when we are bored.",
+                    "quiet moments may allow useful mental processing.",
+                    "using a phone improves memory.",
+                    "daydreaming is a sign of chronic boredom."
+                  ],
+                  "a": 1,
+                  "at": "During these periods, the brain is far from idle",
+                  "why": "安静时大脑在整理记忆、想象未来；时间都被屏幕占满，这种处理就被挤掉了。"
+                }
               ]
             },
             {
               "type": "pick",
               "instr": "Complete the summary using the list of words, A–I, below.",
               "instr_zh": "摘要填空：从下面 A~I 里选词（有多余）",
-              "options": ["A. useful", "B. reward", "C. long-lasting", "D. avoid", "E. number", "F. want", "G. rare", "H. sign", "I. quality"],
+              "options": [
+                "A. useful",
+                "B. reward",
+                "C. long-lasting",
+                "D. avoid",
+                "E. number",
+                "F. want",
+                "G. rare",
+                "H. sign",
+                "I. quality"
+              ],
               "items": [
-                { "n": 36, "q": "Chronic boredom is a frequent and ___ tendency, linked with problems such as poor performance at school.", "a": 2, "at": "a frequent, long-lasting tendency to feel bored", "why": "慢性无聊的定义：经常的、持久的（long-lasting）。" },
-                { "n": 37, "q": "In such cases, boredom may be a ___ that something in a person's life needs to change.", "a": 7, "at": "a sign that something in a person's life or environment needs to change", "why": "这时无聊更像一个信号（sign）。" },
-                { "n": 38, "q": "The creativity research only shows that bored people produce a greater ___ of ideas,", "a": 4, "at": "only more of them", "why": "研究只说明无聊的人想法更多（数量），没说更好。" },
-                { "n": 39, "q": "not that their ideas are more ___.", "a": 0, "at": "whether those ideas are useful is a separate question", "why": "想法是否有用（useful）是另一回事。I quality 是名词，放在 more ___ 里语法不通。" },
-                { "n": 40, "q": "The writer believes we should respond to boredom by asking what we really ___ to do.", "a": 5, "at": "to ask what we actually want to be doing", "why": "作者建议问问自己真正想做什么（want）。" }
+                {
+                  "n": 36,
+                  "q": "Chronic boredom is a frequent and ___ tendency, linked with problems such as poor performance at school.",
+                  "a": 2,
+                  "at": "a frequent, long-lasting tendency to feel bored",
+                  "why": "慢性无聊的定义：经常的、持久的（long-lasting）。"
+                },
+                {
+                  "n": 37,
+                  "q": "In such cases, boredom may be a ___ that something in a person's life needs to change.",
+                  "a": 7,
+                  "at": "a sign that something in a person's life or environment needs to change",
+                  "why": "这时无聊更像一个信号（sign）。"
+                },
+                {
+                  "n": 38,
+                  "q": "The creativity research only shows that bored people produce a greater ___ of ideas,",
+                  "a": 4,
+                  "at": "only more of them",
+                  "why": "研究只说明无聊的人想法更多（数量），没说更好。"
+                },
+                {
+                  "n": 39,
+                  "q": "not that their ideas are more ___.",
+                  "a": 0,
+                  "at": "whether those ideas are useful is a separate question",
+                  "why": "想法是否有用（useful）是另一回事。I quality 是名词，放在 more ___ 里语法不通。"
+                },
+                {
+                  "n": 40,
+                  "q": "The writer believes we should respond to boredom by asking what we really ___ to do.",
+                  "a": 5,
+                  "at": "to ask what we actually want to be doing",
+                  "why": "作者建议问问自己真正想做什么（want）。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "passages": [
+        {
+          "n": 1,
+          "title": "The Humble Pencil",
+          "title_zh": "不起眼的铅笔",
+          "minutes": 20,
+          "paras": [
+            "Few objects are as ordinary as the pencil. It is cheap, light and reliable, and it works in conditions where pens fail – upside down, in freezing temperatures, even underwater. Yet the pencil has a surprisingly eventful history, involving shepherds, smugglers and a war between two of Europe's great powers.",
+            "The story begins in the sixteenth century in Borrowdale, a valley in the north-west of England, where a large deposit of unusually pure graphite was discovered. Local shepherds are said to have used lumps of the soft black mineral to mark their sheep. At the time, nobody understood what graphite was: because it left a grey mark like lead, it was called 'black lead', and the name has survived, even though modern pencils contain no lead at all.",
+            "Borrowdale graphite was so pure that it could simply be sawn into sticks and used for writing. It soon became extremely valuable, not only for artists and writers but also for industry, since it was used to line the moulds in which cannonballs were made. The English government took control of the mine, which was opened for only a few weeks each year to prevent prices from falling, and armed guards were employed to stop workers from smuggling graphite out of the valley.",
+            "Elsewhere in Europe, graphite was of poorer quality and broke easily, so pencil makers had to find other solutions. In Germany, craftsmen mixed powdered graphite with substances such as sulphur, but the results were disappointing. The decisive breakthrough came in France in 1795. Because of the war with Britain, French manufacturers could no longer obtain English graphite, and the government asked an engineer, Nicolas-Jacques Conté, to find an alternative. Conté mixed powdered graphite with clay, shaped the mixture into thin rods and baked them in a kiln. By changing the proportion of clay, he could make the pencil harder or softer – the basis of the grading system still used today.",
+            "Conté's method meant that good pencils could be made from low-quality graphite almost anywhere, and pencil making became a major industry, particularly in Germany and later in the United States. Wooden cases, which had previously been made by hand, began to be produced by machine in the nineteenth century, and the price of pencils fell dramatically.",
+            "The familiar yellow colour also has an interesting origin. In the late nineteenth century, some of the finest graphite came from Siberia, near the border with China. To advertise the quality of pencils made from it, one manufacturer is said to have painted them yellow, a colour associated with China. The idea was widely copied, and in North America yellow is still by far the most common colour for pencils.",
+            "In 1858, an American named Hymen Lipman was granted a patent for attaching an eraser to the end of a pencil. The idea was popular with customers, but the patent was later declared invalid by the courts, on the grounds that Lipman had simply combined two existing products rather than inventing something new. In many parts of Europe, pencils are still often sold without erasers.",
+            "Despite the arrival of computers and touchscreens, the pencil remains in heavy use. Billions are produced every year, and many artists, architects and students still prefer it, partly because mistakes can be corrected so easily. It is often claimed that a single ordinary pencil contains enough graphite to draw a line around fifty kilometres long."
+          ],
+          "groups": [
+            {
+              "type": "tfng",
+              "instr": "Do the following statements agree with the information given in the passage? Write TRUE, FALSE or NOT GIVEN.",
+              "instr_zh": "判断：和原文一致选 TRUE，矛盾选 FALSE，原文没提选 NOT GIVEN",
+              "items": [
+                {
+                  "n": 1,
+                  "q": "In the sixteenth century, people understood that graphite was different from lead.",
+                  "a": "F",
+                  "at": "At the time, nobody understood what graphite was",
+                  "why": "当时没人知道石墨是什么，因为痕迹像铅，才叫它“黑铅”。"
+                },
+                {
+                  "n": 2,
+                  "q": "Modern pencils contain a small amount of lead.",
+                  "a": "F",
+                  "at": "modern pencils contain no lead at all",
+                  "why": "现代铅笔完全不含铅。"
+                },
+                {
+                  "n": 3,
+                  "q": "The Borrowdale mine was only open for part of the year.",
+                  "a": "T",
+                  "at": "opened for only a few weeks each year",
+                  "why": "每年只开几个星期，防止价格下跌。"
+                },
+                {
+                  "n": 4,
+                  "q": "Workers at the Borrowdale mine were well paid.",
+                  "a": "NG",
+                  "at": "armed guards were employed to stop workers from smuggling graphite",
+                  "why": "原文只说有武装看守防止工人走私，没提工资。"
+                },
+                {
+                  "n": 5,
+                  "q": "German pencils made with sulphur were of high quality.",
+                  "a": "F",
+                  "at": "but the results were disappointing",
+                  "why": "德国人用硫磺混合石墨，效果令人失望。"
+                },
+                {
+                  "n": 6,
+                  "q": "Conté had worked as an artist before he became an engineer.",
+                  "a": "NG",
+                  "at": "the government asked an engineer, Nicolas-Jacques Conté",
+                  "why": "原文只说他是工程师，没提他之前的经历。别用课外知识答题。"
+                },
+                {
+                  "n": 7,
+                  "q": "Pencils became much cheaper in the nineteenth century.",
+                  "a": "T",
+                  "at": "the price of pencils fell dramatically",
+                  "why": "19 世纪木壳改用机器生产，价格大幅下降。"
+                }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 1,
+              "instr": "Complete the notes below. Choose ONE WORD ONLY from the passage for each answer.",
+              "instr_zh": "笔记填空：每空只填原文里的一个词",
+              "title": "The history of the pencil",
+              "items": [
+                {
+                  "n": 8,
+                  "q": "Borrowdale graphite was used to line moulds for making ___",
+                  "a": [
+                    "cannonballs"
+                  ],
+                  "at": "used to line the moulds in which cannonballs were made",
+                  "why": "石墨用来涂炮弹模具的内壁。"
+                },
+                {
+                  "n": 9,
+                  "q": "Armed ___ prevented workers from smuggling graphite",
+                  "a": [
+                    "guards"
+                  ],
+                  "at": "armed guards were employed",
+                  "why": "雇了武装看守。"
+                },
+                {
+                  "n": 10,
+                  "q": "Conté mixed powdered graphite with ___",
+                  "a": [
+                    "clay"
+                  ],
+                  "at": "Conté mixed powdered graphite with clay",
+                  "why": "孔泰把石墨粉和黏土混合。"
+                },
+                {
+                  "n": 11,
+                  "q": "The rods were baked in a ___",
+                  "a": [
+                    "kiln"
+                  ],
+                  "at": "baked them in a kiln",
+                  "why": "放进窑里烧。"
+                },
+                {
+                  "n": 12,
+                  "q": "Yellow paint suggested a connection with ___",
+                  "a": [
+                    "China"
+                  ],
+                  "at": "a colour associated with China",
+                  "why": "黄色让人联想到中国，暗示用的是西伯利亚（靠近中国）的好石墨。"
+                },
+                {
+                  "n": 13,
+                  "q": "Lipman's patent was later rejected by the ___",
+                  "a": [
+                    "courts"
+                  ],
+                  "at": "declared invalid by the courts",
+                  "why": "法院宣布专利无效：只是把两样现有东西组合起来，不算发明。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "title": "Cooling the City",
+          "title_zh": "给城市降温",
+          "minutes": 20,
+          "lettered": true,
+          "paras": [
+            "On a still summer evening, the centre of a large city can be several degrees warmer than the surrounding countryside. This effect, known as the urban heat island, was first described in the early nineteenth century by Luke Howard, an amateur scientist who recorded temperatures in and around London. Today it is one of the best-documented features of urban climate, and as cities grow and summers become hotter, it is attracting increasing attention from planners and public health officials. Measurements in cities all over the world have since confirmed the pattern, and the difference tends to be largest in big, densely built cities.",
+            "Several factors combine to produce the effect. Dark surfaces such as asphalt roads and roofs absorb a large proportion of the sun's energy during the day and release it slowly at night, which is why the difference between city and countryside is usually greatest after sunset. Cities also have fewer trees and less open ground. In the countryside, plants release water vapour through their leaves, a process that cools the surrounding air in much the same way that sweating cools the human body. Finally, cities produce heat of their own, from vehicles, factories and, increasingly, air-conditioning units, which pump heat out of buildings and into the streets.",
+            "The shape of a city matters too. Where tall buildings line narrow streets, the heat given off by walls and pavements is trapped rather than escaping into the sky, and the buildings also reduce the wind that might otherwise carry warm air away. Researchers sometimes compare such streets to canyons. Paving over gardens and open land has a similar effect, since hard surfaces store heat and cannot release moisture into the air.",
+            "The consequences can be serious. During heatwaves, high night-time temperatures prevent people's bodies from recovering from the heat of the day, and older people and those with heart or breathing problems are particularly at risk. The European heatwave of 2003, which is estimated to have caused tens of thousands of deaths, prompted many governments to introduce warning systems and emergency plans. Higher temperatures also increase the demand for air conditioning, which raises energy use and, in a vicious circle, adds still more heat to the urban environment.",
+            "Fortunately, there are well-tested ways of reducing the problem. One of the simplest is to make roofs and roads lighter in colour, so that they reflect more sunlight. 'Cool roofs' coated with reflective paint can be many degrees cooler than conventional dark roofs on a sunny day, reducing the need for air conditioning in the rooms below. Green roofs, covered with plants, have a similar effect and also absorb rainwater, though they are more expensive to install and maintain. Some cities have also experimented with lighter-coloured pavements, although bright surfaces can cause uncomfortable glare and need regular cleaning if they are to stay reflective.",
+            "Trees are perhaps the most effective tool of all, since they provide shade as well as cooling the air through their leaves. However, planting trees in dense city centres is not as easy as it sounds. Underground pipes and cables leave little room for roots, and young trees need regular watering for several years. Some cities have therefore started to treat trees as part of their basic infrastructure, like roads and drains, with long-term budgets for their care rather than one-off planting campaigns."
+          ],
+          "groups": [
+            {
+              "type": "pick",
+              "instr": "The passage has six paragraphs, A–F. Which paragraph contains the following information? You may use any letter more than once.",
+              "instr_zh": "信息定位：下面的信息在哪一段（字母可以重复用）",
+              "options": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+              ],
+              "items": [
+                {
+                  "n": 14,
+                  "q": "a comparison between a natural process and the way humans cool down",
+                  "a": 1,
+                  "at": "in much the same way that sweating cools the human body",
+                  "why": "B 段：植物蒸腾降温，就像出汗让人体降温。"
+                },
+                {
+                  "n": 15,
+                  "q": "a reference to the person who first identified the heat island effect",
+                  "a": 0,
+                  "at": "was first described in the early nineteenth century by Luke Howard",
+                  "why": "A 段：Luke Howard 最早描述了城市热岛。"
+                },
+                {
+                  "n": 16,
+                  "q": "a description of practical difficulties in growing trees in cities",
+                  "a": 5,
+                  "at": "Underground pipes and cables leave little room for roots",
+                  "why": "F 段：地下管线挤占树根空间，幼树要浇好几年水。"
+                },
+                {
+                  "n": 17,
+                  "q": "an explanation of why some people are more at risk than others",
+                  "a": 3,
+                  "at": "older people and those with heart or breathing problems are particularly at risk",
+                  "why": "D 段：老人和心肺病人风险更高。"
+                },
+                {
+                  "n": 18,
+                  "q": "a disadvantage of one method of cooling buildings",
+                  "a": 4,
+                  "at": "though they are more expensive to install and maintain",
+                  "why": "E 段：绿色屋顶安装和维护更贵。"
+                },
+                {
+                  "n": 19,
+                  "q": "a reason why the effect is strongest at night",
+                  "a": 1,
+                  "at": "release it slowly at night, which is why the difference between city and countryside is usually greatest after sunset",
+                  "why": "B 段：深色路面白天吸热、晚上慢慢释放，所以日落后温差最大。B 可以重复选。"
+                }
+              ]
+            },
+            {
+              "type": "gap",
+              "limit": 2,
+              "instr": "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
+              "instr_zh": "填空：每空不超过两个词，用原文的词",
+              "items": [
+                {
+                  "n": 20,
+                  "q": "In narrow streets lined with tall buildings, the buildings also reduce the ___.",
+                  "a": [
+                    "wind"
+                  ],
+                  "at": "the buildings also reduce the wind",
+                  "why": "高楼还挡住了能把热空气带走的风。"
+                },
+                {
+                  "n": 21,
+                  "q": "Air-conditioning units move heat out of buildings and into the ___.",
+                  "a": [
+                    "streets"
+                  ],
+                  "at": "pump heat out of buildings and into the streets",
+                  "why": "空调把热量从楼里抽到街上。"
+                },
+                {
+                  "n": 22,
+                  "q": "After the 2003 heatwave, many governments introduced warning systems and ___.",
+                  "a": [
+                    "emergency plans"
+                  ],
+                  "at": "introduce warning systems and emergency plans",
+                  "why": "预警系统和应急预案。"
+                },
+                {
+                  "n": 23,
+                  "q": "Some cities now provide ___ for looking after trees.",
+                  "a": [
+                    "long-term budgets"
+                  ],
+                  "at": "with long-term budgets for their care",
+                  "why": "有些城市给树木养护做长期预算，而不是一次性种树。"
+                }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 24,
+                  "q": "According to paragraph B, the temperature difference between city and countryside is usually greatest",
+                  "options": [
+                    "at midday.",
+                    "in winter.",
+                    "after sunset.",
+                    "during rain."
+                  ],
+                  "a": 2,
+                  "at": "usually greatest after sunset",
+                  "why": "日落后温差最大。"
+                },
+                {
+                  "n": 25,
+                  "q": "Why does the writer describe air-conditioning use as a 'vicious circle'?",
+                  "options": [
+                    "It makes cities even hotter.",
+                    "It is too expensive for many people.",
+                    "It often fails during heatwaves.",
+                    "It is harmful to older people."
+                  ],
+                  "a": 0,
+                  "at": "adds still more heat to the urban environment",
+                  "why": "越热越开空调，空调又往城市里排更多热——恶性循环。"
+                },
+                {
+                  "n": 26,
+                  "q": "What is the main point of paragraph F?",
+                  "options": [
+                    "Trees are cheaper than cool roofs.",
+                    "Trees need long-term support to be effective.",
+                    "Trees should be planted outside city centres.",
+                    "Trees often damage underground pipes."
+                  ],
+                  "a": 1,
+                  "at": "with long-term budgets for their care rather than one-off planting campaigns",
+                  "why": "种树难在养护，所以有的城市把树当基础设施、做长期预算。D 反了：是管线挤占树根空间。"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "Is Earlier Always Better?",
+          "title_zh": "学外语越早越好吗？",
+          "minutes": 20,
+          "paras": [
+            "It is widely believed that when it comes to learning a foreign language, the younger the better. Parents in many countries pay for English lessons for children who can barely read, and governments have moved the start of compulsory language teaching to ever earlier ages. The belief is not without foundation. But a closer look at the evidence suggests that the relationship between age and language learning is more complicated than the popular slogan implies.",
+            "The idea that there is a 'critical period' for language was popularised in the 1960s by the linguist Eric Lenneberg, who argued that the brain's ability to acquire language declines around puberty. Strong support seemed to come from a well-known study published in 1989, which tested the English grammar of Chinese and Korean speakers who had moved to the United States at different ages. Those who had arrived before the age of seven performed like native speakers; after that, performance declined steadily with age of arrival.",
+            "Crucially, however, the people in this study had learned English by immersion: they lived in the country where it was spoken and used it every day for years. That is very different from the situation of most children who learn a foreign language at school, where they may receive two or three hours of teaching a week. Studies of school learners tell a different story. A large research project in Spain, for example, compared students who had begun English at different ages in school. After the same number of hours of teaching, those who had started later, as teenagers, generally did better than those who had started as young children. Older learners, it seems, can make better use of limited input: they have more developed memories, can understand explicit explanations of grammar, and are better at using strategies such as taking notes.",
+            "Even in immersion settings, the advantage of youth is not equally strong in every area. It is most obvious in pronunciation, where those who start in early childhood are far more likely to end up sounding like native speakers. For vocabulary, by contrast, age of starting seems to matter much less, and adults often learn new words faster than children in the early stages.",
+            "None of this means that early teaching is a waste of time. Young children are often less anxious about making mistakes and more willing to imitate unfamiliar sounds, and an early start can give them a positive attitude towards other languages and cultures. But these benefits depend heavily on the quality of the teaching. If lessons are given by teachers who themselves lack confidence in the language, or if classes are large and children rarely get a chance to speak, an early start may achieve very little.",
+            "In my view, the debate has too often been framed as a simple question of age, when the more important factors are the amount and quality of the language that learners are exposed to. A twelve-year-old who has rich, frequent contact with a language will almost certainly overtake a six-year-old who hears it for an hour a week. Policymakers who move language lessons into primary schools without investing in teacher training are likely to be disappointed.",
+            "For adult learners, the research contains an encouraging message. While it is rare for people who start as adults to be mistaken for native speakers, many reach a very high level of proficiency, and some achieve near-native ability. Motivation, regular practice and opportunities to use the language seem to matter at least as much as the age at which one begins. 'Too late' is, for most practical purposes, a myth."
+          ],
+          "groups": [
+            {
+              "type": "ynng",
+              "instr": "Do the following statements agree with the claims of the writer? Write YES, NO or NOT GIVEN.",
+              "instr_zh": "判断作者观点：和作者观点一致选 YES，相反选 NO，作者没表态选 NOT GIVEN",
+              "items": [
+                {
+                  "n": 27,
+                  "q": "The popular belief that younger learners do better has some basis in evidence.",
+                  "a": "Y",
+                  "at": "The belief is not without foundation",
+                  "why": "not without foundation = 有一定依据（双重否定）。"
+                },
+                {
+                  "n": 28,
+                  "q": "The 1989 study was the first to investigate the effect of age on language learning.",
+                  "a": "NG",
+                  "at": "a well-known study published in 1989",
+                  "why": "只说这项研究很有名，没说是不是第一项。"
+                },
+                {
+                  "n": 29,
+                  "q": "Age is the most important factor in learning a language.",
+                  "a": "N",
+                  "at": "the more important factors are the amount and quality of the language that learners are exposed to",
+                  "why": "作者认为更重要的是接触语言的量和质，不是年龄。"
+                },
+                {
+                  "n": 30,
+                  "q": "Plans to start language lessons earlier should include training for teachers.",
+                  "a": "Y",
+                  "at": "without investing in teacher training are likely to be disappointed",
+                  "why": "不投入师资培训就提前开课，结果多半令人失望——作者主张要培训老师。"
+                },
+                {
+                  "n": 31,
+                  "q": "People who start learning a language as adults cannot reach a high level.",
+                  "a": "N",
+                  "at": "many reach a very high level of proficiency",
+                  "why": "很多成年人能达到很高水平，“太晚了”基本是个迷思。"
+                }
+              ]
+            },
+            {
+              "type": "mc",
+              "instr": "Choose the correct letter, A, B, C or D.",
+              "instr_zh": "单选",
+              "items": [
+                {
+                  "n": 32,
+                  "q": "How were the participants in the 1989 study different from most school learners?",
+                  "options": [
+                    "They were all adults.",
+                    "They learned English through daily use in an English-speaking country.",
+                    "They were taught grammar explicitly.",
+                    "They had more lessons each week."
+                  ],
+                  "a": 1,
+                  "at": "they lived in the country where it was spoken and used it every day for years",
+                  "why": "他们是沉浸式习得：住在英语国家、天天用；学校学生每周只有两三小时课。"
+                },
+                {
+                  "n": 33,
+                  "q": "In the research project in Spain, students who started later",
+                  "options": [
+                    "developed better pronunciation.",
+                    "did better after the same amount of teaching.",
+                    "needed more hours of teaching.",
+                    "felt less anxious in class."
+                  ],
+                  "a": 1,
+                  "at": "After the same number of hours of teaching, those who had started later, as teenagers, generally did better",
+                  "why": "同样的课时下，十几岁才开始的学生一般学得更好。"
+                },
+                {
+                  "n": 34,
+                  "q": "According to the writer, an early start gives the clearest advantage in",
+                  "options": [
+                    "vocabulary.",
+                    "grammar.",
+                    "pronunciation.",
+                    "reading."
+                  ],
+                  "a": 2,
+                  "at": "It is most obvious in pronunciation",
+                  "why": "早开始的优势在发音上最明显；词汇上年龄影响小得多。"
+                },
+                {
+                  "n": 35,
+                  "q": "Which of the following is NOT mentioned as a benefit of early language teaching?",
+                  "options": [
+                    "Children worry less about making mistakes.",
+                    "Children are more willing to copy new sounds.",
+                    "Children develop a positive attitude to other cultures.",
+                    "Children get better exam results later."
+                  ],
+                  "a": 3,
+                  "at": "an early start can give them a positive attitude towards other languages and cultures",
+                  "why": "第五段提到 A、B、C 三点，没提考试成绩。"
+                }
+              ]
+            },
+            {
+              "type": "pick",
+              "instr": "Complete the summary using the list of words, A–I, below.",
+              "instr_zh": "摘要填空：从下面 A~I 里选词（有多余）",
+              "options": [
+                "A. hours",
+                "B. memories",
+                "C. myth",
+                "D. accent",
+                "E. explicit",
+                "F. quality",
+                "G. fact",
+                "H. motivation",
+                "I. pronunciation"
+              ],
+              "items": [
+                {
+                  "n": 36,
+                  "q": "Older school learners can make good use of limited input because they have better ___",
+                  "a": 1,
+                  "at": "they have more developed memories",
+                  "why": "年龄大的学习者记忆力更成熟。"
+                },
+                {
+                  "n": 37,
+                  "q": "and can understand ___ explanations of grammar.",
+                  "a": 4,
+                  "at": "can understand explicit explanations of grammar",
+                  "why": "能理解明确讲解的语法规则（explicit）。"
+                },
+                {
+                  "n": 38,
+                  "q": "However, the benefits of an early start depend on the ___ of the teaching.",
+                  "a": 5,
+                  "at": "these benefits depend heavily on the quality of the teaching",
+                  "why": "早开始的好处很依赖教学质量。"
+                },
+                {
+                  "n": 39,
+                  "q": "For adults, ___ and regular practice matter at least as much as age,",
+                  "a": 7,
+                  "at": "Motivation, regular practice and opportunities to use the language",
+                  "why": "动机、坚持练习、用的机会，和开始年龄一样重要。"
+                },
+                {
+                  "n": 40,
+                  "q": "and the idea that it is ever 'too late' is a ___.",
+                  "a": 2,
+                  "at": "'Too late' is, for most practical purposes, a myth.",
+                  "why": "“太晚了”基本是个迷思（myth）。G fact 意思正相反。"
+                }
               ]
             }
           ]
