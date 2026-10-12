@@ -1,4 +1,5 @@
-# 剧集 + 雅思听力配音：content/episodes/*.json、content/ielts/listening.json 的台词 → Kokoro（每个角色自己的声音）→ mp3。美音 / 英音各一个任务（四季 + 三套听力约 40~70 分钟）
+# 剧集 + 雅思听力配音：content/episodes/*.json、content/ielts/listening.json 的台词 → Kokoro（每个角色自己的声音）→ mp3。
+# 另配主角改名 / 男声的几套（content/episodes/names.json）。美音 / 英音 × 4 片并行，每片约 40 分钟
 # 服务器用 ONLY=e scripts/sync-audio.sh <run_id> 发布到 sayday.ivyea.com/audio/{us,gb}/e/
 name: content-episodes
 
@@ -6,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['content/episodes/**', 'content/ielts/listening.json']
+    paths: ['content/episodes/**', 'content/ielts/listening.json', 'content/audio/build_audio.mjs']
 
 jobs:
   gen:
@@ -16,6 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         accent: [us, gb]
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,10 +35,10 @@ jobs:
           key: kokoro-82m-v1.0-q8
       - name: 合成剧集
         working-directory: content/audio
-        run: node build_audio.mjs --accent ${{ matrix.accent }} --shard 0 --shards 1 --out out --dtype q8 --only e
+        run: node build_audio.mjs --accent ${{ matrix.accent }} --shard ${{ matrix.shard }} --shards 4 --out out --dtype q8 --only e,v
       - uses: actions/upload-artifact@v4
         with:
-          name: audio-${{ matrix.accent }}-e
+          name: audio-${{ matrix.accent }}-e-${{ matrix.shard }}
           path: content/audio/out
           retention-days: 3
           compression-level: 0

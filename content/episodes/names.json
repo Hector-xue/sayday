@@ -1,0 +1,5 @@
+{
+  "_说明": "剧集主角可选的英文名（预先配好别人叫你名字的那几句）；不能和任何一季的角色重名。默认 Lin 不在列表里。voice：主角男声（女声用各季 cast.Lin.voice）",
+  "names": ["Amy", "Lily", "Grace", "Chloe", "Lucy", "Mia", "Zoe", "Ivy", "Nina", "Cindy", "Vivian", "Iris", "Jack", "Leo", "Max", "Ben", "Kevin", "Eric", "Ryan", "Alex", "Daniel", "Henry", "Jason", "Kai"],
+  "male_voice": { "us": "am_puck", "gb": "bm_fable" }
+}

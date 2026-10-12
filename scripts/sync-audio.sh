@@ -26,7 +26,8 @@ done
 
 if [ "${ONLY:-}" = "e" ]; then
   # 只换剧集目录 e/，句子 s/ 和单词 w/ 一个文件都不碰
-  [ "$n" -eq 2 ] || { echo "剧集产物不全：$n/2"; exit 1; }
+  # content-episodes：美音 / 英音各 4 片
+  [ "$n" -eq 8 ] || { echo "剧集产物不全：$n/8"; exit 1; }
   for acc in us gb; do
     c=$(ls "$TMP/audio/$acc/e" | wc -l)
     [ "$c" -gt 0 ] || { echo "$acc 没有剧集音频"; exit 1; }

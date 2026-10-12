@@ -9,6 +9,8 @@ import { getAi, providerOf, type AiConfig } from '../lib/ai'
 import { canRemind, enableReminder, getReminder, type Reminder } from '../lib/reminder'
 import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
+import { MeEditor } from '../components/MeEditor'
+import { DEFAULT_ME, getMe, type Me } from '../lib/episodes'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -22,6 +24,9 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [upd, setUpd] = useState<UpdateInfo | null>(null)
   const [checking, setChecking] = useState(false)
   const [privacy, setPrivacy] = useState(false)
+  const [me, setMe] = useState<Me>(DEFAULT_ME)
+  const [editMe, setEditMe] = useState(false)
+  useEffect(() => { getMe().then(setMe) }, [tick])
   const [cache, setCache] = useState<{ clips: number; used: number } | null>(null)
   const loadCache = async () => {
     const clips = await cachedAudioCount()
@@ -119,6 +124,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="k"><b>示范口音</b><span>听示范和例句用的声音</span></div>
           <div className="seg"><button aria-pressed={profile.accent === 'us'} onClick={() => setProfile({ ...profile, accent: 'us' })}>美音</button><button aria-pressed={profile.accent === 'gb'} onClick={() => setProfile({ ...profile, accent: 'gb' })}>英音</button></div>
         </div>
+        <div className="set-row"><div className="k"><b>剧里的你</b><span>叫 {me.name === 'Lin' ? 'Lin（林）' : me.name} · {me.voice === 'm' ? '男声' : '女声'}</span></div><button className="btn small quiet" onClick={() => setEditMe(true)}>修改</button></div>
         <div className="set-row">
           <div className="k"><b>示范语速</b><span>{speed < 1 ? '放慢一点，听清每个音' : speed > 1 ? '快一点，接近真实语速' : '正常语速'}</span></div>
           <div className="seg">{SPEEDS.map((s) => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s === 1 ? '1×' : `${s}×`}</button>)}</div>
@@ -196,6 +202,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
         <p className="small muted" style={{ marginTop: 8 }}>词典 ECDICT（MIT）· 例句 Tatoeba（CC BY 2.0 FR）· 发音词典 CMUdict（BSD）· 评测数据 speechocean762（CC BY 4.0）· 示范语音 Kokoro（Apache-2.0，预先生成）· 音素识别 Charsiu（Zhu 等，2022）· 语音识别 Moonshine（MIT）· 字体 Bricolage Grotesque、Newsreader、Noto Serif SC（OFL）</p>
         <p className="small" style={{ marginTop: 8 }}><a href="https://github.com/Hector-xue/sayday" style={{ color: 'var(--brand)' }}>源码与完整致谢</a></p>
       </div>
+      {editMe && <MeEditor me={me} onClose={() => setEditMe(false)} />}
     </div>
   )
 }
