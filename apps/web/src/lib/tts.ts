@@ -40,6 +40,8 @@ async function fromPack(c: Clip, accent: Accent): Promise<Blob | null> {
   } catch { return null }
 }
 const keyUrl = (text: string, accent: Accent) => new URL(`./tts-cache/${accent}/${encodeURIComponent(norm(text))}.wav`, location.href).href
+// 本机缓存的键：一般按文字；剧集的另几套配音（男声 .m、换名字 .n-xxx）文字可能和原版一样，按配音键存，不然会拿到原版的声音
+const cacheKey = (c: Clip, accent: Accent) => (c.ep?.includes('.') ? new URL(`./tts-cache/${accent}/e/${c.ep}.mp3`, location.href).href : keyUrl(c.text, accent))
 
 // ---- 下载队列：后台一条条下，播放请求不排队 ----
 type Job = Clip & { accent: Accent }
@@ -51,7 +53,7 @@ async function pump() {
   busy = true
   while (queue.length) {
     const job = queue.shift()!
-    const k = keyUrl(job.text, job.accent)
+    const k = cacheKey(job, job.accent)
     if (await cached(k)) continue
     const packed = await fromPack(job, job.accent)
     if (packed) await putCache(k, packed)
@@ -83,9 +85,9 @@ export async function clearAudioCache(): Promise<void> {
 export async function getAudio(clip: Clip | string, accent: Accent): Promise<string> {
   const c = asClip(clip)
   const text = c.text
-  const pre = (await presets())[norm(text)]
+  const pre = c.ep?.includes('.') ? null : (await presets())[norm(text)] // 另几套配音不能拿原版的预置音频顶
   if (pre?.[accent]) return new URL(`./tts/samples/${pre[accent]}`, location.href).href
-  const k = keyUrl(text, accent)
+  const k = cacheKey(c, accent)
   const hit = await cached(k)
   if (hit) return URL.createObjectURL(hit)
   const packed = await fromPack(c, accent)

@@ -1,4 +1,4 @@
-// 剧集：一季十集，一天解锁一集。每集 听 → 演（你演林，逐句跟读）→ 测 → 收生词
+// 剧集：一季十集，一天解锁一集。每集 听 → 演（你演主角，逐句跟读）→ 测 → 收生词。主角的名字和声音可以改（MeEditor）
 import { useEffect, useRef, useState } from 'react'
 import { Overlay } from '../components/Overlay'
 import { Icon } from '../components/icons'
@@ -6,7 +6,8 @@ import { PlayButton } from '../components/PlayButton'
 import { Shadow } from '../components/Shadow'
 import { Tappable } from '../components/Tappable'
 import { useApp } from '../store'
-import { clipOf, episodeWords, finish, getProgress, key, loadSeasons, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Season } from '../lib/episodes'
+import { clipOf, DEFAULT_ME, episodeWords, finish, getMe, getProgress, key, loadSeasons, meKey, meZh, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Me, type Season } from '../lib/episodes'
+import { MeEditor } from '../components/MeEditor'
 import { play, prefetch, stopAudio } from '../lib/tts'
 import { addCard } from '../lib/srs'
 import { db } from '../lib/db'
@@ -20,7 +21,9 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
   const [p, setP] = useState<EpProgress | null>(null)
   const [open, setOpen] = useState<{ s: Season; ep: Episode } | null>(null)
   const [tab, setTab] = useState<number | null>(null)
-  useEffect(() => { loadSeasons().then(setAll); getProgress().then(setP) }, [tick, open])
+  const [me, setMeState] = useState<Me>(DEFAULT_ME)
+  const [editMe, setEditMe] = useState(false)
+  useEffect(() => { loadSeasons().then(setAll); getProgress().then(setP); getMe().then(setMeState) }, [tick, open])
   useEffect(() => {
     if (!all || !openId) return
     const s = all.find((x) => x.season === openId.season)
@@ -39,7 +42,7 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
           <div className="poster" aria-hidden>
             <span className="poster-no">{String(up.ep.id).padStart(2, '0')}</span>
             <span className="poster-s">S{up.season.season} · {up.ep.level}</span>
-            {up.state === 'ready' && up.ep.lines[0] && <p className="poster-quote en">“{up.ep.lines[0].en}”<small>— {up.ep.lines[0].who}</small></p>}
+            {up.state === 'ready' && up.ep.lines[0] && <p className="poster-quote en">“{up.ep.lines[0].en}”<small>— {up.ep.lines[0].who === meKey(up.season) ? me.name : up.ep.lines[0].who}</small></p>}
           </div>
         )}
         <p className="small muted">{up.state === 'all-done' ? '已经全部看完' : up.state === 'tomorrow' ? '明天解锁' : `第 ${up.season.season} 季 第 ${up.ep.id} 集 · ${up.ep.level}`}</p>
@@ -64,15 +67,22 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
           )
         })}
       </div>
+      <div className="list" style={{ marginTop: 14 }}>
+        <button className="list-row" onClick={() => setEditMe(true)}>
+          <span className="main"><b>剧里的你</b><span>叫 {me.name === 'Lin' ? 'Lin（林）' : me.name} · {me.voice === 'm' ? '男声' : '女声'}</span></span>
+          <span className="side">修改</span>
+        </button>
+      </div>
       <p className="small faint" style={{ margin: '14px 4px' }}>一天一集，像追剧一样学。人物配音为 AI 合成。</p>
-      {open && <Player s={open.s} ep={open.ep} onClose={() => setOpen(null)} />}
+      {open && <Player s={open.s} ep={open.ep} me={me} onClose={() => setOpen(null)} />}
+      {editMe && <MeEditor me={me} onClose={() => setEditMe(false)} />}
     </div>
   )
 }
 
 type Stage = 'listen' | 'act' | 'quiz' | 'words' | 'done'
 
-function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => void }) {
+function Player({ s, ep, me: my, onClose }: { s: Season; ep: Episode; me: Me; onClose: () => void }) {
   const { profile, refresh, toast } = useApp()
   const accent = profile!.accent
   const [stage, setStage] = useState<Stage>('listen')
@@ -86,13 +96,13 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
   const [added, setAdded] = useState<Set<string>>(new Set())
   const end = useRef<HTMLDivElement>(null)
   const started = useRef(performance.now())
-  const me = Object.entries(s.cast).find(([, c]) => c.me)?.[0] ?? 'Lin'
+  const me = meKey(s)
   const myLines = ep.lines.map((l, i) => ({ l, i })).filter((x) => x.l.who === me)
-  const clip = (i: number) => clipOf(s.season, ep.id, i, ep.lines[i].en)
+  const clip = (i: number) => clipOf(s.season, ep.id, i, ep.lines[i], my, ep.lines[i].who === me)
 
   useEffect(() => {
     prefetch(ep.lines.map((_, i) => clip(i)), accent)
-    db.all<{ word: string }>('SELECT word FROM card').then(async (r) => setWords(await episodeWords(ep, new Set(r.map((x) => x.word)), (await vocabLevel(profile!)).frontier)))
+    db.all<{ word: string }>('SELECT word FROM card').then(async (r) => setWords(await episodeWords(ep, new Set(r.map((x) => x.word)), (await vocabLevel(profile!)).frontier, my.name)))
     return () => { stopAudio(); markDay({ seconds: (performance.now() - started.current) / 1000 }) }
   }, [])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end', behavior: 'smooth' }) }, [shown])
@@ -115,7 +125,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
     const mine = l.who === me
     return (
       <div key={i} className={`bubble-row ${mine ? 'user' : 'assistant'}`}>
-        <span className="who small muted">{mine ? '你（林）' : s.cast[l.who]?.zh ?? l.who}</span>
+        <span className="who small muted">{mine ? `你（${meZh(my)}）` : s.cast[l.who]?.zh ?? l.who}</span>
         <div className={`bubble ep ${mine ? 'me' : ''}`} onClick={() => setZh((z) => { const n = new Set(z); if (n.has(i)) n.delete(i); else n.add(i); return n })}>
           <span className="en"><Tappable text={l.en} karaoke /></span>
           {zh.has(i) && <p className="bubble-zh">{l.zh}</p>}
@@ -132,7 +142,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
   const foot = stage === 'listen' ? (
     shown < ep.lines.length
       ? <div className="row">{auto ? <button className="btn quiet" style={{ flex: 1 }} onClick={pause}>暂停</button> : <button className="btn quiet" style={{ flex: 1 }} onClick={() => playFrom(shown)}>自动连播</button>}<button className="btn primary" style={{ flex: 2 }} onClick={() => { pause(); setShown(shown + 1); play(clip(shown), accent).catch(() => {}) }}>下一句</button></div>
-      : <div className="row"><button className="btn quiet" style={{ flex: 1 }} onClick={() => playFrom(0)}>从头再听</button><button className="btn primary" style={{ flex: 2 }} onClick={() => { pause(); setStage(myLines.length ? 'act' : 'quiz') }}>轮到你演林</button></div>
+      : <div className="row"><button className="btn quiet" style={{ flex: 1 }} onClick={() => playFrom(0)}>从头再听</button><button className="btn primary" style={{ flex: 2 }} onClick={() => { pause(); setStage(myLines.length ? 'act' : 'quiz') }}>轮到你演{meZh(my)}</button></div>
   ) : stage === 'act' ? (
     <div className="row"><button className="btn quiet" style={{ flex: 1 }} onClick={() => (actI + 1 < myLines.length ? setActI(actI + 1) : setStage('quiz'))}>跳过</button><button className="btn primary" style={{ flex: 2 }} disabled={actScores[myLines[actI].i] === undefined} onClick={() => (actI + 1 < myLines.length ? setActI(actI + 1) : setStage('quiz'))}>{actI + 1 < myLines.length ? '下一句' : '去答题'}</button></div>
   ) : stage === 'quiz' ? (
@@ -160,7 +170,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
         const prev = i > 0 ? ep.lines[i - 1] : null
         return (
           <div className="fade-in" key={actI}>
-            <p className="step-kind">你演林 · {actI + 1}/{myLines.length}</p>
+            <p className="step-kind">你演{meZh(my)} · {actI + 1}/{myLines.length}</p>
             {prev && (
               <div className="act-prev">
                 <span className="small muted">{s.cast[prev.who]?.zh ?? prev.who}：</span>

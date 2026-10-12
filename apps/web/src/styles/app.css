@@ -470,3 +470,15 @@ html[data-text="lg"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.1; }
 html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .privacy { padding: 12px 16px 16px; font-size: 14px; color: var(--soft); display: grid; gap: 6px; }
 .privacy ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* 剧里的你（components/MeEditor.tsx） */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.me-editor h2 { font-size: 20px; }
+.me-editor .section-title { margin: 18px 0 8px; }
+
+/* 词书（pages/Words.tsx） */
+.book-card { margin-bottom: 14px; }
+.book-card .row { gap: 8px; }
+.book-name { display: grid; gap: 2px; }
+.book-name b { font-size: 20px; }
+.list-row[aria-pressed="true"] .side { color: var(--brand); font-weight: 600; }

@@ -4,6 +4,9 @@ import { db } from '../lib/db'
 import { loadContent, pickSentence, type Word } from '../lib/content'
 import { PlayButton } from '../components/PlayButton'
 import { State, addCard } from '../lib/srs'
+import { BOOKS, bookName, inBook } from '../lib/books'
+import { Sheet } from '../components/Sheet'
+import { FUNCTION_WORDS } from '../lib/lesson'
 
 type Row = { word: string; due: number; state: number; reps: number; lapses: number; known: number; stability: number }
 type Filter = 'learning' | 'mastered' | 'known'
@@ -16,7 +19,9 @@ function nextLabel(due: number) {
 }
 
 export function Words() {
-  const { tick, profile, refresh, toast } = useApp()
+  const { tick, profile, setProfile, refresh, toast } = useApp()
+  const [pickBook, setPickBook] = useState(false)
+  const [browse, setBrowse] = useState(false)
   const [allWords, setAllWords] = useState<Word[]>([])
   const [rows, setRows] = useState<Row[]>([])
   const [byWord, setByWord] = useState<Map<string, Word>>(new Map())
@@ -44,9 +49,42 @@ export function Words() {
   }, [q, allWords, have])
   const addWord = async (w: Word) => { await addCard(w.w); toast(`已加入：${w.w}`); refresh() }
 
+  // 词书：书里的词、各自学到哪了
+  const book = profile?.book
+  const status = useMemo(() => new Map(rows.map((r) => [r.word, r.known ? 'known' : r.state === State.Review && r.stability >= 21 ? 'mastered' : 'learning'] as const)), [rows])
+  // 虚词（in、on、the……）不单独当新词学，词书里也不列
+  const bookable = useMemo(() => allWords.filter((w) => !FUNCTION_WORDS.has(w.w) && !w.sensitive), [allWords])
+  const bookCounts = useMemo(() => new Map(BOOKS.map((b) => [b.tag, bookable.filter((w) => inBook(w, b.tag)).length])), [bookable])
+  const bookWords = useMemo(() => (book ? bookable.filter((w) => inBook(w, book)) : []), [bookable, book])
+  const bookLearned = bookWords.filter((w) => status.has(w.w)).length
+  const bookMastered = bookWords.filter((w) => { const s = status.get(w.w); return s === 'mastered' || s === 'known' }).length
+  const chooseBook = async (tag: string) => {
+    if (!profile) return
+    const { book: _, ...rest } = profile
+    await setProfile(tag ? { ...rest, book: tag } : rest)
+    setPickBook(false)
+    toast(tag ? `之后的新词按「${bookName(tag)}」来` : '之后的新词按常用程度来')
+  }
+
   return (
     <div className="page fade-in">
       <div className="page-head"><h1>词库</h1><span className="small muted">共 {rows.length - groups.known.length} 个在学</span></div>
+      <div className="card book-card">
+        <div className="row">
+          <div className="book-name"><span className="small muted">词书</span><b>{bookName(book)}</b></div>
+          <div className="spacer" />
+          {book && <button className="btn small quiet" onClick={() => setBrowse(true)}>浏览</button>}
+          <button className="btn small quiet" onClick={() => setPickBook(true)}>{book ? '换一本' : '选词书'}</button>
+        </div>
+        {book ? (
+          <>
+            <div className="bar" style={{ marginTop: 14 }}><i style={{ width: `${bookWords.length ? (bookLearned / bookWords.length) * 100 : 0}%` }} /></div>
+            <p className="small muted" style={{ marginTop: 8 }}>已学 {bookLearned.toLocaleString()} / {bookWords.length.toLocaleString()} · 掌握 {bookMastered.toLocaleString()}</p>
+          </>
+        ) : (
+          <p className="small muted" style={{ marginTop: 8 }}>新词按常用程度、从你的水平往上排{profile?.goal.kind === 'ielts' ? '，雅思词优先' : ''}。要按考试大纲背，选一本词书。</p>
+        )}
+      </div>
       <input className="search" placeholder="搜英文或中文" value={q} onChange={(e) => setQ(e.target.value)} />
       <div className="seg" style={{ margin: '12px 0' }} role="group">
         {([['learning', `学习中 ${groups.learning.length}`], ['mastered', `已掌握 ${groups.mastered.length}`], ['known', `早就认识 ${groups.known.length}`]] as [Filter, string][]).map(([k, t]) => (
@@ -82,9 +120,28 @@ export function Words() {
           </div>
         </>
       )}
+      {pickBook && (
+        <Sheet onClose={() => setPickBook(false)}>
+            <h2 style={{ fontSize: 20 }}>选词书</h2>
+            <p className="small muted" style={{ marginTop: 4 }}>换了之后，每天的新词从这本书里出；已经学的词不受影响。</p>
+            <div className="list" style={{ marginTop: 14 }}>
+              <button className="list-row" aria-pressed={!book} onClick={() => chooseBook('')}>
+                <span className="main"><b>按常用程度</b><span>从你的水平往上，最常用的先学</span></span>
+                <span className="side">{!book ? '在用' : ''}</span>
+              </button>
+              {BOOKS.map((b) => (
+                <button key={b.tag} className="list-row" aria-pressed={book === b.tag} onClick={() => chooseBook(b.tag)}>
+                  <span className="main"><b>{b.name}</b><span>{b.desc} · {(bookCounts.get(b.tag) ?? 0).toLocaleString()} 词</span></span>
+                  <span className="side">{book === b.tag ? '在用' : ''}</span>
+                </button>
+              ))}
+            </div>
+            <p className="small faint" style={{ marginTop: 10 }}>词书收的是本 App 词表（最常用的 1.2 万词）里属于该考试的词，考试标签来自 ECDICT。</p>
+        </Sheet>
+      )}
+      {browse && book && <BookBrowser words={bookWords} status={status} title={bookName(book)} onOpen={(w) => setOpen(w)} onAdd={addWord} onClose={() => setBrowse(false)} />}
       {open && profile && (
-        <div className="sheet-mask" onClick={() => setOpen(null)}>
-          <div className="sheet fade-in" onClick={(e) => e.stopPropagation()}>
+        <Sheet onClose={() => setOpen(null)}>
             <div className="row"><div className="word-big" style={{ fontSize: 36 }}>{open.w}</div><div className="spacer" /><PlayButton text={open.w} clip={{ text: open.w, word: open.w }} accent={profile.accent} /></div>
             <p className="ipa">/{open.ipa}/ · 第 {open.rank.toLocaleString()} 常用 · {open.cefr}</p>
             <p className="zh-mean">{open.zh}</p>
@@ -92,9 +149,45 @@ export function Words() {
               <div className="example"><p className="en">{s.en}</p><p className="zh">{s.zh}</p><div className="row" style={{ marginTop: 10 }}><PlayButton text={s.en} clip={{ text: s.en, sentenceId: s.id }} accent={profile.accent} label="听例句" /></div></div>
             ) : null })()}
             <button className="btn quiet block" style={{ marginTop: 18 }} onClick={() => setOpen(null)}>关闭</button>
-          </div>
-        </div>
+        </Sheet>
       )}
     </div>
+  )
+}
+
+const LABEL = { learning: '学习中', mastered: '已掌握', known: '认识' } as const
+type St = keyof typeof LABEL
+
+/** 浏览词书：按常用程度排，分“没学 / 在学 / 掌握了”看，没学的可以直接加入 */
+function BookBrowser({ words, status, title, onOpen, onAdd, onClose }: { words: Word[]; status: Map<string, St>; title: string; onOpen: (w: Word) => void; onAdd: (w: Word) => void; onClose: () => void }) {
+  const [f, setF] = useState<'new' | 'learning' | 'done'>('new')
+  const [n, setN] = useState(100)
+  const groups = useMemo(() => ({
+    new: words.filter((w) => !status.has(w.w)),
+    learning: words.filter((w) => status.get(w.w) === 'learning'),
+    done: words.filter((w) => { const s = status.get(w.w); return s === 'mastered' || s === 'known' }),
+  }), [words, status])
+  const list = groups[f]
+  return (
+    <Sheet onClose={onClose} className="book-browser">
+        <h2 style={{ fontSize: 20 }}>{title} · {words.length.toLocaleString()} 词</h2>
+        <div className="seg" style={{ margin: '12px 0' }}>
+          {([['new', `没学 ${groups.new.length}`], ['learning', `在学 ${groups.learning.length}`], ['done', `掌握 ${groups.done.length}`]] as const).map(([k, t]) => (
+            <button key={k} aria-pressed={f === k} onClick={() => { setF(k); setN(100) }}>{t}</button>
+          ))}
+        </div>
+        {list.length === 0 ? <p className="small muted">这里还没有词。</p> : (
+          <div className="list">
+            {list.slice(0, n).map((w) => (
+              <div className="list-row" key={w.w}>
+                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(w)}><b>{w.w}</b><span>{w.zh}</span></button>
+                {status.has(w.w) ? <span className="side">{LABEL[status.get(w.w)!]}</span> : <button className="btn small quiet" onClick={() => onAdd(w)}>加入学习</button>}
+              </div>
+            ))}
+          </div>
+        )}
+        {list.length > n && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => setN(n + 200)}>再显示 200 个</button>}
+        <button className="btn quiet block" style={{ marginTop: 12 }} onClick={onClose}>关闭</button>
+    </Sheet>
   )
 }

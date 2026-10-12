@@ -5,6 +5,7 @@ import { dueWords } from './srs'
 import type { Goal, Cefr } from './levels'
 import type { Accent } from './tts'
 import type { PlacementResult } from './placement'
+import { bookOrder } from './books'
 import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type CheckItem } from './calibrate'
 import { CEFR } from './levels'
 
@@ -14,13 +15,15 @@ export type Profile = {
   accent: Accent
   start: Cefr // 定级时的档位（进度从这里算）
   placement: PlacementResult
+  /** 词书（ECDICT 考试标签，见 books.ts）；没设 = 按常用程度 */
+  book?: string
   createdAt: number
 }
 export const getProfile = () => kvGet<Profile | null>('profile', null)
 export const saveProfile = (p: Profile) => kvSet('profile', p)
 
 // 功能词：太基础、没法做成词卡，学了也是浪费时间，直接当“认识”
-const FUNCTION_WORDS = new Set(`a an the be is am are was were been being have has had do does did i me my mine you your yours he him his she her hers it its we us our ours they them their theirs this that these those
+export const FUNCTION_WORDS = new Set(`a an the be is am are was were been being have has had do does did i me my mine you your yours he him his she her hers it its we us our ours they them their theirs this that these those
 and or but if so as of to in on at by for from with about into over under up down out off than then there here what which who whom whose when where why how not no yes all any some each every
 can could will would shall should may might must also very just too only own same such both either neither nor one two three`.split(/\s+/))
 
@@ -47,7 +50,9 @@ export async function dayRow(date = today()): Promise<DayRow> {
 async function pickNewWords(p: Profile, n: number, words: Word[], frontier: number): Promise<Word[]> {
   const have = new Set((await db.all<{ word: string }>('SELECT word FROM card')).map((r) => r.word))
   const from = Math.max(1, frontier)
-  const cand = words.filter((w) => w.rank >= from && !have.has(w.w) && !FUNCTION_WORDS.has(w.w) && !w.sensitive && w.cmu.length > 0)
+  const learnable = words.filter((w) => !have.has(w.w) && !FUNCTION_WORDS.has(w.w) && !w.sensitive && w.cmu.length > 0)
+  if (p.book) return bookOrder(learnable, p.book, from).slice(0, n)
+  const cand = learnable.filter((w) => w.rank >= from)
   if (p.goal.kind !== 'ielts') return cand.slice(0, n)
   // 雅思目标：在接下来 400 个词的窗口里，带 ielts 标签的优先
   const win = cand.slice(0, 400)

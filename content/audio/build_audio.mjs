@@ -1,7 +1,7 @@
 // 示范音频包：content/pack 里的例句 + 单词 → Kokoro 合成 → mp3（32kbps 单声道）
 // 输出 <out>/<accent>/s/<Tatoeba句号>.mp3、<out>/<accent>/w/<单词>.mp3、<out>/<accent>/e/s<季>e<集>-<行>.mp3（剧集，每个角色自己的声音）、e/l<套>p<部分>-<行>.mp3（雅思听力），
 // 外加 <out>/<accent>/shard-<i>.json（清单）
-// 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10] [--only s,w,e]
+// 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10] [--only s,w,e,v]（v=剧集主角改名/男声的另几套，也放 e/）
 // 没有 ffmpeg 时输出 wav（只用于本地验证；CI 里装 ffmpeg 出 mp3）
 import { KokoroTTS } from 'kokoro-js'
 import { spawnSync } from 'node:child_process'
@@ -29,6 +29,33 @@ const epItems = seasons.flatMap((season) => season.episodes.flatMap((ep) => ep.l
   return { kind: 'e', key: `s${season.season}e${ep.id}-${i}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
 })))
 
+// 主角可以改名、换男声（content/episodes/names.json）：另配几套，同样放 e/ 目录（kind v 只是为了能单独合成）
+//   <键>.m          主角的台词换男声
+//   <键>.n-<名字>    提到主角名字的台词（别人叫你、你自我介绍）换成这个名字；主角自己说的再配一份男声 <键>.m.n-<名字>
+const NAMES = JSON.parse(readFileSync(new URL('../episodes/names.json', import.meta.url)))
+const MALE = NAMES.male_voice[accent]
+const NAME_RE = /\bLin\b/g
+for (const season of seasons) {
+  const me = Object.entries(season.cast).find(([, c]) => c.me)?.[0] ?? 'Lin'
+  for (const ep of season.episodes) {
+    ep.lines.forEach((l, i) => {
+      const key = `s${season.season}e${ep.id}-${i}`
+      const v = season.cast[l.who].voice
+      const voice = typeof v === 'string' ? v : v[accent]
+      const mine = l.who === me
+      if (mine) epItems.push({ kind: 'v', key: `${key}.m`, text: l.en, voice: MALE })
+      if (!NAME_RE.test(l.en)) return
+      NAME_RE.lastIndex = 0
+      for (const n of NAMES.names) {
+        const text = l.en.replace(NAME_RE, n)
+        const id = n.toLowerCase()
+        epItems.push({ kind: 'v', key: `${key}.n-${id}`, text, voice })
+        if (mine) epItems.push({ kind: 'v', key: `${key}.m.n-${id}`, text, voice: MALE })
+      }
+    })
+  }
+}
+
 // 雅思听力（content/ielts/listening.json）：也放 e/ 目录、跟剧集一起合成和同步；声音固定，不跟口音换；say 是朗读写法
 const listening = JSON.parse(readFileSync(new URL('../ielts/listening.json', import.meta.url))).tests
 epItems.push(...listening.flatMap((t) => t.parts.flatMap((p) => p.lines.map((l, i) => ({ kind: 'e', key: `l${t.id}p${p.n}-${i}`, text: l.say ?? l.en, voice: p.cast[l.who].voice })))))
@@ -40,6 +67,13 @@ const items = [
   ...epItems,
 ].filter((it) => only.has(it.kind)).filter((_, i) => i % shards === shard)
 const todo = limit ? items.slice(0, limit) : items
+// --dry 1：只数条数（核对分片和改动），不载入模型
+if (arg('dry', '')) {
+  const by = {}
+  for (const it of todo) by[it.kind] = (by[it.kind] ?? 0) + 1
+  console.log(JSON.stringify({ accent, shard, shards, by, sample: todo.filter((x) => x.kind === 'v').slice(0, 4) }))
+  process.exit(0)
+}
 const hasFfmpeg = spawnSync('ffmpeg', ['-version']).status === 0
 const ext = hasFfmpeg ? 'mp3' : 'wav'
 for (const k of ['s', 'w', 'e']) mkdirSync(join(out, accent, k), { recursive: true })
@@ -69,7 +103,7 @@ console.log(`载入 ${Date.now() - t0}ms · ${accent} 第 ${shard + 1}/${shards}
 const manifest = []
 let audioSec = 0, i = 0
 for (const it of todo) {
-  const file = join(out, accent, it.kind, `${it.kind === 'w' ? encodeURIComponent(it.key) : it.key}.${ext}`)
+  const file = join(out, accent, it.kind === 'v' ? 'e' : it.kind, `${it.kind === 'w' ? encodeURIComponent(it.key) : it.key}.${ext}`)
   if (existsSync(file)) { i++; continue }
   const a = await tts.generate(it.text, { voice: it.voice ?? VOICE, speed: it.kind === 'w' ? 0.9 : 0.95 })
   const pcm = trim(a.audio, a.sampling_rate)

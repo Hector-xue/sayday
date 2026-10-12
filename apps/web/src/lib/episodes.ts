@@ -2,8 +2,10 @@
 // 每集：听（逐句播放，角色各自的声音）→ 演（你演林，逐句跟读打分）→ 测（3 道听力理解题）→ 收生词
 import { kvGet, kvSet, today } from './db'
 import { loadContent, lookup, type Word } from './content'
+import NAMES from '../../../../content/episodes/names.json'
 
-export type Line = { who: string; en: string; zh: string }
+/** named：这句原文里提到了主角的名字（换名字时要换配音） */
+export type Line = { who: string; en: string; zh: string; named?: boolean }
 export type Episode = { id: number; level: string; title: string; title_zh: string; scene_zh: string; lines: Line[]; quiz: { q: string; options: string[]; answer: number }[]; next_zh: string }
 export type Season = { season: number; title: string; title_zh: string; cast: Record<string, { zh: string; voice: string | Record<string, string>; me?: boolean }>; episodes: Episode[] }
 type Done = { date: string; quiz: number; act: number | null }
@@ -11,8 +13,52 @@ type Done = { date: string; quiz: number; act: number | null }
 export type EpProgress = { done: Record<string, Done> }
 
 export const SEASONS = [1, 2, 3, 4]
+
+// ---- 剧里的“你”：默认叫 Lin（林）、女声；可以换成预先配好音的英文名、换男声，也可以自己填名字 ----
+export type Me = { name: string; voice: 'f' | 'm' }
+export const DEFAULT_ME: Me = { name: 'Lin', voice: 'f' }
+/** 预先配好音的名字（content/episodes/names.json，和配音脚本共用） */
+export const PRESET_NAMES: string[] = NAMES.names
+/** 名字只收英文字母（可带空格、连字符、撇号），首字母大写；不合法返回 null */
+export function cleanName(s: string): string | null {
+  const t = s.trim().replace(/\s+/g, ' ')
+  if (!/^[A-Za-z][A-Za-z' -]{0,15}$/.test(t)) return null
+  return t[0].toUpperCase() + t.slice(1)
+}
+export async function getMe(): Promise<Me> {
+  const m = await kvGet<Me>('me', DEFAULT_ME)
+  return { name: cleanName(m?.name ?? '') ?? 'Lin', voice: m?.voice === 'm' ? 'm' : 'f' }
+}
+export async function setMe(m: Me) { await kvSet('me', m); cache = null }
+/** 中文界面里怎么称呼你：默认还叫“林”，改了名就直接用英文名 */
+export const meZh = (m: Me) => (m.name === 'Lin' ? '林' : m.name)
+/** 名字是不是预先配好音的（列表外的名字，提到名字的那几句改用系统朗读） */
+export const presetOf = (name: string) => PRESET_NAMES.find((n) => n.toLowerCase() === name.toLowerCase()) ?? null
+
+const NAME_EN = /\bLin\b/g
+const NAME_ZH = /(?<!柏)林/g // “都柏林”不是人名
+/** 把一季里所有文字中的 Lin / 林 换成你的名字；who、voice 这些内部字段不动 */
+export function personalize(s: Season, me: Me): Season {
+  const zh = meZh(me)
+  const walk = (v: unknown, k = ''): unknown => {
+    if (typeof v === 'string') return k === 'who' || k === 'voice' || me.name === 'Lin' ? v : v.replace(NAME_EN, me.name).replace(NAME_ZH, zh)
+    if (Array.isArray(v)) return v.map((x) => walk(x, k))
+    if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([kk, x]) => [kk, walk(x, kk)]))
+    return v
+  }
+  const out = walk(s) as Season
+  out.episodes.forEach((ep, e) => ep.lines.forEach((l, i) => { l.named = /\bLin\b/.test(s.episodes[e].lines[i].en) }))
+  return out
+}
+export const meKey = (s: Season) => Object.entries(s.cast).find(([, c]) => c.me)?.[0] ?? 'Lin'
+
 let cache: Promise<Season[]> | null = null
-export const loadSeasons = (): Promise<Season[]> => (cache ??= Promise.all(SEASONS.map((n) => fetch(`./content/episodes-s${n}.json`).then((r) => r.json()))))
+let raw: Promise<Season[]> | null = null
+export const loadSeasons = (): Promise<Season[]> => (cache ??= (async () => {
+  raw ??= Promise.all(SEASONS.map((n) => fetch(`./content/episodes-s${n}.json`).then((r) => r.json())))
+  const [all, me] = await Promise.all([raw, getMe()])
+  return all.map((s) => personalize(s, me))
+})())
 /** 兼容旧调用：第一季 */
 export const loadSeason = async (): Promise<Season> => (await loadSeasons())[0]
 
@@ -66,14 +112,27 @@ export async function finish(season: number, ep: number, quiz: number, act: numb
   await kvSet('ep_progress', p)
 }
 
-export const clipOf = (season: number, ep: number, i: number, text: string) => ({ text, ep: `s${season}e${ep}-${i}` })
+/**
+ * 这句台词用哪条配音：<键>（默认）、<键>.m（你的台词换男声）、<键>[.m].n-<名字>（提到你名字的句子）。
+ * 名字不在预配列表里：提到名字的句子不给配音键，播放时走系统朗读（总比念错名字好）
+ */
+export function clipOf(season: number, ep: number, i: number, l: Line, me: Me, mine: boolean): { text: string; ep?: string } {
+  const base = `s${season}e${ep}-${i}`
+  const m = mine && me.voice === 'm' ? '.m' : ''
+  if (l.named && me.name !== 'Lin') {
+    const p = presetOf(me.name)
+    return p ? { text: l.en, ep: `${base}${m}.n-${p.toLowerCase()}` } : { text: l.en }
+  }
+  return { text: l.en, ep: base + m }
+}
 
 /** 这一集里值得学的词：词表里有、不太基础、还没进词卡的（按难度从易到难，最多 6 个） */
-export async function episodeWords(ep: Episode, have: Set<string>, frontier: number): Promise<Word[]> {
+export async function episodeWords(ep: Episode, have: Set<string>, frontier: number, myName = 'Lin'): Promise<Word[]> {
   const { byWord } = await loadContent()
   const seen = new Set<string>()
   const out: Word[] = []
   for (const l of ep.lines) for (const t of l.en.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []) {
+    if (t.toLowerCase() === myName.toLowerCase()) continue // 你的名字（Grace、Max 这类本身也是单词）
     const w = lookup(byWord, t)
     if (!w || seen.has(w.w) || have.has(w.w) || w.sensitive || w.rank < Math.max(600, frontier * 0.6)) continue
     seen.add(w.w)
