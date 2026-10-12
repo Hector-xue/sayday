@@ -77,6 +77,10 @@ p { margin: 0; }
 .tab svg { width: 22px; height: 22px; }
 .tab:active { transform: scale(.92); }
 .tab[aria-current="page"] { color: var(--dock-on); font-weight: 600; }
+/* 在页面里打字（词库搜索等）时键盘升起：底栏让开，不浮在键盘上挡结果 */
+.tabbar { transition: opacity .18s, transform .18s; }
+.shell:has(.page :is(input:not([type="file"]):not([type="time"]), textarea):focus) .tabbar { opacity: 0; transform: translateY(16px); pointer-events: none; }
+.shell:has(.page :is(input:not([type="file"]):not([type="time"]), textarea):focus) .tabbar nav { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .tab-pill { transition: opacity .2s; } .tab-pill i.go { animation: none; } }
 
 /* 卡片 */
