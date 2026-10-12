@@ -9,7 +9,10 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.SystemClock
+import android.content.ActivityNotFoundException
 import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -48,6 +51,11 @@ class SaveArgs {
   var mime: String = "application/json"
   /** 文件内容的 base64 */
   lateinit var data: String
+}
+
+@InvokeArg
+class UrlArgs {
+  lateinit var url: String
 }
 
 @InvokeArg
@@ -424,5 +432,42 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
       ret.put("path", where)
       invoke.resolve(ret)
     }
+  }
+
+  // ---- 支持日日说：收款码存进相册（微信扫一扫只能从相册选图）----
+  @Command
+  fun saveImage(invoke: Invoke) {
+    val args = invoke.parseArgs(SaveArgs::class.java)
+    onWorker(invoke, "保存失败") {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) throw IllegalStateException("这台手机的系统版本存不了图，请截图保存")
+      val bytes = Base64.decode(args.data, Base64.DEFAULT)
+      val values = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, args.name)
+        put(MediaStore.Images.Media.MIME_TYPE, args.mime)
+        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Sayday")
+      }
+      val uri = activity.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw IllegalStateException("无法创建图片")
+      activity.contentResolver.openOutputStream(uri)!!.use { it.write(bytes) }
+      val ret = JSObject()
+      ret.put("path", "相册/Pictures/Sayday/" + args.name)
+      invoke.resolve(ret)
+    }
+  }
+
+  /** 用别的 App 打开链接（weixin:// 这类 WebView 自己打不开）；没装对应 App 返回 ok=false */
+  @Command
+  fun openUrl(invoke: Invoke) {
+    val args = invoke.parseArgs(UrlArgs::class.java)
+    val ok = try {
+      activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(args.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      true
+    } catch (e: ActivityNotFoundException) {
+      false
+    } catch (e: SecurityException) {
+      false
+    }
+    val ret = JSObject()
+    ret.put("ok", ok)
+    invoke.resolve(ret)
   }
 }

@@ -115,6 +115,18 @@ fn save_to_downloads<R: Runtime>(app: tauri::AppHandle<R>, name: String, mime: O
     )
 }
 
+/// 支持页：收款码图片存进相册（base64 PNG）
+#[tauri::command]
+fn save_image<R: Runtime>(app: tauri::AppHandle<R>, name: String, data: String) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("saveImage", serde_json::json!({ "name": name, "mime": "image/png", "data": data }))
+}
+
+/// 用别的 App 打开链接（weixin:// 等）；返回 { ok }
+#[tauri::command]
+fn open_url<R: Runtime>(app: tauri::AppHandle<R>, url: String) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("openUrl", serde_json::json!({ "url": url }))
+}
+
 /// 桌面小组件的内容（网页算好：连续天数、今天练没练、一个在学的词），原样交给 Kotlin
 #[tauri::command]
 fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<Value> {
@@ -144,7 +156,7 @@ async fn update_install<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

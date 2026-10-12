@@ -1,5 +1,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "允许载入音素模型、推理、录音（含音量）、朗读、导出备份、更新桌面小组件和应用内更新。"
-permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-insets", "allow-set-bars", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget", "allow-update-start", "allow-update-status", "allow-update-install"]
+description = "允许载入音素模型、推理、录音（含音量）、朗读、导出备份、更新桌面小组件、应用内更新、存收款码到相册和打开外部链接。"
+permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-insets", "allow-set-bars", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget", "allow-update-start", "allow-update-status", "allow-update-install", "allow-save-image", "allow-open-url"]

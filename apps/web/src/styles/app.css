@@ -48,12 +48,40 @@ p { margin: 0; }
 .page { flex: 1; padding: calc(20px + var(--sat)) 16px calc(96px + var(--safe-b)); }
 .page-head { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 2px 18px; }
 .page-head h1 { font-size: 26px; color: var(--navy); }
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 8px 12px calc(8px + var(--safe-b));
-  background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-top: 1px solid var(--hair); }
-.tabbar nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
-.tab { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font-size: 11px; color: var(--faint); border-radius: 12px; }
-.tab svg { width: 24px; height: 24px; }
-.tab[aria-current="page"] { color: var(--brand); font-weight: 600; }
+/* 底栏：悬浮胶囊，页面从它下面滑过（照余见的 Dock）。选中的那格垫一块会滑的小胶囊：
+   四周和大胶囊留一样宽的缝（--dock-gap）、两头半圆同心；切换时滑过去，路上横向拉长、微微鼓起，到了回弹。
+   各风格只换 --dock-* 变量（marker.css / paper.css） */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none;
+  padding: 0 16px max(10px, calc(var(--safe-b) + 4px));
+  --dock-gap: 5px;
+  --dock-bg: color-mix(in srgb, var(--surface) 74%, transparent);
+  --dock-line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --dock-shadow: 0 12px 30px -8px color-mix(in srgb, #000 22%, transparent), 0 1px 4px color-mix(in srgb, #000 6%, transparent);
+  --dock-pill: color-mix(in srgb, var(--ink) 7%, transparent);
+  --dock-rim: color-mix(in srgb, #fff 70%, transparent);
+  --dock-on: var(--brand);
+  --dock-off: color-mix(in srgb, var(--ink) 62%, transparent); }
+:where(:root[data-theme="dark"]) .tabbar { --dock-pill: color-mix(in srgb, #fff 12%, transparent); --dock-rim: color-mix(in srgb, #fff 14%, transparent); --dock-shadow: 0 12px 30px -8px rgba(0, 0, 0, .6), 0 1px 4px rgba(0, 0, 0, .3); }
+@media (prefers-color-scheme: dark) { :where(:root:not([data-theme="light"])) .tabbar { --dock-pill: color-mix(in srgb, #fff 12%, transparent); --dock-rim: color-mix(in srgb, #fff 14%, transparent); --dock-shadow: 0 12px 30px -8px rgba(0, 0, 0, .6), 0 1px 4px rgba(0, 0, 0, .3); } }
+.tabbar nav { pointer-events: auto; position: relative; max-width: 440px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr);
+  padding: var(--dock-gap); border-radius: 999px; background: var(--dock-bg); border: 1px solid var(--dock-line); box-shadow: var(--dock-shadow);
+  backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5); }
+.tab-pill { position: absolute; top: var(--dock-gap); bottom: var(--dock-gap); left: var(--dock-gap); width: calc((100% - 2 * var(--dock-gap)) / 5);
+  transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .42s cubic-bezier(.22, 1, .36, 1), opacity .2s; pointer-events: none; }
+.tab-pill[data-off] { opacity: 0; }
+.tab-pill i { display: block; height: 100%; border-radius: 999px; background: var(--dock-pill); box-shadow: inset 0 1px 0 var(--dock-rim), 0 1px 6px color-mix(in srgb, #000 6%, transparent); }
+.tab-pill i.go { animation: dock-stretch .42s cubic-bezier(.3, 0, .3, 1); }
+@keyframes dock-stretch { 45% { transform: scale(1.26, 1.07); } }
+.tab { position: relative; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 46px; padding: 4px 0; font-size: 11px; line-height: 1.2; color: var(--dock-off); border-radius: 999px; transition: color .2s, transform .12s; -webkit-tap-highlight-color: transparent; }
+.tab svg { width: 22px; height: 22px; }
+.tab:active { transform: scale(.92); }
+.tab[aria-current="page"] { color: var(--dock-on); font-weight: 600; }
+/* 在页面里打字（词库搜索等）时键盘升起：底栏让开，不浮在键盘上挡结果 */
+.tabbar { transition: opacity .18s, transform .18s; }
+.shell:has(.page :is(input:not([type="file"]):not([type="time"]), textarea):focus) .tabbar { opacity: 0; transform: translateY(16px); pointer-events: none; }
+.shell:has(.page :is(input:not([type="file"]):not([type="time"]), textarea):focus) .tabbar nav { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .tab-pill { transition: opacity .2s; } .tab-pill i.go { animation: none; } }
 
 /* 卡片 */
 .card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r); padding: 20px; }
@@ -482,3 +510,11 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .book-name { display: grid; gap: 2px; }
 .book-name b { font-size: 20px; }
 .list-row[aria-pressed="true"] .side { color: var(--brand); font-weight: 600; }
+
+/* 支持日日说 */
+.support-price { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 10px; }
+.support-price b { font: 600 40px/1 var(--num, inherit); font-variant-numeric: tabular-nums; }
+.support-price span { color: var(--soft); font-size: 14px; }
+.support-text { line-height: 1.7; margin-bottom: 16px; }
+.support-qr { margin: 14px auto 0; text-align: center; }
+.support-qr img { display: block; margin: 0 auto 6px; padding: 10px; background: #fff; border-radius: 12px; width: 196px; height: 196px; }
