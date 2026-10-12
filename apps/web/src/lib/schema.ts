@@ -46,4 +46,9 @@ export const MIGRATIONS: string[] = [
   `
   CREATE TABLE writing(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, prompt_id TEXT NOT NULL, text TEXT NOT NULL, band REAL, result TEXT);
   `,
+  // v0.0.5：雅思阅读 / 听力练习（part = 0 表示整套）
+  `
+  CREATE TABLE practice(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, kind TEXT NOT NULL, test INTEGER NOT NULL, part INTEGER NOT NULL, score INTEGER NOT NULL, total INTEGER NOT NULL, band REAL, answers TEXT);
+  CREATE INDEX practice_kind ON practice(kind, ts);
+  `,
 ]

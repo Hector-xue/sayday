@@ -26,7 +26,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
 
   const exportData = async () => {
     // 录音存档（recording）是二进制、体积大，不放进 JSON 备份
-    const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing']
+    const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice']
     const out: Record<string, unknown> = { app: 'sayday', exported: new Date().toISOString() }
     for (const t of tables) out[t] = await db.all(`SELECT * FROM ${t}`)
     const json = JSON.stringify(out)
@@ -51,7 +51,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
     let data: Record<string, unknown>
     try { data = JSON.parse(await file.text()) } catch { toast('不是有效的备份文件'); return }
     if (data.app !== 'sayday') { toast('这不是日日说的备份文件'); return }
-    const allowed = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing']
+    const allowed = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice']
     const tables = allowed.filter((t) => Array.isArray(data[t]))
     const n = tables.reduce((s, t) => s + (data[t] as unknown[]).length, 0)
     if (!confirm(`用备份（${String(data.exported).slice(0, 10)}，共 ${n} 条记录）覆盖现在的学习记录？`)) return
@@ -70,7 +70,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   }
   const reset = async () => {
     if (!confirm('清空所有学习记录？这一步不能撤销，建议先导出备份。')) return
-    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'chat', 'diary', 'speaking_test', 'writing', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
+    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
     location.reload()
   }
 

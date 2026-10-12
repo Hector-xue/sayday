@@ -13,6 +13,8 @@ import { Chat } from './pages/Chat'
 import { Diary } from './pages/Diary'
 import { Episodes } from './pages/Episodes'
 import { Writing } from './pages/Writing'
+import { Practice } from './pages/Practice'
+import { Speaking } from './pages/Speaking'
 
 type Tab = 'today' | 'episodes' | 'lab' | 'words' | 'progress' | 'settings'
 // 设置不占底栏：从“今天”和“进步”右上角的齿轮进
@@ -28,12 +30,13 @@ function Main() {
   const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary' | 'writing'>(null)
   const [openEp, setOpenEp] = useState<{ season: number; ep: number } | null>(null)
   const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing'>(null)
+  const [ielts, setIelts] = useState<null | 'reading' | 'listening' | 'speaking'>(null)
   const { refresh } = useApp()
   if (profile === undefined) return <div className="loading">…</div>
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (
     <div className="shell">
-      {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); setTab('episodes') }} onSettings={() => setTab('settings')} />}
+      {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); setTab('episodes') }} onSettings={() => setTab('settings')} onIelts={setIelts} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
       {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} />}
       {tab === 'words' && <Words />}
@@ -50,6 +53,8 @@ function Main() {
       {ai === 'chat' && <Chat onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('chat'); setAi('setup') }} />}
       {ai === 'diary' && <Diary onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('diary'); setAi('setup') }} />}
       {ai === 'writing' && <Writing onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('writing'); setAi('setup') }} />}
+      {(ielts === 'reading' || ielts === 'listening') && <Practice kind={ielts} onClose={() => { setIelts(null); refresh() }} />}
+      {ielts === 'speaking' && <Speaking onClose={() => { setIelts(null); refresh() }} onSetupAi={() => { setIelts(null); setAi('setup') }} />}
       {ai === 'setup' && <AiSetup onClose={(ok) => { setAi(ok ? after : null); setAfter(null); refresh() }} />}
     </div>
   )

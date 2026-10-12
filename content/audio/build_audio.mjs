@@ -1,5 +1,5 @@
 // 示范音频包：content/pack 里的例句 + 单词 → Kokoro 合成 → mp3（32kbps 单声道）
-// 输出 <out>/<accent>/s/<Tatoeba句号>.mp3、<out>/<accent>/w/<单词>.mp3、<out>/<accent>/e/s<季>e<集>-<行>.mp3（剧集，每个角色自己的声音），
+// 输出 <out>/<accent>/s/<Tatoeba句号>.mp3、<out>/<accent>/w/<单词>.mp3、<out>/<accent>/e/s<季>e<集>-<行>.mp3（剧集，每个角色自己的声音）、e/l<套>p<部分>-<行>.mp3（雅思听力），
 // 外加 <out>/<accent>/shard-<i>.json（清单）
 // 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10] [--only s,w,e]
 // 没有 ffmpeg 时输出 wav（只用于本地验证；CI 里装 ffmpeg 出 mp3）
@@ -28,6 +28,10 @@ const epItems = seasons.flatMap((season) => season.episodes.flatMap((ep) => ep.l
   const v = season.cast[l.who].voice
   return { kind: 'e', key: `s${season.season}e${ep.id}-${i}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
 })))
+
+// 雅思听力（content/ielts/listening.json）：也放 e/ 目录、跟剧集一起合成和同步；声音固定，不跟口音换；say 是朗读写法
+const listening = JSON.parse(readFileSync(new URL('../ielts/listening.json', import.meta.url))).tests
+epItems.push(...listening.flatMap((t) => t.parts.flatMap((p) => p.lines.map((l, i) => ({ kind: 'e', key: `l${t.id}p${p.n}-${i}`, text: l.say ?? l.en, voice: p.cast[l.who].voice })))))
 
 // 先句子后单词再剧集；按下标取模分片，每片的难度分布一致
 const items = [
