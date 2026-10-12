@@ -5,7 +5,7 @@ import { nextUp, unlocked, key, teaserFor, type Season } from '../episodes'
 import { dictWord, tokenize } from '../speech/score'
 
 const root = new URL('../../../../../', import.meta.url).pathname
-const all: Season[] = [1, 2, 3].map((n) => JSON.parse(readFileSync(root + `content/episodes/s${n}.json`, 'utf8')))
+const all: Season[] = [1, 2, 3, 4].map((n) => JSON.parse(readFileSync(root + `content/episodes/s${n}.json`, 'utf8')))
 const dict: Record<string, string> = JSON.parse(readFileSync(root + 'packages/speech/cmudict.min.json', 'utf8'))
 
 describe('剧集内容', () => {
@@ -18,7 +18,7 @@ describe('剧集内容', () => {
     }
   })
   it('林的台词基本都能打分（发音词典里查得到，人名地名除外）', () => {
-    const names = new Set(['lin', 'emma', 'tom', 'patel', 'sophie', 'arthur', 'hangzhou', 'camden', 'edinburgh', 'manchester', 'hiya', 'callum', 'morag', 'mackenzie', 'jake', 'ceilidh', 'priya', 'reed', 'hale'])
+    const names = new Set(['lin', 'emma', 'tom', 'patel', 'sophie', 'arthur', 'hangzhou', 'camden', 'edinburgh', 'manchester', 'hiya', 'callum', 'morag', 'mackenzie', 'jake', 'ceilidh', 'priya', 'reed', 'hale', 'ana', 'alvarez', 'brooks'])
     const miss = new Set<string>()
     for (const s of all) for (const e of s.episodes) for (const l of e.lines) if (l.who === 'Lin') for (const w of tokenize(l.en)) if (!dictWord(dict, w) && !names.has(w)) miss.add(w)
     expect([...miss]).toEqual([])
