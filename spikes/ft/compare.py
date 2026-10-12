@@ -4,7 +4,7 @@
 App 实际用的是“轻量校准”（只用 af、句内均值、音素 id，见 spikes/m0/export_calib.py），所以以 lite 那行为准。
 
 用法:
-  python spikes/ft/compare.py prep             # 生成 .cache/data/so762_trainB.parquet
+  python spikes/ft/compare.py prep             # 生成 .cache/data/so762_trainA.parquet、so762_trainB.parquet
   python spikes/ft/compare.py report int8 ft_int8
 产物: .cache/ft/compare.json
 """
@@ -31,11 +31,11 @@ def prep() -> None:
     from train import speakers_split
 
     t = pq.read_table(CACHE / "data" / "so762_train.parquet")
-    _, b = speakers_split(t.select(["speaker"]).to_pylist())
-    mask = [s in b for s in t.column("speaker").to_pylist()]
-    tb = t.filter(mask)
-    pq.write_table(tb, CACHE / "data" / "so762_trainB.parquet")
-    print("trainB", tb.num_rows, "句")
+    a, b = speakers_split(t.select(["speaker"]).to_pylist())
+    for name, keep in (("trainA", a), ("trainB", b)):
+        part = t.filter([s in keep for s in t.column("speaker").to_pylist()])
+        pq.write_table(part, CACHE / "data" / f"so762_{name}.parquet")
+        print(name, part.num_rows, "句")
 
 
 def lite(z) -> np.ndarray:

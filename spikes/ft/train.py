@@ -59,9 +59,10 @@ def speakers_split(rows) -> tuple[set, set]:
 
 
 def load(part: str):
+    """part: A / B（按说话人对半分）或 all（整个训练集）"""
     rows = pq.read_table(CACHE / "data" / "so762_train.parquet", columns=["audio", "words", "speaker"]).to_pylist()
     a, b = speakers_split(rows)
-    keep = a if part == "A" else b
+    keep = {"A": a, "B": b, "all": a | b}[part]
     data = []
     for r in rows:
         if r["speaker"] not in keep:
@@ -133,15 +134,16 @@ def main() -> None:
     ap.add_argument("--batch-seconds", type=float, default=48)
     ap.add_argument("--bench", type=int, default=0, help="只跑这么多步测速，不存检查点")
     ap.add_argument("--threads", type=int, default=0)
+    ap.add_argument("--part", choices=["A", "B", "all"], default="A", help="用哪部分说话人训练（交叉拟合要 A、B 各一个，最终模型用 all）")
     a = ap.parse_args()
     if a.threads:
         torch.set_num_threads(a.threads)
     OUT.mkdir(parents=True, exist_ok=True)
     t_start = time.time()
 
-    data = load("A")
+    data = load(a.part)
     total_s = sum(len(w) for w, _ in data) / 16000
-    print(f"A 半：{len(data)} 句，{total_s/60:.1f} 分钟音频，线程 {torch.get_num_threads()}", flush=True)
+    print(f"{a.part}：{len(data)} 句，{total_s/60:.1f} 分钟音频，线程 {torch.get_num_threads()}", flush=True)
 
     model = build_model()
     params = [p for p in model.parameters() if p.requires_grad]
