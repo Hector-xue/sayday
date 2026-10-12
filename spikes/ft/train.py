@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import sys
 import math
 import random
 import time
@@ -109,6 +110,45 @@ def collate(data, ids):
     return x, att, y
 
 
+XLSR = "facebook/wav2vec2-xlsr-53-espeak-cv-ft"
+
+
+def build_xlsr() -> Wav2Vec2ForCTC:
+    """授权明确的备选（Apache-2.0）：输出层从 392 个国际音标换成 charsiu 的 42 个音素。
+    新输出层每一行用对应国际音标那一行的权重起步（spikes/alt/export_xlsr.py 的对应表），等于从它已经会的地方接着学"""
+    sys.path.insert(0, str(ROOT / "spikes" / "alt"))
+    from export_xlsr import IPA2CMU
+    from huggingface_hub import hf_hub_download
+    model = Wav2Vec2ForCTC.from_pretrained(XLSR)
+    src = json.loads(Path(hf_hub_download(XLSR, "vocab.json")).read_text())
+    dst = json.loads((M / "charsiu_vocab.json").read_text())
+    old = model.lm_head
+    head = torch.nn.Linear(old.in_features, len(dst))
+    with torch.no_grad():
+        head.weight.normal_(0, 0.02)
+        head.bias.zero_()
+        first = {}
+        for tok, cmu in IPA2CMU.items():  # 对应表里每个 CMU 音素排第一的国际音标是它的主要写法
+            if tok in src:
+                first.setdefault(cmu, src[tok])
+        rows = {dst[k]: v for k, v in first.items()} | {dst["[PAD]"]: src["<pad>"], dst["[UNK]"]: src["<unk>"], dst["[SIL]"]: src["<pad>"]}
+        for k, v in rows.items():
+            head.weight[k] = old.weight[v]
+            head.bias[k] = old.bias[v]
+        head.bias[dst["[SIL]"]] -= 2.0  # 静音和空白起点一样，先压低一点，让它从数据里学出来
+    model.lm_head = head
+    model.config.vocab_size = len(dst)
+    model.config.pad_token_id = dst["[PAD]"]  # CTC 空白
+    model.config.ctc_loss_reduction = "mean"
+    model.config.ctc_zero_infinity = True
+    model.config.mask_time_prob = 0.05
+    model.config.layerdrop = 0.0
+    model.freeze_feature_encoder()
+    # 3 亿参数的大模型在 16GB 内存的 CPU 机器上训练：用梯度检查点换内存
+    model.gradient_checkpointing_enable()
+    return model
+
+
 def build_model() -> Wav2Vec2ForCTC:
     cfg = Wav2Vec2Config.from_json_file(str(M / "charsiu_config.json"))
     # 和原模型训练时一样做时间遮挡（SpecAugment），防止在两千多句上过拟合
@@ -134,6 +174,7 @@ def main() -> None:
     ap.add_argument("--batch-seconds", type=float, default=48)
     ap.add_argument("--bench", type=int, default=0, help="只跑这么多步测速，不存检查点")
     ap.add_argument("--threads", type=int, default=0)
+    ap.add_argument("--base", choices=["charsiu", "xlsr"], default="charsiu", help="从哪个模型起步：charsiu，或授权明确的 xlsr-53 espeak（大 3 倍）")
     ap.add_argument("--part", choices=["A", "B", "all"], default="A", help="用哪部分说话人训练（交叉拟合要 A、B 各一个，最终模型用 all）")
     a = ap.parse_args()
     if a.threads:
@@ -145,7 +186,7 @@ def main() -> None:
     total_s = sum(len(w) for w, _ in data) / 16000
     print(f"{a.part}：{len(data)} 句，{total_s/60:.1f} 分钟音频，线程 {torch.get_num_threads()}", flush=True)
 
-    model = build_model()
+    model = build_xlsr() if a.base == "xlsr" else build_model()
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=a.lr, weight_decay=0.0)
     steps_per_epoch = len(batches(data, a.batch_seconds, 0))
@@ -163,7 +204,7 @@ def main() -> None:
         print("接着跑：", state, flush=True)
 
     def save(done: bool):
-        torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(), "state": state | {"done": done}}, OUT / "ckpt.pt.tmp")
+        torch.save({"model": model.state_dict(), "config": model.config.to_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(), "state": state | {"done": done}}, OUT / "ckpt.pt.tmp")
         (OUT / "ckpt.pt.tmp").replace(OUT / "ckpt.pt")
         (OUT / "state.json").write_text(json.dumps(state | {"done": done, "total_steps": total_steps}))
 

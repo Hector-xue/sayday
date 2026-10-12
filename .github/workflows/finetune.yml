@@ -20,6 +20,11 @@ on:
         type: choice
         options: [A, B, all]
         default: A
+      base:
+        description: 起步模型：charsiu，或授权明确的 xlsr-53 espeak（Apache-2.0，大 3 倍）
+        type: choice
+        options: [charsiu, xlsr]
+        default: charsiu
       resume_run:
         description: 接着哪次 run 的检查点跑（留空 = 从头）
         default: ''
@@ -32,7 +37,7 @@ permissions:
 
 # 同一个 part 的训练排队接力；B 和 all 可以并行
 concurrency:
-  group: finetune-${{ inputs.mode || 'bench' }}-${{ inputs.part || 'A' }}
+  group: finetune-${{ inputs.base || 'charsiu' }}-${{ inputs.mode || 'bench' }}-${{ inputs.part || 'A' }}
   cancel-in-progress: false
 
 jobs:
@@ -42,7 +47,9 @@ jobs:
     env:
       MODE: ${{ inputs.mode || 'bench' }}
       PART: ${{ inputs.part || 'A' }}
-      CKPT: ${{ (inputs.part == 'B' && 'ft-ckpt-B') || (inputs.part == 'all' && 'ft-ckpt-all') || 'ft-ckpt' }}
+      BASE: ${{ inputs.base || 'charsiu' }}
+      # 检查点名：charsiu 的 A 半沿用 ft-ckpt；xlsr 起步的加 x
+      CKPT: ${{ format('{0}{1}', inputs.base == 'xlsr' && 'ftx-ckpt' || 'ft-ckpt', (inputs.part == 'B' && '-B') || (inputs.part == 'all' && '-all') || '') }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +84,7 @@ jobs:
 
       - name: 测速
         if: env.MODE == 'bench'
-        run: python spikes/ft/train.py --bench 30 --threads $(nproc)
+        run: python spikes/ft/train.py --base $BASE --bench 20 --threads $(nproc) $([ "$BASE" = xlsr ] && echo --batch-seconds 24)
 
       - name: 取上次的检查点
         if: (env.MODE == 'train' || env.MODE == 'eval' || env.MODE == 'xeval') && inputs.resume_run != ''
@@ -92,7 +99,8 @@ jobs:
         if: env.MODE == 'train'
         run: |
           R=""; [ -s .cache/ft/ckpt.pt ] && R="--resume .cache/ft/ckpt.pt"
-          python spikes/ft/train.py --part $PART --minutes 320 --threads $(nproc) --epochs ${{ inputs.epochs }} $R
+          B=""; [ "$BASE" = xlsr ] && B="--batch-seconds 24"
+          python spikes/ft/train.py --base $BASE --part $PART --minutes 320 --threads $(nproc) --epochs ${{ inputs.epochs }} $B $R
           cat .cache/ft/state.json
 
       - name: 存检查点
@@ -113,15 +121,15 @@ jobs:
           R="-R ${{ github.repository }} --ref ${{ github.ref_name }}"
           if python -c "import json,sys; sys.exit(0 if json.load(open('.cache/ft/state.json'))['done'] else 1)"; then
             # A 训完：和原模型对比；all 训完：交叉拟合评测（要用到已经训完的 B）；B 训完什么都不用做
-            [ "$PART" = A ] && gh workflow run finetune.yml $R -f mode=eval -f resume_run=${{ github.run_id }}
-            [ "$PART" = all ] && gh workflow run finetune.yml $R -f mode=xeval -f part=all -f resume_run=${{ github.run_id }}
+            [ "$PART" = A ] && gh workflow run finetune.yml $R -f mode=eval -f base=$BASE -f resume_run=${{ github.run_id }}
+            [ "$PART" = all ] && [ "$BASE" = charsiu ] && gh workflow run finetune.yml $R -f mode=xeval -f part=all -f resume_run=${{ github.run_id }}
             true
           else
-            gh workflow run finetune.yml $R -f mode=train -f part=$PART -f resume_run=${{ github.run_id }} -f epochs=${{ inputs.epochs }}
+            gh workflow run finetune.yml $R -f mode=train -f base=$BASE -f part=$PART -f resume_run=${{ github.run_id }} -f epochs=${{ inputs.epochs }}
           fi
 
       - name: 评测
-        if: env.MODE == 'eval'
+        if: env.MODE == 'eval' && env.BASE == 'charsiu'
         run: |
           python spikes/m0/export_onnx.py
           python spikes/m0/export_onnx.py --ckpt .cache/ft/ckpt.pt --name ft_
@@ -136,7 +144,7 @@ jobs:
           tail -3 .cache/ft/log.jsonl >> $GITHUB_STEP_SUMMARY
 
       - name: 存微调模型
-        if: env.MODE == 'eval'
+        if: env.MODE == 'eval' && env.BASE == 'charsiu'
         uses: actions/upload-artifact@v4
         with:
           name: ft-model
@@ -148,7 +156,7 @@ jobs:
 
       # 换模型时重算 App 的校准表（calib.json）要用：微调模型在 B 半 / 测试集上的输出和特征
       - name: 存微调模型的评测输出
-        if: env.MODE == 'eval'
+        if: env.MODE == 'eval' && env.BASE == 'charsiu'
         uses: actions/upload-artifact@v4
         with:
           name: ft-feats
@@ -195,4 +203,38 @@ jobs:
             .cache/ft/xfit.json
             .cache/ft/calib.xfit.json
             .cache/ft/log.jsonl
+          retention-days: 30
+
+      # ---------- xlsr 起步的微调：和线上 ft1、未微调的 xlsr 三方对比 ----------
+      - name: 评测（xlsr）
+        if: env.MODE == 'eval' && env.BASE == 'xlsr'
+        run: |
+          curl -sSfL --retry 3 -o .cache/models/phone_ctc.ft_int8.onnx https://github.com/Hector-xue/sayday/releases/download/model-phone-ft1/phone_ctc.ft1.int8.onnx
+          echo "354570df4f54a6cba3108166db6447d6eb19bdb9e056b4125c96d762b27e4a39  .cache/models/phone_ctc.ft_int8.onnx" | sha256sum -c -
+          python spikes/alt/export_xlsr.py
+          python spikes/m0/export_onnx.py --ckpt .cache/ft/ckpt.pt --name ftx_
+          rm -f .cache/models/*fp32.onnx
+          python spikes/ft/compare.py prep
+          for m in ft_int8 xlsr_int8 ftx_int8; do
+            for sp in test trainB; do
+              python spikes/m0/infer_so762.py --model $m --split $sp --threads 4 | tail -1
+              python spikes/m0/score_eval.py --logits $m --split $sp > /dev/null
+            done
+          done
+          python spikes/ft/compare.py report ft_int8 xlsr_int8 ftx_int8 | tee -a $GITHUB_STEP_SUMMARY
+          for m in ft_int8 ftx_int8; do python -c "import json,sys; d=json.load(open('.cache/latency_'+sys.argv[1]+'.json')); print('-', sys.argv[1], '推理 p50', d.get('infer_p50_ms'), 'ms')" $m | tee -a $GITHUB_STEP_SUMMARY; done
+          tail -3 .cache/ft/log.jsonl >> $GITHUB_STEP_SUMMARY
+
+      - name: 存 xlsr 微调模型
+        if: env.MODE == 'eval' && env.BASE == 'xlsr'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftx-model
+          include-hidden-files: true
+          path: |
+            .cache/models/phone_ctc.ftx_int8.onnx
+            .cache/ft/compare.json
+            .cache/ft/log.jsonl
+            .cache/logits_*ftx_int8.npz
+            .cache/feats_*ftx_int8.npz
           retention-days: 30
