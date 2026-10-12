@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { appendFileSync, existsSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join, relative, resolve } from 'node:path'
 
 // 构建后列出 dist 里的全部文件，写成 precache.json 给 Service Worker 用。
@@ -32,7 +33,13 @@ function precacheManifest(): Plugin {
   }
 }
 
+// 音素模型指纹：网页按 models/phone_ctc.int8.onnx?v=<指纹> 加载，换了模型浏览器缓存自动失效
+// （评分校准表 calib.json 每次构建都更新，模型不跟着换就会对不上）
+const modelFile = join(__dirname, 'public/models/phone_ctc.int8.onnx')
+const MODEL_REV = existsSync(modelFile) ? createHash('sha256').update(readFileSync(modelFile)).digest('hex').slice(0, 12) : 'none'
+
 export default defineConfig({
+  define: { __MODEL_REV__: JSON.stringify(MODEL_REV) },
   // 相对路径：同一份产物既能挂在 sayday.ivyea.com/app/ 下，也能直接塞进 Tauri
   base: './',
   plugins: [react(), precacheManifest()],

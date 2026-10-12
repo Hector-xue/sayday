@@ -34,7 +34,7 @@
 | 资源 | 用途 | 授权 |
 |---|---|---|
 | [speechocean762](https://www.openslr.org/101/) | 评测与校准；`spikes/m0/web/samples/u*.f32` 是其中 3 条录音的派生数据 | CC BY 4.0（Junbo Zhang 等） |
-| [charsiu/en_w2v2_ctc_libris_and_cv](https://huggingface.co/charsiu/en_w2v2_ctc_libris_and_cv) | 音素识别模型（不在仓库内，需自行下载） | 模型页未标注；项目代码 MIT，**正式发版前需确认** |
+| [charsiu/en_w2v2_ctc_libris_and_cv](https://huggingface.co/charsiu/en_w2v2_ctc_libris_and_cv) | 音素识别模型（不在仓库内，需自行下载）；论文 Zhu et al., *Phone-to-audio alignment without text*, ICASSP 2022 | 模型页未标注；项目代码 MIT，**正式发版前需确认** |
 | [CMUdict](https://github.com/cmusphinx/cmudict) | 发音词典 | BSD，见 `packages/speech/cmudict.LICENSE` |
 | [ECDICT](https://github.com/skywind3000/ECDICT) | 词表、释义、音标、词频、考试标签（`content/pack/words.json`） | MIT |
 | [Tatoeba](https://tatoeba.org)（经 [manythings.org](https://www.manythings.org/anki/) 打包的中英句对） | 例句（`content/pack/sentences.json`，每句保留 Tatoeba 原句号） | CC BY 2.0 FR |

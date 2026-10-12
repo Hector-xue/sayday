@@ -60,7 +60,7 @@ export function ensureEngine(): Promise<void> {
         }
       }
       const base = new URL('./', location.href)
-      worker!.postMessage({ type: 'load', modelUrl: new URL('models/phone_ctc.int8.onnx', base).href, wasmBase: new URL('ort/', base).href })
+      worker!.postMessage({ type: 'load', modelUrl: new URL(`models/phone_ctc.int8.onnx?v=${__MODEL_REV__}`, base).href, wasmBase: new URL('ort/', base).href })
     })
   }
   loading = loading.catch((e) => { setStatus({ state: 'error', error: String(e?.message || e) }); loading = null; throw e })

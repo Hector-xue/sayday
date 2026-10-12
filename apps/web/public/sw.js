@@ -1,5 +1,6 @@
 // 日日说离线外壳：安装时预缓存 precache.json 列出的全部文件（构建时生成）；
 // 之后同源 GET 一律缓存优先，没缓存的取网络后存起来（音素模型 122MB 就是这样第一次用到时才缓存）。
+// 音素模型地址带 ?v=<模型指纹>，换模型后老用户会重新下载（见 vite.config.ts 的 __MODEL_REV__）。
 // 升级：precache.json 的 version 变 → 新缓存名；只清 sayday-app- 前缀的旧缓存（语音模型的缓存不动）。
 const PREFIX = 'sayday-app-'
 
@@ -53,7 +54,18 @@ self.addEventListener('fetch', (e) => {
       try { return await fetch(req) } catch { if (shell) return shell; throw new Error('offline') }
     }
     const res = await fetch(req)
-    if (res.ok && names.length && res.status === 200) (await caches.open(names[0])).put(req, res.clone())
+    if (res.ok && names.length && res.status === 200) {
+      // 边下边返回（下载进度照常显示），存缓存在后台进行；副本必须现在就复制，返回后页面就把内容读走了
+      const copy = res.clone()
+      ;(async () => {
+        await (await caches.open(names[0])).put(req, copy)
+        // 模型地址带 ?v=<模型指纹>：换了模型就是新地址；新的存好后删掉同一文件的旧版本（122MB 不留两份）
+        if (/\.onnx$/.test(u.pathname)) for (const n of names) {
+          const c = await caches.open(n)
+          for (const k of await c.keys()) { const ku = new URL(k.url); if (ku.pathname === u.pathname && ku.search !== u.search) await c.delete(k) }
+        }
+      })().catch((err) => console.warn('模型缓存失败', err))
+    }
     return res
   })())
 })
