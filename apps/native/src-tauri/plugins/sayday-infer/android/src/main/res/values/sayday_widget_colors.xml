@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桌面小组件配色：和 App 默认风格「荧光笔」一致；values-night 里是深色版 -->
+<resources>
+    <color name="sayday_w_bg">#F7F6F2</color>
+    <color name="sayday_w_hair">#17141413</color>
+    <color name="sayday_w_ink">#141413</color>
+    <color name="sayday_w_soft">#5C5B56</color>
+    <color name="sayday_w_faint">#8E8D86</color>
+    <color name="sayday_w_mark">#FFE14A</color>
+    <color name="sayday_w_on_mark">#141413</color>
+</resources>
