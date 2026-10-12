@@ -121,9 +121,30 @@ fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<
     app.state::<Infer<R>>().inner().call("updateWidget", widget)
 }
 
+/// 应用内更新：开始下载新版安装包（后台进行，立即返回当前状态）
+#[tauri::command]
+fn update_start<R: Runtime>(app: tauri::AppHandle<R>, urls: Vec<String>, sha256: String, size: u64, version: String) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call(
+        "updateStart",
+        serde_json::json!({ "urls": urls, "sha256": sha256, "size": size, "version": version }),
+    )
+}
+
+/// 当前装的版本 + 下载进度
+#[tauri::command]
+fn update_status<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("updateStatus", serde_json::json!({}))
+}
+
+/// 打开系统安装器（没有“安装未知应用”权限时先跳到授权页）
+#[tauri::command]
+async fn update_install<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("updateInstall", serde_json::json!({}))
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

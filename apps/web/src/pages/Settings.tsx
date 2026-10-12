@@ -6,6 +6,8 @@ import { goalLabel } from '../lib/levels'
 import { isNative } from '../lib/speech/engine'
 import { getAi, providerOf, type AiConfig } from '../lib/ai'
 import { canRemind, enableReminder, getReminder, type Reminder } from '../lib/reminder'
+import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/update'
+import { UpdateCard } from '../components/UpdateCard'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, toast } = useApp()
@@ -15,6 +17,19 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   useEffect(() => { getAi().then(setAiCfg) }, [tick])
   const [rem, setRem] = useState<Reminder | null>(null)
   useEffect(() => { getReminder().then(setRem) }, [])
+  const [ver, setVer] = useState('')
+  const [upd, setUpd] = useState<UpdateInfo | null>(null)
+  const [checking, setChecking] = useState(false)
+  useEffect(() => { currentVersion().then(setVer).catch(() => {}) }, [])
+  const check = async () => {
+    setChecking(true)
+    try {
+      const u = await checkUpdate(false)
+      setUpd(u)
+      if (!u) toast('已经是最新版本')
+    } catch (e) { toast((e as Error).message) }
+    setChecking(false)
+  }
   const saveRem = async (r: Reminder) => {
     const err = await enableReminder(r)
     if (err) { toast(err); return }
@@ -128,6 +143,12 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       </div>
 
       <p className="section-title">关于</p>
+      {canUpdate && (
+        <div className="list" style={{ marginBottom: 12 }}>
+          <div className="set-row"><div className="k"><b>版本</b><span>{ver ? `v${ver}` : '…'}</span></div><button className="btn small quiet" disabled={checking} onClick={check}>{checking ? '检查中…' : '检查更新'}</button></div>
+        </div>
+      )}
+      {upd && <div style={{ marginBottom: 12 }}><UpdateCard info={upd} /></div>}
       <div className="card">
         <p className="small muted">日日说 · MIT 开源 · 所有练习数据只在你的设备上，录音不上传。</p>
         <p className="small muted" style={{ marginTop: 8 }}>词典 ECDICT（MIT）· 例句 Tatoeba（CC BY 2.0 FR）· 发音词典 CMUdict（BSD）· 评测数据 speechocean762（CC BY 4.0）· 示范语音 Kokoro（Apache-2.0，预先生成）· 音素识别 Charsiu（Zhu 等，2022）· 语音识别 Moonshine（MIT）· 字体 Bricolage Grotesque、Newsreader、Noto Serif SC（OFL）</p>

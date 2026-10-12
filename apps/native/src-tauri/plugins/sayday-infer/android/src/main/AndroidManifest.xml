@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 跟读录音 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 应用内更新：下载新版安装包后交给系统安装器 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- AI 回复、日记朗读用系统 TTS；安卓 11+ 要声明才能找到语音引擎 -->
     <queries>
         <intent>
@@ -21,5 +23,15 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/sayday_widget_info" />
         </receiver>
+        <!-- 应用内更新：把缓存目录里的安装包交给系统安装器（见 Updater.kt） -->
+        <provider
+            android:name="com.ivyea.sayday.infer.UpdateFileProvider"
+            android:authorities="${applicationId}.sayday.update"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/sayday_update_paths" />
+        </provider>
     </application>
 </manifest>

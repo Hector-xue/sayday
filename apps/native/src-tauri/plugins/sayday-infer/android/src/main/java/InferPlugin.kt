@@ -75,6 +75,15 @@ class BarsArgs {
 }
 
 @InvokeArg
+class UpdateArgs {
+  /** 依次尝试的下载地址（本站镜像在前，GitHub 兜底） */
+  var urls: Array<String> = arrayOf()
+  var sha256: String = ""
+  var size: Long = 0
+  var version: String = ""
+}
+
+@InvokeArg
 class RunArgs {
   /** 已归一化的 16kHz 单声道音频，float32 小端序的 base64 */
   lateinit var audio: String
@@ -337,6 +346,44 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   fun speakStop(invoke: Invoke) {
     tts?.stop()
     invoke.resolve(JSObject())
+  }
+
+  // ---- 应用内更新（见 Updater.kt）----
+  private val updater by lazy { Updater(activity) }
+
+  @Command
+  fun updateStart(invoke: Invoke) {
+    val a = invoke.parseArgs(UpdateArgs::class.java)
+    updater.start(a.urls.toList(), a.sha256, a.size, a.version)
+    invoke.resolve(updateState())
+  }
+
+  @Command
+  fun updateStatus(invoke: Invoke) {
+    invoke.resolve(updateState())
+  }
+
+  @Command
+  fun updateInstall(invoke: Invoke) {
+    activity.runOnUiThread {
+      try {
+        val ret = JSObject()
+        ret.put("opened", updater.install())
+        invoke.resolve(ret)
+      } catch (e: Throwable) {
+        invoke.reject(e.message ?: "无法打开安装器")
+      }
+    }
+  }
+
+  private fun updateState(): JSObject {
+    val r = JSObject()
+    r.put("current", updater.appVersion())
+    r.put("state", updater.state)
+    r.put("done", updater.done.toDouble())
+    r.put("total", updater.total.toDouble())
+    r.put("error", updater.error)
+    return r
   }
 
   // ---- 桌面小组件：网页算好内容推过来，存起来并刷新（见 SaydayWidget.kt） ----

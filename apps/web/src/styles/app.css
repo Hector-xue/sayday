@@ -452,3 +452,15 @@ p { margin: 0; }
 .poster-s { position: absolute; top: 18px; right: 20px; font: 600 12px var(--num); letter-spacing: .12em; opacity: .85; }
 .poster-quote { font-size: 20px; line-height: 1.35; }
 .poster-quote small { display: block; margin-top: 6px; font: 500 12px var(--font); opacity: .75; }
+
+/* 应用内更新卡片（安卓 App；见 components/UpdateCard.tsx） */
+.update-card { margin-bottom: 16px; }
+.update-head { display: flex; align-items: baseline; gap: 8px; }
+.update-head b { font-size: 20px; font-family: var(--num); }
+.update-tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--brand); color: var(--brand-ink); align-self: center; }
+.update-title { margin-top: 10px; font-weight: 600; }
+.update-points { margin: 8px 0 0; padding-left: 18px; font-size: 14px; color: var(--soft); }
+.update-points li + li { margin-top: 4px; }
+.update-progress { margin-top: 14px; display: grid; gap: 6px; }
+.update-actions { display: flex; gap: 8px; margin-top: 14px; }
+.update-actions:empty { display: none; }
