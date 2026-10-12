@@ -71,6 +71,15 @@ const asClip = (c: Clip | string): Clip => (typeof c === 'string' ? { text: c } 
 
 export class NoAudio extends Error {}
 
+/** 已缓存在本机的示范音频条数（设置页显示用） */
+export async function cachedAudioCount(): Promise<number> {
+  try { return (await (await caches.open(CACHE)).keys()).length } catch { return 0 }
+}
+/** 清掉缓存的示范音频（之后播放时会重新下载） */
+export async function clearAudioCache(): Promise<void> {
+  try { await caches.delete(CACHE) } catch { /* 没有缓存接口：本来就没存 */ }
+}
+
 export async function getAudio(clip: Clip | string, accent: Accent): Promise<string> {
   const c = asClip(clip)
   const text = c.text
@@ -98,6 +107,9 @@ export function onPlayback(f: (p: Progress) => void) { playListeners.add(f); ret
 const emit = (p: Progress) => playListeners.forEach((f) => f(p))
 
 let current: HTMLAudioElement | null = null
+// 设置里的“示范语速”：乘在每次播放的速度上（“慢速”按钮在这个基础上再放慢）
+let speed = 1
+export const setSpeed = (s: number) => { speed = s }
 export async function play(clip: Clip | string, accent: Accent, rate = 1): Promise<void> {
   const text = asClip(clip).text
   let url: string
@@ -105,12 +117,13 @@ export async function play(clip: Clip | string, accent: Accent, rate = 1): Promi
     url = await getAudio(clip, accent)
   } catch (e) {
     // 没有预生成音频：交给系统语音（没联网时的例句也走这里，总比没声音好）
-    if (e instanceof NoAudio && canSpeak()) { await speak(text, accent, 0.95 * rate); return }
+    if (e instanceof NoAudio && canSpeak()) { await speak(text, accent, 0.95 * rate * speed); return }
     throw e
   }
   current?.pause()
   const a = new Audio(url)
-  a.playbackRate = rate
+  a.playbackRate = rate * speed
+  a.preservesPitch = true
   current = a
   await a.play()
   let raf = 0

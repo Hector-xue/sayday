@@ -15,6 +15,7 @@
   var d = document.documentElement, s = 'marker', t = 'system'
   try { s = localStorage.getItem('sayday-style') || s; t = localStorage.getItem('sayday-theme') || t } catch (e) {}
   d.setAttribute('data-style', s)
+  try { var x = localStorage.getItem('sayday-text'); if (x === 'lg' || x === 'xl') d.setAttribute('data-text', x) } catch (e) {}
   if (t !== 'system') d.setAttribute('data-theme', t)
   var dark = t === 'dark' || (t === 'system' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)
   var bg = { marker: ['#f7f6f2', '#121211'], paper: ['#f3efe6', '#1b1916'], classic: ['#f6f8fc', '#0c1120'] }[s] || ['#f7f6f2', '#121211']
