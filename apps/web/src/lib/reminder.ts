@@ -36,6 +36,8 @@ async function body(): Promise<string> {
 
 export async function reschedule() {
   if (!tauri) return
+  // 桌面小组件和提醒同一时机更新（打开 App、做完练习）
+  import('./widget').then((m) => m.updateWidget()).catch(() => {})
   const r = await getReminder()
   await tauri.invoke('plugin:notification|cancel', { notifications: IDS }).catch(() => {})
   if (!r.on) return

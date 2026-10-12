@@ -55,6 +55,17 @@ class SpeakArgs {
 }
 
 @InvokeArg
+class WidgetArgs {
+  var date: String = ""
+  var streak: Int = 0
+  var practiced: Boolean = false
+  var main: String = ""
+  var sub: String = ""
+  var word: String = ""
+  var meaning: String = ""
+}
+
+@InvokeArg
 class RunArgs {
   /** 已归一化的 16kHz 单声道音频，float32 小端序的 base64 */
   lateinit var audio: String
@@ -262,6 +273,18 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   @Command
   fun speakStop(invoke: Invoke) {
     tts?.stop()
+    invoke.resolve(JSObject())
+  }
+
+  // ---- 桌面小组件：网页算好内容推过来，存起来并刷新（见 SaydayWidget.kt） ----
+  @Command
+  fun updateWidget(invoke: Invoke) {
+    val a = invoke.parseArgs(WidgetArgs::class.java)
+    activity.getSharedPreferences(SaydayWidget.PREFS, android.content.Context.MODE_PRIVATE).edit()
+      .putString("date", a.date).putInt("streak", a.streak).putBoolean("practiced", a.practiced)
+      .putString("main", a.main).putString("sub", a.sub).putString("word", a.word).putString("meaning", a.meaning)
+      .apply()
+    SaydayWidget.render(activity)
     invoke.resolve(JSObject())
   }
 
