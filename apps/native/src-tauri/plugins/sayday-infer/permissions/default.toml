@@ -2,4 +2,4 @@
 
 [default]
 description = "允许载入音素模型、推理、录音（含音量）、朗读、导出备份和更新桌面小组件。"
-permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget"]
+permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-insets", "allow-set-bars", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget"]

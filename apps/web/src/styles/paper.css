@@ -42,7 +42,7 @@
 /* ---------- 字：中文标题宋体，不加负字距 ---------- */
 [data-style="paper"] h1, [data-style="paper"] h2, [data-style="paper"] h3 { font-family: var(--title); font-weight: 700; }
 [data-style="paper"] a { color: var(--brand); text-underline-offset: 3px; }
-[data-style="paper"] .page { padding-top: 28px; }
+[data-style="paper"] .page { padding-top: calc(24px + var(--sat)); }
 [data-style="paper"] .page-head { margin: 4px 0 22px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); align-items: flex-end; }
 [data-style="paper"] .page-head h1 { font: 700 32px/1.15 var(--title); color: var(--ink); }
 [data-style="paper"] .page-head .small { font: italic 15px var(--serif); color: var(--soft); }

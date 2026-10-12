@@ -73,7 +73,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
             return (
               <div key={w.date}>
                 <div className="d">{WEEK[dt.getDay()]}</div>
-                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${i === 6 ? 'today' : ''}`}>{w.done ? '✓' : any ? '·' : dt.getDate()}</div>
+                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${i === 6 ? 'today' : ''}`}>{w.done ? '✓' : dt.getDate()}</div>
               </div>
             )
           })}
