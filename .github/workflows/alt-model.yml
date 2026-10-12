@@ -1,0 +1,76 @@
+# charsiu 的备选音素模型评测（spikes/alt/export_xlsr.py）：
+# 万一 charsiu 作者不同意分发，就要换成授权明确的模型。这里先摸底：同一套 B 半校准、同一个测试集，
+# 和原版 charsiu（App 里 ft1 的起点）比打分一致程度、模型大小和推理速度。手动触发。
+name: alt-model
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依赖
+        run: |
+          python -m pip install --quiet torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --quiet "numpy<2.1" transformers==4.46.3 pyarrow soundfile onnx onnxruntime==1.19.2 scipy scikit-learn
+          nproc; free -g; df -h .
+
+      - name: 数据缓存
+        uses: actions/cache@v4
+        with:
+          path: .cache/data
+          key: so762-v1
+
+      - name: 下载 charsiu 和数据
+        run: |
+          mkdir -p .cache/models .cache/data
+          HF=https://huggingface.co
+          curl -sSfL -o .cache/models/charsiu_ctc.bin     $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/pytorch_model.bin
+          curl -sSfL -o .cache/models/charsiu_config.json $HF/charsiu/en_w2v2_ctc_libris_and_cv/resolve/main/config.json
+          curl -sSfL -o .cache/models/charsiu_vocab.json  $HF/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+          for s in train test; do
+            [ -s .cache/data/so762_$s.parquet ] || curl -sSfL -o .cache/data/so762_$s.parquet $HF/datasets/mispeech/speechocean762/resolve/main/data/$s-00000-of-00001.parquet
+          done
+
+      - name: 导出两个模型
+        run: |
+          python spikes/m0/export_onnx.py
+          python spikes/alt/export_xlsr.py
+          rm -f .cache/models/charsiu_ctc.bin .cache/models/phone_ctc.fp32.onnx .cache/models/phone_ctc.xlsr_fp32.onnx
+          ls -la .cache/models
+
+      - name: 评测
+        run: |
+          python spikes/ft/compare.py prep
+          for m in int8 xlsr_int8; do
+            for sp in test trainB; do
+              python spikes/m0/infer_so762.py --model $m --split $sp --threads 4 | tail -1
+              python spikes/m0/score_eval.py --logits $m --split $sp > /dev/null
+            done
+          done
+          python spikes/ft/compare.py report int8 xlsr_int8 | tee -a $GITHUB_STEP_SUMMARY
+          echo >> $GITHUB_STEP_SUMMARY
+          for m in int8 xlsr_int8; do
+            python -c "import json,sys; d=json.load(open('.cache/latency_'+sys.argv[1]+'.json')); print('-', sys.argv[1], '模型', round(__import__('os').path.getsize('.cache/models/phone_ctc.'+sys.argv[1]+'.onnx')/1e6), 'MB，推理 p50', d.get('infer_p50_ms'), 'ms，实时率', d.get('rtf_mean'))" $m | tee -a $GITHUB_STEP_SUMMARY
+          done
+
+      - name: 存结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: alt-model
+          include-hidden-files: true
+          path: |
+            .cache/ft/compare.json
+            .cache/latency_*.json
+          retention-days: 30
