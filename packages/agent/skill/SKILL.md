@@ -72,7 +72,7 @@ description: 英语学习教练（日日说）。用户发英文语音、问单�
 调用：`sayday-agent call speaking_question '{}'`
 
 ### episode（剧集台词）
-日日说原创剧集的一集台词（第一季 Life in London A2→B1，第二季 Edinburgh B1→B2，每季 10 集），带中文和理解题；学习者在剧里演林（Lin）。适合陪读、分角色对练。
+日日说原创剧集的一集台词（第一季 Life in London A2→B1，第二季 Edinburgh B1→B2，第三季 Back in London B2→C1，每季 10 集），带中文和理解题；学习者在剧里演林（Lin）。适合陪读、分角色对练。
 
 参数：
 - `season`：integer

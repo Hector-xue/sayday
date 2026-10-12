@@ -1,0 +1,293 @@
+{
+  "season": 3,
+  "title": "Back in London",
+  "title_zh": "回到伦敦",
+  "cast": {
+    "Lin": { "zh": "林（你）", "voice": { "us": "af_heart", "gb": "bf_lily" }, "me": true },
+    "Emma": { "zh": "Emma · 室友", "voice": "bf_emma" },
+    "Tom": { "zh": "Tom · 同事", "voice": "bm_george" },
+    "Arthur": { "zh": "Arthur · 蓝门咖啡馆", "voice": "bm_lewis" },
+    "Mr Hale": { "zh": "Hale 先生 · 客户", "voice": "bm_daniel" },
+    "Examiner": { "zh": "口语考官", "voice": "bm_fable" },
+    "Dr Reed": { "zh": "Reed 博士 · 设计学院", "voice": "af_sarah" },
+    "Priya": { "zh": "Priya · 同学", "voice": "bf_isabella" },
+    "Jake": { "zh": "Jake · 纽约的制作人", "voice": "am_michael" }
+  },
+  "episodes": [
+    {
+      "id": 1,
+      "level": "B2",
+      "title": "Home Again",
+      "title_zh": "回家",
+      "scene_zh": "你从爱丁堡回到伦敦。Emma 和 Tom 在国王十字车站等你。",
+      "lines": [
+        { "who": "Emma", "en": "Lin! Over here! Look at you. You look as if you've been away for a year, not a fortnight.", "zh": "林！这儿！看看你，像是走了一年，而不是两个星期。" },
+        { "who": "Lin", "en": "It feels like a year. So much happened that I've completely lost track of the days.", "zh": "感觉就像一年。发生了太多事，我完全记不清过了几天。" },
+        { "who": "Tom", "en": "We've been following everything online. Your dinners were all over the papers.", "zh": "我们一直在网上关注。你们的晚餐上了各大报纸。" },
+        { "who": "Lin", "en": "Only after the storm. Before that, nobody had heard of us.", "zh": "那是暴雨之后的事。在那之前，根本没人听说过我们。" },
+        { "who": "Emma", "en": "And? Did Jake really offer you a job in New York?", "zh": "然后呢？Jake 真的给了你纽约的工作？" },
+        { "who": "Lin", "en": "He did. I turned it down, at least for now.", "zh": "是的。我拒绝了，至少暂时拒绝了。" },
+        { "who": "Tom", "en": "You turned down New York? For Camden? I need to sit down.", "zh": "你拒绝了纽约？为了卡姆登？我得坐下缓缓。" },
+        { "who": "Lin", "en": "It isn't just Camden. I've decided to apply for a part-time master's in design here in London.", "zh": "不只是为了卡姆登。我决定在伦敦申请一个在职的设计硕士。" },
+        { "who": "Emma", "en": "That's brilliant! Is there anything you need first?", "zh": "太棒了！你需要先准备什么吗？" },
+        { "who": "Lin", "en": "An English test. They want an overall score of seven before the course starts in January.", "zh": "一个英语考试。一月开课前，他们要求总分 7 分。" },
+        { "who": "Tom", "en": "Seven out of what? Ten?", "zh": "满分多少？十分？" },
+        { "who": "Emma", "en": "Out of nine, Tom. Don't worry, Lin. Your English is miles better than when you first arrived.", "zh": "满分九分，Tom。别担心，林。你的英语比刚来时好太多了。" },
+        { "who": "Lin", "en": "Thanks. But chatting with friends is one thing. Doing it under exam conditions is quite another.", "zh": "谢谢。不过跟朋友聊天是一回事，在考试条件下说又是另一回事。" }
+      ],
+      "quiz": [
+        { "q": "林回到伦敦后打算做什么？", "options": ["去纽约工作", "申请伦敦的在职设计硕士", "回国"], "answer": 1 },
+        { "q": "入学要求英语考试总分多少？", "options": ["6 分", "7 分", "9 分"], "answer": 1 },
+        { "q": "“quite another” 那句是什么意思？", "options": ["考试和聊天没区别", "在考试条件下说英语完全是另一回事", "考试比聊天容易"], "answer": 1 }
+      ],
+      "next_zh": "Emma 说她认识一个能帮你练口语的人——就在蓝门咖啡馆。"
+    },
+    {
+      "id": 2,
+      "level": "B2",
+      "title": "Arthur's Secret",
+      "title_zh": "Arthur 的秘密",
+      "scene_zh": "Emma 说的那个能帮你练口语的人，原来是蓝门咖啡馆的 Arthur。",
+      "lines": [
+        { "who": "Arthur", "en": "Emma tells me you need someone to fire questions at you in English. I might be able to help.", "zh": "Emma 说你需要有人用英语连珠炮似的问你问题。我也许能帮上忙。" },
+        { "who": "Lin", "en": "Really? I thought you'd always run the café.", "zh": "真的？我还以为你一直在开咖啡馆。" },
+        { "who": "Arthur", "en": "Only for the last twelve years. Before that, I taught English to adults for nearly thirty.", "zh": "只开了十二年。在那之前，我教了将近三十年的成人英语。" },
+        { "who": "Lin", "en": "You never mentioned it!", "zh": "你从来没提过！" },
+        { "who": "Arthur", "en": "You never asked. Right, let's begin. Tell me about a place you like to visit.", "zh": "你也没问过。好，开始吧。说说一个你喜欢去的地方。" },
+        { "who": "Lin", "en": "Um, I like the canal. Because it's very nice. And, um, quiet.", "zh": "呃，我喜欢运河。因为它很好。而且，呃，安静。" },
+        { "who": "Arthur", "en": "Stop there. What did you notice?", "zh": "停。你注意到什么了？" },
+        { "who": "Lin", "en": "I said 'um' too many times. And 'nice' doesn't really say anything.", "zh": "我说了太多“嗯”。而且 nice 这个词其实什么也没说。" },
+        { "who": "Arthur", "en": "Exactly. Hesitating isn't the problem; everyone hesitates. The problem is that you stopped thinking in English and started translating.", "zh": "没错。犹豫不是问题，人人都会犹豫。问题是你不再用英语思考，开始翻译了。" },
+        { "who": "Lin", "en": "So what should I do instead?", "zh": "那我该怎么做？" },
+        { "who": "Arthur", "en": "Buy yourself time with real phrases. 'That's an interesting question.' 'Let me think about that for a second.' Then paint me a picture.", "zh": "用地道的短语给自己争取时间：“这个问题很有意思。”“让我想一下。”然后给我描绘一幅画面。" },
+        { "who": "Lin", "en": "Let me think about that for a second. There's a stretch of the canal near here where the water is so still that the boats look as if they're floating on glass.", "zh": "让我想一下。这附近有一段运河，水面静得让那些船看起来像漂在玻璃上。" },
+        { "who": "Arthur", "en": "Now that is a seven.", "zh": "这才是 7 分。" }
+      ],
+      "quiz": [
+        { "q": "Arthur 开咖啡馆之前做什么？", "options": ["厨师", "教成人英语", "开书店"], "answer": 1 },
+        { "q": "Arthur 认为林真正的问题是什么？", "options": ["犹豫太多", "不再用英语思考，开始翻译", "声音太小"], "answer": 1 },
+        { "q": "他建议用什么争取思考时间？", "options": ["多说 erm", "地道的过渡短语", "保持沉默"], "answer": 1 }
+      ],
+      "next_zh": "第二天上班，一位难缠的客户把你的设计批得一无是处。"
+    },
+    {
+      "id": 3,
+      "level": "B2",
+      "title": "A Difficult Client",
+      "title_zh": "难缠的客户",
+      "scene_zh": "公司让你负责一个新客户。第一次反馈会上，Hale 先生对设计一句好话都没有。",
+      "lines": [
+        { "who": "Mr Hale", "en": "I'll be honest with you. I don't like any of it. The colours are wrong, the logo's too small, and it doesn't feel premium.", "zh": "说实话，我一点都不喜欢。颜色不对，标志太小，而且没有高级感。" },
+        { "who": "Lin", "en": "I appreciate your honesty. Could you tell me a bit more about what 'premium' means to you?", "zh": "谢谢您直说。能多讲讲“高级感”对您来说是什么意思吗？" },
+        { "who": "Mr Hale", "en": "You know. Expensive. Like a hotel lobby.", "zh": "你懂的。贵气。像酒店大堂那样。" },
+        { "who": "Lin", "en": "That's helpful. When we spoke last month, you said you wanted the brand to feel friendly and affordable. Has that changed?", "zh": "这很有帮助。上个月我们沟通时，您说希望品牌给人亲切、实惠的感觉。现在变了吗？" },
+        { "who": "Mr Hale", "en": "Well, the board thinks we should aim a bit higher.", "zh": "嗯，董事会觉得我们应该定位再高一点。" },
+        { "who": "Tom", "en": "The deadline's on Friday, Lin. We can't start from scratch.", "zh": "周五就截止了，林。我们不可能从头再来。" },
+        { "who": "Lin", "en": "Mr Hale, may I suggest a compromise? We keep the overall layout, which tested very well, but we develop a darker, more elegant colour palette.", "zh": "Hale 先生，我能提个折中方案吗？我们保留整体布局，它的测试效果很好；但配色改得更深、更优雅。" },
+        { "who": "Mr Hale", "en": "And the logo?", "zh": "那标志呢？" },
+        { "who": "Lin", "en": "We can make it larger on the packaging, although I'd advise against changing it on the website, where space is limited.", "zh": "包装上可以放大，不过网站上我建议不要改，那里空间有限。" },
+        { "who": "Mr Hale", "en": "Hmm. Can you show me something by Wednesday?", "zh": "嗯。周三之前能给我看点东西吗？" },
+        { "who": "Lin", "en": "We can have two options ready by Wednesday afternoon.", "zh": "周三下午我们可以准备好两个方案。" },
+        { "who": "Mr Hale", "en": "Fine. Two options. Not ten.", "zh": "行。两个方案。别给我十个。" },
+        { "who": "Tom", "en": "That was masterful. You said no about four times and he didn't even notice.", "zh": "太高明了。你拒绝了他大概四次，他居然都没察觉。" }
+      ],
+      "quiz": [
+        { "q": "Hale 先生现在想要什么感觉？", "options": ["亲切实惠", "高级、贵气", "可爱活泼"], "answer": 1 },
+        { "q": "林提出的折中方案是？", "options": ["全部重做", "保留布局，配色改得更深更优雅", "只改标志"], "answer": 1 },
+        { "q": "Tom 说林最厉害的地方是？", "options": ["说话很快", "拒绝了好几次对方却没察觉", "答应了所有要求"], "answer": 1 }
+      ],
+      "next_zh": "方案过了。可周四的部门会上，你得用一张图表说清楚这个项目带来了什么。"
+    },
+    {
+      "id": 4,
+      "level": "B2",
+      "title": "The Numbers",
+      "title_zh": "用数字说话",
+      "scene_zh": "部门会议上，你要用一张图表说明新设计带来了什么变化。",
+      "lines": [
+        { "who": "Tom", "en": "Two minutes until the meeting. Have you got your figures ready?", "zh": "还有两分钟开会。数据准备好了吗？" },
+        { "who": "Lin", "en": "Yes, but I'm worried I'll just read out numbers and send everyone to sleep.", "zh": "好了，但我怕自己只是念数字，把大家念睡着。" },
+        { "who": "Tom", "en": "Then don't. Tell them what the numbers mean.", "zh": "那就别念。告诉他们这些数字意味着什么。" },
+        { "who": "Lin", "en": "Good morning, everyone. This chart shows visits to the client's website over the past twelve months.", "zh": "大家早上好。这张图显示的是过去十二个月客户网站的访问量。" },
+        { "who": "Lin", "en": "As you can see, traffic remained fairly stable until June, and then rose sharply after the new design was launched.", "zh": "可以看到，访问量到六月一直比较平稳，新设计上线后急剧上升。" },
+        { "who": "Lin", "en": "It peaked in August at just over forty thousand visits, roughly double the figure for January.", "zh": "八月达到峰值，略超过四万次，大约是一月的两倍。" },
+        { "who": "Tom", "en": "Was that increase sustained, or was it just a summer effect?", "zh": "这个增长持续下去了吗，还是只是夏天的效应？" },
+        { "who": "Lin", "en": "Good question. Visits fell slightly in September, but they've levelled off at a much higher level than before.", "zh": "好问题。九月略有下降，但之后稳定在了比以前高得多的水平。" },
+        { "who": "Lin", "en": "Overall, the redesign appears to have had a significant and lasting impact.", "zh": "总的来说，这次改版似乎带来了显著而持久的影响。" },
+        { "who": "Tom", "en": "And what about sales?", "zh": "那销售额呢？" },
+        { "who": "Lin", "en": "Online sales followed a similar pattern, although the increase was more gradual.", "zh": "线上销售额的趋势相似，不过增长更平缓一些。" },
+        { "who": "Tom", "en": "You see? Nobody fell asleep. Even the finance director asked a question.", "zh": "看到没？没人睡着。连财务总监都提问了。" },
+        { "who": "Lin", "en": "He asked where the biscuits were.", "zh": "他问的是饼干在哪儿。" }
+      ],
+      "quiz": [
+        { "q": "网站访问量什么时候开始急剧上升？", "options": ["一月", "六月新设计上线后", "九月"], "answer": 1 },
+        { "q": "八月的访问量大约是一月的多少？", "options": ["差不多", "两倍", "三倍"], "answer": 1 },
+        { "q": "“levelled off” 是什么意思？", "options": ["继续上升", "趋于平稳", "大幅下降"], "answer": 1 }
+      ],
+      "next_zh": "考试前一晚，你几乎没睡。第二天一早，Emma 坚持要送你去考场。"
+    },
+    {
+      "id": 5,
+      "level": "C1",
+      "title": "Test Day",
+      "title_zh": "考试日",
+      "scene_zh": "考试当天。上午笔试，下午口语。",
+      "lines": [
+        { "who": "Emma", "en": "Have you got your passport? Pencils? Water?", "zh": "护照带了吗？铅笔？水？" },
+        { "who": "Lin", "en": "Yes, yes and yes. Emma, you're more nervous than I am.", "zh": "带了，带了，带了。Emma，你比我还紧张。" },
+        { "who": "Emma", "en": "Somebody has to be. Go on. You've got this.", "zh": "总得有人紧张吧。去吧，你没问题的。" },
+        { "who": "Examiner", "en": "Good afternoon. In this part of the test, I'm going to give you a topic, and I'd like you to talk about it for one to two minutes.", "zh": "下午好。这一部分我会给你一个话题，请你讲一到两分钟。" },
+        { "who": "Examiner", "en": "Describe a time when you helped someone. You should say who you helped, how you helped them, and explain how you felt about it.", "zh": "描述一次你帮助别人的经历。你应该说明帮了谁、怎么帮的，并解释你的感受。" },
+        { "who": "Lin", "en": "I'd like to talk about something that happened last summer, when I was working in Edinburgh.", "zh": "我想讲去年夏天在爱丁堡工作时发生的一件事。" },
+        { "who": "Lin", "en": "A friend of mine was running a small dinner club, and on the night of an important event, a storm flooded the street outside.", "zh": "我的一个朋友在经营一家小餐会，在一场重要活动的当晚，暴雨淹了外面的街道。" },
+        { "who": "Lin", "en": "Most people would probably have cancelled, but we decided to move everything to a hall nearby and carry the food through the rain.", "zh": "大多数人可能会取消，但我们决定把所有东西搬到附近的大厅，冒雨把菜端过去。" },
+        { "who": "Lin", "en": "What I learned from it is that helping someone isn't always about solving their problem. Sometimes it's simply about refusing to let them face it alone.", "zh": "我从中学到的是，帮助别人不一定是替他解决问题。有时只是不让他独自面对。" },
+        { "who": "Examiner", "en": "Thank you. Do you think people are less willing to help strangers than they used to be?", "zh": "谢谢。你认为现在的人比过去更不愿意帮助陌生人吗？" },
+        { "who": "Lin", "en": "That's a difficult question. I suspect it depends less on the era than on the environment.", "zh": "这个问题挺难的。我觉得这更多取决于环境，而不是时代。" },
+        { "who": "Lin", "en": "In big cities, people can seem indifferent, but in my experience that's often shyness rather than a lack of kindness.", "zh": "在大城市里，人们看起来可能很冷漠，但据我的经验，那往往是害羞，而不是缺少善意。" },
+        { "who": "Examiner", "en": "Thank you. That's the end of the speaking test.", "zh": "谢谢。口语考试到此结束。" }
+      ],
+      "quiz": [
+        { "q": "口语第二部分的题目是？", "options": ["描述一个你喜欢的地方", "描述一次你帮助别人的经历", "描述一本书"], "answer": 1 },
+        { "q": "林讲的是哪件事？", "options": ["伦敦的读书夜", "爱丁堡暴雨夜搬晚餐", "帮 Hale 先生改设计"], "answer": 1 },
+        { "q": "林认为大城市的人看起来冷漠，往往是因为？", "options": ["不够善良", "害羞", "太忙"], "answer": 1 }
+      ],
+      "next_zh": "两周后的一个早上，成绩邮件来了。你不敢点开。"
+    },
+    {
+      "id": 6,
+      "level": "C1",
+      "title": "The Results",
+      "title_zh": "成绩",
+      "scene_zh": "考试两周后，成绩出来了。你把手机递给了 Emma。",
+      "lines": [
+        { "who": "Lin", "en": "It's here. The email has arrived. I can't open it.", "zh": "来了。邮件到了。我不敢打开。" },
+        { "who": "Emma", "en": "Give me your phone. Right. Are you ready?", "zh": "手机给我。好了，准备好了吗？" },
+        { "who": "Lin", "en": "No. Yes. Just read it.", "zh": "没有。好了。你就念吧。" },
+        { "who": "Emma", "en": "Listening, seven and a half. Reading, seven.", "zh": "听力 7.5，阅读 7。" },
+        { "who": "Lin", "en": "And writing? Writing was the one I was worried about.", "zh": "写作呢？我最担心的就是写作。" },
+        { "who": "Emma", "en": "Writing, six and a half.", "zh": "写作 6.5。" },
+        { "who": "Lin", "en": "Six and a half. That's not enough, is it?", "zh": "6.5。不够吧？" },
+        { "who": "Emma", "en": "Hang on. Speaking, seven and a half. Overall... seven! Lin, it's a seven!", "zh": "等等。口语 7.5。总分……7！林，是 7 分！" },
+        { "who": "Lin", "en": "But they said no section below six and a half. Let me check. Yes, six and a half is the minimum. I've actually done it.", "zh": "可他们说单项不能低于 6.5。我查一下……对，6.5 是最低要求。我真的做到了。" },
+        { "who": "Emma", "en": "Of course you have. Right, I'm calling Tom, and we're all going to Arthur's.", "zh": "你当然做到了。好，我给 Tom 打电话，我们都去 Arthur 那儿。" },
+        { "who": "Arthur", "en": "Seven and a half in speaking? I'll have you know I take full credit for that.", "zh": "口语 7.5？告诉你，这份功劳全归我。" },
+        { "who": "Lin", "en": "You can take half the credit. The other half goes to the canal and its floating boats.", "zh": "你可以拿一半功劳。另一半归那条运河，还有它上面漂着的船。" }
+      ],
+      "quiz": [
+        { "q": "林的总分是多少？", "options": ["6.5", "7", "7.5"], "answer": 1 },
+        { "q": "哪一项分数最低？", "options": ["听力", "写作", "口语"], "answer": 1 },
+        { "q": "学校要求单项不低于多少？", "options": ["6", "6.5", "7"], "answer": 1 }
+      ],
+      "next_zh": "分数够了，还有最后一关：和教授面谈。"
+    },
+    {
+      "id": 7,
+      "level": "C1",
+      "title": "The Interview",
+      "title_zh": "面试",
+      "scene_zh": "你走进大学设计学院的办公室。Reed 博士正在翻看你的作品集。",
+      "lines": [
+        { "who": "Dr Reed", "en": "Thank you for coming in, Lin. I've had a look at your portfolio. The Edinburgh posters are particularly striking.", "zh": "谢谢你过来，林。我看了你的作品集，爱丁堡的那些海报尤其令人印象深刻。" },
+        { "who": "Lin", "en": "Thank you. To be honest, they were designed in a bit of a hurry, but I think the pressure actually helped.", "zh": "谢谢。说实话，那些是赶出来的，但我觉得压力反而有帮助。" },
+        { "who": "Dr Reed", "en": "Let's talk about why you want to do this course. You already have a good job. What's missing?", "zh": "说说你为什么想读这个课程吧。你已经有一份不错的工作了。缺了什么？" },
+        { "who": "Lin", "en": "I'd say my job has taught me how to solve problems, but not always how to ask the right questions in the first place.", "zh": "我想说，工作教会了我怎么解决问题，但不总是教我一开始该问什么问题。" },
+        { "who": "Dr Reed", "en": "Go on.", "zh": "继续说。" },
+        { "who": "Lin", "en": "For instance, when a client asks for something to feel 'premium', I can deliver that. But I'd like to understand why some designs make people feel welcome, while others make them feel excluded.", "zh": "比如，客户要“高级感”，我能做出来。但我想弄明白，为什么有些设计让人觉得被欢迎，有些却让人觉得被排斥。" },
+        { "who": "Dr Reed", "en": "That's essentially a question about public space, which is exactly what our second term focuses on.", "zh": "这本质上是关于公共空间的问题，正是我们第二学期的重点。" },
+        { "who": "Lin", "en": "That's precisely why I applied to this programme rather than any other.", "zh": "这正是我申请这个项目而不是别的项目的原因。" },
+        { "who": "Dr Reed", "en": "One more question. Part-time study on top of a full-time job is exhausting. How will you manage?", "zh": "最后一个问题。全职工作之外再在职读书会非常累。你打算怎么应对？" },
+        { "who": "Lin", "en": "I won't pretend it'll be easy. But I've just spent a year learning a language in my spare time, so I have a fairly realistic idea of what it takes.", "zh": "我不会假装这很容易。但我刚用业余时间学了一年语言，所以我对需要付出什么心里有数。" },
+        { "who": "Dr Reed", "en": "Fair point. You'll hear from us within a week.", "zh": "有道理。一周内我们会通知你。" }
+      ],
+      "quiz": [
+        { "q": "Reed 博士对哪些作品印象最深？", "options": ["伦敦读书夜的海报", "爱丁堡的海报", "Hale 先生的网站"], "answer": 1 },
+        { "q": "林说工作没能教会她什么？", "options": ["解决问题", "一开始就问对问题", "和客户沟通"], "answer": 1 },
+        { "q": "林为什么觉得自己能应付在职学习？", "options": ["时间很多", "刚用业余时间学了一年语言", "公司会帮忙"], "answer": 1 }
+      ],
+      "next_zh": "一周后，录取通知来了。一月，你第一次走进研讨课的教室。"
+    },
+    {
+      "id": 8,
+      "level": "C1",
+      "title": "The Seminar",
+      "title_zh": "研讨课",
+      "scene_zh": "一月，第一次研讨课。同学 Priya 观点鲜明，Reed 博士喜欢让大家争论。",
+      "lines": [
+        { "who": "Dr Reed", "en": "This week's question: should public spaces be designed to discourage certain kinds of behaviour? Priya, would you like to start?", "zh": "本周的问题：公共空间是否应该通过设计来阻止某些行为？Priya，你先来？" },
+        { "who": "Priya", "en": "I think they have to be, to some extent. Nobody wants a park where people feel unsafe at night.", "zh": "我觉得在一定程度上必须这样。没人想要一个晚上让人觉得不安全的公园。" },
+        { "who": "Lin", "en": "I take your point, but I'd question who gets to decide what counts as unsafe.", "zh": "我明白你的意思，但我想问：谁来决定什么算“不安全”？" },
+        { "who": "Priya", "en": "Meaning what, exactly?", "zh": "具体是什么意思？" },
+        { "who": "Lin", "en": "Well, benches with a bar in the middle are often presented as a safety measure, but in practice they mainly stop homeless people from lying down.", "zh": "比如，中间加一根横杆的长椅常被说成是安全措施，但实际上主要是为了不让无家可归的人躺下。" },
+        { "who": "Priya", "en": "That's true, although I'm not convinced the designers always intend that.", "zh": "确实，不过我不确定设计师总是有意这样做。" },
+        { "who": "Lin", "en": "Possibly not. But if the effect is consistently the same, the intention becomes rather less relevant.", "zh": "也许不是。但如果效果始终如一，那么初衷就没那么重要了。" },
+        { "who": "Dr Reed", "en": "Interesting. Priya, is there a way to design for safety without excluding anyone?", "zh": "有意思。Priya，有没有办法既保证安全又不排斥任何人？" },
+        { "who": "Priya", "en": "Better lighting, perhaps. More reasons for people to be around in the evening. Things that make everyone feel safer, rather than pushing some people out.", "zh": "也许是更好的照明，让人们晚上有更多理由在那儿。让每个人都觉得更安全，而不是把一部分人赶走。" },
+        { "who": "Lin", "en": "I'd agree with that entirely. It's the difference between designing against people and designing for them.", "zh": "这一点我完全同意。这就是“针对人的设计”和“为人的设计”的区别。" },
+        { "who": "Dr Reed", "en": "Excellent. That's your essay title for next week, by the way.", "zh": "很好。顺便说一句，这就是你们下周的论文题目。" },
+        { "who": "Priya", "en": "Thanks a lot, Lin.", "zh": "真是谢谢你了，林。" }
+      ],
+      "quiz": [
+        { "q": "这次研讨课讨论的问题是？", "options": ["公园怎么省钱", "公共空间该不该用设计阻止某些行为", "论文怎么写"], "answer": 1 },
+        { "q": "林认为中间加横杆的长椅实际上是为了？", "options": ["让人坐得更舒服", "不让无家可归的人躺下", "更好看"], "answer": 1 },
+        { "q": "Priya 最后的 “Thanks a lot, Lin.” 是什么语气？", "options": ["真心感谢", "开玩笑地抱怨（害她多了论文要写）", "生气"], "answer": 1 }
+      ],
+      "next_zh": "就在这时，Jake 又打来了电话：一年之约快到了。"
+    },
+    {
+      "id": 9,
+      "level": "C1",
+      "title": "The Offer Stands",
+      "title_zh": "邀请还有效",
+      "scene_zh": "深夜，你的手机响了。是 Jake，从纽约打来。",
+      "lines": [
+        { "who": "Jake", "en": "Lin! It's been almost a year. I said the offer stands, and I meant it. New York wants you.", "zh": "林！快一年了。我说过邀请一直有效，我是认真的。纽约需要你。" },
+        { "who": "Lin", "en": "Jake, it's lovely to hear from you. And I'm genuinely flattered.", "zh": "Jake，真高兴接到你的电话。我真的受宠若惊。" },
+        { "who": "Jake", "en": "I can hear a 'but' coming.", "zh": "我听出来后面要说“但是”了。" },
+        { "who": "Lin", "en": "There is a 'but'. I've just started my master's, and I'm not going to walk away from it.", "zh": "确实有个“但是”。我刚开始读硕士，不会半途放弃。" },
+        { "who": "Jake", "en": "OK. So what would it take?", "zh": "好吧。那要怎样你才愿意？" },
+        { "who": "Lin", "en": "What if, instead of a full-time job, we talked about a single project over the summer, when the course takes a break?", "zh": "如果不是全职工作，而是暑假课程休息时做一个项目，怎么样？" },
+        { "who": "Jake", "en": "Three months? I'd need you for at least four.", "zh": "三个月？我至少需要你四个月。" },
+        { "who": "Lin", "en": "Could we meet in the middle? Three months in New York, and I'll do the early concept work remotely from London.", "zh": "我们各让一步？在纽约待三个月，前期的概念设计我在伦敦远程做。" },
+        { "who": "Jake", "en": "You've turned into a tough negotiator, you know that?", "zh": "你变成一个难对付的谈判高手了，知道吗？" },
+        { "who": "Lin", "en": "I've had a lot of practice lately. Mostly with a client who wanted everything to look like a hotel lobby.", "zh": "最近练得多。主要是跟一个什么都想做成酒店大堂的客户。" },
+        { "who": "Jake", "en": "All right, deal. Three months, plus the remote work. I'll send you the details.", "zh": "好，成交。三个月，加上远程的部分。我把细节发给你。" },
+        { "who": "Lin", "en": "Thank you, Jake. Honestly, this is the best of both worlds.", "zh": "谢谢你，Jake。说真的，这是两全其美。" }
+      ],
+      "quiz": [
+        { "q": "林为什么不接受全职工作？", "options": ["不喜欢纽约", "刚开始读硕士，不想放弃", "薪水太低"], "answer": 1 },
+        { "q": "最后谈成了什么？", "options": ["全职搬去纽约", "暑假去纽约三个月，前期在伦敦远程做", "完全拒绝"], "answer": 1 },
+        { "q": "“the best of both worlds” 是什么意思？", "options": ["两全其美", "世界上最好的地方", "两个都不要"], "answer": 0 }
+      ],
+      "next_zh": "出发去纽约前，蓝门咖啡馆要办一场特别的分享会——主讲人是你。"
+    },
+    {
+      "id": 10,
+      "level": "C1",
+      "title": "Full Circle",
+      "title_zh": "回到原点",
+      "scene_zh": "去纽约之前，Arthur 在蓝门咖啡馆为你办了一场小小的分享会。",
+      "lines": [
+        { "who": "Arthur", "en": "Ladies and gentlemen, a year and a half ago, someone knocked on my door in the pouring rain. Tonight, they're going to tell you what happened next.", "zh": "女士们先生们，一年半以前，有人在倾盆大雨里敲了我的门。今晚，由这位来讲讲后来发生的事。" },
+        { "who": "Lin", "en": "Thank you, Arthur. When I first arrived in London, I couldn't even open my own front door. The key was wrong, and so, I thought, was my English.", "zh": "谢谢你，Arthur。我刚到伦敦的时候，连自己家的门都打不开。钥匙是错的，我当时觉得，我的英语也是错的。" },
+        { "who": "Lin", "en": "What I've come to realise is that learning a language isn't really about being correct. It's about being brave enough to be understood.", "zh": "后来我慢慢明白，学语言其实不是为了永远正确，而是要有勇气让别人听懂你。" },
+        { "who": "Lin", "en": "I made mistakes in shops, at work, in front of investors and once, memorably, in front of an entire theatre.", "zh": "我在商店里犯过错，在公司犯过错，在投资人面前犯过错，还有一次——令人难忘地——在整个剧院的人面前。" },
+        { "who": "Lin", "en": "But every single one of those mistakes led me to a person. A neighbour, a colleague, a friend.", "zh": "但每一个错误都把我带到了一个人身边。一个邻居，一个同事，一个朋友。" },
+        { "who": "Emma", "en": "And a very patient flatmate!", "zh": "还有一个超有耐心的室友！" },
+        { "who": "Lin", "en": "Yes, her too. So if any of you are learning something difficult right now, my advice is simple.", "zh": "对，还有她。所以，如果你们中有人正在学一样很难的东西，我的建议很简单。" },
+        { "who": "Lin", "en": "Do a little every day. Talk to people, even when it's frightening. And don't wait until you feel ready, because nobody ever does.", "zh": "每天做一点。和人说话，哪怕会害怕。别等到觉得自己准备好了，因为没有人会真的准备好。" },
+        { "who": "Tom", "en": "Speech! Oh, wait. That was the speech.", "zh": "来一段演讲！哦，等等，刚才那就是演讲。" },
+        { "who": "Arthur", "en": "There's one more thing. Sophie sent this down from Edinburgh. She said you'd know what to do with it.", "zh": "还有一件事。Sophie 从爱丁堡寄来了这个，她说你知道该怎么做。" },
+        { "who": "Lin", "en": "A notebook, with a note inside: 'For the next person, who needs it more than I do.'", "zh": "一本笔记本，里面夹着一张纸条：“给下一个比我更需要它的人。”" },
+        { "who": "Emma", "en": "So who's the next person?", "zh": "那下一个人是谁？" },
+        { "who": "Lin", "en": "I have a feeling I'll find out in New York.", "zh": "我有种感觉，到了纽约我就会知道。" }
+      ],
+      "quiz": [
+        { "q": "林刚到伦敦时遇到了什么事？", "options": ["迷路", "钥匙打不开门", "生病"], "answer": 1 },
+        { "q": "林认为学语言的关键是什么？", "options": ["永远不出错", "有勇气让别人听懂你", "背很多单词"], "answer": 1 },
+        { "q": "Sophie 托 Arthur 交给林的是？", "options": ["一张机票", "一本笔记本", "一封推荐信"], "answer": 1 }
+      ],
+      "next_zh": "第三季完。新的剧集会继续更新。"
+    }
+  ]
+}
