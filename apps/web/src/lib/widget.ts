@@ -18,11 +18,16 @@ export function streakOf(days: { date: string; active: boolean }[], now = today(
   return n
 }
 
+/** 当前连续天数（今天页顶部和小组件共用） */
+export async function currentStreak(): Promise<number> {
+  const rows = await db.all<{ date: string; reviews: number; new_words: number; shadows: number; listens: number }>('SELECT date, reviews, new_words, shadows, listens FROM day ORDER BY date DESC LIMIT 400')
+  return streakOf(rows.map((r) => ({ date: r.date, active: active(r) })))
+}
+
 export async function updateWidget() {
   if (!tauri) return
   const d = await dayRow()
-  const rows = await db.all<{ date: string; reviews: number; new_words: number; shadows: number; listens: number }>('SELECT date, reviews, new_words, shadows, listens FROM day ORDER BY date DESC LIMIT 400')
-  const streak = streakOf(rows.map((r) => ({ date: r.date, active: active(r) })))
+  const streak = await currentStreak()
   const practiced = active(d)
   // 一个最近在学的词（还没熟的里面最近加入的），显示释义帮着回想
   const card = await db.one<{ word: string }>('SELECT word FROM card WHERE known = 0 AND state != 2 ORDER BY added DESC LIMIT 1')

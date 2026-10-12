@@ -9,6 +9,7 @@ import { getProgress, loadSeasons, nextUp, teaserFor } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
 import { currentLevel } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
+import { currentStreak } from '../lib/widget'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -26,6 +27,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [chatted, setChatted] = useState(false)
   const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
   const [prevTeaser, setPrevTeaser] = useState('')
+  const [streak, setStreak] = useState(0)
   useEffect(() => {
     if (profile) {
       dailySize(profile).then(setSize)
@@ -40,6 +42,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
     dayRow().then(setD)
     dueCount().then(setDue)
     recentDays(7).then(setWeek)
+    currentStreak().then(setStreak)
     if (profile) currentLevel(profile).then(setLv)
   }, [tick, profile])
   if (!profile || !d || !size) return <div className="loading">…</div>
@@ -61,10 +64,26 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         <span className="row"><span className="small muted">{now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}</span><button className="icon-btn ghost" aria-label="设置" onClick={onSettings}><Icon.settings /></button></span>
       </div>
 
+      <div className="streak-hero">
+        <div className="streak-num"><b>{streak}</b><span>{streak ? '天连续' : '今天开个头'}</span></div>
+        <div className="week">
+          {week.map((w, i) => {
+            const dt = new Date(Date.now() - (6 - i) * 86400_000)
+            const any = w.reviews + w.new_words + w.shadows + w.listens > 0
+            return (
+              <div key={w.date}>
+                <div className="d">{WEEK[dt.getDay()]}</div>
+                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${i === 6 ? 'today' : ''}`}>{w.done ? '✓' : any ? '·' : dt.getDate()}</div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="card raised today-card">
         {allDone ? (
           <div className="done-banner">
-            <span className="big" aria-hidden>🌱</span>
+            <span className="big" aria-hidden><Icon.sprout /></span>
             <div><b>今天的练习完成了</b><p className="small muted">明天到期的词会自动排好。想多练可以再来一组。</p></div>
           </div>
         ) : (
@@ -110,16 +129,16 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           <p className="section-title">雅思专项</p>
           <div className="ai-grid">
             <button className="card ai-card" onClick={() => onIelts('listening')}>
-              <span className="ai-ico">🎧</span><b>听力</b><span>四个部分，和真考一样只放一遍</span>
+              <span className="ai-ico"><Icon.headphones /></span><b>听力</b><span>四个部分，和真考一样只放一遍</span>
             </button>
             <button className="card ai-card" onClick={() => onIelts('reading')}>
-              <span className="ai-ico">📖</span><b>阅读</b><span>学术类文章，判断、填空、配对</span>
+              <span className="ai-ico"><Icon.book /></span><b>阅读</b><span>学术类文章，判断、填空、配对</span>
             </button>
             <button className="card ai-card" onClick={() => onIelts('speaking')}>
-              <span className="ai-ico">🎙️</span><b>口语模考</b><span>三个部分完整走一遍</span>
+              <span className="ai-ico"><Icon.speak /></span><b>口语模考</b><span>三个部分完整走一遍</span>
             </button>
             <button className="card ai-card" onClick={() => onAi('writing')}>
-              <span className="ai-ico">📝</span><b>写作</b><span>{hasAi ? '大作文 / 书信，AI 批改' : '需要先接入 AI'}</span>
+              <span className="ai-ico"><Icon.pen /></span><b>写作</b><span>{hasAi ? '大作文 / 书信，AI 批改' : '需要先接入 AI'}</span>
             </button>
           </div>
         </>
@@ -129,10 +148,10 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
       {hasAi ? (
         <div className="ai-grid">
           <button className="card ai-card" onClick={() => onAi('chat')}>
-            <span className="ai-ico">💬</span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
+            <span className="ai-ico"><Icon.chat /></span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
           </button>
           <button className="card ai-card" onClick={() => onAi('diary')}>
-            <span className="ai-ico">✍️</span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
+            <span className="ai-ico"><Icon.diary /></span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
           </button>
         </div>
       ) : (
@@ -147,22 +166,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         </div>
       )}
 
-      <p className="section-title">最近 7 天</p>
-      <div className="card">
-        <div className="week">
-          {week.map((w, i) => {
-            const dt = new Date(Date.now() - (6 - i) * 86400_000)
-            const any = w.reviews + w.new_words + w.shadows + w.listens > 0
-            return (
-              <div key={w.date}>
-                <div className="d">{WEEK[dt.getDay()]}</div>
-                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${i === 6 ? 'today' : ''}`}>{w.done ? '✓' : any ? '·' : dt.getDate()}</div>
-              </div>
-            )
-          })}
-        </div>
-        <p className="small faint" style={{ marginTop: 12 }}>漏了也没关系，不扣分、不清零。</p>
-      </div>
     </div>
   )
 }

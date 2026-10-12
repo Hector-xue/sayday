@@ -40,6 +40,7 @@
 | [Tatoeba](https://tatoeba.org)（经 [manythings.org](https://www.manythings.org/anki/) 打包的中英句对） | 例句（`content/pack/sentences.json`，每句保留 Tatoeba 原句号） | CC BY 2.0 FR |
 | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)（[ONNX 版](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)） | 示范读音合成：预置音频与音频包（`content/audio`）由它生成 | Apache-2.0 |
 | [Moonshine base](https://huggingface.co/UsefulSensors/moonshine-base)（[ONNX 版](https://huggingface.co/onnx-community/moonshine-base-ONNX)） | 离线语音识别（说话输入、口语模考、MCP 转写），首次使用时下载 | MIT |
+| [Bricolage Grotesque](https://github.com/ateliertriay/bricolage) / [Newsreader](https://github.com/productiontype/Newsreader) | 界面英文字体（随包离线使用，许可证在 `apps/web/public/licenses/`） | SIL OFL 1.1 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 间隔复习算法 | MIT |
 | [kokoro-js](https://github.com/hexgrad/kokoro/tree/main/kokoro.js) | 只在 CI 里用来生成音频包（应用本身不带；它打包的 eSpeak NG 是 GPL-3.0，所以 v0.0.4 起去掉了浏览器内合成） | Apache-2.0 |
 | onnxruntime-web / onnxruntime-node / SQLite WASM / silk-wasm / MCP SDK | 运行时 | MIT / MIT / 公有领域 / MIT / MIT |

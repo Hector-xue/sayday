@@ -4,12 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>日日说</title>
-<meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0c1120" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="./manifest.webmanifest" crossorigin="use-credentials">
 <link rel="icon" href="./icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icon-180.png">
-<style>html,body{background:#f6f8fc}@media (prefers-color-scheme:dark){html,body{background:#0c1120}}</style>
+<script>
+// 在样式载入前就定好风格和深浅，避免启动时先闪一下默认样式（真正的设置存在本机数据库里，这里只是镜像）
+(function () {
+  var d = document.documentElement, s = 'marker', t = 'system'
+  try { s = localStorage.getItem('sayday-style') || s; t = localStorage.getItem('sayday-theme') || t } catch (e) {}
+  d.setAttribute('data-style', s)
+  if (t !== 'system') d.setAttribute('data-theme', t)
+  var dark = t === 'dark' || (t === 'system' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)
+  var bg = { marker: ['#f7f6f2', '#121211'], classic: ['#f6f8fc', '#0c1120'] }[s] || ['#f7f6f2', '#121211']
+  d.style.background = bg[dark ? 1 : 0]
+  var m = document.querySelectorAll('meta[name="theme-color"]')
+  for (var i = 0; i < m.length; i++) { m[i].setAttribute('content', bg[dark ? 1 : 0]); m[i].removeAttribute('media') }
+})()
+</script>
 </head>
 <body>
 <div id="root"></div>

@@ -209,7 +209,7 @@ function Player({ s, ep, onClose }: { s: Season; ep: Episode; onClose: () => voi
 
       {stage === 'done' && (
         <div className="fade-in" style={{ textAlign: 'center', paddingTop: 32 }}>
-          <div style={{ fontSize: 44 }} aria-hidden>🎬</div>
+          <div className="done-mark" aria-hidden><Icon.film /></div>
           <h2 style={{ margin: '10px 0 6px' }}>第 {ep.id} 集看完了</h2>
           <p className="muted">理解 {quizScore}/{ep.quiz.length}{actAvg !== null ? ` · 跟读平均 ${actAvg} 分` : ''}</p>
           <div className="card" style={{ marginTop: 22, textAlign: 'left' }}>

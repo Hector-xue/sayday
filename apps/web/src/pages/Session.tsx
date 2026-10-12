@@ -70,7 +70,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
     <div className="session">
       <div className="session-body" style={{ justifyContent: 'center', textAlign: 'center' }}>
         <div className="fade-in">
-          <div style={{ fontSize: 48 }} aria-hidden>{steps.length ? '🌱' : '☕'}</div>
+          <div className="done-mark" aria-hidden>{steps.length ? <Icon.sprout /> : <Icon.cup />}</div>
           <h2 style={{ margin: '12px 0 8px' }}>{steps.length ? '这一组完成了' : '今天的量已经做完了'}</h2>
           <p className="muted">{steps.length ? [['review', '复习'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((s) => s.kind === k)).map(([k, t]) => `${t} ${steps.filter((s) => s.kind === k).length}`).join(' · ') : '明天到期的词会自动排好。'}</p>
         </div>

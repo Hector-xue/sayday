@@ -16,4 +16,12 @@ export const Icon = {
   back: () => <svg viewBox="0 0 24 24" {...P}><path d="M15 5l-7 7 7 7" /></svg>,
   ear: () => <svg viewBox="0 0 24 24" {...P}><path d="M6 9a6 6 0 1112 0c0 3-2 4-3 5.5S14 18 12 20a3 3 0 01-4-1" /><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-1.5 2-1.5 3" /></svg>,
   slow: () => <svg viewBox="0 0 24 24" {...P}><path d="M3 17h13a4 4 0 004-4 4 4 0 00-4-4h-1.5A4.5 4.5 0 006 9.5V12" /><circle cx="18" cy="13" r=".8" fill="currentColor" /></svg>,
+  headphones: () => <svg viewBox="0 0 24 24" {...P}><path d="M4 15v-3a8 8 0 0116 0v3" /><rect x="3" y="14" width="5" height="7" rx="2" /><rect x="16" y="14" width="5" height="7" rx="2" /></svg>,
+  book: () => <svg viewBox="0 0 24 24" {...P}><path d="M12 6.5C10.5 5 8 4.5 3.5 4.5v14C8 18.5 10.5 19 12 20.5c1.5-1.5 4-2 8.5-2v-14C16 4.5 13.5 5 12 6.5z" /><path d="M12 6.5v14" /></svg>,
+  speak: () => <svg viewBox="0 0 24 24" {...P}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20.5c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5" /><path d="M16.5 5.5a4 4 0 010 5M19 3.5a7 7 0 010 9" /></svg>,
+  pen: () => <svg viewBox="0 0 24 24" {...P}><path d="M14.5 4.5l5 5L9 20H4v-5z" /><path d="M12.5 6.5l5 5" /></svg>,
+  chat: () => <svg viewBox="0 0 24 24" {...P}><path d="M20.5 11.5a7.5 7.5 0 01-11 6.6L4 19.5l1.4-4.6a7.5 7.5 0 1115.1-3.4z" /><path d="M9 11.5h.01M12.5 11.5h.01M16 11.5h.01" strokeWidth={2.6} /></svg>,
+  diary: () => <svg viewBox="0 0 24 24" {...P}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 3v18M12 8h4M12 11.5h4" /></svg>,
+  sprout: () => <svg viewBox="0 0 24 24" {...P}><path d="M12 21v-8" /><path d="M12 13C12 8.5 9 6 4.5 6 4.5 10.5 7.5 13 12 13zM12 11c0-4 2.5-6.5 7.5-6.5 0 4.5-3 6.5-7.5 6.5z" /></svg>,
+  cup: () => <svg viewBox="0 0 24 24" {...P}><path d="M4 9h13v5a5 5 0 01-5 5H9a5 5 0 01-5-5z" /><path d="M17 10.5h1.5a2.5 2.5 0 010 5H17M8 3.5c-.8 1 .8 2 0 3M12 3.5c-.8 1 .8 2 0 3" /></svg>,
 }

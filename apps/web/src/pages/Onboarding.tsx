@@ -41,6 +41,7 @@ export function Onboarding({ redo, onExit }: { redo?: 'goal' | 'place'; onExit?:
     <div className="onb fade-in">
       <div className="onb-body" style={{ textAlign: 'center' }}>
         <img className="hero-logo" src="./icon-192.png" alt="" />
+        <p className="hero-en" aria-hidden>Say it.<br /><mark>Every day.</mark></p>
         <h1>每天开口，<br />把英语说出来</h1>
         <p className="lead">先花 3 分钟告诉我你的目标、测一下现在的水平，<br />之后每天的练习都从你的水平开始。</p>
       </div>

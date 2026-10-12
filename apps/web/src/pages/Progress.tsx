@@ -80,7 +80,7 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
           const fill = i <= iNow ? 100 : i === iNow + 1 && nxt ? Math.round(((lv.vocab - vocabFloor(lv.cefr)) / Math.max(1, vocabFloor(nxt) - vocabFloor(lv.cefr))) * 100) : 0
           return (
             <div className="rung" key={c}>
-              <b style={{ color: i === iGoal ? 'var(--brand)' : undefined }}>{c}{i === iGoal ? ' 🎯' : ''}</b>
+              <b className={i === iGoal ? 'goal' : undefined}>{c}{i === iGoal && <small> 目标</small>}</b>
               <div className="track"><i style={{ width: `${Math.max(0, Math.min(100, fill))}%`, opacity: i < iStart ? 0.4 : 1 }} /></div>
             </div>
           )
