@@ -10,6 +10,8 @@ import { dueCount } from '../lib/srs'
 import { currentLevel } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
 import { currentStreak } from '../lib/widget'
+import { checkUpdate, type UpdateInfo } from '../lib/update'
+import { UpdateCard } from '../components/UpdateCard'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -23,6 +25,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [check, setCheck] = useState(false)
   const [retest, setRetest] = useState(false)
   const [hasAi, setHasAi] = useState(false)
+  const [upd, setUpd] = useState<UpdateInfo | null>(null)
+  useEffect(() => { checkUpdate(true).then(setUpd).catch(() => {}) }, [])
   const [wrote, setWrote] = useState(false)
   const [chatted, setChatted] = useState(false)
   const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
@@ -63,6 +67,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         <h1>今天</h1>
         <span className="row"><span className="small muted">{now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}</span><button className="icon-btn ghost" aria-label="设置" onClick={onSettings}><Icon.settings /></button></span>
       </div>
+
+      {upd && <UpdateCard info={upd} onClose={() => setUpd(null)} />}
 
       <div className="streak-hero">
         <div className="streak-num"><b>{streak}</b><span>{streak ? '天连续' : '今天开个头'}</span></div>
