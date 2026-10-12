@@ -98,8 +98,14 @@ try {
     } else if (kind.startsWith('复习')) {
       await clickText('看答案'); await clickText('记得'); reviews++
     } else if (kind.startsWith('跟读')) {
-      await p.click('.rec-btn'); await sleep(3500); await p.click('.rec-btn')
+      await p.click('.rec-btn')
+      // 录音时话筒外圈跟着音量动：采样 --lv，第一句记一下范围
+      const lvs = []
+      for (let k = 0; k < 14; k++) { await sleep(250); lvs.push(await p.evaluate(() => +(document.querySelector('.rec-btn')?.style.getPropertyValue('--lv') || 0))) }
+      if (shadows === 0) { log('录音音量', Math.min(...lvs).toFixed(2), '~', Math.max(...lvs).toFixed(2)); await shot('07a-recording') }
+      await p.click('.rec-btn')
       await p.waitForFunction(() => document.querySelector('.ring b') || /出错|没听清|用不了/.test(document.querySelector('.rec-label')?.textContent ?? ''), { timeout: 600000 })
+      await sleep(900) // 分数从 0 往上数（约 0.7 秒），等数完再读
       const res = await p.evaluate(() => ({ score: document.querySelector('.ring b')?.textContent, label: document.querySelector('.rec-label')?.textContent, sentence: document.querySelector('.shadow-sentence')?.textContent }))
       log('跟读', JSON.stringify(res))
       if (shadows === 0) await shot('07-shadow')
@@ -147,7 +153,7 @@ try {
   await clickText('轮到你演林'); await sleep(400)
   await p.click('.rec-btn'); await sleep(3000); await p.click('.rec-btn')
   await p.waitForFunction(() => document.querySelector('.ring b') || /出错|没听清/.test(document.querySelector('.rec-label')?.textContent ?? ''), { timeout: 600000 })
-  await shot('19-ep-act')
+  await sleep(900); await shot('19-ep-act')
   for (let k = 0; k < 10; k++) {
     if (await p.evaluate(() => document.querySelector('.step-kind')?.textContent?.startsWith('听懂了吗'))) break
     await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].find((b) => /去答题|下一句|跳过/.test(b.textContent) && !b.disabled)?.click()); await sleep(300)

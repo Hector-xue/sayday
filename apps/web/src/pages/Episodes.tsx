@@ -35,6 +35,13 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
     <div className="page fade-in">
       <div className="page-head"><h1>剧集</h1><span className="small muted">第 {up.season.season} 季 · {up.season.title}</span></div>
       <div className="card raised ep-hero">
+        {up.state !== 'all-done' && (
+          <div className="poster" aria-hidden>
+            <span className="poster-no">{String(up.ep.id).padStart(2, '0')}</span>
+            <span className="poster-s">S{up.season.season} · {up.ep.level}</span>
+            {up.state === 'ready' && up.ep.lines[0] && <p className="poster-quote en">“{up.ep.lines[0].en}”<small>— {up.ep.lines[0].who}</small></p>}
+          </div>
+        )}
         <p className="small muted">{up.state === 'all-done' ? '已经全部看完' : up.state === 'tomorrow' ? '明天解锁' : `第 ${up.season.season} 季 第 ${up.ep.id} 集 · ${up.ep.level}`}</p>
         <h2 className="en" style={{ margin: '6px 0 2px' }}>{up.ep.title}</h2>
         <p className="muted">{up.ep.title_zh}</p>

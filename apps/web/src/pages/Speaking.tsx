@@ -8,6 +8,7 @@ import { buildTest, gradeWithAi, loadBank, objectiveBands, saveTest, type Answer
 import { fluency, fluencyNote, segments } from '../lib/fluency'
 import { ASR_MB, asrCached, ensureAsr, onAsrStatus, transcribe, type AsrStatus } from '../lib/speech/asr'
 import { cancelRecording, infer, startRecording, stopRecording } from '../lib/speech/engine'
+import { useMicLevel } from '../components/motion'
 import { score } from '../lib/speech/score'
 import { speak, stopSpeak } from '../lib/speak'
 import { AiError, getAi, type AiConfig } from '../lib/ai'
@@ -38,6 +39,7 @@ export function Speaking({ onClose, onSetupAi }: { onClose: () => void; onSetupA
   const [qs, setQs] = useState<Q[] | null>(null)
   const [i, setI] = useState(-1)
   const [phase, setPhase] = useState<'ask' | 'prep' | 'rec' | 'idle'>('idle')
+  const lv = useMicLevel(phase === 'rec')
   const [left, setLeft] = useState(0)
   const [asr, setAsr] = useState<AsrStatus>({ state: 'idle' })
   const [cached, setCached] = useState<boolean | null>(null)
@@ -192,7 +194,7 @@ export function Speaking({ onClose, onSetupAi }: { onClose: () => void; onSetupA
           </div>
         )}
         <div className="rec-zone" style={{ marginTop: 28 }}>
-          <div className={`rec-btn ${phase === 'rec' ? 'on' : ''}`} aria-hidden>{phase === 'rec' ? <Icon.mic /> : <Icon.ear />}</div>
+          <div className={`rec-btn ${phase === 'rec' ? 'on' : ''}`} style={{ ['--lv' as string]: lv }} aria-hidden>{phase === 'rec' ? <Icon.mic /> : <Icon.ear />}</div>
           <div className="rec-label">{phase === 'rec' ? '正在听你说…说完点下面的按钮' : phase === 'prep' ? `准备时间，可以在脑子里列个提纲（剩 ${left} 秒）` : '听问题'}</div>
         </div>
         {phase === 'rec' && <p className="small faint" style={{ textAlign: 'center' }}>{q!.part === 2 ? '尽量说满 1 分钟以上' : '两三句话、带一个理由或例子就好'}</p>}
