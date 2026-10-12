@@ -30,7 +30,10 @@ if [ "${ONLY:-}" = "e" ]; then
   for acc in us gb; do
     c=$(ls "$TMP/audio/$acc/e" | wc -l)
     [ "$c" -gt 0 ] || { echo "$acc 没有剧集音频"; exit 1; }
-    echo "$acc 剧集 $c"
+    # 剧集 / 听力只会越加越多：比线上少就是拿错了产物，不发布
+    old=$(ls "$DEST/$acc/e" 2>/dev/null | wc -l)
+    [ "$c" -ge "$old" ] || { echo "$acc 剧集音频比线上少（$old → $c），不发布"; exit 1; }
+    echo "$acc 剧集 $old → $c"
     chmod -R a+rX "$TMP/audio/$acc/e"
     rm -rf "$DEST/$acc/e.new" && mv "$TMP/audio/$acc/e" "$DEST/$acc/e.new"
     if [ -d "$DEST/$acc/e" ]; then mv "$DEST/$acc/e" "$DEST/$acc/e.old"; fi
