@@ -33,6 +33,9 @@ SOURCES = {
     "cmn-eng.zip": "https://www.manythings.org/anki/cmn-eng.zip",
 }
 MAX_WORDS = 12000
+# 词书补词：考试大纲里、但排在常用 1.2 万之外（或没有词频）的词，接在后面（排名 12001 起，估算 C2）。
+# 只收有 CMU 音标的（能进词卡打分），常用 1.2 万的排名和例句都不受影响
+EXAM_TAGS = {"zk", "gk", "cet4", "cet6", "ky", "ielts", "toefl", "gre"}
 CEFR_CUTS = [(800, "A1"), (2000, "A2"), (3500, "B1"), (6000, "B2"), (10000, "C1")]
 INFLECT = set("pdi3srt")  # ECDICT exchange 类型：过去式/过去分词/现在分词/三单/复数/比较级/最高级
 # Tatoeba 里高频出现的人名：不在词频表里，但不该让句子变“难”
@@ -91,8 +94,10 @@ def build_words(cmu: dict[str, str]) -> tuple[list[list], dict[str, str]]:
                 continue  # 只要小写普通词：专名、缩写、词组另做
             frq, bnc = int(x["frq"] or 0), int(x["bnc"] or 0)
             rank = frq or bnc
-            if not rank:
+            exam = bool(EXAM_TAGS & set(x["tag"].split()))
+            if not rank and not exam:
                 continue
+            rank = rank or 10**7  # 没词频的考试词排最后
             ex = dict(kv.split(":", 1) for kv in x["exchange"].split("/") if ":" in kv)
             if "0" in ex and re.fullmatch(r"[a-z]+", ex["0"]):
                 lemma.setdefault(w, ex["0"])
@@ -108,10 +113,12 @@ def build_words(cmu: dict[str, str]) -> tuple[list[list], dict[str, str]]:
     for w, rank, ph, tr, tag, cmu_ph in rows:
         if w in seen:
             continue
+        if len(out) >= MAX_WORDS and not (EXAM_TAGS & set(tag.split()) and cmu_ph):
+            continue  # 1.2 万之后只补考试词
+        if len(out) < MAX_WORDS and rank >= 10**7:
+            continue  # 没词频的不挤进常用表
         seen.add(w)
         out.append([w, len(out) + 1, cefr(len(out) + 1), ph, tr, tag, cmu_ph, 1 if w in SENSITIVE else 0])  # 排名按去重后的顺序重排
-        if len(out) >= MAX_WORDS:
-            break
     return out, lemma
 
 
@@ -190,7 +197,7 @@ def build_pseudowords(words: list[list], cmu: dict[str, str], n: int = 120) -> l
         if m:
             heads.append(m.group(1))
             tails.append(m.group(2))
-    common = {w[0] for w in words}
+    common = {w[0] for w in words[:MAX_WORDS]}
 
     def near_common(c: str) -> bool:
         """和常用词只差一个字母（替换/增/删）：像拼写错误，认识原词的人会误点“认识”"""
@@ -240,6 +247,7 @@ def main() -> None:
     meta = {
         "version": 1,
         "words": len(words),
+        "common_words": MAX_WORDS,
         "sentences": len(sents),
         "sentences_by_cefr": by_band,
         "pseudowords": len(pseudo),

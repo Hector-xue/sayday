@@ -2,6 +2,7 @@
 // 输出 <out>/<accent>/s/<Tatoeba句号>.mp3、<out>/<accent>/w/<单词>.mp3、<out>/<accent>/e/s<季>e<集>-<行>.mp3（剧集，每个角色自己的声音）、e/l<套>p<部分>-<行>.mp3（雅思听力），
 // 外加 <out>/<accent>/shard-<i>.json（清单）
 // 用法: node build_audio.mjs --accent us --shard 0 --shards 20 --out out [--dtype q8] [--limit 10] [--only s,w,e,v]（v=剧集主角改名/男声的另几套，也放 e/）
+//       [--have have.txt]  增量：线上已有的不再合成（have.txt 每行 <口音>/<目录>/<文件名去扩展名>，scripts/sync-audio.sh 发布时生成在 audio/have.txt）
 // 没有 ffmpeg 时输出 wav（只用于本地验证；CI 里装 ffmpeg 出 mp3）
 import { KokoroTTS } from 'kokoro-js'
 import { spawnSync } from 'node:child_process'
@@ -16,6 +17,7 @@ const out = arg('out', 'out')
 const dtype = arg('dtype', 'q8')
 const limit = Number(arg('limit', 0))
 const only = new Set(arg('only', 's,w,e').split(','))
+const have = new Set(arg('have', '') ? readFileSync(arg('have', ''), 'utf8').split('\n').filter(Boolean) : [])
 const VOICE = { us: 'af_heart', gb: 'bf_emma' }[accent]
 const pack = new URL('../pack/', import.meta.url)
 const words = JSON.parse(readFileSync(new URL('words.json', pack)))
@@ -65,7 +67,9 @@ const items = [
   ...sents.map((s) => ({ kind: 's', key: String(s[0]), text: s[1] })),
   ...words.map((w) => ({ kind: 'w', key: w[0], text: w[0] })),
   ...epItems,
-].filter((it) => only.has(it.kind)).filter((_, i) => i % shards === shard)
+].filter((it) => only.has(it.kind))
+  .filter((it) => !have.has(`${accent}/${it.kind === 'v' ? 'e' : it.kind}/${it.kind === 'w' ? encodeURIComponent(it.key) : it.key}`))
+  .filter((_, i) => i % shards === shard)
 const todo = limit ? items.slice(0, limit) : items
 // --dry 1：只数条数（核对分片和改动），不载入模型
 if (arg('dry', '')) {

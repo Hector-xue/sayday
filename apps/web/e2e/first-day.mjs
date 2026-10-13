@@ -70,6 +70,11 @@ try {
   await p.waitForFunction(() => document.body.innerText.includes('今日练习'))
   await sleep(500)
   await shot('05-today')
+  // 网页版：今天页几秒后开始后台下发音模型（下载中才显示进度条）
+  if (!process.env.PW) {
+    const dl = await p.waitForSelector('.model-dl', { timeout: 20000 }).then(() => p.evaluate(() => document.querySelector('.model-dl')?.innerText)).catch(() => '没出现（可能已缓存）')
+    log('发音模型预下载', dl)
+  }
   log('今天页', (await text()).match(/新词[\s\S]*?\d+\/\d+/)?.[0].replace(/\s+/g, ' '))
 
   // 第一组：没有到期复习 → 新词 8 个 → 跟读 3 句
@@ -127,6 +132,11 @@ try {
   }
   log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+/)?.[0])
   await openSettings(); await sleep(400); await shot('12-settings')
+  // 提醒与小组件（网页版只给下载 App 的入口）、发音模型预下载状态
+  await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.scrollIntoView({ block: 'start' }))
+  await sleep(300); await shot('12b-settings-remind')
+  log('设置·提醒与小组件', await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.nextElementSibling?.innerText.replace(/\s+/g, ' ')))
+  log('设置·发音模型', await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.innerText.startsWith('发音模型'))?.innerText.replace(/\s+/g, ' ')))
 
   // 发音实验室：音标口型卡、最小对立听辨两题
   await clickText('发音', '.tab'); await sleep(300)

@@ -1,5 +1,5 @@
 // 词书：按考试大纲学新词。标签来自 ECDICT（中考 zk、高考 gk、四级 cet4、六级 cet6、考研 ky、雅思、托福、GRE），
-// 只收本 App 词表（最常用的 1.2 万词）里有的。没选词书（profile.book 未设）时保持原来的做法：按常用程度往上学，雅思目标优先雅思词
+// 词表 = 最常用的 1.2 万词 + 1.2 万之外的考试大纲词（content/build_content.py 的 EXAM_TAGS，排在 12001 之后）。没选词书（profile.book 未设）时保持原来的做法：按常用程度往上学，雅思目标优先雅思词
 import type { Word } from './content'
 
 export type Book = { tag: string; name: string; desc: string }

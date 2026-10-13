@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../store'
 import { Icon } from '../components/icons'
 import { PlayButton } from '../components/PlayButton'
-import { Shadow } from '../components/Shadow'
+import { HINT, Shadow } from '../components/Shadow'
+import { ipa } from '../lib/phones'
+import { LINE_PASS, reviewLine } from '../lib/episodes'
 import { buildSession, markDay, saveAttempt, saveRecording, type Step } from '../lib/lesson'
 import { applyCheck, saveListen, type CheckItem } from '../lib/calibrate'
 import type { Answer } from '../lib/placement'
@@ -31,6 +33,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
   const [scored, setScored] = useState(false)
   const started = useRef(performance.now())
   const doneSteps = useRef(0)
+  const linePassed = useRef(new Set<number>())
   const stepStart = useRef(performance.now())
   const accent = profile!.accent
 
@@ -39,7 +42,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
       setSteps(s)
       // 后台提前合成示范读音：先跟读句，再例句
       const clips = [
-        ...s.flatMap((x) => (x.kind === 'shadow' || x.kind === 'listen' ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])),
+        ...s.flatMap((x) => (x.kind === 'shadow' && x.line ? [x.line.clip] : x.kind === 'shadow' || x.kind === 'listen' ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])),
         ...s.flatMap((x) => (x.kind === 'learn' || x.kind === 'review' ? [{ text: x.word.w, word: x.word.w }, ...(x.sentence ? [{ text: x.sentence.en, sentenceId: x.sentence.id }] : [])] : [])),
       ]
       prefetch(clips, accent)
@@ -106,7 +109,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
             <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
             {revealed ? (
               <>
-                <p className="ipa">/{step.word.ipa}/</p>
+                {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
                 <p className="zh-mean">{step.word.zh}</p>
                 <Example s={step.sentence} word={step.word.w} />
                 {step.sentence && <div className="row" style={{ marginTop: 12 }}><PlayButton text={step.sentence.en} clip={{ text: step.sentence.en, sentenceId: step.sentence.id }} accent={accent} label="听例句" /><span className="small muted">听例句</span></div>}
@@ -124,7 +127,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
           <div className="fade-in">
             <p className="step-kind">新词{step.word.tags.includes('ielts') ? ' · 雅思词汇' : ''}</p>
             <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
-            <p className="ipa">/{step.word.ipa}/</p>
+            {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
             <p className="zh-mean">{step.word.zh}</p>
             <Example s={step.sentence} word={step.word.w} />
             {step.sentence && <div className="row" style={{ marginTop: 12 }}><PlayButton text={step.sentence.en} clip={{ text: step.sentence.en, sentenceId: step.sentence.id }} accent={accent} label="听例句" /><span className="small muted">听例句</span></div>}
@@ -146,13 +149,20 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
 
         {step.kind === 'shadow' && (
           <div className="fade-in">
-            <p className="step-kind">跟读</p>
+            <p className="step-kind">{step.phone ? <>跟读 · 专练弱项 <b>/{ipa(step.phone)}/</b></> : step.line ? `跟读 · 剧集台词（${step.line.from}）` : '跟读'}</p>
+            {step.phone && HINT[step.phone] && <p className="small muted" style={{ marginTop: 2 }}>{HINT[step.phone]}</p>}
             <p className="shadow-sentence en"><Tappable text={step.sentence.en} highlight={step.focus} karaoke /></p>
             <p className="shadow-zh">{step.sentence.zh}</p>
-            <Shadow text={step.sentence.en} sentenceId={step.sentence.id} accent={accent} onScored={async (r, audio) => {
+            <Shadow key={step.sentence.id} text={step.sentence.en} sentenceId={step.line ? undefined : step.sentence.id} clip={step.line?.clip} accent={accent} onScored={async (r, audio) => {
               const phones = r.words.flatMap((w) => w.phones.map((p) => [p.p, +p.s.toFixed(2)] as [string, number]))
-              await saveAttempt(step.sentence.id, step.sentence.en, r.score, phones, r.words.filter((w) => w.tail).map((w) => `${w.word}:${w.tail}`))
-              saveRecording(step.sentence.id, step.sentence.en, r.score, audio).catch(() => {})
+              const sid = step.line ? null : step.sentence.id
+              await saveAttempt(sid, step.sentence.en, r.score, phones, r.words.filter((w) => w.tail).map((w) => `${w.word}:${w.tail}`))
+              saveRecording(sid, step.sentence.en, r.score, audio).catch(() => {})
+              // 台词复习：读好之前每次都记（没读好 = 明天再来），读好一次就往后推，之后重读不再改
+              if (step.line && !linePassed.current.has(i)) {
+                await reviewLine(step.line.ref, r.score)
+                if (r.score >= LINE_PASS) linePassed.current.add(i)
+              }
               if (!scored) { await markDay({ shadows: 1 }); setScored(true) }
             }} />
           </div>

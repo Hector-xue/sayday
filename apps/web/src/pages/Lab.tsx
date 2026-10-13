@@ -246,7 +246,7 @@ function PhoneCard({ phone, accent, onClose, onDrill }: { phone: string; accent:
         <div className="list">
           {ex.map((w) => (
             <div className="list-row" key={w.w}>
-              <span className="main"><b>{w.w}</b><span>/{w.ipa}/ · {w.zh.split(/[；;,，]/)[0]}</span></span>
+              <span className="main"><b>{w.w}</b><span>{w.ipa ? `/${w.ipa}/ · ` : ''}{w.zh.split(/[；;,，]/)[0]}</span></span>
               <PlayButton text={w.w} clip={{ text: w.w, word: w.w }} accent={accent} />
             </div>
           ))}

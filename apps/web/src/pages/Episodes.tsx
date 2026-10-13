@@ -6,7 +6,7 @@ import { PlayButton } from '../components/PlayButton'
 import { Shadow } from '../components/Shadow'
 import { Tappable } from '../components/Tappable'
 import { useApp } from '../store'
-import { clipOf, DEFAULT_ME, episodeWords, finish, getMe, getProgress, key, loadSeasons, meKey, meZh, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Me, type Season } from '../lib/episodes'
+import { clipOf, DEFAULT_ME, episodeWords, finish, LINE_PASS, queueLines, getMe, getProgress, key, loadSeasons, meKey, meZh, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Me, type Season } from '../lib/episodes'
 import { MeEditor } from '../components/MeEditor'
 import { play, prefetch, stopAudio } from '../lib/tts'
 import { addCard } from '../lib/srs'
@@ -136,7 +136,12 @@ function Player({ s, ep, me: my, onClose }: { s: Season; ep: Episode; me: Me; on
 
   const quizScore = answers.filter((a, k) => a === ep.quiz[k].answer).length
   const actAvg = Object.values(actScores).length ? Math.round(Object.values(actScores).reduce((a, b) => a + b, 0) / Object.values(actScores).length) : null
-  const done = async () => { await finish(s.season, ep.id, quizScore, actAvg); refresh(); setStage('done') }
+  const badLines = myLines.filter((x) => !(actScores[x.i] >= LINE_PASS)).length
+  const done = async () => {
+    await finish(s.season, ep.id, quizScore, actAvg)
+    if (myLines.length) await queueLines(s.season, ep.id, myLines.map((x) => x.i), actScores)
+    refresh(); setStage('done')
+  }
 
   const STAGES: [Stage, string][] = [['listen', '听'], ['act', '演'], ['quiz', '测'], ['words', '词']]
   const foot = stage === 'listen' ? (
@@ -213,7 +218,7 @@ function Player({ s, ep, me: my, onClose }: { s: Season; ep: Episode; me: Me; on
           <div className="list" style={{ marginTop: 12 }}>
             {words.map((w) => (
               <div className="list-row" key={w.w}>
-                <span className="main"><b>{w.w}</b><span>/{w.ipa}/ · {w.zh.split(/[；;]/)[0]}</span></span>
+                <span className="main"><b>{w.w}</b><span>{w.ipa ? `/${w.ipa}/ · ` : ''}{w.zh.split(/[；;]/)[0]}</span></span>
                 <PlayButton text={w.w} clip={{ text: w.w, word: w.w }} accent={accent} />
                 <button className="btn small quiet" disabled={added.has(w.w)} onClick={async () => { await addCard(w.w); await markDay({ new_words: 1 }); setAdded((x) => new Set(x).add(w.w)) }}>{added.has(w.w) ? '已加' : '加入'}</button>
               </div>
@@ -228,6 +233,7 @@ function Player({ s, ep, me: my, onClose }: { s: Season; ep: Episode; me: Me; on
           <div className="done-mark" aria-hidden><Icon.film /></div>
           <h2 style={{ margin: '10px 0 6px' }}>第 {ep.id} 集看完了</h2>
           <p className="muted">理解 {quizScore}/{ep.quiz.length}{actAvg !== null ? ` · 跟读平均 ${actAvg} 分` : ''}</p>
+          {badLines > 0 && <p className="small muted" style={{ marginTop: 6 }}>没读好的 {badLines} 句台词，之后几天会排进每日跟读</p>}
           <div className="card" style={{ marginTop: 22, textAlign: 'left' }}>
             <p className="small muted">下集预告</p>
             <p style={{ marginTop: 6 }}>{ep.next_zh}</p>

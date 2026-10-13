@@ -1,5 +1,9 @@
 // 离线内容包：词表 + 例句（content/build_content.py 生成，随应用缓存）
 export type Word = { w: string; rank: number; cefr: string; ipa: string; zh: string; tags: string[]; cmu: string[]; sensitive: boolean }
+/** 词表前 1.2 万是按常用程度排的；之后是补进来的考试大纲词（排名只是顺序，不代表常用程度） */
+export const COMMON_WORDS = 12000
+export const rankLabel = (w: Word) => w.rank <= COMMON_WORDS ? `第 ${w.rank.toLocaleString()} 常用` : '大纲补充词'
+
 export type Sentence = { id: number; en: string; zh: string; hard: number; cefr: string; words: string[] }
 
 let cache: Promise<{ words: Word[]; byWord: Map<string, Word>; sents: Sentence[]; sentsByWord: Map<string, Sentence[]> }> | null = null

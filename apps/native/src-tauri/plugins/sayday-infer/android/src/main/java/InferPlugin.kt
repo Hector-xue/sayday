@@ -16,6 +16,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import androidx.core.app.NotificationManagerCompat
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
@@ -469,5 +473,39 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     val ret = JSObject()
     ret.put("ok", ok)
     invoke.resolve(ret)
+  }
+
+  // ---- 设置页「提醒与小组件」 ----
+  /** 桌面上放了几个小组件、能不能一键添加、通知开没开（系统层面的总开关） */
+  @Command
+  fun systemStatus(invoke: Invoke) {
+    val mgr = AppWidgetManager.getInstance(activity)
+    val ret = JSObject()
+    ret.put("widgets", mgr.getAppWidgetIds(ComponentName(activity, SaydayWidget::class.java)).size)
+    ret.put("canPin", Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mgr.isRequestPinAppWidgetSupported)
+    ret.put("notify", NotificationManagerCompat.from(activity).areNotificationsEnabled())
+    invoke.resolve(ret)
+  }
+
+  /** 请求把小组件放到桌面（系统弹确认框）；桌面不支持时 ok=false，网页那边提示手动添加 */
+  @Command
+  fun pinWidget(invoke: Invoke) {
+    val mgr = AppWidgetManager.getInstance(activity)
+    val ok = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mgr.isRequestPinAppWidgetSupported &&
+      mgr.requestPinAppWidget(ComponentName(activity, SaydayWidget::class.java), null, null)
+    val ret = JSObject()
+    ret.put("ok", ok)
+    invoke.resolve(ret)
+  }
+
+  /** 打开系统里本 App 的通知设置页（关了通知、想换提醒铃声时用） */
+  @Command
+  fun openNotifySettings(invoke: Invoke) {
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+      Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName)
+    else
+      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + activity.packageName))
+    activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    invoke.resolve(JSObject())
   }
 }

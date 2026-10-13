@@ -7,12 +7,14 @@ import { goalLabel } from '../lib/levels'
 import { isNative } from '../lib/speech/engine'
 import { getAi, providerOf, type AiConfig } from '../lib/ai'
 import { canRemind, enableReminder, getReminder, type Reminder } from '../lib/reminder'
+import { openNotifySettings, pinWidget, systemStatus, type SystemStatus } from '../lib/system'
 import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
 import { MeEditor } from '../components/MeEditor'
 import { DEFAULT_ME, getMe, type Me } from '../lib/episodes'
 import { getSupport, type SupportState } from '../lib/support'
 import { SupportSheet } from '../components/SupportSheet'
+import { ModelPrefetchRow } from '../components/ModelPrefetch'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -22,6 +24,19 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   useEffect(() => { getAi().then(setAiCfg) }, [tick])
   const [rem, setRem] = useState<Reminder | null>(null)
   useEffect(() => { getReminder().then(setRem) }, [])
+  const [sys, setSys] = useState<SystemStatus | null>(null)
+  // 从系统设置 / 桌面回来时刷新（通知开关、小组件个数）
+  useEffect(() => {
+    if (!canRemind) return
+    const load = () => { if (document.visibilityState === 'visible') systemStatus().then(setSys) }
+    load()
+    document.addEventListener('visibilitychange', load)
+    return () => document.removeEventListener('visibilitychange', load)
+  }, [])
+  const addWidget = async () => {
+    if (sys?.canPin && (await pinWidget())) toast('在弹出的窗口里点“添加”')
+    else toast('长按桌面空白处 → 小组件 → 找到“日日说”拖到桌面')
+  }
   const [ver, setVer] = useState('')
   const [upd, setUpd] = useState<UpdateInfo | null>(null)
   const [checking, setChecking] = useState(false)
@@ -134,19 +149,38 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="k"><b>示范语速</b><span>{speed < 1 ? '放慢一点，听清每个音' : speed > 1 ? '快一点，接近真实语速' : '正常语速'}</span></div>
           <div className="seg">{SPEEDS.map((s) => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s === 1 ? '1×' : `${s}×`}</button>)}</div>
         </div>
-        {canRemind && rem && (
-          <div className="set-row">
-            <div className="k"><b>每日提醒</b><span>{rem.on ? '当天练过就不打扰' : '到点提醒你练一会儿'}</span></div>
-            {rem.on && <input className="input time" type="time" value={`${String(rem.hour).padStart(2, '0')}:${String(rem.minute).padStart(2, '0')}`} onChange={(e) => { const [h, m] = e.target.value.split(':').map(Number); if (!Number.isNaN(h)) saveRem({ on: true, hour: h, minute: m || 0 }) }} />}
-            <div className="seg"><button aria-pressed={!rem.on} onClick={() => saveRem({ ...rem, on: false })}>关</button><button aria-pressed={rem.on} onClick={() => saveRem({ ...rem, on: true })}>开</button></div>
-          </div>
-        )}
         <div className="set-row"><div className="k"><b>重新定级</b><span>当前起点 {profile.placement.cefr} · 约 {profile.placement.vocab.toLocaleString()} 词</span></div><button className="btn small quiet" onClick={() => onRedo('place')}>重测</button></div>
       </div>
 
       <p className="section-title">AI</p>
       <div className="list">
         <div className="set-row"><div className="k"><b>你自己的 AI</b><span>{ai ? `${providerOf(ai.provider).name} · ${ai.model}` : '陪练聊天、日记批改要用。DeepSeek、通义、Kimi 等都行'}</span></div><button className="btn small quiet" onClick={onAi}>{ai ? '修改' : '接入'}</button></div>
+      </div>
+
+      <p className="section-title">提醒与小组件</p>
+      <div className="list">
+        {canRemind ? (<>
+        {rem && (
+          <div className="set-row">
+            <div className="k"><b>每日提醒</b><span>{rem.on ? '当天练过就不打扰' : '到点提醒你练一会儿'}</span></div>
+            {rem.on && <input className="input time" type="time" value={`${String(rem.hour).padStart(2, '0')}:${String(rem.minute).padStart(2, '0')}`} onChange={(e) => { const [h, m] = e.target.value.split(':').map(Number); if (!Number.isNaN(h)) saveRem({ on: true, hour: h, minute: m || 0 }) }} />}
+            <div className="seg"><button aria-pressed={!rem.on} onClick={() => saveRem({ ...rem, on: false })}>关</button><button aria-pressed={rem.on} onClick={() => saveRem({ ...rem, on: true })}>开</button></div>
+          </div>
+        )}
+          <div className="set-row">
+            <div className="k"><b>系统通知</b><span>{sys ? (sys.notify ? '已允许' : '已关闭 · 提醒不会弹出来') : '提醒铃声、横幅样式在系统里改'}</span></div>
+            <button className="btn small quiet" onClick={async () => { if (!(await openNotifySettings())) toast('到系统设置 → 应用 → 日日说 → 通知 里改') }}>{sys && !sys.notify ? '去打开' : '系统设置'}</button>
+          </div>
+          <div className="set-row">
+            <div className="k"><b>桌面小组件</b><span>{sys?.widgets ? `桌面上已有 ${sys.widgets} 个 · ` : ''}连续天数、今天练没练、一个在学的词</span></div>
+            <button className="btn small quiet" onClick={addWidget}>{sys?.widgets ? '再加一个' : '添加'}</button>
+          </div>
+        </>) : (
+          <div className="set-row">
+            <div className="k"><b>每日提醒 · 桌面小组件</b><span>网页版做不了，安卓 App 里有</span></div>
+            <a className="btn small quiet" href="https://sayday.ivyea.com/#download" target="_blank" rel="noreferrer">下载 App</a>
+          </div>
+        )}
       </div>
 
       <p className="section-title">外观</p>
@@ -172,6 +206,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       <p className="section-title">数据</p>
       <div className="list">
         <div className="set-row"><div className="k"><b>保存在</b><span>{storage}{isNative ? ' · App' : ''}</span></div></div>
+        <ModelPrefetchRow />
         {cache && (
           <div className="set-row"><div className="k"><b>离线缓存</b><span>已下载示范音频 {cache.clips.toLocaleString()} 条{cache.used ? ` · 本机共占 ${Math.round(cache.used / 1048576)} MB（含学习记录和语音模型）` : ''}</span></div><button className="btn small quiet" disabled={!cache.clips} onClick={clearCache}>清理</button></div>
         )}

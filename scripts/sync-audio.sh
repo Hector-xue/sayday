@@ -2,6 +2,8 @@
 # 把 content-audio 工作流的产物（32 个分片 artifact）合并发布到 /var/www/sayday.ivyea.com/audio/
 # 用法: scripts/sync-audio.sh <run_id>            全量（32 片，整体换上）
 #       ONLY=e scripts/sync-audio.sh <run_id>     只更新剧集（content-episodes 工作流的产物，只换 e/ 目录）
+#       ONLY=add scripts/sync-audio.sh <run_id>   增量（content-audio incremental=true 的产物）：新文件加进 s/ w/ e/，线上已有的一个不删
+# 每次发布后重写 audio/have.txt（线上已有清单，增量合成靠它跳过）
 # 先下到临时目录、校验每片都有清单，再换上（发布中途不会出现半套）
 set -euo pipefail
 RUN=${1:?run id}
@@ -11,6 +13,12 @@ TMP=$(mktemp -d /root/sayday/.cache/audio-sync.XXXX)
 trap 'rm -rf "$TMP"' EXIT
 export GH_TOKEN=${GH_TOKEN:-$(printf 'protocol=https\nhost=github.com\n' | git credential fill 2>/dev/null | sed -n 's/^password=//p')}
 gh run download "$RUN" -R "$REPO" -D "$TMP/dl"
+# 线上已有清单：<口音>/<目录>/<文件名去 .mp3>
+write_have() {
+  (cd "$DEST" && find us gb -name '*.mp3' | sed 's/\.mp3$//' | sort) > "$DEST/have.txt.new"
+  chmod a+r "$DEST/have.txt.new" && mv -f "$DEST/have.txt.new" "$DEST/have.txt"
+  echo "have.txt $(wc -l < "$DEST/have.txt") 条"
+}
 mkdir -p "$TMP/audio"
 n=0
 for d in "$TMP"/dl/audio-*; do
@@ -40,6 +48,23 @@ if [ "${ONLY:-}" = "e" ]; then
     if [ -d "$DEST/$acc/e" ]; then mv "$DEST/$acc/e" "$DEST/$acc/e.old"; fi
     mv "$DEST/$acc/e.new" "$DEST/$acc/e" && rm -rf "$DEST/$acc/e.old"
   done
+  write_have
+  exit 0
+fi
+if [ "${ONLY:-}" = "add" ]; then
+  # 增量：32 片齐全；只往线上目录里加文件（同名的覆盖），不删任何东西
+  [ "$n" -eq 32 ] || { echo "分片不全：$n/32"; exit 1; }
+  for acc in us gb; do
+    for k in s w e; do
+      c=$(find "$TMP/audio/$acc/$k" -name '*.mp3' | wc -l)
+      echo "$acc/$k 新增 $c"
+      [ "$c" -gt 0 ] || continue
+      mkdir -p "$DEST/$acc/$k"
+      chmod -R a+rX "$TMP/audio/$acc/$k"
+      find "$TMP/audio/$acc/$k" -name '*.mp3' -exec mv -f -t "$DEST/$acc/$k/" {} +
+    done
+  done
+  write_have
   exit 0
 fi
 # 全量：必须 32 片齐全，而且句子、单词都不能是空的（防止拿错产物把整个音频包换空）
@@ -57,3 +82,4 @@ rm -rf "$DEST.new" && mv "$TMP/audio" "$DEST.new"
 [ -d "$DEST" ] && mv "$DEST" "$DEST.old"
 mv "$DEST.new" "$DEST" && rm -rf "$DEST.old"
 du -sh "$DEST"
+write_have

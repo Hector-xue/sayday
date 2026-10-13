@@ -40,10 +40,68 @@ let seq = 0
 const pending = new Map<number, { resolve: (r: Logits) => void; reject: (e: Error) => void }>()
 let loading: Promise<void> | null = null
 
+const modelUrl = () => new URL(`models/phone_ctc.int8.onnx?v=${__MODEL_REV__}`, new URL('./', location.href)).href
+
+// ---- 网页：提前在后台把模型下进离线缓存（只下不载入，不占内存），第一次跟读时就不用干等 ----
+// 下载走 Service Worker（它边下边存缓存）；没有 Service Worker 时不预下（存不住，白下）
+export type ModelCache = { state: 'idle' | 'cached' | 'downloading' | 'error' | 'unsupported'; got?: number; total?: number }
+let mc: ModelCache = { state: 'idle' }
+const mcListeners = new Set<(s: ModelCache) => void>()
+const setMc = (s: ModelCache) => { mc = s; mcListeners.forEach((f) => f(s)) }
+export const modelCacheStatus = () => mc
+export function onModelCache(f: (s: ModelCache) => void) { mcListeners.add(f); return () => { mcListeners.delete(f) } }
+let prefetching: Promise<void> | null = null
+
+/** 模型是不是已经在离线缓存里 */
+export async function modelCached(): Promise<boolean> {
+  if (isNative) return true
+  try { return !!(await caches.match(modelUrl())) } catch { return false }
+}
+
+/** 把模型下进缓存。auto：自动触发时，省流量模式下不下（设置里手动点的不管） */
+export function prefetchModel(auto = false): Promise<void> {
+  if (isNative || status.state === 'ready') return Promise.resolve()
+  if (prefetching) return prefetching
+  prefetching = (async () => {
+    if (await modelCached()) { setMc({ state: 'cached' }); return }
+    if (!('serviceWorker' in navigator)) { setMc({ state: 'unsupported' }); return }
+    // 第一次打开时 Service Worker 还在装（先缓存外壳），等它接管页面再下，最多等 2 分钟
+    if (!navigator.serviceWorker.controller) await new Promise((r) => { navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }); setTimeout(r, 120_000) })
+    if (!navigator.serviceWorker.controller) { setMc({ state: 'unsupported' }); return }
+    if (await modelCached()) { setMc({ state: 'cached' }); return }
+    if (status.state !== 'idle') { setMc({ state: 'idle' }); return } // 等的时候已经开始跟读、引擎自己在下了
+    if (auto && (navigator as any).connection?.saveData) return
+    setMc({ state: 'downloading', got: 0 })
+    const res = await fetch(modelUrl())
+    if (!res.ok || !res.body) throw new Error(`模型下载失败（HTTP ${res.status}）`)
+    const total = Number(res.headers.get('content-length')) || 0
+    const reader = res.body.getReader()
+    let got = 0, last = 0
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      got += value.length
+      if (got - last > 512 * 1024 || got === total) { last = got; setMc({ state: 'downloading', got, total }) }
+    }
+    // Service Worker 在后台写缓存，等它写完再报“已下好”
+    for (let k = 0; k < 40 && !(await modelCached()); k++) await new Promise((r) => setTimeout(r, 250))
+    setMc({ state: (await modelCached()) ? 'cached' : 'error' })
+  })().catch((e) => { setMc({ state: 'error' }); console.warn('模型预下载失败', e) }).finally(() => { prefetching = null })
+  return prefetching
+}
+
 /** 准备好推理（网页首次要下载约 120MB 模型，之后走离线缓存） */
 export function ensureEngine(): Promise<void> {
   if (loading) return loading
   setStatus({ state: 'loading' })
+  if (!tauri && prefetching && mc.state === 'downloading') {
+    // 后台正在预下：等它下完（进度照样显示在跟读按钮上），再从缓存载入，不重复下
+    const off = onModelCache((m) => { if (m.state === 'downloading') setStatus({ state: 'loading', got: m.got, total: m.total }) })
+    setStatus({ state: 'loading', got: mc.got, total: mc.total })
+    loading = prefetching.finally(off).then(() => { loading = null; return ensureEngine() })
+    loading = loading.catch((e) => { setStatus({ state: 'error', error: String(e?.message || e) }); loading = null; throw e })
+    return loading
+  }
   if (tauri) {
     loading = tauri.invoke('plugin:sayday-infer|load_model', { threads: 4 }).then(() => setStatus({ state: 'ready' }))
   } else {
@@ -59,8 +117,7 @@ export function ensureEngine(): Promise<void> {
           else { setStatus({ state: 'error', error: d.error }); reject(new Error(d.error)) }
         }
       }
-      const base = new URL('./', location.href)
-      worker!.postMessage({ type: 'load', modelUrl: new URL(`models/phone_ctc.int8.onnx?v=${__MODEL_REV__}`, base).href, wasmBase: new URL('ort/', base).href })
+      worker!.postMessage({ type: 'load', modelUrl: modelUrl(), wasmBase: new URL('ort/', new URL('./', location.href)).href })
     })
   }
   loading = loading.catch((e) => { setStatus({ state: 'error', error: String(e?.message || e) }); loading = null; throw e })
