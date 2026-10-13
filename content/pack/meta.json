@@ -1,14 +1,15 @@
 {
  "version": 1,
- "words": 12000,
- "sentences": 15141,
+ "words": 15740,
+ "common_words": 12000,
+ "sentences": 16097,
  "sentences_by_cefr": {
-  "A1": 5971,
-  "A2": 4922,
-  "B1": 2204,
-  "B2": 1321,
-  "C1": 618,
-  "C2": 105
+  "A1": 6183,
+  "A2": 5120,
+  "B1": 2269,
+  "B2": 1384,
+  "C1": 646,
+  "C2": 495
  },
  "pseudowords": 120,
  "cefr_note": "CEFR 为按词频排名的估算",

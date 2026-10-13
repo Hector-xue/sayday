@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
 import { db } from '../lib/db'
-import { loadContent, pickSentence, type Word } from '../lib/content'
+import { loadContent, pickSentence, rankLabel, type Word } from '../lib/content'
 import { PlayButton } from '../components/PlayButton'
 import { State, addCard } from '../lib/srs'
 import { BOOKS, bookName, inBook } from '../lib/books'
@@ -136,14 +136,14 @@ export function Words() {
                 </button>
               ))}
             </div>
-            <p className="small faint" style={{ marginTop: 10 }}>词书收的是本 App 词表（最常用的 1.2 万词）里属于该考试的词，考试标签来自 ECDICT。</p>
+            <p className="small faint" style={{ marginTop: 10 }}>词书按考试大纲收词（常用 1.2 万词之外的大纲词也在），考试标签来自 ECDICT。</p>
         </Sheet>
       )}
       {browse && book && <BookBrowser words={bookWords} status={status} title={bookName(book)} onOpen={(w) => setOpen(w)} onAdd={addWord} onClose={() => setBrowse(false)} />}
       {open && profile && (
         <Sheet onClose={() => setOpen(null)}>
             <div className="row"><div className="word-big" style={{ fontSize: 36 }}>{open.w}</div><div className="spacer" /><PlayButton text={open.w} clip={{ text: open.w, word: open.w }} accent={profile.accent} /></div>
-            <p className="ipa">/{open.ipa}/ · 第 {open.rank.toLocaleString()} 常用 · {open.cefr}</p>
+            <p className="ipa">{open.ipa ? `/${open.ipa}/ · ` : ''}{rankLabel(open)} · {open.cefr}</p>
             <p className="zh-mean">{open.zh}</p>
             {(() => { const s = pickSentence(sents?.get(open.w), open.rank); return s ? (
               <div className="example"><p className="en">{s.en}</p><p className="zh">{s.zh}</p><div className="row" style={{ marginTop: 10 }}><PlayButton text={s.en} clip={{ text: s.en, sentenceId: s.id }} accent={profile.accent} label="听例句" /></div></div>

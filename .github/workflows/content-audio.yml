@@ -1,10 +1,19 @@
 # 示范音频包：用 Kokoro-82M 把 content/pack 的全部例句 + 单词合成成 mp3（美音 / 英音各 16 片并行）。
 # 产物挂 artifact（保留 3 天），服务器用 scripts/sync-audio.sh 拉下来发布到 sayday.ivyea.com/audio/。
 # 内容包变了才需要重跑：手动触发。
+# 增量（incremental=true）：先拉线上的 audio/have.txt，只合成还没有的（词表/例句扩充后用），发布用 ONLY=add scripts/sync-audio.sh
 name: content-audio
 
 on:
   workflow_dispatch:
+    inputs:
+      incremental:
+        description: '只合成线上还没有的'
+        type: boolean
+        default: false
+      only:
+        description: '合成哪几类（s 例句 / w 单词 / e 剧集）'
+        default: 's,w,e'
 
 jobs:
   gen:
@@ -41,7 +50,15 @@ jobs:
 
       - name: 合成
         working-directory: content/audio
-        run: node build_audio.mjs --accent ${{ matrix.accent }} --shard ${{ matrix.shard }} --shards 16 --out out --dtype q8
+        run: |
+          HAVE=""
+          if [ "${{ inputs.incremental }}" = "true" ]; then
+            curl -fsS https://sayday.ivyea.com/audio/have.txt -o have.txt
+            echo "线上已有 $(wc -l < have.txt) 条"
+            [ "$(wc -l < have.txt)" -gt 20000 ] || { echo "have.txt 不对"; exit 1; }
+            HAVE="--have have.txt"
+          fi
+          node build_audio.mjs --accent ${{ matrix.accent }} --shard ${{ matrix.shard }} --shards 16 --out out --dtype q8 --only ${{ inputs.only || 's,w,e' }} $HAVE
 
       - uses: actions/upload-artifact@v4
         with:

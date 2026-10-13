@@ -140,3 +140,56 @@ export async function episodeWords(ep: Episode, have: Set<string>, frontier: num
   }
   return out.sort((a, b) => a.rank - b.rank).slice(0, 6)
 }
+
+// ---- 台词复习：演的时候没读好（< 80 分）或跳过的台词，排进之后几天的每日跟读 ----
+// 只存位置（季/集/行），播放和文字在用的时候再按当前名字、声音取；读到 80 分往后推（1→3→7→14 天），读好四轮就不再出现
+export type LineCard = { s: number; e: number; i: number; box: number; due: string }
+export const LINE_PASS = 80
+const LINE_GAPS = [1, 3, 7, 14]
+const LINE_MAX = 60
+const addDays = (date: string, n: number) => today(new Date(Date.parse(date + 'T12:00:00') + n * 86400_000))
+const same = (a: LineCard, b: { s: number; e: number; i: number }) => a.s === b.s && a.e === b.e && a.i === b.i
+
+/** 演完一集：没读好的台词进队列（已在队里的重新从头排），队列最多 60 句，满了丢最早的 */
+export function enqueueLines(list: LineCard[], season: number, ep: number, mine: number[], scores: Record<number, number>, date = today()): LineCard[] {
+  const bad = mine.filter((i) => !(scores[i] >= LINE_PASS))
+  const rest = list.filter((c) => !bad.some((i) => same(c, { s: season, e: ep, i })))
+  return [...rest, ...bad.map((i) => ({ s: season, e: ep, i, box: 0, due: addDays(date, 1) }))].slice(-LINE_MAX)
+}
+/** 复习一句：读好了往后推，读完最后一轮就移出；没读好明天再来 */
+export function gradeLine(list: LineCard[], ref: { s: number; e: number; i: number }, score: number, date = today()): LineCard[] {
+  return list.flatMap((c) => {
+    if (!same(c, ref)) return [c]
+    if (score < LINE_PASS) return [{ ...c, box: 0, due: addDays(date, 1) }]
+    const box = c.box + 1
+    return box >= LINE_GAPS.length ? [] : [{ ...c, box, due: addDays(date, LINE_GAPS[box]) }]
+  })
+}
+export const dueLineCards = (list: LineCard[], date = today()) => list.filter((c) => c.due <= date).sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : 0))
+
+export const getLineCards = () => kvGet<LineCard[]>('ep_lines', [])
+export async function queueLines(season: number, ep: number, mine: number[], scores: Record<number, number>) {
+  await kvSet('ep_lines', enqueueLines(await getLineCards(), season, ep, mine, scores))
+}
+export async function reviewLine(ref: { s: number; e: number; i: number }, score: number) {
+  await kvSet('ep_lines', gradeLine(await getLineCards(), ref, score))
+}
+
+export type DueLine = { ref: { s: number; e: number; i: number }; en: string; zh: string; clip: { text: string; ep?: string }; from: string }
+/** 今天到期的台词（按当前名字 / 声音取文字和配音）；找不到的（内容改过）跳过 */
+export async function dueLines(n: number): Promise<DueLine[]> {
+  if (n <= 0) return []
+  const cards = dueLineCards(await getLineCards())
+  if (!cards.length) return []
+  const [all, me] = await Promise.all([loadSeasons(), getMe()])
+  const out: DueLine[] = []
+  for (const c of cards) {
+    const s = all.find((x) => x.season === c.s)
+    const ep = s?.episodes.find((x) => x.id === c.e)
+    const l = ep?.lines[c.i]
+    if (!s || !ep || !l) continue
+    out.push({ ref: { s: c.s, e: c.e, i: c.i }, en: l.en, zh: l.zh, clip: clipOf(c.s, c.e, c.i, l, me, l.who === meKey(s)), from: `${c.s > 1 ? `第 ${c.s} 季` : ''}第 ${c.e} 集 · ${ep.title_zh}` })
+    if (out.length >= n) break
+  }
+  return out
+}

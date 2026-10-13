@@ -518,3 +518,7 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .support-text { line-height: 1.7; margin-bottom: 16px; }
 .support-qr { margin: 14px auto 0; text-align: center; }
 .support-qr img { display: block; margin: 0 auto 6px; padding: 10px; background: #fff; border-radius: 12px; width: 196px; height: 196px; }
+
+/* 网页版：发音模型后台下载进度（今天页卡片底部） */
+.model-dl { margin-top: 14px; }
+.model-dl .bar { height: 3px; margin-top: 6px; }

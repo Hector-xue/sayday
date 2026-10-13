@@ -127,6 +127,24 @@ fn open_url<R: Runtime>(app: tauri::AppHandle<R>, url: String) -> Result<Value> 
     app.state::<Infer<R>>().inner().call("openUrl", serde_json::json!({ "url": url }))
 }
 
+/// 设置页：桌面小组件个数、能否一键添加、系统通知开关
+#[tauri::command]
+fn system_status<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("systemStatus", serde_json::json!({}))
+}
+
+/// 请求把小组件放到桌面；返回 { ok }
+#[tauri::command]
+fn pin_widget<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("pinWidget", serde_json::json!({}))
+}
+
+/// 打开系统里本 App 的通知设置
+#[tauri::command]
+fn open_notify_settings<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("openNotifySettings", serde_json::json!({}))
+}
+
 /// 桌面小组件的内容（网页算好：连续天数、今天练没练、一个在学的词），原样交给 Kotlin
 #[tauri::command]
 fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<Value> {
@@ -156,7 +174,7 @@ async fn update_install<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

@@ -127,6 +127,11 @@ try {
   }
   log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+/)?.[0])
   await openSettings(); await sleep(400); await shot('12-settings')
+  // 提醒与小组件（网页版只给下载 App 的入口）、发音模型预下载状态
+  await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.scrollIntoView({ block: 'start' }))
+  await sleep(300); await shot('12b-settings-remind')
+  log('设置·提醒与小组件', await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.nextElementSibling?.innerText.replace(/\s+/g, ' ')))
+  log('设置·发音模型', await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.innerText.startsWith('发音模型'))?.innerText.replace(/\s+/g, ' ')))
 
   // 发音实验室：音标口型卡、最小对立听辨两题
   await clickText('发音', '.tab'); await sleep(300)

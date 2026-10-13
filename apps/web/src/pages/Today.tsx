@@ -13,6 +13,7 @@ import { currentStreak } from '../lib/widget'
 import { checkUpdate, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
 import { SupportSheet } from '../components/SupportSheet'
+import { ModelPrefetchBar } from '../components/ModelPrefetch'
 import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
@@ -111,6 +112,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         </ul>
         <button className="btn primary block" onClick={() => onStart(false)}>{allDone ? '再来一组' : d.reviews + d.new_words + d.shadows + d.listens > 0 ? '继续' : '开始'}</button>
         {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很忙，只做 2 分钟</button>}
+        <ModelPrefetchBar />
       </div>
 
       {lv && e && (

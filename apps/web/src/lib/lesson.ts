@@ -1,6 +1,7 @@
-// 每日一课：复习（FSRS 到期）+ 新词（从水平边界往后，按目标加权）+ 跟读（今天新词和复习词的例句）
+// 每日一课：复习（FSRS 到期）+ 新词（从水平边界往后，按目标加权）+ 跟读（今天新词和复习词的例句；有发音弱项时其中一句换成专练弱项的，
+// 剧集里没读好的台词到期了也换进来）
 import { db, kvGet, kvSet, today } from './db'
-import { loadContent, pickSentence, type Sentence, type Word } from './content'
+import { loadContent, lookup, pickSentence, type Sentence, type Word } from './content'
 import { dueWords } from './srs'
 import type { Goal, Cefr } from './levels'
 import type { Accent } from './tts'
@@ -8,6 +9,8 @@ import type { PlacementResult } from './placement'
 import { bookOrder } from './books'
 import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type CheckItem } from './calibrate'
 import { CEFR } from './levels'
+import { weakPhones } from './progress'
+import { dueLines, type DueLine } from './episodes'
 
 export type Profile = {
   goal: Goal
@@ -38,7 +41,7 @@ export const sizeFor = (minutes: number) => SIZES[minutes] ?? SIZES[20]
 export type Step =
   | { kind: 'learn'; word: Word; sentence?: Sentence }
   | { kind: 'review'; word: Word; sentence?: Sentence }
-  | { kind: 'shadow'; sentence: Sentence; focus?: string }
+  | { kind: 'shadow'; sentence: Sentence; focus?: string; /** 专练这个弱项音素（CMU） */ phone?: string; /** 剧集台词复习（sentence 是拼出来的，id 为负，不进例句库） */ line?: DueLine }
   | { kind: 'listen'; sentence: Sentence; options: string[]; answer: number }
   | { kind: 'check'; items: CheckItem[] }
 
@@ -68,6 +71,28 @@ export async function dailySize(p: Profile) {
   if (ll.cefr && CEFR.indexOf(ll.cefr) < CEFR.indexOf(lv.cefr) - 1) base.listen += Math.ceil(base.listen / 2)
   return base
 }
+
+/**
+ * 专练弱项的跟读句：含这个音的词越多越好（够多时至少两个），只用你水平以内的句子（认识的词才好专心练发音）。
+ * 返回句子和要高亮的词（句中第一个含这个音的词）
+ */
+export function phoneShadow(phone: string, sents: Sentence[], byWord: Map<string, Word>, cap: number, used: Set<number>, rnd = Math.random): { sentence: Sentence; focus?: string } | undefined {
+  const hits = (s: Sentence) => s.words.filter((w) => byWord.get(w)?.cmu.includes(phone)).length
+  const all = sents.filter((s) => s.hard <= cap && !used.has(s.id) && s.en.length >= 20 && s.en.length <= 70).map((s) => ({ s, n: hits(s) }))
+  // 少见的音（/ʒ/ /ɔɪ/）凑不出两个，含一个也行
+  const two = all.filter((x) => x.n >= 2)
+  const pool = two.length ? two : all.filter((x) => x.n >= 1)
+  if (!pool.length) return undefined
+  // 不总挑同一句：命中最多的前 20 句里随机
+  const top = pool.sort((a, b) => b.n - a.n).slice(0, 20)
+  const s = top[Math.floor(rnd() * top.length)].s
+  const toks = s.en.match(/[A-Za-z']+/g) ?? []
+  const focus = toks.find((t) => lookup(byWord, t)?.cmu.includes(phone))
+  return { sentence: s, focus }
+}
+
+/** 今天轮到练哪个弱项：前三个弱项按天轮换 */
+export const phoneOfDay = (weak: string[], date = today()) => weak.length ? weak[Math.floor(Date.parse(date) / 86400_000) % weak.length] : undefined
 
 /** 听音选义：同档、长度相近的另外两句的译文做干扰项 */
 export function listenOptions(s: Sentence, pool: Sentence[], rnd = Math.random): { options: string[]; answer: number } {
@@ -128,6 +153,25 @@ export async function buildSession(p: Profile, minimum = false): Promise<Step[]>
       const s = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]
       shadows.push({ kind: 'shadow', sentence: s })
     }
+  }
+  // 有发音弱项（某个音练过 5 次以上）时，第一句跟读换成专练它的；总句数不变
+  if (!minimum && shadowLeft > 0) {
+    const phone = phoneOfDay((await weakPhones(3)).map((w) => w.phone))
+    const { sents } = await loadContent()
+    const ps = phone && phoneShadow(phone, sents, byWord, Math.max(1500, lv.frontier), used)
+    if (ps) {
+      used.add(ps.sentence.id)
+      if (shadows.length >= shadowLeft) shadows.pop()
+      shadows.unshift({ kind: 'shadow', sentence: ps.sentence, focus: ps.focus, phone })
+    }
+  }
+  // 剧集台词到期了：换掉后面的普通句（练得多的计划换两句，否则一句）
+  if (!minimum && shadowLeft > 0) {
+    const lines = await dueLines(shadowLeft >= 3 ? 2 : 1).catch(() => [] as DueLine[])
+    const regular = shadows.filter((x) => x.kind === 'shadow' && !x.phone)
+    const head = shadows.filter((x) => x.kind === 'shadow' && x.phone)
+    const keep = Math.max(0, shadowLeft - head.length - lines.length)
+    shadows.splice(0, shadows.length, ...head, ...lines.map((l, k): Step => ({ kind: 'shadow', sentence: { id: -1 - k, en: l.en, zh: l.zh, hard: 0, cefr: '', words: [] }, line: l })), ...regular.slice(0, keep))
   }
   const listens = await pickListens(listenLeft, lv.cefr, used)
   // 每周小测（1 分钟）放最前面；保底模式不打扰
