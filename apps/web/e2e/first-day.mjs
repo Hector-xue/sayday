@@ -160,6 +160,26 @@ try {
     await clickText('下一句'); await sleep(150)
   }
   await shot('18-ep-listen')
+  // 点词查义：卡片贴着词弹出、不出屏
+  {
+    for (const top of [false, true]) {
+    const r = await p.evaluate(async (top) => {
+      // 屏幕下半部分的词（卡片应弹在上方）；top 时挑最上面能看到的词（卡片应弹在下方）
+      const vis = [...document.querySelectorAll('.bubble .tap')].filter((x) => { const r = x.getBoundingClientRect(); return r.top > 150 && r.bottom < innerHeight - 140 && x.textContent.length > 3 })
+      const w = top ? vis[0] : vis[vis.length - 1]
+      w.click()
+      await new Promise((r) => setTimeout(r, 400))
+      const pop = document.querySelector('.word-pop')
+      if (!pop) return null
+      const a = w.getBoundingClientRect(), b = pop.getBoundingClientRect()
+      return { word: w.textContent, text: pop.innerText.replace(/\s+/g, ' ').slice(0, 60), gap: Math.round(b.bottom <= a.top ? a.top - b.bottom : b.top - a.bottom), inside: b.left >= 0 && b.right <= document.documentElement.clientWidth, zhShown: !!w.closest('.bubble-row')?.querySelector('.bubble-zh'), placed: pop.classList.contains('below') ? 'below' : 'above' }
+    }, top)
+    log('点词查义', JSON.stringify(r))
+    await shot(top ? '18c-word-pop-below' : '18b-word-pop')
+    await p.mouse.click(5, 300); await sleep(200)
+    log('点外面关掉', await p.evaluate(() => !document.querySelector('.word-pop')))
+    }
+  }
   await clickText('轮到你演林'); await sleep(400)
   await p.click('.rec-btn'); await sleep(3000); await p.click('.rec-btn')
   await p.waitForFunction(() => document.querySelector('.ring b') || /出错|没听清/.test(document.querySelector('.rec-label')?.textContent ?? ''), { timeout: 600000 })

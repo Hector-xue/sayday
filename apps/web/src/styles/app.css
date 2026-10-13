@@ -261,7 +261,7 @@ p { margin: 0; }
 .onb-foot { display: grid; gap: 10px; margin-top: 20px; }
 .hero-logo { width: 88px; height: 88px; margin-top: 10vh; }
 
-.toast { position: fixed; left: 50%; bottom: calc(96px + var(--safe-b)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; z-index: 50; max-width: calc(100% - 32px); }
+.toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: fit-content; bottom: calc(96px + var(--safe-b)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; z-index: 50; max-width: calc(100% - 32px); }
 .sheet-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
 .sheet { width: 100%; max-width: 560px; background: var(--surface); border-radius: 22px 22px 0 0; padding: 22px 18px calc(22px + var(--safe-b)); max-height: 85vh; overflow-y: auto; }
 .loading { display: grid; place-items: center; min-height: 60vh; color: var(--faint); }
@@ -522,3 +522,17 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 /* 网页版：发音模型后台下载进度（今天页卡片底部） */
 .model-dl { margin-top: 14px; }
 .model-dl .bar { height: 3px; margin-top: 6px; }
+
+/* 点词查义的小卡片（WordPop）：贴着词弹出，小三角指向词 */
+.tap.on { background: var(--brand-soft); }
+.word-pop { position: fixed; z-index: 60; width: min(300px, calc(100vw - 24px)); padding: 12px 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--hair); border-radius: 14px; box-shadow: var(--shadow); font-size: 15px; line-height: 1.5; text-align: left; animation: pop-in .14s ease-out both; }
+.word-pop::after { content: ''; position: absolute; left: calc(var(--arrow, 50%) - 7px); width: 12px; height: 12px; background: var(--surface); border: 1px solid var(--hair); transform: rotate(45deg); }
+.word-pop.above::after { bottom: -7px; border-top: 0; border-left: 0; }
+.word-pop.below::after { top: -7px; border-bottom: 0; border-right: 0; }
+.word-pop .row { align-items: center; gap: 8px; }
+.word-pop-head b { font-size: 18px; }
+.word-pop-zh { margin: 4px 0 0; color: var(--soft); }
+.word-pop .btn { margin-top: 10px; }
+.word-pop .small.faint { margin-top: 8px; }
+@keyframes pop-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .word-pop { animation: none; } }
