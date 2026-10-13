@@ -27,7 +27,7 @@ export function ModelPrefetchBar() {
   const pct = m.total ? Math.round(((m.got ?? 0) / m.total) * 100) : null
   return (
     <div className="model-dl" role="status">
-      <p className="small muted">正在后台下载发音模型{pct !== null ? ` ${pct}%` : ` ${mb(m.got)}`} · 下完跟读打分不用等，也能离线用</p>
+      <p className="small muted">正在后台下载发音模型{pct !== null ? ` ${pct}%` : m.got ? ` ${mb(m.got)}` : ''} · 下完跟读打分不用等，也能离线用</p>
       <div className="bar"><i style={{ width: `${pct ?? 5}%` }} /></div>
     </div>
   )

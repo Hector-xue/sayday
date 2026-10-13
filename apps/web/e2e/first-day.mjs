@@ -70,6 +70,11 @@ try {
   await p.waitForFunction(() => document.body.innerText.includes('今日练习'))
   await sleep(500)
   await shot('05-today')
+  // 网页版：今天页几秒后开始后台下发音模型（下载中才显示进度条）
+  if (!process.env.PW) {
+    const dl = await p.waitForSelector('.model-dl', { timeout: 20000 }).then(() => p.evaluate(() => document.querySelector('.model-dl')?.innerText)).catch(() => '没出现（可能已缓存）')
+    log('发音模型预下载', dl)
+  }
   log('今天页', (await text()).match(/新词[\s\S]*?\d+\/\d+/)?.[0].replace(/\s+/g, ' '))
 
   // 第一组：没有到期复习 → 新词 8 个 → 跟读 3 句
