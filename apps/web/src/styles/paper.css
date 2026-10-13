@@ -210,3 +210,5 @@
 /* 底栏：纸色胶囊、细墨线描边，选中块是一块实墨 */
 [data-style="paper"] .tabbar { --dock-bg: color-mix(in srgb, var(--bg) 86%, transparent); --dock-line: var(--ink); --dock-shadow: 0 10px 26px -12px color-mix(in srgb, #000 30%, transparent); --dock-pill: var(--solid); --dock-rim: transparent; --dock-on: var(--on-solid); }
 [data-style="paper"] .tab svg { stroke-width: 1.4; }
+[data-style="paper"] .word-pop, [data-style="paper"] .word-pop::after { border-color: var(--ink); }
+[data-style="paper"] .word-pop { border-radius: 4px; }

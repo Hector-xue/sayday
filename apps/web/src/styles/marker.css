@@ -215,3 +215,4 @@
 [data-style="marker"] .tabbar { --dock-bg: color-mix(in srgb, var(--surface) 80%, transparent); --dock-pill: var(--mark); --dock-rim: transparent; --dock-on: var(--on-mark); }
 [data-style="marker"] .tab { font-weight: 600; }
 [data-style="marker"] .tab[aria-current="page"] { font-weight: 700; }
+[data-style="marker"] .tap.on { background: var(--mark); color: var(--on-mark); }

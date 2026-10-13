@@ -1,7 +1,7 @@
-// 点词查义：句子里每个词都能点，弹出本机词典的释义（不联网）
-import { useEffect, useState } from 'react'
+// 点词查义：句子里每个词都能点，在词旁边弹出本机词典的释义（不联网，见 WordPop）
+import { useCallback, useEffect, useState } from 'react'
 import { loadContent, lookup, type Word } from '../lib/content'
-import { useApp } from '../store'
+import { WordPop } from './WordPop'
 import { onPlayback } from '../lib/tts'
 
 /** 每个词在整句里大约从几成开始读：按音节数估（标点处多留一点停顿），示范音频本身没有逐词时间 */
@@ -15,7 +15,8 @@ export function wordStarts(parts: string[]): number[] {
 }
 
 export function Tappable({ text, highlight, karaoke }: { text: string; highlight?: string; karaoke?: boolean }) {
-  const { toast } = useApp()
+  const [pop, setPop] = useState<{ el: HTMLElement; token: string; word?: Word } | null>(null)
+  const close = useCallback(() => setPop(null), [])
   const [byWord, setByWord] = useState<Map<string, Word> | null>(null)
   const [frac, setFrac] = useState<number | null>(null)
   useEffect(() => { loadContent().then((c) => setByWord(c.byWord)) }, [])
@@ -31,12 +32,16 @@ export function Tappable({ text, highlight, karaoke }: { text: string; highlight
         const k = (i - 1) / 2
         const sung = frac !== null && starts[k] <= frac
         return (
-          <span key={i} className={`tap ${isHl ? 'hl' : ''} ${frac !== null ? (sung ? 'sung' : 'unsung') : ''}`} onClick={() => {
-            const w = byWord && lookup(byWord, p)
-            toast(w ? `${w.w}  ${w.zh.split('；')[0]}` : `${p}：词典里没有`)
+          <span key={i} className={`tap ${isHl ? 'hl' : ''} ${frac !== null ? (sung ? 'sung' : 'unsung') : ''} ${pop?.el.dataset.k === String(k) ? 'on' : ''}`} data-k={k} onClick={(e) => {
+            // 别让外层（剧集气泡点一下显示中文）也响应
+            e.stopPropagation()
+            const el = e.currentTarget
+            if (pop?.el === el) { setPop(null); return }
+            setPop({ el, token: p, word: (byWord && lookup(byWord, p)) || undefined })
           }}>{p}</span>
         )
       })}
+      {pop && <WordPop anchor={pop.el} word={pop.word} token={pop.token} onClose={close} />}
     </>
   )
 }
