@@ -179,6 +179,15 @@ try {
     await p.mouse.click(5, 300); await sleep(200)
     log('点外面关掉', await p.evaluate(() => !document.querySelector('.word-pop')))
     }
+    // 缩写词（doesn't 之类）照原样显示并给出展开，不还原成词根
+    const c = await p.evaluate(async () => {
+      const w = [...document.querySelectorAll('.bubble .tap')].find((x) => x.textContent.includes("'"))
+      if (!w) return '本集没有缩写词'
+      w.click(); await new Promise((r) => setTimeout(r, 400))
+      return w.textContent + ' → ' + (document.querySelector('.word-pop')?.innerText.replace(/\s+/g, ' ') ?? '没弹')
+    })
+    log('缩写词', c)
+    await p.mouse.click(5, 300); await sleep(200)
   }
   await clickText('轮到你演林'); await sleep(400)
   await p.click('.rec-btn'); await sleep(3000); await p.click('.rec-btn')

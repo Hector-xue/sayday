@@ -8,16 +8,20 @@ import { addCard } from '../lib/srs'
 import { FUNCTION_WORDS } from '../lib/lesson'
 import { useApp } from '../store'
 import { PlayButton } from './PlayButton'
+import { contraction } from '../lib/contractions'
 
-const GUTTER = 12, GAP = 8
+// 小三角伸出卡片 7px，GAP 要把它算进去，三角尖离词还留 11px
+const GUTTER = 12, GAP = 18
 
 export function WordPop({ anchor, word, token, onClose }: { anchor: HTMLElement; word?: Word; token: string; onClose: () => void }) {
   const { profile } = useApp()
   const box = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<{ left: number; top: number; arrow: number; below: boolean } | null>(null)
   const [have, setHave] = useState<boolean | null>(null)
+  const short = contraction(token)
+  const inflected = !!word && token.toLowerCase() !== word.w.toLowerCase()
   // 功能词（it、do、the…）不进词卡，不给“加入复习”
-  useEffect(() => { if (word && !FUNCTION_WORDS.has(word.w)) db.one('SELECT word FROM card WHERE word = ?', [word.w]).then((r) => setHave(!!r)).catch(() => setHave(null)) }, [word])
+  useEffect(() => { if (word && !contraction(token) && !FUNCTION_WORDS.has(word.w)) db.one('SELECT word FROM card WHERE word = ?', [word.w]).then((r) => setHave(!!r)).catch(() => setHave(null)) }, [word, token])
 
   useLayoutEffect(() => {
     const a = anchor.getBoundingClientRect(), b = box.current!.getBoundingClientRect()
@@ -41,11 +45,21 @@ export function WordPop({ anchor, word, token, onClose }: { anchor: HTMLElement;
     <div ref={box} className={`word-pop ${pos?.below ? 'below' : 'above'}`} role="dialog" aria-label={word?.w ?? token}
       style={pos ? { left: pos.left, top: pos.top, ['--arrow' as string]: `${pos.arrow}px` } : { left: 0, top: 0, visibility: 'hidden' }}
       onClick={(e) => e.stopPropagation()}>
-      {word ? (<>
+      {short ? (<>
         <div className="row">
-          <div className="word-pop-head"><b className="en">{word.w}</b>{word.ipa && <span className="faint small"> /{word.ipa}/</span>}</div>
+          <div className="word-pop-head"><b className="en">{token}</b><span className="faint small"> = {short.full.replace(/^i\b/, 'I')}</span></div>
           <div className="spacer" />
-          {profile && <PlayButton text={word.w} clip={{ text: word.w, word: word.w }} accent={profile.accent} />}
+          {profile && <PlayButton text={token} accent={profile.accent} />}
+        </div>
+        {short.zh && <p className="word-pop-zh">{short.zh}</p>}
+      </>) : word ? (<>
+        <div className="row">
+          {/* 点的是变形（does、keys、went…）就照原样显示，后面注明原形，免得以为点错了词 */}
+          <div className="word-pop-head">{inflected
+            ? <><b className="en">{token}</b><span className="faint small"> 原形 <span className="en">{word.w}</span>{word.ipa && ` /${word.ipa}/`}</span></>
+            : <><b className="en">{word.w}</b>{word.ipa && <span className="faint small"> /{word.ipa}/</span>}</>}</div>
+          <div className="spacer" />
+          {profile && (inflected ? <PlayButton text={token} accent={profile.accent} /> : <PlayButton text={word.w} clip={{ text: word.w, word: word.w }} accent={profile.accent} />)}
         </div>
         <p className="word-pop-zh">{word.zh.split('；').slice(0, 2).join('；')}</p>
         {have === false && <button className="btn small quiet" onClick={async () => { await addCard(word.w); setHave(true) }}>加入复习</button>}
