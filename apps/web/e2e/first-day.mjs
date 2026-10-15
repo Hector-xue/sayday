@@ -135,6 +135,11 @@ try {
   // 提醒与小组件（网页版只给下载 App 的入口）、发音模型预下载状态
   await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.scrollIntoView({ block: 'start' }))
   await sleep(300); await shot('12b-settings-remind')
+  // 桌面小组件页：六种，用真实数据预览
+  await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.textContent.includes('小组件长什么样'))?.querySelector('button')?.click()); await sleep(600)
+  log('小组件页', await p.evaluate(() => [...document.querySelectorAll('.wk > .row b')].map((b) => b.textContent).join('、')), await p.evaluate(() => document.querySelector('.wg-week')?.innerText.replace(/\s+/g, ' ')))
+  await shot('12c-widgets'); await p.evaluate(() => document.querySelectorAll('.wk')[2]?.scrollIntoView({ block: 'start' })); await sleep(200); await shot('12d-widgets-2')
+  await p.click('.session-top .icon-btn'); await sleep(300)
   // 兴趣：选“美食”和“旅行”
   await clickText('美食', '.chip'); await clickText('旅行', '.chip'); await sleep(200)
   log('设置·兴趣', await p.evaluate(() => [...document.querySelectorAll('.chip[aria-pressed="true"]')].map((b) => b.textContent).join('、')))

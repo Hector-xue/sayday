@@ -32,7 +32,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [tags, setTags] = useState<string[]>([])
   const [quiz, setQuiz] = useState<QuizCfg | null>(null)
   useEffect(() => { getQuizCfg().then(setQuiz) }, [])
-  const saveQuiz = async (q: QuizCfg) => { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q) }
+  const saveQuiz = async (q: QuizCfg) => { try { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q); if (q.on) toast('开了：每天 ' + String(q.hour).padStart(2, '0') + ':' + String(q.minute).padStart(2, '0') + ' 在通知里弹 3 道题') } catch (e) { toast('没开成：' + ((e as Error).message || e)) } }
   useEffect(() => { getInterests().then(setTags) }, [])
   // 从系统设置 / 桌面回来时刷新（通知开关、小组件个数）
   useEffect(() => {

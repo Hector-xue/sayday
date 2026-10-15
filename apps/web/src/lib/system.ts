@@ -19,3 +19,14 @@ export async function takeLaunchAction(): Promise<string | null> {
 export async function openNotifySettings(): Promise<boolean> {
   try { await tauri?.invoke('plugin:sayday-infer|open_notify_settings'); return !!tauri } catch { return false }
 }
+
+/**
+ * 要通知权限。通知插件（tauri-plugin-notification 2.4）在安卓 13+ 上“已经允许”时 request_permission 永远不返回，
+ * 所以先用自己的 system_status 看开没开；没开才去请求，并且最多等 30 秒，之后再看一次
+ */
+export async function ensureNotifyPermission(): Promise<boolean> {
+  if (!tauri) return false
+  if ((await systemStatus())?.notify) return true
+  await Promise.race([tauri.invoke('plugin:notification|request_permission').catch(() => null), new Promise((r) => setTimeout(r, 30_000))])
+  return !!(await systemStatus())?.notify
+}

@@ -1,6 +1,7 @@
 // 每日提醒（仅安卓 App，本地定时通知，不连服务器）
 // 一次排好接下来 7 天、每天一条；今天已经练过就跳过今天。每次打开 App、做完练习都重排一遍：
 // 这样几天不打开也还有提醒，练过的那天不会再被催。
+import { ensureNotifyPermission } from './system'
 import { db, kvGet, kvSet, today } from './db'
 import { dayRow } from './lesson'
 import { dueCount } from './srs'
@@ -15,11 +16,10 @@ const IDS = [7101, 7102, 7103, 7104, 7105, 7106, 7107]
 export async function enableReminder(r: Reminder): Promise<string | null> {
   if (!tauri) return '网页版不支持定时提醒，请用安卓 App'
   if (r.on) {
-    const st = await tauri.invoke('plugin:notification|request_permission').catch(() => 'denied')
-    if (st !== 'granted') return '没有通知权限：到系统设置 → 应用 → 日日说 → 通知 里打开'
+    if (!(await ensureNotifyPermission())) return '没有通知权限：到系统设置 → 应用 → 日日说 → 通知 里打开，再回来开'
   }
   await kvSet('reminder', r)
-  await reschedule()
+  reschedule().catch((e) => console.error(e))
   return null
 }
 

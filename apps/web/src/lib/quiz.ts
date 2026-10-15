@@ -1,6 +1,7 @@
 // 通知里做题（方案 1.1，仅安卓 App）：每天到点弹几道复习题，在通知里直接点按钮 / 快捷回复作答，不用打开 App。
 // 出题在这里（从词卡里挑快到期的词），弹题和判对错在原生那边（Quiz.kt）；答过的题下次打开 App 时取回来，按作答时间记进复习。
 // 默认关（老用户不受影响）；和每日提醒一样，打开 App、做完练习时重排
+import { ensureNotifyPermission } from './system'
 import { db, kvGet, kvSet } from './db'
 import { grade, Rating } from './srs'
 import { loadContent, type Word } from './content'
@@ -73,11 +74,11 @@ export async function syncQuiz(): Promise<{ applied: number }> {
 export async function enableQuiz(cfg: QuizCfg): Promise<string | null> {
   if (!tauri) return '网页版做不了，请用安卓 App'
   if (cfg.on) {
-    const st = await tauri.invoke('plugin:notification|request_permission').catch(() => 'denied')
-    if (st !== 'granted') return '没有通知权限：到系统设置 → 应用 → 日日说 → 通知 里打开'
+    if (!(await ensureNotifyPermission())) return '没有通知权限：到系统设置 → 应用 → 日日说 → 通知 里打开，再回来开'
   }
   await kvSet('notify_quiz', cfg)
-  await syncQuiz()
+  // 出题、排闹钟放后台：开关先翻过来，出错再提示
+  syncQuiz().catch((e) => console.error(e))
   return null
 }
 
@@ -85,7 +86,9 @@ export async function enableQuiz(cfg: QuizCfg): Promise<string | null> {
 export async function testQuiz(): Promise<string | null> {
   if (!tauri) return '网页版做不了'
   const cfg = await getQuizCfg()
-  if (!cfg.on) { const e = await enableQuiz({ ...cfg, on: true }); if (e) return e } else await syncQuiz()
+  if (!cfg.on) { const e = await enableQuiz({ ...cfg, on: true }); if (e) return e }
+  // 先把题交过去再弹（开关那里出题是放后台的）
+  await syncQuiz()
   await tauri.invoke('plugin:sayday-infer|quiz_test')
   return null
 }
