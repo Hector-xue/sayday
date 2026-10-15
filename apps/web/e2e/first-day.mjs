@@ -135,6 +135,9 @@ try {
   // 提醒与小组件（网页版只给下载 App 的入口）、发音模型预下载状态
   await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.scrollIntoView({ block: 'start' }))
   await sleep(300); await shot('12b-settings-remind')
+  // 兴趣：选“美食”和“旅行”
+  await clickText('美食', '.chip'); await clickText('旅行', '.chip'); await sleep(200)
+  log('设置·兴趣', await p.evaluate(() => [...document.querySelectorAll('.chip[aria-pressed="true"]')].map((b) => b.textContent).join('、')))
   log('设置·提醒与小组件', await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '提醒与小组件')?.nextElementSibling?.innerText.replace(/\s+/g, ' ')))
   log('设置·发音模型', await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.innerText.startsWith('发音模型'))?.innerText.replace(/\s+/g, ' ')))
 
@@ -296,6 +299,20 @@ try {
     await p.waitForFunction(() => document.body.innerText.includes('逐句改错'), { timeout: 20000 })
     await shot('24-writing')
     log('写作批改', (await text()).replace(/\s+/g, ' ').match(/总分（AI 评估） \S+/)?.[0])
+    await p.click('.session-top .icon-btn'); await sleep(300)
+    await p.click('.session-top .icon-btn'); await sleep(300)
+
+    // 工作英语：回买家邮件 → 假 AI 批改
+    await clickText('今天', '.tab'); await sleep(300)
+    await clickCard('工作英语'); await sleep(400)
+    await shot('24b-work-list')
+    await clickText('回复买家：包裹晚到了', '.list-row'); await sleep(400)
+    await p.type('.diary-edit', 'Hi Karen, I am very sorry for your lamp. I can send you a new one today or give you a full refund. Please tell me which one you like. Best regards, Lin')
+    await shot('24c-work-edit')
+    await clickText('提交批改')
+    await p.waitForFunction(() => document.body.innerText.includes('地道写法'), { timeout: 20000 })
+    await shot('24d-work-result')
+    log('工作英语', (await text()).replace(/\s+/g, ' ').match(/AI 评分（满分 10） \S+ 语气：\S+/)?.[0])
     await p.click('.session-top .icon-btn'); await sleep(300)
     await p.click('.session-top .icon-btn'); await sleep(300)
 

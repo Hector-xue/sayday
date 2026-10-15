@@ -12,7 +12,7 @@ describe('雅思总分取整', () => {
 })
 
 describe('能力解锁', () => {
-  const base: Ctx = { vocab: 0, listen: null, readBand: null, mock: false, diaries: 0, chats: 0, recentScore: null, attempts: 0, seasonsDone: [] }
+  const base: Ctx = { vocab: 0, listen: null, readBand: null, mock: false, diaries: 0, chats: 0, works: 0, recentScore: null, attempts: 0, seasonsDone: [] }
   const ok = (c: Partial<Ctx>) => ABILITIES.filter((a) => a.ok({ ...base, ...c })).map((a) => a.id)
   it('新人什么都没有', () => expect(ok({})).toEqual([]))
   it('按数据解锁', () => {

@@ -23,7 +23,7 @@ import { vocabLevel } from '../lib/calibrate'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -232,6 +232,9 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
         </button>
       )}
+      <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => onAi('work')}>
+        <b>工作英语</b><span>回买家邮件、给供应商发消息、写 Listing。{hasAi ? 'AI 逐句批改' : '有参考写法，接入 AI 能逐句批改'}</span>
+      </button>
 
       {support?.show && (
         <div className="card support-nudge" style={{ marginTop: 12 }}>

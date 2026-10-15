@@ -15,6 +15,7 @@ import { DEFAULT_ME, getMe, type Me } from '../lib/episodes'
 import { getSupport, type SupportState } from '../lib/support'
 import { SupportSheet } from '../components/SupportSheet'
 import { ModelPrefetchRow } from '../components/ModelPrefetch'
+import { TOPICS, getInterests, setInterests } from '../lib/interests'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -25,6 +26,8 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [rem, setRem] = useState<Reminder | null>(null)
   useEffect(() => { getReminder().then(setRem) }, [])
   const [sys, setSys] = useState<SystemStatus | null>(null)
+  const [tags, setTags] = useState<string[]>([])
+  useEffect(() => { getInterests().then(setTags) }, [])
   // 从系统设置 / 桌面回来时刷新（通知开关、小组件个数）
   useEffect(() => {
     if (!canRemind) return
@@ -82,7 +85,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
 
   const exportData = async () => {
     // 录音存档（recording、voice_diary）是二进制、体积大，不放进 JSON 备份
-    const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice']
+    const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work']
     const out: Record<string, unknown> = { app: 'sayday', exported: new Date().toISOString() }
     for (const t of tables) out[t] = await db.all(`SELECT * FROM ${t}`)
     const json = JSON.stringify(out)
@@ -107,7 +110,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
     let data: Record<string, unknown>
     try { data = JSON.parse(await file.text()) } catch { toast('不是有效的备份文件'); return }
     if (data.app !== 'sayday') { toast('这不是日日说的备份文件'); return }
-    const allowed = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice']
+    const allowed = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work']
     const tables = allowed.filter((t) => Array.isArray(data[t]))
     const n = tables.reduce((s, t) => s + (data[t] as unknown[]).length, 0)
     if (!confirm(`用备份（${String(data.exported).slice(0, 10)}，共 ${n} 条记录）覆盖现在的学习记录？`)) return
@@ -126,7 +129,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   }
   const reset = async () => {
     if (!confirm('清空所有学习记录？这一步不能撤销，建议先导出备份。')) return
-    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
+    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
     location.reload()
   }
 
@@ -148,6 +151,10 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
         <div className="set-row">
           <div className="k"><b>示范语速</b><span>{speed < 1 ? '放慢一点，听清每个音' : speed > 1 ? '快一点，接近真实语速' : '正常语速'}</span></div>
           <div className="seg">{SPEEDS.map((s) => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s === 1 ? '1×' : `${s}×`}</button>)}</div>
+        </div>
+        <div className="set-row interests">
+          <div className="k"><b>兴趣</b><span>{tags.length ? '每日听力和跟读的例句多从这些话题里挑' : '选几个，例句多挑你感兴趣的话题；不选就随机'}</span></div>
+          <div className="chips">{TOPICS.map((t) => <button key={t.id} className="chip" aria-pressed={tags.includes(t.id)} onClick={async () => { const n = tags.includes(t.id) ? tags.filter((x) => x !== t.id) : [...tags, t.id]; setTags(n); await setInterests(n) }}>{t.zh}</button>)}</div>
         </div>
         <div className="set-row"><div className="k"><b>重新定级</b><span>当前起点 {profile.placement.cefr} · 约 {profile.placement.vocab.toLocaleString()} 词</span></div><button className="btn small quiet" onClick={() => onRedo('place')}>重测</button></div>
       </div>

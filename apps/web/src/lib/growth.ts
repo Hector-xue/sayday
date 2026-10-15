@@ -84,7 +84,7 @@ export async function vocabCurve(p: Profile, now = Date.now()): Promise<VocabPoi
 
 export type Ctx = {
   vocab: number; listen: Cefr | null; readBand: number | null; mock: boolean
-  diaries: number; chats: number; recentScore: number | null; attempts: number; seasonsDone: number[]
+  diaries: number; chats: number; works: number; recentScore: number | null; attempts: number; seasonsDone: number[]
 }
 export type Ability = { id: string; t: string; how: string; ok: (c: Ctx) => boolean }
 
@@ -95,6 +95,7 @@ export const ABILITIES: Ability[] = [
   { id: 'travel', t: '出国旅游时问路、点餐、办入住', how: '认识约 1500 个词（A2）', ok: (c) => c.vocab >= 1500 },
   { id: 'chat10', t: '用英文和人文字聊上十来句', how: '和 Emma 聊 10 句以上', ok: (c) => c.chats >= 10 },
   { id: 'diary', t: '用英文写一段自己的日记', how: '写 3 篇日记', ok: (c) => c.diaries >= 3 },
+  { id: 'work-mail', t: '用英文回复客户和供应商的邮件', how: '在“工作英语”里写 3 个场景', ok: (c) => c.works >= 3 },
   { id: 'clear', t: '大多数句子能读得让人听清楚', how: '跟读 20 句以上，最近平均 80 分', ok: (c) => c.attempts >= 20 && (c.recentScore ?? 0) >= 80 },
   { id: 'daily90', t: '日常对话里九成的词你都认识', how: '认识约 3000 个词', ok: (c) => c.vocab >= 3000 },
   { id: 'london', t: '应付在伦敦租房、办卡、看病这类事', how: '看完剧集第一季', ok: (c) => c.seasonsDone.includes(1) },
@@ -114,6 +115,7 @@ export async function abilityCtx(p: Profile): Promise<Ctx> {
     vocab: lv.vocab, listen: ll.cefr, readBand: rp?.band ?? null, mock: (await one('SELECT count(*) n FROM speaking_test')) > 0,
     diaries: await one('SELECT count(*) n FROM diary WHERE result IS NOT NULL'),
     chats: await one("SELECT count(*) n FROM chat WHERE role = 'user'"),
+    works: await one('SELECT count(DISTINCT task) n FROM work'),
     recentScore: avg?.n ?? null, attempts: await one('SELECT count(*) n FROM attempt'),
     seasonsDone: seasons.filter((s) => s.episodes.every((e) => prog.done[`${s.season}:${e.id}`])).map((s) => s.season),
   }
