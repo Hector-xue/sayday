@@ -154,9 +154,17 @@ try {
   await clickText('剧集', '.tab'); await sleep(500)
   await shot('17-episodes')
   await clickText('开始看'); await sleep(500)
-  for (let k = 0; k < 20; k++) {
+  for (let k = 0; k < 30; k++) {
     const has = await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].some((b) => b.textContent.includes('轮到你演林')))
     if (has) break
+    // 剧情分岔：选第二个回答，后面的台词跟着这条线走
+    if (await p.$('.ep-choice')) {
+      await shot('18a-ep-choice')
+      log('剧情分岔', await p.evaluate(() => document.querySelector('.ep-choice').innerText.replace(/\s+/g, ' ')))
+      await p.evaluate(() => document.querySelectorAll('.ep-choice .opt')[1].click()); await sleep(300)
+      log('选完接着', await p.evaluate(() => [...document.querySelectorAll('.bubble.ep')].slice(-1)[0].innerText.replace(/\s+/g, ' ')))
+      continue
+    }
     await clickText('下一句'); await sleep(150)
   }
   await shot('18-ep-listen')
@@ -203,6 +211,7 @@ try {
   if (await p.evaluate(() => document.body.innerText.includes('这一集的生词'))) { await clickText('全部加入').catch(() => {}); await clickText('完成这一集') }
   await p.waitForFunction(() => document.body.innerText.includes('看完了'), { timeout: 10000 })
   await shot('21-ep-done')
+  log('隐藏支线', (await text()).replace(/\s+/g, ' ').match(/(这集藏着一段支线|解锁了隐藏支线).{0,40}/)?.[0])
   await clickText('好的'); await sleep(400)
   log('剧集', (await text()).replace(/\s+/g, ' ').match(/明天解锁.{0,30}/)?.[0])
 
