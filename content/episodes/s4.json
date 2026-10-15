@@ -114,6 +114,26 @@
           "zh": "就是简单聊聊。相信我，这种说法你会听到很多。"
         }
       ],
+      "choice": {
+        "at": 8, "q_zh": "纽约有八百万人，你问 Jake：",
+        "options": [
+          { "label_zh": "怎么知道找对了人", "lines": [
+            { "who": "Lin", "en": "How will I know when I've found the right person?", "zh": "我怎么知道找对人了？" },
+            { "who": "Jake", "en": "Sophie said you'd just know. Very helpful, Sophie.", "zh": "Sophie 说你到时候自然就知道。真是谢谢 Sophie 了。" }
+          ] },
+          { "label_zh": "可我只认识你一个", "lines": [
+            { "who": "Lin", "en": "Eight million people, and you're the only one I know.", "zh": "八百万人，我只认识你一个。" },
+            { "who": "Jake", "en": "Then start talking to strangers. You're good at that.", "zh": "那就去跟陌生人说话。你最擅长这个。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "过桥", "lines": [
+        { "who": "Jake", "en": "Look out of the window. We're crossing the bridge now.", "zh": "看窗外，我们正在过桥。" },
+        { "who": "Lin", "en": "Oh my goodness. It looks exactly like the films.", "zh": "天哪，跟电影里一模一样。" },
+        { "who": "Jake", "en": "Everyone says that. Then they live here for a month and start complaining about the subway.", "zh": "人人都这么说。住一个月就开始抱怨地铁了。" },
+        { "who": "Lin", "en": "I'll try to stay amazed for at least two months.", "zh": "我争取至少惊叹两个月。" },
+        { "who": "Jake", "en": "That's the spirit. Welcome to Brooklyn.", "zh": "这就对了。欢迎来到布鲁克林。" }
+      ] },
       "quiz": [
         {
           "q": "机场的接机牌出了什么问题？",
@@ -213,6 +233,27 @@
           "zh": "好啊，拜托了。有帮助我都要。"
         }
       ],
+      "choice": {
+        "at": 9, "q_zh": "听完“circle back”，你接着说：",
+        "options": [
+          { "label_zh": "分享一句英式说法", "lines": [
+            { "who": "Lin", "en": "In London, we'd say \"let's park that for now\".", "zh": "在伦敦我们会说“这个先放一放”。" },
+            { "who": "Dana", "en": "Park it? I love that. I'm stealing it.", "zh": "Park it？我喜欢，归我了。" }
+          ] },
+          { "label_zh": "问还有哪些说法", "lines": [
+            { "who": "Lin", "en": "Are there any other phrases I should know before lunch?", "zh": "午饭前还有什么说法我该知道的吗？" },
+            { "who": "Dana", "en": "\"Low-hanging fruit.\" The easy wins. Start with those.", "zh": "“低垂的果子”，就是容易拿下的。先从这些做起。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Marcus 的小抄", "lines": [
+        { "who": "Marcus", "en": "Here's your cheat sheet. Want me to read it out?", "zh": "你的小抄。要我念一遍吗？" },
+        { "who": "Lin", "en": "Yes, please. Slowly.", "zh": "好，慢一点。" },
+        { "who": "Marcus", "en": "Touch base: a quick chat. Circle back: later. Bandwidth: time. Ballpark: a rough number.", "zh": "touch base：简单聊聊。circle back：回头再说。bandwidth：时间精力。ballpark：大概的数。" },
+        { "who": "Marcus", "en": "And \"let's take this offline\" means \"not in front of everyone\".", "zh": "还有 let's take this offline，意思是“别当着大家的面说”。" },
+        { "who": "Lin", "en": "This is gold. Can I take this offline and study it?", "zh": "这太有用了。我能把它“线下”带回去研究吗？" },
+        { "who": "Marcus", "en": "Ha! You're a fast learner.", "zh": "哈！你学得真快。" }
+      ] },
       "quiz": [
         {
           "q": "Dana 说的 bandwidth 指什么？",
@@ -317,6 +358,26 @@
           "zh": "我知道，亲爱的，我是房东。快去吃点东西吧，你看起来累坏了。"
         }
       ],
+      "choice": {
+        "at": 4, "q_zh": "暖气要到周二才修，你问：",
+        "options": [
+          { "label_zh": "这之前我能做点什么", "lines": [
+            { "who": "Lin", "en": "Tuesday? Is there anything I can do until then?", "zh": "周二？那之前我能做点什么吗？" },
+            { "who": "Mrs Alvarez", "en": "Earplugs, honey. The best two dollars you'll ever spend.", "zh": "耳塞，亲爱的。你花过最值的两块钱。" }
+          ] },
+          { "label_zh": "每年冬天都这样吗", "lines": [
+            { "who": "Lin", "en": "Does it happen every winter?", "zh": "每年冬天都这样吗？" },
+            { "who": "Mrs Alvarez", "en": "Every winter for thirty years. I've given it a name. Big Frank.", "zh": "三十年来每个冬天都这样。我给它起了个名字，叫大弗兰克。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "一锅鸡肉饭", "lines": [
+        { "who": "Mrs Alvarez", "en": "I made too much arroz con pollo. Chicken and rice. Take some.", "zh": "我做多了鸡肉饭，拿点去吃。" },
+        { "who": "Lin", "en": "This smells incredible. Thank you so much.", "zh": "闻着太香了。太谢谢您了。" },
+        { "who": "Mrs Alvarez", "en": "My mother taught me. She said food is the first language everybody understands.", "zh": "我妈妈教的。她说，食物是每个人都听得懂的第一种语言。" },
+        { "who": "Lin", "en": "A friend in Edinburgh says almost exactly the same thing.", "zh": "爱丁堡有个朋友几乎说过一模一样的话。" },
+        { "who": "Mrs Alvarez", "en": "Then she's a smart woman. Bring the bowl back when you're done.", "zh": "那她很聪明。吃完把碗还回来。" }
+      ] },
       "quiz": [
         {
           "q": "Alvarez 太太想提醒林什么？",
@@ -416,6 +477,26 @@
           "zh": "百分之二十，好。我觉得这顿饭让我对美国的了解，比上一整周班还多。"
         }
       ],
+      "choice": {
+        "at": 5, "q_zh": "Marcus 点了 over easy，你：",
+        "options": [
+          { "label_zh": "问 over easy 是什么", "lines": [
+            { "who": "Lin", "en": "What does \"over easy\" actually mean?", "zh": "over easy 到底是什么意思？" },
+            { "who": "Marcus", "en": "Fried on both sides, but the yolk's still runny. Trust me.", "zh": "两面煎，但蛋黄还是流心的。相信我。" }
+          ] },
+          { "label_zh": "改点跟他一样的", "lines": [
+            { "who": "Lin", "en": "Actually, can I have what he's having?", "zh": "要不我点跟他一样的吧？" },
+            { "who": "Marcus", "en": "Bold move. You won't regret it.", "zh": "有胆量。你不会后悔的。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "发给 Emma 的照片", "lines": [
+        { "who": "Lin", "en": "Emma, look at the size of these pancakes. That's one portion.", "zh": "Emma，看这松饼有多大。这只是一份。" },
+        { "who": "Emma", "en": "That's not breakfast, Lin. That's a building.", "zh": "林，那不是早饭，是一栋楼。" },
+        { "who": "Lin", "en": "And I tipped twenty percent. I feel very American.", "zh": "我还付了百分之二十的小费。我觉得自己很美国了。" },
+        { "who": "Emma", "en": "Don't come back with an accent. I'm warning you.", "zh": "回来可别带口音。我警告你。" },
+        { "who": "Lin", "en": "No promises, y'all.", "zh": "不敢保证哦，各位。" }
+      ] },
       "quiz": [
         {
           "q": "林点了什么样的鸡蛋？",
@@ -515,6 +596,26 @@
           "zh": "她让我想起一个人。两年前的我。"
         }
       ],
+      "choice": {
+        "at": 6, "q_zh": "馆长希望路人一看就觉得“这是给我的”，你问：",
+        "options": [
+          { "label_zh": "能和常来的人聊聊吗", "lines": [
+            { "who": "Lin", "en": "Could I talk to some of the people who use it every day?", "zh": "我能和每天来的人聊聊吗？" },
+            { "who": "Mr Brooks", "en": "Of course. They'll have plenty of opinions, believe me.", "zh": "当然。相信我，他们意见多着呢。" }
+          ] },
+          { "label_zh": "路人现在怎么看这里", "lines": [
+            { "who": "Lin", "en": "What do people say when they walk past?", "zh": "路过的人现在怎么说这里？" },
+            { "who": "Mr Brooks", "en": "Most of them think it's closed. That's the problem.", "zh": "大多数人以为关门了。问题就在这儿。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "旧留言簿", "lines": [
+        { "who": "Mr Brooks", "en": "Let me show you something. This is our guestbook from the nineteen-eighties.", "zh": "给你看样东西。这是八十年代的留言簿。" },
+        { "who": "Lin", "en": "There are so many languages. Is that Korean? And Greek?", "zh": "这么多种语言。这是韩语吗？还有希腊语？" },
+        { "who": "Mr Brooks", "en": "And Spanish, Urdu, Polish, Bengali. Everyone wrote the same thing. Thank you.", "zh": "还有西班牙语、乌尔都语、波兰语、孟加拉语。大家写的都是同一句：谢谢。" },
+        { "who": "Lin", "en": "That's the design. Right there, in this book.", "zh": "设计就在这里，就在这本留言簿里。" },
+        { "who": "Mr Brooks", "en": "Forty years, and nobody thought to put it on the wall.", "zh": "四十年了，从没人想过把它搬到墙上。" }
+      ] },
       "quiz": [
         {
           "q": "为什么很多新移民来到这里先去图书馆？",
@@ -614,6 +715,26 @@
           "zh": "这是你的点子，林。你来讲，我坐第一排。"
         }
       ],
+      "choice": {
+        "at": 6, "q_zh": "Marcus 觉得点子不错，你补充：",
+        "options": [
+          { "label_zh": "办工作坊让孩子一起画", "lines": [
+            { "who": "Lin", "en": "We could even run workshops so local kids can help paint.", "zh": "我们还可以办工作坊，让附近的孩子一起来画。" },
+            { "who": "Marcus", "en": "Free labour and happy parents. I'm in.", "zh": "免费劳动力加开心的家长。算我一个。" }
+          ] },
+          { "label_zh": "最难的是词放哪儿", "lines": [
+            { "who": "Lin", "en": "The hardest part will be deciding which words go where.", "zh": "最难的是决定哪个词画在哪儿。" },
+            { "who": "Marcus", "en": "Easy. Let the community vote on that too.", "zh": "简单，也让社区投票。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Dana 的第一次市民大会", "lines": [
+        { "who": "Dana", "en": "Want to know about my first town hall? It was a disaster.", "zh": "想听我第一次开市民大会的事吗？简直是灾难。" },
+        { "who": "Lin", "en": "Now I definitely want to know.", "zh": "那我必须得听了。" },
+        { "who": "Dana", "en": "The microphone died, a pigeon flew in, and I called the mayor by the wrong name.", "zh": "话筒坏了，飞进来一只鸽子，我还叫错了市长的名字。" },
+        { "who": "Lin", "en": "And did your project get approved?", "zh": "那你的项目通过了吗？" },
+        { "who": "Dana", "en": "Unanimously. People forgive a lot when you're honest. Just keep the pigeons out.", "zh": "全票通过。只要你真诚，人们能原谅很多事。只要别让鸽子进来。" }
+      ] },
       "quiz": [
         {
           "q": "按常规方式，预算只够做什么？",
@@ -713,6 +834,26 @@
           "zh": "当然。每场市民大会都需要有人唱反调，我们只是确保那个人是自己人。"
         }
       ],
+      "choice": {
+        "at": 5, "q_zh": "Marcus 故意唱反调，你先回应：",
+        "options": [
+          { "label_zh": "谢谢你问", "lines": [
+            { "who": "Lin", "en": "Thank you for asking. I was hoping somebody would.", "zh": "谢谢你问这个。我正希望有人问。" },
+            { "who": "Marcus", "en": "Happy to help. I'm a professional pain in the neck.", "zh": "乐意效劳。我是专业讨人嫌的。" }
+          ] },
+          { "label_zh": "用一个故事回答", "lines": [
+            { "who": "Lin", "en": "Can I answer with a story?", "zh": "我能用一个故事来回答吗？" },
+            { "who": "Marcus", "en": "Sure, as long as it's shorter than this meeting.", "zh": "可以，只要比这个会短。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "三百一十二只手", "lines": [
+        { "who": "Mr Brooks", "en": "I counted. Three hundred and twelve hands in favour. Four against.", "zh": "我数了。三百一十二票赞成，四票反对。" },
+        { "who": "Lin", "en": "Only four? I was expecting a fight.", "zh": "才四票？我还以为要吵一架。" },
+        { "who": "Mr Brooks", "en": "Two of them were my brothers. They vote against everything I do.", "zh": "其中两个是我兄弟。我干什么他们都反对。" },
+        { "who": "Lin", "en": "Then it was practically unanimous.", "zh": "那几乎就是全票通过了。" },
+        { "who": "Mr Brooks", "en": "Practically. Now the hard part starts. We need a hundred languages by spring.", "zh": "差不多。难的才开始。春天前要凑齐一百种语言。" }
+      ] },
       "quiz": [
         {
           "q": "林演讲开头问了大家什么？",
@@ -812,6 +953,26 @@
           "zh": "那你已经比当年的我强了。周四见。"
         }
       ],
+      "choice": {
+        "at": 5, "q_zh": "Ana 很没信心，你想鼓励她：",
+        "options": [
+          { "label_zh": "谁刚开始都奇怪", "lines": [
+            { "who": "Lin", "en": "Everyone sounds strange in a new language at first.", "zh": "刚开始说一门新语言，谁听起来都怪怪的。" },
+            { "who": "Ana", "en": "Even in Portuguese, I sound strange sometimes.", "zh": "我说葡萄牙语有时候都怪怪的。" }
+          ] },
+          { "label_zh": "现在就试一句", "lines": [
+            { "who": "Lin", "en": "Would you like to try now? Just one sentence.", "zh": "要不现在试一句？就一句。" },
+            { "who": "Ana", "en": "Okay. My name is Ana, and I like books with dragons.", "zh": "好。我叫 Ana，我喜欢有龙的书。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "第一个星期四", "lines": [
+        { "who": "Lin", "en": "So, tell me about your home in Brazil.", "zh": "跟我说说你在巴西的家吧。" },
+        { "who": "Ana", "en": "I lived with my grandmother in Recife. Near the sea. She makes the best cake in the world.", "zh": "我和奶奶住在累西腓，靠海。她做的蛋糕是世界上最好吃的。" },
+        { "who": "Lin", "en": "What kind of cake?", "zh": "什么蛋糕？" },
+        { "who": "Ana", "en": "Bolo de rolo. It's very thin, and it rolls. I don't know the English word.", "zh": "卷卷蛋糕。很薄，卷起来的。我不知道英语怎么说。" },
+        { "who": "Lin", "en": "Neither do I. Maybe there isn't one. That's the best kind of word.", "zh": "我也不知道。也许英语里根本没有。这种词最好了。" }
+      ] },
       "quiz": [
         {
           "q": "Ana 为什么不敢说英语？",
@@ -911,6 +1072,26 @@
           "zh": "我知道。先把开幕办完，其他的之后再想。"
         }
       ],
+      "choice": {
+        "at": 4, "q_zh": "你想问问伦敦的近况：",
+        "options": [
+          { "label_zh": "小说写完了吗", "lines": [
+            { "who": "Lin", "en": "And have you finished the novel yet?", "zh": "小说写完了吗？" },
+            { "who": "Emma", "en": "Two chapters to go. You'll be the first to read it.", "zh": "还剩两章。你会是第一个读的。" }
+          ] },
+          { "label_zh": "Tom 和 Patel 太太还好吗", "lines": [
+            { "who": "Lin", "en": "And are Tom and Mrs Patel behaving?", "zh": "Tom 和 Patel 太太还老实吗？" },
+            { "who": "Emma", "en": "Tom isn't. Mrs Patel is running the whole street, as usual.", "zh": "Tom 不老实。Patel 太太还是照样管着整条街。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Emma 的纽约评价", "lines": [
+        { "who": "Jake", "en": "So, Emma, after one whole day, what do you think of New York?", "zh": "那么 Emma，待了一整天，你觉得纽约怎么样？" },
+        { "who": "Emma", "en": "Honestly? Not bad.", "zh": "说实话？还不赖。" },
+        { "who": "Jake", "en": "Not bad? That's it? I showed you the best pizza in the city!", "zh": "还不赖？就这？我带你吃了全城最好的披萨！" },
+        { "who": "Lin", "en": "Jake, in Britain, \"not bad\" means it was really good.", "zh": "Jake，在英国，“还不赖”就是“真的很好”。" },
+        { "who": "Jake", "en": "You people are impossible. Wonderful, but impossible.", "zh": "你们这些人真没法搞。很棒，但是没法搞。" }
+      ] },
       "quiz": [
         {
           "q": "Arthur 在伦敦办了什么新活动？",
@@ -1010,6 +1191,26 @@
           "zh": "决定了。我再留一年。我有个周四的约，还不想放弃。"
         }
       ],
+      "choice": {
+        "at": 8, "q_zh": "Ana 读出了第一页的那句话，你说：",
+        "options": [
+          { "label_zh": "葡萄牙语也可以写进去", "lines": [
+            { "who": "Lin", "en": "You can write in Portuguese too. Both languages belong in there.", "zh": "你也可以写葡萄牙语。两种语言都属于这本笔记本。" },
+            { "who": "Ana", "en": "Then the first word will be \"obrigada\". Thank you.", "zh": "那第一个词就写“obrigada”，谢谢。" }
+          ] },
+          { "label_zh": "勇敢的时候读最后一页", "lines": [
+            { "who": "Lin", "en": "Read the last page when you feel brave.", "zh": "觉得勇敢的时候，读读最后一页。" },
+            { "who": "Ana", "en": "I'll read it tonight. I feel brave today.", "zh": "我今晚就读。我今天很勇敢。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "寄往爱丁堡的明信片", "lines": [
+        { "who": "Lin", "en": "Dear Sophie, the notebook has found its next person.", "zh": "亲爱的 Sophie，笔记本找到下一个人了。" },
+        { "who": "Lin", "en": "Her name is Ana. She's fourteen, she loves dragons, and today she spoke in front of three hundred people.", "zh": "她叫 Ana，十四岁，喜欢龙，今天她在三百个人面前讲了话。" },
+        { "who": "Lin", "en": "I painted a little of Rose's blue on the library door. Arthur would approve.", "zh": "我在图书馆的门上刷了一点 Rose 的蓝色。Arthur 一定会赞成。" },
+        { "who": "Lin", "en": "Thank you for the note that started everything. I still have it. I always will.", "zh": "谢谢你那张让一切开始的纸条。我还留着，会一直留着。" },
+        { "who": "Lin", "en": "Love from New York, Lin. P.S. Save me a seat at the long table.", "zh": "来自纽约的爱，林。附：长桌边给我留个位子。" }
+      ] },
       "quiz": [
         {
           "q": "Ana 写在墙上的词是什么意思？",

@@ -35,6 +35,26 @@
         { "who": "Emma", "en": "Out of nine, Tom. Don't worry, Lin. Your English is miles better than when you first arrived.", "zh": "满分九分，Tom。别担心，林。你的英语比刚来时好太多了。" },
         { "who": "Lin", "en": "Thanks. But chatting with friends is one thing. Doing it under exam conditions is quite another.", "zh": "谢谢。不过跟朋友聊天是一回事，在考试条件下说又是另一回事。" }
       ],
+      "choice": {
+        "at": 6, "q_zh": "Tom 不敢相信你放弃了纽约，你说：",
+        "options": [
+          { "label_zh": "开个玩笑", "lines": [
+            { "who": "Lin", "en": "Don't be so dramatic, Tom. Camden has better tea.", "zh": "别这么夸张，Tom。卡姆登的茶更好喝。" },
+            { "who": "Emma", "en": "She's got a point. American tea is a crime.", "zh": "她说得对。美国的茶简直是犯罪。" }
+          ] },
+          { "label_zh": "说伦敦还有事没做完", "lines": [
+            { "who": "Lin", "en": "New York can wait. I've got unfinished business here.", "zh": "纽约可以等。我在这儿还有事没做完。" },
+            { "who": "Tom", "en": "Unfinished business? That sounds very mysterious.", "zh": "没做完的事？听起来很神秘啊。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "“还不赖”蛋糕", "lines": [
+        { "who": "Tom", "en": "Before we go, I made you something. Well, I bought it, but I chose the words.", "zh": "走之前，我给你做了个东西。好吧，是买的，但字是我挑的。" },
+        { "who": "Lin", "en": "A cake! It says \"Not bad.\"", "zh": "蛋糕！上面写着“还不赖”。" },
+        { "who": "Tom", "en": "In Manchester, that's the highest compliment there is.", "zh": "在曼彻斯特，这可是最高评价。" },
+        { "who": "Emma", "en": "He spent twenty minutes arguing with the baker about the spelling.", "zh": "他为了拼写跟面包师吵了二十分钟。" },
+        { "who": "Lin", "en": "It's perfect. Honestly, really good. Not just not bad.", "zh": "太完美了。说真的，是真好，不只是还不赖。" }
+      ] },
       "quiz": [
         { "q": "林回到伦敦后打算做什么？", "options": ["去纽约工作", "申请伦敦的在职设计硕士", "回国"], "answer": 1 },
         { "q": "入学要求英语考试总分多少？", "options": ["6 分", "7 分", "9 分"], "answer": 1 },
@@ -63,6 +83,27 @@
         { "who": "Lin", "en": "Let me think about that for a second. There's a stretch of the canal near here where the water is so still that the boats look as if they're floating on glass.", "zh": "让我想一下。这附近有一段运河，水面静得让那些船看起来像漂在玻璃上。" },
         { "who": "Arthur", "en": "Now that is a seven.", "zh": "这才是 7 分。" }
       ],
+      "choice": {
+        "at": 10, "q_zh": "Arthur 教了你几句争取思考时间的话，你先试哪句？",
+        "options": [
+          { "label_zh": "“这个问题很有意思”", "lines": [
+            { "who": "Lin", "en": "That's an interesting question.", "zh": "这是个很有意思的问题。" },
+            { "who": "Arthur", "en": "Good. Now don't stop there. Keep going.", "zh": "好。别停，接着说。" }
+          ] },
+          { "label_zh": "想换个地方说", "lines": [
+            { "who": "Lin", "en": "Could I try again with a different place?", "zh": "我能换个地方重新说吗？" },
+            { "who": "Arthur", "en": "No. Same place, better words. Go on.", "zh": "不行。同一个地方，换更好的说法。来。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "出租车司机的作业", "lines": [
+        { "who": "Arthur", "en": "My favourite student was a taxi driver called Bill. He was sixty-two.", "zh": "我最喜欢的学生是个出租车司机，叫 Bill，六十二岁。" },
+        { "who": "Lin", "en": "Why was he learning English? Wasn't he British?", "zh": "他为什么学英语？他不是英国人吗？" },
+        { "who": "Arthur", "en": "He was learning to read. He'd hidden it for fifty years.", "zh": "他在学认字。他瞒了五十年。" },
+        { "who": "Arthur", "en": "Every day, he read me one page of the newspaper. Just one. After a year, he read me a whole novel.", "zh": "他每天给我读一页报纸，就一页。一年后，他给我读完了一整本小说。" },
+        { "who": "Lin", "en": "One page a day. That's all it takes?", "zh": "一天一页。就这么简单？" },
+        { "who": "Arthur", "en": "That, and refusing to stop. Fluency is a habit, not a talent.", "zh": "再加上不停下来。流利是习惯，不是天赋。" }
+      ] },
       "quiz": [
         { "q": "Arthur 开咖啡馆之前做什么？", "options": ["厨师", "教成人英语", "开书店"], "answer": 1 },
         { "q": "Arthur 认为林真正的问题是什么？", "options": ["犹豫太多", "不再用英语思考，开始翻译", "声音太小"], "answer": 1 },
@@ -91,6 +132,26 @@
         { "who": "Mr Hale", "en": "Fine. Two options. Not ten.", "zh": "行。两个方案。别给我十个。" },
         { "who": "Tom", "en": "That was masterful. You said no about four times and he didn't even notice.", "zh": "太高明了。你拒绝了他大概四次，他居然都没察觉。" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "客户说董事会想“高端一点”，你追问：",
+        "options": [
+          { "label_zh": "是谁在推动", "lines": [
+            { "who": "Lin", "en": "I see. Who on the board is pushing for this?", "zh": "明白了。董事会里是谁在推这件事？" },
+            { "who": "Mr Hale", "en": "Mostly the new chairman. He likes gold. A lot of gold.", "zh": "主要是新来的董事长。他喜欢金色，非常喜欢。" }
+          ] },
+          { "label_zh": "有没有喜欢的例子", "lines": [
+            { "who": "Lin", "en": "That's useful to know. Do you have any examples you like?", "zh": "这个信息很有用。您有喜欢的例子吗？" },
+            { "who": "Mr Hale", "en": "I'll send you a few. They're all hotels, I'm afraid.", "zh": "我发几个给你。恐怕全是酒店。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "说“不”的艺术", "lines": [
+        { "who": "Tom", "en": "Teach me. How do you say no without saying no?", "zh": "教教我。你是怎么不说“不”却拒绝了的？" },
+        { "who": "Lin", "en": "First, thank them. Then ask a question. Then offer a smaller yes.", "zh": "先感谢，再提问，然后给一个小一点的“可以”。" },
+        { "who": "Tom", "en": "A smaller yes. I like that. Can I have a pay rise?", "zh": "小一点的“可以”。我喜欢。我能涨工资吗？" },
+        { "who": "Lin", "en": "Thank you for asking. What did you have in mind? Perhaps we could start with a biscuit.", "zh": "谢谢你问。你想要多少？也许我们可以先从一块饼干开始。" },
+        { "who": "Tom", "en": "That was brutal. Brilliant, but brutal.", "zh": "太狠了。漂亮，但是狠。" }
+      ] },
       "quiz": [
         { "q": "Hale 先生现在想要什么感觉？", "options": ["亲切实惠", "高级、贵气", "可爱活泼"], "answer": 1 },
         { "q": "林提出的折中方案是？", "options": ["全部重做", "保留布局，配色改得更深更优雅", "只改标志"], "answer": 1 },
@@ -119,6 +180,26 @@
         { "who": "Tom", "en": "You see? Nobody fell asleep. Even the finance director asked a question.", "zh": "看到没？没人睡着。连财务总监都提问了。" },
         { "who": "Lin", "en": "He asked where the biscuits were.", "zh": "他问的是饼干在哪儿。" }
       ],
+      "choice": {
+        "at": 2, "q_zh": "Tom 让你讲数字背后的意思，你问：",
+        "options": [
+          { "label_zh": "先说结论？", "lines": [
+            { "who": "Lin", "en": "So I should start with the conclusion?", "zh": "所以我应该先说结论？" },
+            { "who": "Tom", "en": "Exactly. Headline first, then the details.", "zh": "没错。先说标题，再讲细节。" }
+          ] },
+          { "label_zh": "开头要不要讲个笑话", "lines": [
+            { "who": "Lin", "en": "Should I make a joke at the start?", "zh": "开头要不要讲个笑话？" },
+            { "who": "Tom", "en": "Only if it's better than mine. So, no.", "zh": "除非比我讲得好。所以，不要。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "图表动词小抄", "lines": [
+        { "who": "Lin", "en": "Can you check my list? Rise, increase, climb, peak.", "zh": "帮我看看这个表？上升、增加、攀升、达到顶点。" },
+        { "who": "Tom", "en": "Good. And going down?", "zh": "不错。那下降呢？" },
+        { "who": "Lin", "en": "Fall, drop, decline, dip. And when nothing changes, it levels off or remains stable.", "zh": "下跌、下降、减少、小幅下滑。不变的时候就是趋于平稳、保持稳定。" },
+        { "who": "Tom", "en": "And when it goes up very fast?", "zh": "那涨得特别快呢？" },
+        { "who": "Lin", "en": "It soars. Like my confidence, right now.", "zh": "飙升。就像我现在的自信。" }
+      ] },
       "quiz": [
         { "q": "网站访问量什么时候开始急剧上升？", "options": ["一月", "六月新设计上线后", "九月"], "answer": 1 },
         { "q": "八月的访问量大约是一月的多少？", "options": ["差不多", "两倍", "三倍"], "answer": 1 },
@@ -147,6 +228,26 @@
         { "who": "Lin", "en": "In big cities, people can seem indifferent, but in my experience that's often shyness rather than a lack of kindness.", "zh": "在大城市里，人们看起来可能很冷漠，但据我的经验，那往往是害羞，而不是缺少善意。" },
         { "who": "Examiner", "en": "Thank you. That's the end of the speaking test.", "zh": "谢谢。口语考试到此结束。" }
       ],
+      "choice": {
+        "at": 2, "q_zh": "进考场前，你对 Emma 说：",
+        "options": [
+          { "label_zh": "出来就给你打电话", "lines": [
+            { "who": "Lin", "en": "Thanks, Emma. I'll call you as soon as I'm out.", "zh": "谢谢你，Emma。我一出来就给你打电话。" },
+            { "who": "Emma", "en": "I'll be at Arthur's, eating far too many scones.", "zh": "我会在 Arthur 那儿，吃太多司康饼。" }
+          ] },
+          { "label_zh": "没考好就怪你的咖啡", "lines": [
+            { "who": "Lin", "en": "If I fail, I'm blaming your coffee.", "zh": "要是没考好，我就怪你的咖啡。" },
+            { "who": "Emma", "en": "Fine. And if you pass, I'm taking all the credit.", "zh": "行。那要是考过了，功劳全是我的。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "热身：第一部分", "lines": [
+        { "who": "Examiner", "en": "Let's talk about your hometown. Where is it, and what is it like?", "zh": "聊聊你的家乡吧。在哪儿，是什么样的？" },
+        { "who": "Lin", "en": "I'm from Hangzhou, a city in eastern China that's famous for its lake and its green tea.", "zh": "我来自杭州，中国东部的一座城市，以西湖和绿茶闻名。" },
+        { "who": "Examiner", "en": "Would you like to live there again in the future?", "zh": "你将来还想回去住吗？" },
+        { "who": "Lin", "en": "Possibly. It's a wonderful place to grow old, but at the moment I'm enjoying being somewhere that challenges me.", "zh": "也许吧。那是个养老的好地方，不过现在我更享受待在一个能挑战我的地方。" },
+        { "who": "Examiner", "en": "Thank you. Now I'd like to move on to Part Two.", "zh": "谢谢。现在我们进入第二部分。" }
+      ] },
       "quiz": [
         { "q": "口语第二部分的题目是？", "options": ["描述一个你喜欢的地方", "描述一次你帮助别人的经历", "描述一本书"], "answer": 1 },
         { "q": "林讲的是哪件事？", "options": ["伦敦的读书夜", "爱丁堡暴雨夜搬晚餐", "帮 Hale 先生改设计"], "answer": 1 },
@@ -174,6 +275,26 @@
         { "who": "Arthur", "en": "Seven and a half in speaking? I'll have you know I take full credit for that.", "zh": "口语 7.5？告诉你，这份功劳全归我。" },
         { "who": "Lin", "en": "You can take half the credit. The other half goes to the canal and its floating boats.", "zh": "你可以拿一半功劳。另一半归那条运河，还有它上面漂着的船。" }
       ],
+      "choice": {
+        "at": 5, "q_zh": "写作只有 6.5，你的反应是：",
+        "options": [
+          { "label_zh": "快读完，我要晕了", "lines": [
+            { "who": "Lin", "en": "Oh no. Read the rest quickly, before I faint.", "zh": "完了。快把剩下的读完，我要晕了。" },
+            { "who": "Emma", "en": "Breathe, Lin. Just breathe. There's more.", "zh": "呼吸，林，深呼吸。还没完呢。" }
+          ] },
+          { "label_zh": "就知道作文写太长了", "lines": [
+            { "who": "Lin", "en": "I knew it. My essays were always too long.", "zh": "我就知道，我的作文总是写太长。" },
+            { "who": "Emma", "en": "Too long is better than too short. Hang on, there's more.", "zh": "长总比短好。等等，还有。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Arthur 的祝酒词", "lines": [
+        { "who": "Arthur", "en": "Everyone, raise your cups. Tea, coffee, whatever you've got.", "zh": "大家举杯。茶、咖啡，手里有什么举什么。" },
+        { "who": "Arthur", "en": "To Lin, who arrived with a key that didn't work and a lot of courage that did.", "zh": "敬林：她来的时候钥匙不管用，可勇气一直管用。" },
+        { "who": "Emma", "en": "To Lin!", "zh": "敬林！" },
+        { "who": "Lin", "en": "And to Arthur, who never told me he was a teacher. Thank you for every question.", "zh": "也敬 Arthur，他从没告诉我他是老师。谢谢您问的每一个问题。" },
+        { "who": "Arthur", "en": "The pleasure was mine. Now, who wants a scone?", "zh": "我的荣幸。好了，谁要司康饼？" }
+      ] },
       "quiz": [
         { "q": "林的总分是多少？", "options": ["6.5", "7", "7.5"], "answer": 1 },
         { "q": "哪一项分数最低？", "options": ["听力", "写作", "口语"], "answer": 1 },
@@ -200,6 +321,26 @@
         { "who": "Lin", "en": "I won't pretend it'll be easy. But I've just spent a year learning a language in my spare time, so I have a fairly realistic idea of what it takes.", "zh": "我不会假装这很容易。但我刚用业余时间学了一年语言，所以我对需要付出什么心里有数。" },
         { "who": "Dr Reed", "en": "Fair point. You'll hear from us within a week.", "zh": "有道理。一周内我们会通知你。" }
       ],
+      "choice": {
+        "at": 1, "q_zh": "Reed 博士夸了你的海报，你接着说：",
+        "options": [
+          { "label_zh": "主动讲设计过程", "lines": [
+            { "who": "Lin", "en": "Would you like me to talk you through the process?", "zh": "需要我讲讲设计过程吗？" },
+            { "who": "Dr Reed", "en": "Briefly, yes. I'm always more curious about process than results.", "zh": "简单讲讲吧。比起结果，我一向更好奇过程。" }
+          ] },
+          { "label_zh": "问她想了解什么", "lines": [
+            { "who": "Lin", "en": "Is there anything in particular you'd like to know about them?", "zh": "关于这些海报，您有什么特别想了解的吗？" },
+            { "who": "Dr Reed", "en": "Mostly why you chose such a quiet colour for such a noisy festival.", "zh": "主要是，为什么给那么吵的艺术节选了这么安静的颜色。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "门口的一句话", "lines": [
+        { "who": "Dr Reed", "en": "Lin, one more thing, off the record.", "zh": "林，还有一件事，私下说。" },
+        { "who": "Lin", "en": "Of course.", "zh": "您请说。" },
+        { "who": "Dr Reed", "en": "Most applicants tell me what they know. You told me what you don't know. That's rarer than you think.", "zh": "大多数申请人跟我说他们懂什么，你跟我说你不懂什么。这比你想的少见。" },
+        { "who": "Lin", "en": "I've had a lot of practice not knowing things this year.", "zh": "这一年我可没少练习“不懂”。" },
+        { "who": "Dr Reed", "en": "Keep practising. It's the best qualification there is.", "zh": "继续练。这是最好的资历。" }
+      ] },
       "quiz": [
         { "q": "Reed 博士对哪些作品印象最深？", "options": ["伦敦读书夜的海报", "爱丁堡的海报", "Hale 先生的网站"], "answer": 1 },
         { "q": "林说工作没能教会她什么？", "options": ["解决问题", "一开始就问对问题", "和客户沟通"], "answer": 1 },
@@ -227,6 +368,26 @@
         { "who": "Dr Reed", "en": "Excellent. That's your essay title for next week, by the way.", "zh": "很好。顺便说一句，这就是你们下周的论文题目。" },
         { "who": "Priya", "en": "Thanks a lot, Lin.", "zh": "真是谢谢你了，林。" }
       ],
+      "choice": {
+        "at": 6, "q_zh": "争论正激烈，你补一句：",
+        "options": [
+          { "label_zh": "欢迎举出反例", "lines": [
+            { "who": "Lin", "en": "But I'm happy to be proved wrong if you have an example.", "zh": "不过你要是能举出例子，我很乐意被说服。" },
+            { "who": "Priya", "en": "I might. Give me a week and a library card.", "zh": "也许有。给我一个星期和一张借书证。" }
+          ] },
+          { "label_zh": "为说得太绝对道歉", "lines": [
+            { "who": "Lin", "en": "Sorry, I didn't mean to sound so certain.", "zh": "抱歉，我不是想说得这么绝对。" },
+            { "who": "Priya", "en": "Don't apologise. Disagreeing is the fun part.", "zh": "别道歉。争论才是好玩的部分。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "下课后的咖啡", "lines": [
+        { "who": "Priya", "en": "For the record, I agreed with you more than I admitted.", "zh": "说句实话，我其实比嘴上承认的更同意你。" },
+        { "who": "Lin", "en": "Then why did you argue so hard?", "zh": "那你为什么争得那么凶？" },
+        { "who": "Priya", "en": "Someone has to play devil's advocate. Otherwise, the seminar is just people nodding.", "zh": "总得有人唱反调。不然研讨课就只剩大家点头了。" },
+        { "who": "Lin", "en": "\"Devil's advocate.\" I'm adding that to my notebook.", "zh": "“唱反调”。我要把它记进笔记本。" },
+        { "who": "Priya", "en": "Same time next week? I'll bring better arguments.", "zh": "下周同一时间？我会带更好的论据来。" }
+      ] },
       "quiz": [
         { "q": "这次研讨课讨论的问题是？", "options": ["公园怎么省钱", "公共空间该不该用设计阻止某些行为", "论文怎么写"], "answer": 1 },
         { "q": "林认为中间加横杆的长椅实际上是为了？", "options": ["让人坐得更舒服", "不让无家可归的人躺下", "更好看"], "answer": 1 },
@@ -254,6 +415,26 @@
         { "who": "Jake", "en": "All right, deal. Three months, plus the remote work. I'll send you the details.", "zh": "好，成交。三个月，加上远程的部分。我把细节发给你。" },
         { "who": "Lin", "en": "Thank you, Jake. Honestly, this is the best of both worlds.", "zh": "谢谢你，Jake。说真的，这是两全其美。" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "Jake 问你要什么条件，你先说：",
+        "options": [
+          { "label_zh": "给我一秒想想", "lines": [
+            { "who": "Lin", "en": "Give me a second to think about that.", "zh": "让我想一下。" },
+            { "who": "Jake", "en": "Take two. I'll wait. I'm a very patient man.", "zh": "想两下也行。我等着，我很有耐心。" }
+          ] },
+          { "label_zh": "说实话，要个奇迹", "lines": [
+            { "who": "Lin", "en": "Honestly? A small miracle. But let's try.", "zh": "说实话？要一个小奇迹。不过可以试试。" },
+            { "who": "Jake", "en": "I've produced miracles before. Mostly cheap ones.", "zh": "奇迹我又不是没制作过。大多是便宜的那种。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "半夜的第二个电话", "lines": [
+        { "who": "Emma", "en": "Lin? It's half past twelve. Is everything all right?", "zh": "林？十二点半了，没事吧？" },
+        { "who": "Lin", "en": "Everything's perfect. I'm going to New York. Just for the summer.", "zh": "一切都好。我要去纽约了，就一个夏天。" },
+        { "who": "Emma", "en": "You said no to Jake twice, and now you're going anyway?", "zh": "你拒绝了 Jake 两次，结果还是要去？" },
+        { "who": "Lin", "en": "I didn't say yes to his offer. I made him say yes to mine.", "zh": "我不是答应了他的条件，是让他答应了我的。" },
+        { "who": "Emma", "en": "That's the most Lin thing you've ever said. Now go to sleep.", "zh": "这是你说过的最像你的一句话。快睡吧。" }
+      ] },
       "quiz": [
         { "q": "林为什么不接受全职工作？", "options": ["不喜欢纽约", "刚开始读硕士，不想放弃", "薪水太低"], "answer": 1 },
         { "q": "最后谈成了什么？", "options": ["全职搬去纽约", "暑假去纽约三个月，前期在伦敦远程做", "完全拒绝"], "answer": 1 },
@@ -282,6 +463,26 @@
         { "who": "Emma", "en": "So who's the next person?", "zh": "那下一个人是谁？" },
         { "who": "Lin", "en": "I have a feeling I'll find out in New York.", "zh": "我有种感觉，到了纽约我就会知道。" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "说到每个错误都让你认识了一个人，你点名感谢：",
+        "options": [
+          { "label_zh": "感谢 Arthur 和 Tom", "lines": [
+            { "who": "Lin", "en": "Arthur, who taught me to paint pictures with words.", "zh": "Arthur，他教我用话语画画。" },
+            { "who": "Lin", "en": "Tom, who taught me that \"not bad\" means \"really good\".", "zh": "Tom，他教我“还不赖”的意思是“真的很好”。" }
+          ] },
+          { "label_zh": "感谢 Patel 太太和 Sophie", "lines": [
+            { "who": "Lin", "en": "Mrs Patel, who sold me milk and gave me advice for free.", "zh": "Patel 太太，她卖给我牛奶，还免费送我建议。" },
+            { "who": "Lin", "en": "Sophie, whom I'd never met, but who left me a map.", "zh": "Sophie，我当时从没见过她，她却给我留了一张地图。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "一小罐蓝色", "lines": [
+        { "who": "Arthur", "en": "Before you go, take this. It's the last tin of Rose's blue paint.", "zh": "走之前拿着这个。这是 Rose 留下的最后一罐蓝漆。" },
+        { "who": "Lin", "en": "Arthur, I can't take this. It's from your door.", "zh": "Arthur，我不能收。这是您门上的颜色。" },
+        { "who": "Arthur", "en": "The door has had forty years of luck. It's time the blue travelled.", "zh": "这扇门已经走了四十年运，该让这抹蓝去旅行了。" },
+        { "who": "Lin", "en": "Then I'll find a door in New York that needs it.", "zh": "那我就在纽约找一扇需要它的门。" },
+        { "who": "Arthur", "en": "Rose would have liked you. Safe travels, my dear.", "zh": "Rose 一定会喜欢你。一路平安，孩子。" }
+      ] },
       "quiz": [
         { "q": "林刚到伦敦时遇到了什么事？", "options": ["迷路", "钥匙打不开门", "生病"], "answer": 1 },
         { "q": "林认为学语言的关键是什么？", "options": ["永远不出错", "有勇气让别人听懂你", "背很多单词"], "answer": 1 },

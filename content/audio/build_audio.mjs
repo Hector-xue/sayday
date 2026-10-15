@@ -26,9 +26,15 @@ const sents = JSON.parse(readFileSync(new URL('sentences.json', pack)))
 // 剧集（content/episodes/s*.json，每季一个文件）：主角（“我”）的台词跟着口音换声音，其他角色固定用自己的声音
 const epDir = new URL('../episodes/', import.meta.url)
 const seasons = readdirSync(epDir).filter((f) => /^s\d+\.json$/.test(f)).map((f) => JSON.parse(readFileSync(new URL(f, epDir))))
-const epItems = seasons.flatMap((season) => season.episodes.flatMap((ep) => ep.lines.map((l, i) => {
+// 一集的全部台词和配音键后缀：主线 <行>、分支 c<选项>-<行>、隐藏支线 b-<行>（和 apps/web/src/lib/episodes.ts 的 epLines / bonusLines 一致）
+const keyedLines = (ep) => [
+  ...ep.lines.map((l, i) => [String(i), l]),
+  ...(ep.choice?.options ?? []).flatMap((o, k) => o.lines.map((l, j) => [`c${k}-${j}`, l])),
+  ...(ep.bonus?.lines ?? []).map((l, j) => [`b-${j}`, l]),
+]
+const epItems = seasons.flatMap((season) => season.episodes.flatMap((ep) => keyedLines(ep).map(([k, l]) => {
   const v = season.cast[l.who].voice
-  return { kind: 'e', key: `s${season.season}e${ep.id}-${i}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
+  return { kind: 'e', key: `s${season.season}e${ep.id}-${k}`, text: l.en, voice: typeof v === 'string' ? v : v[accent] }
 })))
 
 // 主角可以改名、换男声（content/episodes/names.json）：另配几套，同样放 e/ 目录（kind v 只是为了能单独合成）
@@ -40,8 +46,8 @@ const NAME_RE = /\bLin\b/g
 for (const season of seasons) {
   const me = Object.entries(season.cast).find(([, c]) => c.me)?.[0] ?? 'Lin'
   for (const ep of season.episodes) {
-    ep.lines.forEach((l, i) => {
-      const key = `s${season.season}e${ep.id}-${i}`
+    keyedLines(ep).forEach(([k, l]) => {
+      const key = `s${season.season}e${ep.id}-${k}`
       const v = season.cast[l.who].voice
       const voice = typeof v === 'string' ? v : v[accent]
       const mine = l.who === me

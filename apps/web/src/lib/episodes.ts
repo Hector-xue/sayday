@@ -4,11 +4,31 @@ import { kvGet, kvSet, today } from './db'
 import { loadContent, lookup, type Word } from './content'
 import NAMES from '../../../../content/episodes/names.json'
 
-/** named：这句原文里提到了主角的名字（换名字时要换配音） */
-export type Line = { who: string; en: string; zh: string; named?: boolean }
-export type Episode = { id: number; level: string; title: string; title_zh: string; scene_zh: string; lines: Line[]; quiz: { q: string; options: string[]; answer: number }[]; next_zh: string }
+/**
+ * named：这句原文里提到了主角的名字（换名字时要换配音）。
+ * key：配音键的后半段（s<季>e<集>-<key>）；主线是行号，分支是 c<选项>-<行>，支线是 b-<行>（见 epLines）。
+ * mi：主线的行号（分支、支线的台词没有；台词复习只排主线）
+ */
+export type Line = { who: string; en: string; zh: string; named?: boolean; key?: string; mi?: number }
+/** 剧情分支（方案 1.2）：主线第 at 行之后由你选怎么回，选项的第一句是你说的，后面是对方的反应，然后接回主线 */
+export type Choice = { at: number; q_zh: string; options: { label_zh: string; lines: Line[] }[] }
+/** 隐藏支线：演的时候跟读平均到 need 分（默认 85）才解锁 */
+export type Bonus = { title_zh: string; need?: number; lines: Line[] }
+export type Episode = { id: number; level: string; title: string; title_zh: string; scene_zh: string; lines: Line[]; choice?: Choice; bonus?: Bonus; quiz: { q: string; options: string[]; answer: number }[]; next_zh: string }
 export type Season = { season: number; title: string; title_zh: string; cast: Record<string, { zh: string; voice: string | Record<string, string>; me?: boolean }>; episodes: Episode[] }
-type Done = { date: string; quiz: number; act: number | null }
+/** pick：上次选的分支；bonus：解锁过隐藏支线 */
+type Done = { date: string; quiz: number; act: number | null; pick?: number; bonus?: boolean }
+export const BONUS_NEED = 85
+
+/** 这一集实际要放的台词：主线 + 选中的分支（还没选就只到分岔处为止的主线 + 之后的主线，分支空着） */
+export function epLines(ep: Episode, pick: number | null): Line[] {
+  const main = ep.lines.map((l, i) => ({ ...l, key: String(i), mi: i }))
+  const c = ep.choice
+  if (!c || pick === null || !c.options[pick]) return main
+  const branch = c.options[pick].lines.map((l, j) => ({ ...l, key: `c${pick}-${j}` }))
+  return [...main.slice(0, c.at + 1), ...branch, ...main.slice(c.at + 1)]
+}
+export const bonusLines = (ep: Episode): Line[] => (ep.bonus?.lines ?? []).map((l, j) => ({ ...l, key: `b-${j}` }))
 /** done 的键是 "季:集"（v0.0.4 第一版只有第一季，键是集号，读的时候换算） */
 export type EpProgress = { done: Record<string, Done> }
 
@@ -47,7 +67,13 @@ export function personalize(s: Season, me: Me): Season {
     return v
   }
   const out = walk(s) as Season
-  out.episodes.forEach((ep, e) => ep.lines.forEach((l, i) => { l.named = /\bLin\b/.test(s.episodes[e].lines[i].en) }))
+  const mark = (to: Line[] | undefined, from: Line[] | undefined) => to?.forEach((l, i) => { l.named = /\bLin\b/.test(from![i].en) })
+  out.episodes.forEach((ep, e) => {
+    const o = s.episodes[e]
+    mark(ep.lines, o.lines)
+    ep.choice?.options.forEach((op, k) => mark(op.lines, o.choice!.options[k].lines))
+    mark(ep.bonus?.lines, o.bonus?.lines)
+  })
   return out
 }
 export const meKey = (s: Season) => Object.entries(s.cast).find(([, c]) => c.me)?.[0] ?? 'Lin'
@@ -104,11 +130,11 @@ export function teaserFor(all: Season[], season: number, ep: number): string {
   return all.find((s) => s.season === prev[0])?.episodes.find((e) => e.id === prev[1])?.next_zh ?? ''
 }
 
-export async function finish(season: number, ep: number, quiz: number, act: number | null) {
+export async function finish(season: number, ep: number, quiz: number, act: number | null, extra: { pick?: number | null; bonus?: boolean } = {}) {
   const p = await getProgress()
   const k = key(season, ep)
   const old = p.done[k]
-  p.done[k] = { date: old?.date ?? today(), quiz: Math.max(quiz, old?.quiz ?? 0), act: act ?? old?.act ?? null }
+  p.done[k] = { date: old?.date ?? today(), quiz: Math.max(quiz, old?.quiz ?? 0), act: act ?? old?.act ?? null, pick: extra.pick ?? old?.pick, bonus: !!(extra.bonus || old?.bonus) }
   await kvSet('ep_progress', p)
 }
 
@@ -117,7 +143,7 @@ export async function finish(season: number, ep: number, quiz: number, act: numb
  * 名字不在预配列表里：提到名字的句子不给配音键，播放时走系统朗读（总比念错名字好）
  */
 export function clipOf(season: number, ep: number, i: number, l: Line, me: Me, mine: boolean): { text: string; ep?: string } {
-  const base = `s${season}e${ep}-${i}`
+  const base = `s${season}e${ep}-${l.key ?? i}`
   const m = mine && me.voice === 'm' ? '.m' : ''
   if (l.named && me.name !== 'Lin') {
     const p = presetOf(me.name)

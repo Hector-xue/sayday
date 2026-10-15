@@ -1,0 +1,135 @@
+{
+  "note": "工作英语练习（方案 1.4）：跨境电商的真实场景。material 是你收到的英文（没有就空），task_zh 是要写什么，model 是参考写法（没接 AI 时给你对照），phrases 是值得记的说法。全部原创。",
+  "tasks": [
+    {
+      "id": "late-parcel", "kind": "email", "title_zh": "回复买家：包裹晚到了", "level": "B1",
+      "material": "Hi, I ordered a desk lamp ten days ago and it still hasn't arrived. The tracking hasn't changed for five days. I needed it for my exams this week. Very disappointed. — Karen",
+      "task_zh": "买家 Karen 的台灯十天没到，物流五天没更新，她很失望。给她回一封邮件：道歉、说明你会怎么处理、给她一个选择。",
+      "hints_zh": ["先道歉，承认给她带来的麻烦", "说清楚你已经做了什么（查物流）", "给两个选项：免费重发 / 全额退款", "结尾留联系方式，语气真诚"],
+      "phrases": [
+        { "en": "I'm really sorry for the inconvenience.", "zh": "给您带来不便，非常抱歉。" },
+        { "en": "I've contacted the carrier and", "zh": "我已经联系了承运商，" },
+        { "en": "Would you prefer a replacement or a full refund?", "zh": "您希望补发还是全额退款？" },
+        { "en": "Please don't hesitate to contact me.", "zh": "有任何问题请随时联系我。" }
+      ],
+      "model": "Hi Karen,\n\nI'm really sorry that your desk lamp hasn't arrived yet, especially with your exams this week.\n\nI've contacted the carrier, and it looks like the parcel has been delayed at their local depot. To make sure you're not left without a lamp, I can send a replacement today by express delivery, at no cost to you. If you'd prefer, I can issue a full refund instead.\n\nJust reply and let me know which option works best for you. Good luck with your exams!\n\nBest regards,\nLin"
+    },
+    {
+      "id": "bad-review", "kind": "review", "title_zh": "公开回复一条差评", "level": "B1",
+      "material": "★★☆☆☆ \"The storage box is much smaller than it looks in the photos. Good quality, but useless for my winter clothes.\"",
+      "task_zh": "买家给了两星，说收纳箱比图片看起来小很多。写一段公开回复：感谢反馈，说明尺寸在哪儿写着，给出解决办法。其他买家也会看到。",
+      "hints_zh": ["别争论，先感谢", "温和地说明尺寸信息在哪儿", "提出解决办法（退货 / 推荐大号）", "表示会改进图片，让别的买家安心"],
+      "phrases": [
+        { "en": "Thank you for taking the time to leave a review.", "zh": "感谢您花时间留下评价。" },
+        { "en": "We're sorry the size didn't meet your expectations.", "zh": "很抱歉尺寸没有达到您的预期。" },
+        { "en": "We've updated our photos to show the size more clearly.", "zh": "我们已更新图片，让尺寸更清楚。" },
+        { "en": "our larger version", "zh": "我们的大号款" }
+      ],
+      "model": "Thank you for taking the time to leave a review, and we're glad you like the quality. We're sorry the size didn't meet your expectations. The box measures 40 × 30 × 25 cm, which is listed in the product details, but we agree the photos could make this clearer, so we've added a new photo with everyday items for scale. For winter clothes, our larger version (60 × 40 × 35 cm) may suit you better. If you'd like to return this one, please contact us through your order page and we'll arrange it right away."
+    },
+    {
+      "id": "supplier-delay", "kind": "message", "title_zh": "催供应商交货", "level": "B1",
+      "material": "Hi Lin, sorry, there is a problem with the packaging material. The 2,000 units will be ready on the 25th instead of the 15th.",
+      "task_zh": "供应商说 2000 件货要从 15 号推迟到 25 号。可你的入仓预约在 20 号。回一条消息：说明影响、问能不能先发一部分、要一个确定的日期。",
+      "hints_zh": ["说清楚推迟对你的影响（入仓预约）", "提出折中方案：先发一部分", "要一个明确、能保证的日期", "语气坚定但保持合作"],
+      "phrases": [
+        { "en": "Thanks for letting me know.", "zh": "谢谢告知。" },
+        { "en": "Our warehouse appointment is on the 20th.", "zh": "我们的入仓预约在 20 号。" },
+        { "en": "Would it be possible to ship part of the order first?", "zh": "能不能先发一部分？" },
+        { "en": "Could you confirm a firm date?", "zh": "能给一个确定的日期吗？" }
+      ],
+      "model": "Hi Mr Chen, thanks for letting me know. A ten-day delay is difficult for us, because our warehouse appointment is on the 20th and it's hard to rebook during peak season. Would it be possible to ship part of the order first, for example 1,000 units by the 15th, and the rest by the 25th? If not, could you confirm a firm date for the full order? I'd also appreciate a quick update if anything changes. Thanks for your help."
+    },
+    {
+      "id": "price-talk", "kind": "email", "title_zh": "和工厂谈价格", "level": "B2",
+      "material": "Dear Lin, thank you for your interest. The unit price for the bamboo cutting board is $4.80 for 500 pcs. MOQ is 500. Lead time is 30 days.",
+      "task_zh": "工厂报价 500 件每件 4.8 美元。你想下 2000 件，希望单价降到 4.2。写邮件还价：给出理由、提出数量换价格、留余地。",
+      "hints_zh": ["先表示认可他们的产品", "说明你计划的数量（2000 件）和长期合作", "提出目标价，给理由（数量、市场价格）", "留余地：如果不行，问他们能给的最好价格"],
+      "phrases": [
+        { "en": "We're planning to order 2,000 units.", "zh": "我们计划下 2000 件。" },
+        { "en": "Would you be able to offer a better price?", "zh": "能给个更好的价格吗？" },
+        { "en": "Our target price is", "zh": "我们的目标价是" },
+        { "en": "If that's not possible, what's the best price you can offer?", "zh": "如果做不到，你们能给的最低价是多少？" }
+      ],
+      "model": "Dear Ms Wang,\n\nThank you for the quick quotation. We were impressed by the samples, and we'd like to work with you on a long-term basis.\n\nFor our first order, we're planning 2,000 units rather than 500, with regular repeat orders if sales go well. Given the larger quantity, would you be able to offer a better price? Our target price is $4.20 per unit, which would allow us to stay competitive on Amazon.\n\nIf that's not possible, could you let me know the best price you can offer for 2,000 units?\n\nLooking forward to your reply.\n\nBest regards,\nLin"
+    },
+    {
+      "id": "samples", "kind": "email", "title_zh": "向工厂要样品", "level": "B1",
+      "material": "",
+      "task_zh": "你在展会上看中一家工厂的保温杯。写邮件：自我介绍、要 3 个颜色的样品、问样品费和运费、给出收货地址的方式。",
+      "hints_zh": ["一句话介绍你和你的店", "说清楚在哪儿看到他们的产品", "具体要什么：型号、颜色、数量", "问费用和寄送时间"],
+      "phrases": [
+        { "en": "We met at the trade show last week.", "zh": "我们上周在展会上见过。" },
+        { "en": "I'd like to request samples of", "zh": "我想申请……的样品" },
+        { "en": "Could you let me know the sample cost and shipping fee?", "zh": "能告诉我样品费和运费吗？" },
+        { "en": "Please find our address below.", "zh": "我们的地址见下方。" }
+      ],
+      "model": "Dear Sir or Madam,\n\nMy name is Lin, and I run a home and kitchen store on Amazon UK. We met at your stand at the trade show last week, and I was very interested in your stainless steel travel mugs.\n\nI'd like to request samples of model TM-350 in three colours: black, white and sage green. Could you let me know the sample cost, the shipping fee to London, and how long delivery would take?\n\nPlease find our address below. Thank you, and I look forward to hearing from you.\n\nBest regards,\nLin"
+    },
+    {
+      "id": "bullets", "kind": "listing", "title_zh": "写 Listing 五点描述", "level": "B2",
+      "material": "Product: foldable silicone water bottle. 600 ml. Folds down to 4 cm. Food-grade silicone, BPA-free. Leak-proof lid with carabiner. Dishwasher safe. Weighs 150 g.",
+      "task_zh": "根据产品信息写 5 条五点描述（bullet points）。每条开头用大写短语点出卖点，后面一两句说清好处，不要堆关键词。",
+      "hints_zh": ["每条一个卖点：容量、折叠、材质安全、防漏、好清洗", "先说好处，再说参数", "用具体场景：徒步、通勤、健身房", "别用 best、No.1 这类违规说法"],
+      "phrases": [
+        { "en": "FOLDS FLAT FOR EASY STORAGE", "zh": "可折叠，方便收纳" },
+        { "en": "fits easily into", "zh": "轻松放进……" },
+        { "en": "food-grade, BPA-free silicone", "zh": "食品级、不含 BPA 的硅胶" },
+        { "en": "Simply rinse or put it in the dishwasher.", "zh": "冲一下或放进洗碗机就行。" }
+      ],
+      "model": "FOLDS FLAT TO SAVE SPACE: When empty, the bottle collapses to just 4 cm, so it fits easily into a pocket, handbag or carry-on.\nHOLDS 600 ML: Enough water for a long walk, a gym session or a day at the office.\nSAFE MATERIALS: Made from food-grade, BPA-free silicone with no plastic taste.\nLEAK-PROOF LID WITH CLIP: The screw lid seals tightly, and the carabiner clips onto your backpack.\nEASY TO CLEAN: Simply rinse it, or put it in the dishwasher. At only 150 g, it's light enough to take everywhere."
+    },
+    {
+      "id": "title", "kind": "listing", "title_zh": "写产品标题", "level": "B1",
+      "material": "Product: set of 3 linen storage baskets, small/medium/large, with handles, beige, for shelves and wardrobes.",
+      "task_zh": "给这套收纳篮写一个英文标题：品牌放最前，核心词清楚，写明数量、材质、用途，别超过 200 个字符，别堆重复词。",
+      "hints_zh": ["品牌 + 核心词（storage baskets）放前面", "写清楚 Set of 3 和尺寸", "材质、颜色、用途各一次", "首字母大写，别用全大写和感叹号"],
+      "phrases": [
+        { "en": "Set of 3", "zh": "三件套" },
+        { "en": "with Handles", "zh": "带提手" },
+        { "en": "for Shelves, Wardrobes and Nursery", "zh": "适用于搁架、衣柜和婴儿房" },
+        { "en": "Small, Medium and Large", "zh": "小、中、大号" }
+      ],
+      "model": "Homely Linen Storage Baskets, Set of 3 (Small, Medium, Large) with Handles, Foldable Fabric Organiser Boxes for Shelves, Wardrobes and Nursery, Beige"
+    },
+    {
+      "id": "refund", "kind": "email", "title_zh": "回复买家：要退货", "level": "B1",
+      "material": "Hello, the blender is too loud for my small flat. It works fine, but I'd like to return it. Is that possible? It's been 20 days. — Daniel",
+      "task_zh": "买家觉得搅拌机太吵，用了 20 天想退。按 30 天退货政策，回复他：可以退，怎么退，退款多久到账；顺便提一个降噪小建议。",
+      "hints_zh": ["先确认可以退（还在 30 天内）", "步骤说清楚：在订单页申请、怎么包装", "退款时间", "可选：给一个降噪建议，也许他就不退了"],
+      "phrases": [
+        { "en": "You're still within our 30-day return period.", "zh": "您还在我们的 30 天退货期内。" },
+        { "en": "You can start a return from your order page.", "zh": "您可以在订单页面发起退货。" },
+        { "en": "The refund will be processed within", "zh": "退款会在……内处理" },
+        { "en": "One tip that may help:", "zh": "一个可能有用的小建议：" }
+      ],
+      "model": "Hi Daniel,\n\nThanks for getting in touch. Of course, you're still within our 30-day return period, so you can return the blender.\n\nYou can start a return from your Amazon order page. Please pack the blender in its original box if possible. Once we receive it, the refund will be processed within 3 to 5 working days.\n\nOne tip that may help if you decide to keep it: placing the blender on a folded tea towel or a rubber mat reduces the noise quite a lot.\n\nBest wishes,\nLin"
+    },
+    {
+      "id": "damaged", "kind": "email", "title_zh": "给货代发邮件：货物破损", "level": "B2",
+      "material": "",
+      "task_zh": "到仓的 40 箱陶瓷杯里有 6 箱外箱破损、杯子碎了。给货代写邮件：说明情况、附照片、问索赔流程、要求以后加固包装。",
+      "hints_zh": ["说清楚哪批货（单号）、多少箱、什么问题", "说明你附上了照片和签收记录", "问索赔需要什么、多久处理", "提出以后的要求：加护角、贴易碎标"],
+      "phrases": [
+        { "en": "I'm writing about shipment", "zh": "我写信是关于……这批货" },
+        { "en": "Six of the forty cartons arrived damaged.", "zh": "40 箱里有 6 箱到货时破损。" },
+        { "en": "Please find the photos attached.", "zh": "照片见附件。" },
+        { "en": "Could you explain the claims process?", "zh": "能说明一下索赔流程吗？" }
+      ],
+      "model": "Dear Tony,\n\nI'm writing about shipment SZ-20481, which arrived at the Coventry warehouse yesterday. Six of the forty cartons arrived damaged, and around 70 ceramic mugs inside were broken.\n\nPlease find the photos and the signed delivery note attached. Could you explain the claims process, including what documents you need and how long it usually takes?\n\nFor future shipments, we'd also like the cartons to be reinforced with corner protectors and clearly marked as fragile.\n\nThank you for your help.\n\nKind regards,\nLin"
+    },
+    {
+      "id": "product-question", "kind": "message", "title_zh": "回答买家的使用问题", "level": "A2",
+      "material": "Hi! Can I use this rice cooker to make porridge? And how long does it take? Thanks, Mei",
+      "task_zh": "买家问电饭煲能不能煮粥、要多久。简单友好地回答：能，按哪个键，大概多久，水和米的比例。",
+      "hints_zh": ["直接回答：可以", "按哪个键", "时间和比例", "祝她用得开心"],
+      "phrases": [
+        { "en": "Yes, you can!", "zh": "可以的！" },
+        { "en": "Just press the", "zh": "按……键就行" },
+        { "en": "It takes about", "zh": "大约需要……" },
+        { "en": "Enjoy your porridge!", "zh": "祝您喝粥愉快！" }
+      ],
+      "model": "Hi Mei,\n\nYes, you can! Just add the rice and water, then press the \"Porridge\" button. It takes about 60 minutes. For a thick porridge, use one cup of rice to eight cups of water. Add more water if you like it thinner.\n\nEnjoy your porridge!\nLin"
+    }
+  ]
+}

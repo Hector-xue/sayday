@@ -1,13 +1,11 @@
 # 剧集 + 雅思听力配音：content/episodes/*.json、content/ielts/listening.json 的台词 → Kokoro（每个角色自己的声音）→ mp3。
 # 另配主角改名 / 男声的几套（content/episodes/names.json）。美音 / 英音 × 4 片并行，每片约 40 分钟
 # 服务器用 ONLY=e scripts/sync-audio.sh <run_id> 发布到 sayday.ivyea.com/audio/{us,gb}/e/
+# 只手动触发（全部重配）。加了台词 / 分支 / 支线：用 content-audio 的 incremental=true、only=e,v 只配新增的，ONLY=add 发布
 name: content-episodes
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ['content/episodes/**', 'content/ielts/listening.json', 'content/audio/build_audio.mjs']
 
 jobs:
   gen:

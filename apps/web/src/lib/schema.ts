@@ -56,4 +56,8 @@ export const MIGRATIONS: string[] = [
   CREATE TABLE voice_diary(id INTEGER PRIMARY KEY, week TEXT NOT NULL, pcm BLOB NOT NULL, score INTEGER, wpm REAL, pauses INTEGER, sec REAL NOT NULL, ts INTEGER NOT NULL);
   CREATE INDEX voice_diary_week ON voice_diary(week);
   `,
+  // v0.0.21：工作英语练习（task = content/work 的任务 id；result = AI 批改 JSON，没接 AI 为空）
+  `
+  CREATE TABLE work(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, task TEXT NOT NULL, text TEXT NOT NULL, score REAL, result TEXT);
+  `,
 ]

@@ -30,6 +30,26 @@
         { "who": "Lin", "en": "Great. Do you know a café called Sophie's Kitchen? A friend told me to go there.", "zh": "太好了。你知道一家叫 Sophie's Kitchen 的店吗？有个朋友叫我去那儿。" },
         { "who": "Callum", "en": "Sophie's? Everyone knows Sophie's. But I heard it might be closing soon.", "zh": "Sophie's？谁都知道。不过我听说它可能快关门了。" }
       ],
+      "choice": {
+        "at": 10, "q_zh": "Callum 说八月的爱丁堡一团乱，你问他：",
+        "options": [
+          { "label_zh": "怎么熬过这团乱", "lines": [
+            { "who": "Lin", "en": "Any advice for surviving the chaos?", "zh": "有什么熬过这团乱的建议吗？" },
+            { "who": "Callum", "en": "Wear good shoes, carry an umbrella, and never trust a sunny morning.", "zh": "穿双好鞋，带把伞，千万别相信晴朗的早晨。" }
+          ] },
+          { "label_zh": "艺术节最值得看什么", "lines": [
+            { "who": "Lin", "en": "What's the best thing to see during the festival?", "zh": "艺术节期间最值得看的是什么？" },
+            { "who": "Callum", "en": "The street performers. Some of them are better than the shows you pay for.", "zh": "街头艺人。有些比买票看的演出还好。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "醒来已是苏格兰", "lines": [
+        { "who": "Callum", "en": "Lin, wake up. You don't want to miss this.", "zh": "林，醒醒。这个你可别错过。" },
+        { "who": "Lin", "en": "Is that the sea? It's so bright.", "zh": "那是海吗？好亮。" },
+        { "who": "Callum", "en": "The North Sea. We're about an hour from Edinburgh now.", "zh": "北海。离爱丁堡大概还有一个小时。" },
+        { "who": "Lin", "en": "I fell asleep in one country and woke up in another. That's a first.", "zh": "在一个地方睡着，在另一个地方醒来。头一回。" },
+        { "who": "Callum", "en": "Welcome to Scotland. The tea on this train is terrible, but the view is free.", "zh": "欢迎来到苏格兰。这车上的茶很难喝，不过风景免费。" }
+      ] },
       "quiz": [
         { "q": "你为什么去爱丁堡？", "options": ["去旅游", "给剧院设计海报", "去看 Callum 的姐姐"], "answer": 1 },
         { "q": "Callum 是做什么的？", "options": ["在老城带徒步游", "开卧铺列车", "剧院制作人"], "answer": 0 },
@@ -55,6 +75,26 @@
         { "who": "Sophie", "en": "Then you'll need feeding. Come to the supper club tonight. It's on the house.", "zh": "那你得吃好。今晚来小餐会吧，我请客。" },
         { "who": "Lin", "en": "Only if you let me help with the washing-up afterwards.", "zh": "那你得让我饭后帮忙洗碗才行。" }
       ],
+      "choice": {
+        "at": 2, "q_zh": "十二个陌生人一起吃饭，你好奇地问：",
+        "options": [
+          { "label_zh": "陌生人真的会聊起来吗", "lines": [
+            { "who": "Lin", "en": "Twelve strangers? Do they actually talk to each other?", "zh": "十二个陌生人？他们真会互相聊天吗？" },
+            { "who": "Sophie", "en": "By dessert, they're usually swapping phone numbers.", "zh": "吃到甜点的时候，一般都在互换电话了。" }
+          ] },
+          { "label_zh": "今晚是什么汤", "lines": [
+            { "who": "Lin", "en": "What kind of soup is it?", "zh": "是什么汤？" },
+            { "who": "Sophie", "en": "Cullen skink. Smoked fish, potatoes and cream. Very Scottish.", "zh": "卡伦浓汤。烟熏鱼、土豆加奶油，非常苏格兰。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "洗碗池边", "lines": [
+        { "who": "Sophie", "en": "You don't have to dry every single spoon, you know.", "zh": "你不用每个勺子都擦干的。" },
+        { "who": "Lin", "en": "I like it. It's the only quiet part of my day.", "zh": "我喜欢。这是我一天里唯一安静的时候。" },
+        { "who": "Sophie", "en": "Can I tell you something? At my first supper club, only two people came.", "zh": "跟你说个事？我第一次办小餐会，只来了两个人。" },
+        { "who": "Lin", "en": "Only two? What did you do?", "zh": "才两个？那你怎么办？" },
+        { "who": "Sophie", "en": "I cooked for twelve anyway. They took the rest home and told everyone. Next week, it sold out.", "zh": "我照样做了十二人份。他们把剩下的带回家，到处讲。下一周就满座了。" }
+      ] },
       "quiz": [
         { "q": "Sophie 的店为什么可能关门？", "options": ["生意不好", "楼被卖了，要改成公寓", "她要回伦敦"], "answer": 1 },
         { "q": "你要在五天里做完什么？", "options": ["三张海报", "一场演出", "十二道菜"], "answer": 0 },
@@ -80,6 +120,26 @@
         { "who": "Jake", "en": "It was. Then the printer called. Sorry, that's festival life.", "zh": "原来是。后来印刷厂打电话了。抱歉，艺术节就是这样。" },
         { "who": "Lin", "en": "No problem. I'll work late tonight.", "zh": "没问题。我今晚加班。" }
       ],
+      "choice": {
+        "at": 2, "q_zh": "美式英语和英式英语不一样，你问 Jake：",
+        "options": [
+          { "label_zh": "还有哪些词要小心", "lines": [
+            { "who": "Lin", "en": "What other words should I watch out for?", "zh": "还有哪些词我得小心？" },
+            { "who": "Jake", "en": "\"Pants.\" For me, they're trousers. Here, they're underwear. Don't say it in a meeting.", "zh": "“pants”。我说的是长裤，这里指的是内裤。开会时可别说。" }
+          ] },
+          { "label_zh": "是不是第一次来爱丁堡", "lines": [
+            { "who": "Lin", "en": "Is this your first time working in Edinburgh?", "zh": "这是你第一次在爱丁堡工作吗？" },
+            { "who": "Jake", "en": "Fifth time. I still can't understand a single taxi driver.", "zh": "第五次了。我还是一个出租车司机的话都听不懂。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "加班到深夜", "lines": [
+        { "who": "Sophie", "en": "Room service! I thought you might forget to eat.", "zh": "送餐服务！我猜你会忘了吃饭。" },
+        { "who": "Lin", "en": "You're a lifesaver. I've been staring at this poster for six hours.", "zh": "你救了我。我盯着这张海报看了六个小时。" },
+        { "who": "Sophie", "en": "Which one do you like better, the loud one or the quiet one?", "zh": "你更喜欢哪张，热闹的还是安静的？" },
+        { "who": "Lin", "en": "The quiet one. But Jake wants fire.", "zh": "安静那张。可 Jake 要火。" },
+        { "who": "Sophie", "en": "Then show him both, and let the poster speak for itself.", "zh": "那就两张都给他看，让海报自己说话。" }
+      ] },
       "quiz": [
         { "q": "对 Jake 来说，first floor 指哪层？", "options": ["地面层", "地面层上面一层", "地下室"], "answer": 0 },
         { "q": "Jake 想要什么样的海报？", "options": ["安静素雅", "大胆、鲜艳、有火焰", "只有文字"], "answer": 1 },
@@ -105,6 +165,26 @@
         { "who": "Callum", "en": "Stories don't pay the rent, unfortunately.", "zh": "可惜，故事交不了房租。" },
         { "who": "Lin", "en": "In London, they did. Let me tell you about a bookshop and a reading night.", "zh": "在伦敦，故事交上了房租。我给你讲讲一家书店和一个读书夜的事吧。" }
       ],
+      "choice": {
+        "at": 5, "q_zh": "爬山爬得气喘吁吁，你说：",
+        "options": [
+          { "label_zh": "停一下喝口水", "lines": [
+            { "who": "Lin", "en": "Can we stop for a minute? I need some water.", "zh": "能停一下吗？我要喝点水。" },
+            { "who": "Callum", "en": "Take your time. This hill has been here for millions of years. It's not going anywhere.", "zh": "慢慢来。这座山在这儿几百万年了，跑不了。" }
+          ] },
+          { "label_zh": "比赛谁先到山顶", "lines": [
+            { "who": "Lin", "en": "Race you to the top!", "zh": "比赛谁先到山顶！" },
+            { "who": "Callum", "en": "You're on! Loser buys the coffee.", "zh": "来就来！输的人请咖啡。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "睡着的龙", "lines": [
+        { "who": "Callum", "en": "Do you want to hear the local legend about this hill?", "zh": "想听听这座山的传说吗？" },
+        { "who": "Lin", "en": "Always. That's why I like your tours.", "zh": "当然。我就喜欢你讲这个。" },
+        { "who": "Callum", "en": "Some people say it's a sleeping dragon. It ate too many sheep and lay down for a nap.", "zh": "有人说它是一条睡着的龙。羊吃太多了，躺下打个盹。" },
+        { "who": "Lin", "en": "A very long nap.", "zh": "这盹睡得可真久。" },
+        { "who": "Callum", "en": "So we walk quietly. Just in case.", "zh": "所以我们走路要轻点。以防万一。" }
+      ] },
       "quiz": [
         { "q": "Jake 最后选了哪版海报？", "options": ["大胆的那版", "安静的那版", "两版都不要"], "answer": 1 },
         { "q": "天晴时从山顶能看到什么？", "options": ["海", "伦敦", "城堡里面"], "answer": 0 },
@@ -129,6 +209,26 @@
         { "who": "Lin", "en": "I know someone who does exactly that. And she's about to lose her kitchen.", "zh": "我认识一个人正好就是做这个的。而且她马上就要失去她的厨房了。" },
         { "who": "Jake", "en": "Set up a meeting. Today, if possible. We have two weeks left to save this show.", "zh": "约个见面。可能的话就今天。我们只剩两周来救这部戏。" }
       ],
+      "choice": {
+        "at": 2, "q_zh": "只得了一颗星，你想安慰 Jake：",
+        "options": [
+          { "label_zh": "评论家又不买票", "lines": [
+            { "who": "Lin", "en": "Don't take it personally. Critics don't buy tickets.", "zh": "别往心里去。评论家又不买票。" },
+            { "who": "Jake", "en": "No, but everyone who buys tickets reads the critics.", "zh": "是不买，可买票的人都看评论。" }
+          ] },
+          { "label_zh": "一篇评论说明不了全部", "lines": [
+            { "who": "Lin", "en": "One review isn't the whole story.", "zh": "一篇评论说明不了全部。" },
+            { "who": "Jake", "en": "Tell that to the people cancelling their tickets this morning.", "zh": "这话去跟今天早上退票的人说吧。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Jake 的第一次失败", "lines": [
+        { "who": "Jake", "en": "You know, my first show in New York closed after three nights.", "zh": "你知道吗，我在纽约的第一部戏演了三晚就停了。" },
+        { "who": "Lin", "en": "Three nights? What happened?", "zh": "三晚？怎么回事？" },
+        { "who": "Jake", "en": "Bad reviews, a broken stage and an actor who forgot every line.", "zh": "差评、舞台坏了，还有个演员把台词全忘了。" },
+        { "who": "Lin", "en": "And you kept going after that?", "zh": "那之后你还继续干了？" },
+        { "who": "Jake", "en": "Twenty years later, here I am, losing again. But never for long.", "zh": "二十年后，我又在这儿输了。不过从来不会输太久。" }
+      ] },
       "quiz": [
         { "q": "评论员给了几颗星？", "options": ["一颗", "三颗", "五颗"], "answer": 0 },
         { "q": "评论员觉得这部戏有什么问题？", "options": ["太吵", "冷冰冰、有距离感", "太长"], "answer": 1 },
@@ -154,6 +254,26 @@
         { "who": "Lin", "en": "A ceilidh? I'm sorry, I don't know that word.", "zh": "Ceilidh？抱歉，我不知道这个词。" },
         { "who": "Sophie", "en": "It's a Scottish dance party. Don't worry, nobody knows the steps after the second song.", "zh": "是苏格兰的舞会。别担心，第二首歌之后谁都记不住舞步。" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "怎么打动 Morag？你补了一句：",
+        "options": [
+          { "label_zh": "菜单上写她的名字", "lines": [
+            { "who": "Lin", "en": "We'd also put your name on every menu, as a thank-you.", "zh": "我们还会把您的名字印在每份菜单上，表示感谢。" },
+            { "who": "Morag", "en": "Flattery will get you everywhere, dear. Go on.", "zh": "嘴真甜，亲爱的。接着说。" }
+          ] },
+          { "label_zh": "大厅每晚都会热热闹闹", "lines": [
+            { "who": "Lin", "en": "The hall would be full of life again, every single night.", "zh": "大厅每天晚上都会重新热闹起来。" },
+            { "who": "Morag", "en": "It hasn't been full of life since my husband's choir stopped singing.", "zh": "自从我丈夫的合唱团不唱了，这里就再没热闹过。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "苏格兰话小课", "lines": [
+        { "who": "Morag", "en": "If you're staying in Scotland, you need a few proper words.", "zh": "既然待在苏格兰，你得学几个地道的词。" },
+        { "who": "Lin", "en": "Please teach me. I only know \"wee\".", "zh": "请教我吧。我只知道“wee”（小）。" },
+        { "who": "Morag", "en": "\"Dreich\" means grey, wet and miserable. Like today.", "zh": "“dreich”是阴沉、潮湿、让人难受。就像今天。" },
+        { "who": "Lin", "en": "And what's the opposite?", "zh": "那反义词呢？" },
+        { "who": "Morag", "en": "\"Bonnie.\" Beautiful. Like this hall will be, thanks to you.", "zh": "“bonnie”，漂亮。多亏了你，这个大厅会变得很漂亮。" }
+      ] },
       "quiz": [
         { "q": "Morag 的大厅空了多久？", "options": ["三个月", "三年", "三十年"], "answer": 1 },
         { "q": "谁来做饭？", "options": ["Morag", "Sophie", "Jake"], "answer": 1 },
@@ -178,6 +298,26 @@
         { "who": "Lin", "en": "In my experience, silence usually means they're doing the maths.", "zh": "按我的经验，安静通常说明他们在算账。" },
         { "who": "Jake", "en": "Look, the woman at the end is smiling. I think we just did it.", "zh": "看，最边上那位女士在笑。我觉得我们成了。" }
       ],
+      "choice": {
+        "at": 0, "q_zh": "投资人坐好了，你怎么开场？",
+        "options": [
+          { "label_zh": "先抛一个问题", "lines": [
+            { "who": "Lin", "en": "Let me start with a question. When did you last talk to a stranger at dinner?", "zh": "我先问个问题：你们上一次在饭桌上和陌生人聊天是什么时候？" },
+            { "who": "Lin", "en": "Hold that thought. I'll come back to it at the end.", "zh": "先记住这个问题，最后我再回来说。" }
+          ] },
+          { "label_zh": "先说坏消息", "lines": [
+            { "who": "Lin", "en": "Let me start with the bad news.", "zh": "我先说坏消息。" },
+            { "who": "Lin", "en": "Then I'll give you the good news, which is much more interesting.", "zh": "然后再说好消息，好消息有意思多了。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "投资人走了以后", "lines": [
+        { "who": "Jake", "en": "Lin, I have a confession. I already told my mother we got the money.", "zh": "林，我得坦白。我已经跟我妈说钱到手了。" },
+        { "who": "Lin", "en": "Before the meeting? Jake!", "zh": "开会之前？Jake！" },
+        { "who": "Jake", "en": "Positive thinking. Also, she was going to call me every hour otherwise.", "zh": "积极思考嘛。再说不这样她每小时都要打电话来。" },
+        { "who": "Lin", "en": "Well, now you don't have to lie to her.", "zh": "好吧，现在你不用骗她了。" },
+        { "who": "Jake", "en": "Exactly. Let's celebrate. Dinner's on me, as long as Sophie's cooking.", "zh": "没错。庆祝一下。我请客，只要是 Sophie 做饭。" }
+      ] },
       "quiz": [
         { "q": "戏只拿一颗星的主要原因是什么？", "options": ["票太贵", "观众觉得和角色有隔阂", "演员迟到"], "answer": 1 },
         { "q": "试吃的二十个人里，多少人愿意推荐？", "options": ["十个", "十二个", "十八个"], "answer": 2 },
@@ -202,6 +342,26 @@
         { "who": "Lin", "en": "He can't fire you. You don't work for him. Yet.", "zh": "他开不了你，你又不是他的员工。暂时还不是。" },
         { "who": "Callum", "en": "Right. Give me ten minutes to find some torches, and we're in business.", "zh": "好。给我十分钟找几个手电筒，咱们就开工。" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "听说有条又窄又黑的小巷，你问：",
+        "options": [
+          { "label_zh": "六十个人走安全吗", "lines": [
+            { "who": "Lin", "en": "Is it safe for sixty people?", "zh": "六十个人走安全吗？" },
+            { "who": "Callum", "en": "If we go in small groups, yes. I've done it with school trips.", "zh": "分成小组走就没问题。我带学生团走过。" }
+          ] },
+          { "label_zh": "闹鬼吗", "lines": [
+            { "who": "Lin", "en": "Is it haunted? Please say no.", "zh": "那里闹鬼吗？千万说不闹。" },
+            { "who": "Callum", "en": "Only on Tuesdays. Today's Thursday, so we're fine.", "zh": "只在周二闹。今天周四，没事。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "小巷里的故事", "lines": [
+        { "who": "Callum", "en": "Stop here for a moment. Listen to how quiet it is.", "zh": "在这儿停一下。听，多安静。" },
+        { "who": "Lin", "en": "I can hear the rain, but I can't feel it.", "zh": "听得到雨声，却淋不到雨。" },
+        { "who": "Callum", "en": "Hundreds of years ago, whole families lived down here, ten people in one room.", "zh": "几百年前，一整家人住在这底下，十个人挤一间屋。" },
+        { "who": "Lin", "en": "It's hard to imagine. It's so small.", "zh": "真难想象，这么小。" },
+        { "who": "Callum", "en": "That's why I tell their stories. Somebody should remember them.", "zh": "所以我要讲他们的故事。总得有人记得他们。" }
+      ] },
       "quiz": [
         { "q": "暴雨造成了什么问题？", "options": ["大厅停电", "通往大厅的街道被淹", "演员病了"], "answer": 1 },
         { "q": "Callum 知道哪条路？", "options": ["穿过老巷子的有顶通道", "坐船过去", "绕城外的高速"], "answer": 0 },
@@ -226,6 +386,26 @@
         { "who": "Lin", "en": "Funny you should say that. Jake asked me to stay and work on his next show. In New York.", "zh": "你这么说真巧。Jake 请我留下来做他下一部戏。在纽约。" },
         { "who": "Emma", "en": "New York?! Lin, you can't drop a bomb like that at midnight!", "zh": "纽约？！林，你不能半夜扔下这样一颗炸弹！" }
       ],
+      "choice": {
+        "at": 4, "q_zh": "Emma 夸你很会把人连在一起，你回答：",
+        "options": [
+          { "label_zh": "是跟你学的", "lines": [
+            { "who": "Lin", "en": "Thanks, Emma. I learned it from you, actually.", "zh": "谢谢你，Emma。其实是跟你学的。" },
+            { "who": "Emma", "en": "Don't be silly. But I'll take the compliment.", "zh": "别瞎说。不过这句夸奖我收下了。" }
+          ] },
+          { "label_zh": "只是运气好", "lines": [
+            { "who": "Lin", "en": "I'm just lucky to meet the right people.", "zh": "我只是运气好，遇到了对的人。" },
+            { "who": "Emma", "en": "Luck is when you talk to strangers on trains, Lin. That's not luck, that's you.", "zh": "林，在火车上和陌生人聊天，这不是运气，是你自己。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "Emma 的小说写完了一半", "lines": [
+        { "who": "Emma", "en": "Oh, and I have news too. I finished the first half of my novel.", "zh": "对了，我也有消息。我的小说写完前一半了。" },
+        { "who": "Lin", "en": "The one from the drawer? Emma, that's amazing!", "zh": "抽屉里那本？Emma，太棒了！" },
+        { "who": "Emma", "en": "There's a character in it now who can't open her front door on her first day in London.", "zh": "里面多了个角色，第一天到伦敦就打不开自家的门。" },
+        { "who": "Lin", "en": "I wonder who that could be.", "zh": "我猜不出那是谁呢。" },
+        { "who": "Emma", "en": "No idea. Pure fiction. Now go to sleep, superstar.", "zh": "不知道，纯属虚构。快去睡吧，大明星。" }
+      ] },
       "quiz": [
         { "q": "报纸给了这部戏几颗星？", "options": ["一颗", "三颗", "四颗"], "answer": 2 },
         { "q": "Emma 说你特别擅长什么？", "options": ["设计海报", "把彼此需要的人连在一起", "做饭"], "answer": 1 },
@@ -251,6 +431,26 @@
         { "who": "Lin", "en": "But I still don't know the steps!", "zh": "可我还是不会跳啊！" },
         { "who": "Sophie", "en": "Nobody does, Lin. That's the whole point. Come on!", "zh": "谁都不会，林。重点就在这儿。来吧！" }
       ],
+      "choice": {
+        "at": 8, "q_zh": "Jake 说邀请一年有效，你回他：",
+        "options": [
+          { "label_zh": "从伦敦给你寄明信片", "lines": [
+            { "who": "Lin", "en": "Thank you, Jake. I'll send you a postcard from London.", "zh": "谢谢你，Jake。我从伦敦给你寄明信片。" },
+            { "who": "Jake", "en": "Make it a good one. I collect them.", "zh": "挑张好看的，我收藏明信片。" }
+          ] },
+          { "label_zh": "一年后再问我", "lines": [
+            { "who": "Lin", "en": "Ask me again in a year. Maybe the answer will be different.", "zh": "一年后再问我吧。也许答案就不一样了。" },
+            { "who": "Jake", "en": "Oh, I'll ask. I've already set a reminder on my phone.", "zh": "我肯定会问的。手机提醒都设好了。" }
+          ] }
+        ]
+      },
+      "bonus": { "title_zh": "凌晨两点的台阶", "lines": [
+        { "who": "Sophie", "en": "My feet are going to hurt for a week.", "zh": "我的脚要疼一个星期了。" },
+        { "who": "Lin", "en": "Mine too. But that was the best night of the whole summer.", "zh": "我也是。不过这是整个夏天最棒的一晚。" },
+        { "who": "Sophie", "en": "Give me the notebook for a second. I want to write something.", "zh": "把笔记本给我一下，我想写点东西。" },
+        { "who": "Lin", "en": "What are you writing?", "zh": "你在写什么？" },
+        { "who": "Sophie", "en": "A new last page. \"Wherever you go next, cook for strangers. They won't stay strangers for long.\"", "zh": "新的最后一页：“不管你下一站去哪儿，给陌生人做顿饭。他们很快就不再是陌生人。”" }
+      ] },
       "quiz": [
         { "q": "Morag 同意把大厅租给 Sophie 多久？", "options": ["五个月", "一年", "五年"], "answer": 2 },
         { "q": "你对 Jake 的邀请怎么回答？", "options": ["马上答应", "很想去，但不是现在", "直接拒绝"], "answer": 1 },

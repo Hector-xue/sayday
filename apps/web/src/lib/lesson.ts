@@ -7,6 +7,7 @@ import type { Goal, Cefr } from './levels'
 import type { Accent } from './tts'
 import type { PlacementResult } from './placement'
 import { bookOrder } from './books'
+import { getInterests, preferTopics, topicMatcher } from './interests'
 import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type CheckItem } from './calibrate'
 import { CEFR } from './levels'
 import { weakPhones } from './progress'
@@ -116,8 +117,11 @@ async function pickListens(n: number, vocabCefr: Cefr, used: Set<number>): Promi
   // 太短的句子听不出水平，太长的手机上读选项累
   const pool = sents.filter((s) => s.cefr === target && !heard.has(s.id) && !used.has(s.id) && s.en.length >= 18 && s.en.length <= 80)
   const out: Step[] = []
+  const match = topicMatcher(await getInterests())
   while (out.length < n && pool.length) {
-    const s = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]
+    const from = preferTopics(pool, match)
+    const s = from[Math.floor(Math.random() * from.length)]
+    pool.splice(pool.indexOf(s), 1)
     used.add(s.id)
     out.push({ kind: 'listen', sentence: s, ...listenOptions(s, sents.filter((x) => x.cefr === target)) })
   }
@@ -153,8 +157,11 @@ export async function buildSession(p: Profile, minimum = false, comeback = false
     const { sents } = await loadContent()
     const cap = Math.max(800, p.placement.frontier + 500)
     const pool = sents.filter((s) => s.hard <= cap && !used.has(s.id))
+    const match = topicMatcher(await getInterests())
     for (let i = 0; shadows.length < shadowLeft && pool.length; i++) {
-      const s = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]
+      const from = preferTopics(pool, match)
+      const s = from[Math.floor(Math.random() * from.length)]
+      pool.splice(pool.indexOf(s), 1)
       shadows.push({ kind: 'shadow', sentence: s })
     }
   }
