@@ -4,6 +4,11 @@ export type Logits = { logits: Float32Array; T: number; V: number; inferMs: numb
 
 const tauri = (globalThis as any).__TAURI__?.core as { invoke: (cmd: string, args?: object) => Promise<any> } | undefined
 export const isNative = !!tauri
+/**
+ * 跑在 App 外壳里（安卓，或者桌面版 Windows / macOS / Linux）：页面不是从 sayday.ivyea.com 打开的，
+ * 音频包、语音识别模型这些服务器上的东西要写完整地址去取
+ */
+export const isShell = isNative || (typeof location !== 'undefined' && (!/^https?:$/.test(location.protocol) || location.hostname === 'tauri.localhost'))
 
 const toB64 = (f32: Float32Array) => {
   const u8 = new Uint8Array(f32.buffer, f32.byteOffset, f32.byteLength)

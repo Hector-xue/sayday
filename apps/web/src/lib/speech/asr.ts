@@ -1,5 +1,5 @@
 // 语音转文字（和 Emma 说话、说日记、口语练习）：全在本机，录音不上传
-import { isNative } from './engine'
+import { isShell } from './engine'
 
 export type AsrStatus = { state: 'idle' | 'loading' | 'ready' | 'error'; got?: number; total?: number; error?: string }
 let status: AsrStatus = { state: 'idle' }
@@ -9,7 +9,7 @@ export const asrStatus = () => status
 export function onAsrStatus(f: (s: AsrStatus) => void) { listeners.add(f); return () => { listeners.delete(f) } }
 
 // 模型放在门户的公开目录（App 里跨域取；目录名带版本，换模型时改这里）
-const BASE = (isNative ? 'https://sayday.ivyea.com' : location.origin) + '/asr/moonshine-base-q8/'
+const BASE = (isShell ? 'https://sayday.ivyea.com' : location.origin) + '/asr/moonshine-base-q8/'
 export const ASR_MB = 63
 
 let worker: Worker | null = null

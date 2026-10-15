@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 桌面版 macOS：跟读要用麦克风 -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>跟读打分和说话输入要用麦克风，录音只在这台电脑上处理。</string>
+</dict>
+</plist>

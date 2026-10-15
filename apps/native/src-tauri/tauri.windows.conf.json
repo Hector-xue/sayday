@@ -1,0 +1,4 @@
+{
+  "app": { "withGlobalTauri": false, "windows": [{ "title": "日日说", "width": 460, "height": 900, "minWidth": 360, "minHeight": 600 }] },
+  "bundle": { "targets": ["nsis"], "windows": { "nsis": { "languages": ["SimpChinese", "English"] } } }
+}
