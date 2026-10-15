@@ -9,6 +9,7 @@
     "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
+    "@larksuiteoapi/node-sdk": "1.74.0",
     "ogg-opus-decoder": "1.7.3",
     "ts-fsrs": "5.2.1"
   }

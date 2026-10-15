@@ -51,7 +51,7 @@ Rules:
 Output format, exactly:
 <your reply in English>
 ###
-{"zh": "<natural Simplified Chinese translation of your reply>", "fix": null}
+{"zh": "<natural Simplified Chinese translation of your reply, every English word translated except names>", "fix": null}
 
 ${FIX_RULE[persona]}: {"you": "<their sentence>", "better": "<corrected natural sentence>", "why": "<one short reason in Simplified Chinese>"}. If they wrote in Chinese, set fix to {"you": "<their Chinese>", "better": "<how to say it in English>", "why": "可以这样用英文说"}.`
 }
@@ -146,6 +146,13 @@ export async function shouldNudge(now = Date.now()): Promise<boolean> {
   return said > 0 && !!last?.ts && now - last.ts >= NUDGE_AFTER && !(await unreadNudge())
 }
 
+/** 主动找人时各性格的说话方式（不然三种开场白都一样） */
+export const NUDGE_STYLE: Record<Persona, string> = {
+  warm: 'warm and friendly, end with an easy question.',
+  tease: 'cheeky — tease them a little for going quiet, end with a question.',
+  strict: 'polite but direct, like an examiner checking in: ask one question that needs a full-sentence answer with a reason or example.',
+}
+
 /** 生成一条主动消息并存起来（失败就算了，不打扰） */
 export async function nudge(cfg: AiConfig, level: Cefr, recentWords: string[], now = Date.now()): Promise<Nudge | null> {
   if (!(await shouldNudge(now))) return null
@@ -154,7 +161,7 @@ export async function nudge(cfg: AiConfig, level: Cefr, recentWords: string[], n
   const past = (await history(10)).map((m) => `${m.role === 'user' ? 'Learner' : 'Emma'}: ${m.content}`).join('\n')
   const raw = await complete(cfg, {
     system: systemPrompt(level, await getMemory(), recentWords, await getPersona()),
-    messages: [{ role: 'user', content: `(You haven't texted each other for ${days} days. Text them first, like a flatmate would: 1–2 short sentences. Follow up on something you remember about them or from your last chat if you can, otherwise share a small thing from your day. End with an easy question. Don't mention studying or apps. Last chat for context:\n${past})` }],
+    messages: [{ role: 'user', content: `(You haven't texted each other for ${days} days. Text them first, in your own personality: ${NUDGE_STYLE[await getPersona()]} 1–2 short sentences. Follow up on something you remember about them or from your last chat if you can, otherwise share a small thing from your day. Don't mention studying or apps. Last chat for context:\n${past})` }],
     maxTokens: 200, temperature: 0.9,
   })
   const r = splitReply(raw)

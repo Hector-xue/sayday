@@ -32,9 +32,9 @@ ReadWritePaths=/var/lib/sayday-bot
 [Install]
 WantedBy=multi-user.target
 UNIT
-# 飞书回调：nginx /api/bot/feishu → 127.0.0.1:5299（Telegram 用长轮询，不用回调地址）
+# 飞书回调地址模式（配了 FEISHU_VERIFY_TOKEN）才要 nginx /api/bot/feishu → 127.0.0.1:5299；长连接模式和 Telegram 都不用
 CONF=/etc/nginx/conf.d/sayday.ivyea.com.conf
-if grep -q '^FEISHU_APP_ID=.\+' "$ENVF" && ! grep -q '/api/bot/feishu' "$CONF"; then
+if grep -q '^FEISHU_VERIFY_TOKEN=.\+' "$ENVF" && ! grep -q '/api/bot/feishu' "$CONF"; then
   cp -p "$CONF" "$ROOT/.cache/sayday.ivyea.com.conf.bak-bot-$(date +%Y%m%d%H%M)"
   python3 - "$CONF" <<'PY'
 import sys

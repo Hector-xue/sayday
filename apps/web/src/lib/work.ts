@@ -36,10 +36,10 @@ Return ONLY JSON:
  "covered": ["<task points they handled well, Simplified Chinese>"],
  "missing": ["<task points missing or unclear, Simplified Chinese; empty if none>"],
  "edits": [{"from": "<exact fragment copied from their text>", "to": "<better fragment>", "why": "<short reason in Simplified Chinese>"}],
- "better": "<their text rewritten as a native professional would write it, keeping their ideas>",
+ "better": "<their text rewritten as a native professional would write it, keeping their ideas; it must be grammatically flawless with consistent tenses>",
  "phrases": [{"en": "<useful phrase from the rewrite>", "zh": "<Chinese>"}],
  "comment": "<one or two encouraging sentences in Simplified Chinese with the single most important thing to improve>"}
-At most 8 edits, real problems only; 4 phrases.`
+At most 8 edits, real grammar / word-choice / tone / content problems only (not line breaks or layout); 4 phrases.`
 }
 
 export async function checkWork(cfg: AiConfig, t: Task, text: string): Promise<WorkResult> {

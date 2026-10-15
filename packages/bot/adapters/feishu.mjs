@@ -1,6 +1,9 @@
-// 飞书：事件订阅（接收消息 im.message.receive_v1、卡片按钮 card.action.trigger）回调到本机 HTTP 服务，nginx 转发 /api/bot/feishu。
-// 不支持“加密策略”里的 Encrypt Key（后台别设）；用 Verification Token 校验来源。按钮用消息卡片，语音是 opus
+// 飞书：收消息（im.message.receive_v1）和卡片按钮（card.action.trigger）两种方式，二选一：
+//   长连接（默认，没配 FEISHU_VERIFY_TOKEN 时）：机器人主动连飞书，不需要公网回调地址，后台“事件与回调”选“使用长连接接收”
+//   回调地址（配了 FEISHU_VERIFY_TOKEN）：飞书 POST 到本机 HTTP 服务（nginx 转发 /api/bot/feishu），用 Verification Token 校验；不支持 Encrypt Key
+// 发消息都走开放平台接口；按钮用消息卡片，语音是 opus
 import http from 'node:http'
+import * as lark from '@larksuiteoapi/node-sdk'
 
 export function feishu({ appId, appSecret, verifyToken, base = 'https://open.feishu.cn', port = 5299, onMessage, log = console.log }) {
   let tok = null, exp = 0
@@ -56,15 +59,34 @@ export function feishu({ appId, appSecret, verifyToken, base = 'https://open.fei
       if (body.header?.token !== verifyToken) { res.writeHead(403); return res.end() }
       // 飞书 3 秒内要回 200，处理放后台；同一事件可能重发，按 event_id 去重
       res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}')
-      const id = body.header?.event_id
-      if (id) { if (seen.has(id)) return; seen.add(id); if (seen.size > 5000) seen.clear() }
       const d = parse(body)
       if (!d) return
+      const id = body.header?.event_id
+      if (id) { if (seen.has(id)) return; seen.add(id); if (seen.size > 5000) seen.clear() }
       try { for (const r of await onMessage(d.chat, d.msg)) await send(d.chat, r) } catch (e) { log('飞书处理出错', e); await send(d.chat, { text: '出错了，稍后再试' }).catch(() => {}) }
     })
   }
+  async function dispatch(type, event, id) {
+    if (id) { if (seen.has(id)) return; seen.add(id); if (seen.size > 5000) seen.clear() }
+    const d = parse({ header: { event_type: type }, event })
+    if (!d) return
+    try { for (const r of await onMessage(d.chat, d.msg)) await send(d.chat, r) } catch (e) { log('飞书处理出错', e); await send(d.chat, { text: '出错了，稍后再试' }).catch(() => {}) }
+  }
+  /** 长连接：SDK 负责连飞书、心跳、重连；事件来了交给 dispatch（不等它处理完，飞书要求尽快确认） */
+  function startWs() {
+    const ws = new lark.WSClient({ appId, appSecret, loggerLevel: lark.LoggerLevel.warn })
+    const ed = new lark.EventDispatcher({}).register({
+      'im.message.receive_v1': async (e) => { dispatch('im.message.receive_v1', e, e?.message?.message_id) },
+      'card.action.trigger': async (e) => { dispatch('card.action.trigger', e, e?.event_id ?? e?.token); return {} },
+    })
+    ws.start({ eventDispatcher: ed })
+    return () => ws.close?.()
+  }
   return {
-    send, parse, handler,
-    start: () => { const srv = http.createServer(handler).listen(port, '127.0.0.1'); return () => srv.close() },
+    send, parse, handler, dispatch,
+    start: () => {
+      if (!verifyToken) { log('飞书：长连接模式'); return startWs() }
+      log('飞书：回调地址模式'); const srv = http.createServer(handler).listen(port, '127.0.0.1'); return () => srv.close()
+    },
   }
 }
