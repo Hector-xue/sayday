@@ -253,7 +253,8 @@ try {
     log('只做 2 分钟', steps2.join(' → '))
   }
   await p.waitForSelector('.egg', { timeout: 5000 }).catch(() => {})
-  if (await p.$('.egg.closed')) { await p.click('.egg.closed'); await sleep(300); await p.evaluate(() => document.querySelector('.egg')?.scrollIntoView({ block: 'center' })); await shot('21d-egg') }
+  // 卡片可能在底栏下面：直接在页面里点，别按坐标点（会点到底栏）
+  if (await p.$('.egg.closed')) { await p.evaluate(() => document.querySelector('.egg.closed').click()); await sleep(300); await p.evaluate(() => document.querySelector('.egg')?.scrollIntoView({ block: 'center' })); await sleep(200); await shot('21d-egg') }
   log('每日彩蛋', await p.evaluate(() => document.querySelector('.egg')?.innerText.replace(/\s+/g, ' ') ?? '没出现（今天还没练完）'))
 
   // 雅思阅读：第 1 篇，判断题选第一个、填空填一个对的一个错的 → 交卷 → 看解析和原文标注
