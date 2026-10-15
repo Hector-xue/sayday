@@ -1,78 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 桌面小组件：荧光笔配色（跟随系统深浅），字少；点整块打开 App -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/w_root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="14dp"
-    android:background="@drawable/sayday_widget_bg">
-
-    <TextView
-        android:id="@+id/w_head"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="日日说"
-        android:textColor="@color/sayday_w_on_mark"
-        android:background="@drawable/sayday_widget_chip"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="1dp"
-        android:paddingBottom="1dp"
-        android:textSize="11sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/w_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="打开 App 开始今天的练习"
-        android:textColor="@color/sayday_w_ink"
-        android:textSize="19sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:ellipsize="end" />
-
-    <TextView
-        android:id="@+id/w_sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="@color/sayday_w_soft"
-        android:textSize="12sp"
-        android:maxLines="1"
-        android:ellipsize="end" />
-
-    <LinearLayout
-        android:id="@+id/w_word_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/w_word"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/sayday_w_on_mark"
-            android:background="@drawable/sayday_widget_mark"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-condensed"
-            android:maxLines="1" />
-
-        <TextView
-            android:id="@+id/w_meaning"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/sayday_w_faint"
-            android:layout_marginTop="2dp"
-            android:textSize="12sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
-    </LinearLayout>
+<!-- 综合（3×2）：本周进度、今天练了什么、一个在学的词。词和意思放一行，两行高的桌面也不被截 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:background="@drawable/sayday_widget_bg">
+<TextView android:id="@+id/w_head" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="本周练了 0/4 天" android:textColor="@color/sayday_w_on_mark" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:background="@drawable/sayday_widget_chip" android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="1dp" android:paddingBottom="1dp"/>
+<TextView android:id="@+id/w_main" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="打开 App 开始今天的练习" android:textColor="@color/sayday_w_ink" android:textSize="16sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_marginTop="5dp"/>
+<TextView android:id="@+id/w_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/sayday_w_soft" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" android:layout_marginTop="1dp"/>
+<LinearLayout android:id="@+id/w_word_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
+<TextView android:id="@+id/w_word" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/sayday_w_on_mark" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:background="@drawable/sayday_widget_mark" android:paddingStart="4dp" android:paddingEnd="4dp"/>
+<TextView android:id="@+id/w_meaning" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/sayday_w_faint" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" android:layout_marginStart="6dp"/>
+</LinearLayout>
 </LinearLayout>

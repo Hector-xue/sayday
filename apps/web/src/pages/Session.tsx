@@ -12,6 +12,7 @@ import type { Answer } from '../lib/placement'
 import { addCard, grade, preview, Rating } from '../lib/srs'
 import { prefetch } from '../lib/tts'
 import type { Sentence } from '../lib/content'
+import { SpellCard } from '../components/SpellCard'
 import { getClips, markWord, type Clip } from '../lib/clips'
 import { Tappable } from '../components/Tappable'
 
@@ -79,7 +80,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         <div className="fade-in">
           <div className="done-mark" aria-hidden>{steps.length ? <Icon.sprout /> : <Icon.cup />}</div>
           <h2 style={{ margin: '12px 0 8px' }}>{steps.length ? '这一组完成了' : '今天的量已经做完了'}</h2>
-          <p className="muted">{steps.length ? [['review', '复习'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((s) => s.kind === k)).map(([k, t]) => `${t} ${steps.filter((s) => s.kind === k).length}`).join(' · ') : '明天到期的词会自动排好。'}</p>
+          <p className="muted">{steps.length ? [['review', '复习'], ['spell', '拼写'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((s) => s.kind === k)).map(([k, t]) => `${t} ${steps.filter((s) => s.kind === k).length}`).join(' · ') : '明天到期的词会自动排好。'}</p>
         </div>
       </div>
       <div className="session-foot"><button className="btn primary block" onClick={finish}>好的</button></div>
@@ -125,6 +126,18 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
                 <p className="reveal-hint">先在心里想一下，再看答案</p>
               </>
             )}
+          </div>
+        )}
+
+        {step.kind === 'spell' && (
+          <div className="fade-in">
+            <p className="step-kind">复习 · 听音写词</p>
+            <SpellCard key={i} word={step.word} accent={accent} onResult={async (r) => {
+              await grade(step.word.w, (r === 'right' ? Rating.Good : r === 'close' ? Rating.Hard : Rating.Again) as any, Math.round(performance.now() - stepStart.current))
+              setScored(true)
+            }} />
+            {scored && clipOf(step.word.w)}
+            {scored && <Example s={step.sentence} word={step.word.w} />}
           </div>
         )}
 
@@ -175,6 +188,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
       </div>
 
       <div className="session-foot">
+        {step.kind === 'spell' && scored && <button className="btn primary block" onClick={() => next()}>下一个</button>}
         {step.kind === 'review' && (revealed ? (
           <div className="grade">
             <button className="again" onClick={() => doGrade(Rating.Again)}>忘了<small>{ivals[Rating.Again]}</small></button>

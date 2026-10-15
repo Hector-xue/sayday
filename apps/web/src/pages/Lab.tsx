@@ -24,7 +24,7 @@ import { Focus } from './Focus'
 type PairStats = Record<string, { listen: [number, number]; speak: [number, number] }>
 type View = null | { kind: 'speaking' } | { kind: 'focus' } | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
 
-export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
+export function Lab({ onSetupAi, onMock }: { onSetupAi: () => void; onMock: () => void }) {
   const { profile, tick } = useApp()
   const [weak, setWeak] = useState<Awaited<ReturnType<typeof weakPhones>>>([])
   const [ps, setPs] = useState<PairStats>({})
@@ -44,6 +44,9 @@ export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
         <span className="small muted">约 12 分钟 · 三个部分</span>
         <b style={{ fontSize: 18 }}>雅思口语模考</b>
         <span>考官提问，你开口答；本机识别 + 流利度 + 发音，接了 AI 还能按四项标准打分{last !== null ? ` · 上次 ${last.toFixed(1)}` : ''}</span>
+      </button>
+      <button className="card ai-card wide" style={{ marginTop: 10 }} onClick={onMock}>
+        <b>全真模考</b><span>听力、阅读、写作、口语四项连考，出总分</span>
       </button>
 
       <button className="card ai-card wide focus-card" onClick={() => setView({ kind: 'focus' })}>

@@ -7,7 +7,8 @@ import { goalLabel } from '../lib/levels'
 import { isNative } from '../lib/speech/engine'
 import { getAi, providerOf, type AiConfig } from '../lib/ai'
 import { canRemind, enableReminder, getReminder, type Reminder } from '../lib/reminder'
-import { openNotifySettings, pinWidget, systemStatus, type SystemStatus } from '../lib/system'
+import { openNotifySettings, systemStatus, type SystemStatus } from '../lib/system'
+import { WidgetsPage } from './WidgetsPage'
 import { canUpdate, checkUpdate, currentVersion, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
 import { MeEditor } from '../components/MeEditor'
@@ -31,7 +32,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [tags, setTags] = useState<string[]>([])
   const [quiz, setQuiz] = useState<QuizCfg | null>(null)
   useEffect(() => { getQuizCfg().then(setQuiz) }, [])
-  const saveQuiz = async (q: QuizCfg) => { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q) }
+  const saveQuiz = async (q: QuizCfg) => { try { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q); if (q.on) toast('开了：每天 ' + String(q.hour).padStart(2, '0') + ':' + String(q.minute).padStart(2, '0') + ' 在通知里弹 3 道题') } catch (e) { toast('没开成：' + ((e as Error).message || e)) } }
   useEffect(() => { getInterests().then(setTags) }, [])
   // 从系统设置 / 桌面回来时刷新（通知开关、小组件个数）
   useEffect(() => {
@@ -41,10 +42,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
     document.addEventListener('visibilitychange', load)
     return () => document.removeEventListener('visibilitychange', load)
   }, [])
-  const addWidget = async () => {
-    if (sys?.canPin && (await pinWidget())) toast('在弹出的窗口里点“添加”')
-    else toast('长按桌面空白处 → 小组件 → 找到“日日说”拖到桌面')
-  }
+  const [widgetsOpen, setWidgetsOpen] = useState(false)
   const [ver, setVer] = useState('')
   const [upd, setUpd] = useState<UpdateInfo | null>(null)
   const [checking, setChecking] = useState(false)
@@ -197,14 +195,20 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
             <button className="btn small quiet" onClick={async () => { if (!(await openNotifySettings())) toast('到系统设置 → 应用 → 日日说 → 通知 里改') }}>{sys && !sys.notify ? '去打开' : '系统设置'}</button>
           </div>
           <div className="set-row">
-            <div className="k"><b>桌面小组件</b><span>{sys?.widgets ? `桌面上已有 ${sys.widgets} 个 · ` : ''}本周练了几天、今天练没练、一个在学的词</span></div>
-            <button className="btn small quiet" onClick={addWidget}>{sys?.widgets ? '再加一个' : '添加'}</button>
+            <div className="k"><b>桌面小组件</b><span>{sys?.widgets ? `桌面上已有 ${sys.widgets} 个 · ` : ''}六种：本周、今天、单词卡、今日剧集、开练、综合</span></div>
+            <button className="btn small quiet" onClick={() => setWidgetsOpen(true)}>看看</button>
           </div>
         </>) : (
+          <>
           <div className="set-row">
             <div className="k"><b>每日提醒 · 桌面小组件</b><span>网页版做不了，安卓 App 里有</span></div>
             <a className="btn small quiet" href="https://sayday.ivyea.com/#download" target="_blank" rel="noreferrer">下载 App</a>
           </div>
+          <div className="set-row">
+            <div className="k"><b>小组件长什么样</b><span>六种，用你现在的数据预览</span></div>
+            <button className="btn small quiet" onClick={() => setWidgetsOpen(true)}>看看</button>
+          </div>
+          </>
         )}
       </div>
 
@@ -271,6 +275,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
       </div>
       {editMe && <MeEditor me={me} onClose={() => setEditMe(false)} />}
       {showSupport && <SupportSheet state={support} onChange={setSupport} onClose={() => setShowSupport(false)} />}
+      {widgetsOpen && <WidgetsPage onClose={() => { setWidgetsOpen(false); systemStatus().then(setSys) }} />}
     </div>
   )
 }

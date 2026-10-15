@@ -71,7 +71,16 @@ export function Practice({ kind, onClose }: { kind: Kind; onClose: () => void })
   )
 }
 
-function Run({ kind, test, units, full, onExit }: { kind: Kind; test: number; units: Unit[]; full: boolean; onExit: () => void }) {
+/** 全真模考里的一节：整套、真考时长，到点自动交卷；交了不看答案，分数交给模考流程 */
+export function MockSection({ kind, test, onDone, onExit }: { kind: Kind; test: number; onDone: (r: { score: number; total: number; band: number }) => void; onExit: () => void }) {
+  const [t, setT] = useState<ReadingTest | ListeningTest | null>(null)
+  useEffect(() => { (kind === 'reading' ? loadReading() : loadListening()).then((ts) => setT(ts.find((x) => x.id === test) ?? ts[0])) }, [])
+  if (!t) return <Overlay title={NAME[kind]} onClose={onExit}><div className="loading">…</div></Overlay>
+  const units: Unit[] = 'passages' in t ? t.passages : t.parts
+  return <Run kind={kind} test={t.id} units={units} full onExit={onExit} mock={{ limitMin: kind === 'reading' ? 60 : 0, onDone }} />
+}
+
+function Run({ kind, test, units, full, onExit, mock }: { kind: Kind; test: number; units: Unit[]; full: boolean; onExit: () => void; mock?: { limitMin: number; onDone: (r: { score: number; total: number; band: number }) => void } }) {
   const { refresh } = useApp()
   const [i, setI] = useState(0)
   const [answers, setAnswers] = useState<Record<number, Answer>>({})
@@ -89,8 +98,14 @@ function Run({ kind, test, units, full, onExit }: { kind: Kind; test: number; un
     await savePractice(kind, test, full ? 0 : u.n, r, answers)
     await markDay({ seconds: Math.round((Date.now() - start) / 1000) })
     refresh()
+    // 模考：和真考一样交了不看答案，直接进下一节（答案和解析在单项练习的记录里）
+    if (mock) { mock.onDone({ score: r.right, total: r.total, band: band(kind, r.right, r.total) }); return }
     setRes(r)
   }
+  // 模考限时：到点自动交卷
+  const left = mock?.limitMin ? mock.limitMin * 60 - Math.floor((now - start) / 1000) : null
+  const submitted = useRef(false)
+  useEffect(() => { if (left !== null && left <= 0 && !submitted.current) { submitted.current = true; submit() } }, [left])
   if (res) return <Report kind={kind} test={test} units={units} answers={answers} res={res} onExit={onExit} />
   const mins = Math.floor((now - start) / 60000)
   const limit = kind === 'reading' ? units.reduce((a, x) => a + (x as Passage).minutes, 0) : 0
@@ -100,11 +115,12 @@ function Run({ kind, test, units, full, onExit }: { kind: Kind; test: number; un
     <button className="btn primary block" onClick={() => {
       if (!last) { setI(i + 1); document.querySelector('.session-body')?.scrollTo(0, 0); return }
       if (answered < groups.reduce((a, g) => a + g.items.length, 0) && !confirm(`还有 ${groups.reduce((a, g) => a + g.items.length, 0) - answered} 题没答，确定交卷？`)) return
+      submitted.current = true
       submit()
     }}>{last ? `交卷（已答 ${answered}）` : kind === 'reading' ? '下一篇' : '下一部分'}</button>
   )
   const title = kind === 'reading' ? `Passage ${u.n}` : `Part ${u.n}`
-  const sub = kind === 'reading' ? `已用 ${mins} 分钟 / 建议 ${limit} 分钟${units.length > 1 ? ` · 第 ${i + 1}/${units.length} 篇` : ''}` : `${(u as Part).context_zh}`
+  const sub = left !== null ? `还剩 ${Math.max(0, Math.floor(left / 60))}:${String(Math.max(0, left % 60)).padStart(2, '0')} · 第 ${i + 1}/${units.length} 篇${left <= 300 ? ' · 快到时间了' : ''}` : kind === 'reading' ? `已用 ${mins} 分钟 / 建议 ${limit} 分钟${units.length > 1 ? ` · 第 ${i + 1}/${units.length} 篇` : ''}` : `${(u as Part).context_zh}`
   return (
     <Overlay title={title} sub={sub} onClose={() => { if (answered === 0 || confirm('退出后这次的作答不会保存，确定退出？')) onExit() }} foot={foot}>
       {kind === 'reading'

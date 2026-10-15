@@ -33,7 +33,8 @@ async function process(q: Q, audio: Float32Array): Promise<Answer> {
   return { q, transcript, fluency: fluency(audio, transcript), pron: prons.length ? Math.round(prons.reduce((a, b) => a + b, 0) / prons.length) : null }
 }
 
-export function Speaking({ onClose, onSetupAi }: { onClose: () => void; onSetupAi: () => void }) {
+/** onFinished：放在全真模考里时，口语答完把分数交回去（AI 评分优先，没接 AI 用流利度和发音的客观分） */
+export function Speaking({ onClose, onSetupAi, onFinished }: { onClose: () => void; onSetupAi: () => void; onFinished?: (band: number | null) => void }) {
   const { profile, refresh } = useApp()
   const accent = profile!.accent
   const [qs, setQs] = useState<Q[] | null>(null)
@@ -105,6 +106,10 @@ export function Speaking({ onClose, onSetupAi }: { onClose: () => void; onSetupA
       }
       await saveTest(answers, grade, objective)
       setReport({ answers, grade, objective, err })
+      if (onFinished) {
+        const xs = [objective.fc, objective.p].filter((x): x is number => typeof x === 'number')
+        onFinished(grade ? grade.overall : xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 2) / 2 : null)
+      }
       refresh()
     })()
   }, [i, qs])

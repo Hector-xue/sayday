@@ -7,6 +7,7 @@ import { State, addCard } from '../lib/srs'
 import { BOOKS, bookName, inBook } from '../lib/books'
 import { Sheet } from '../components/Sheet'
 import { FUNCTION_WORDS } from '../lib/lesson'
+import { Dictation } from './Dictation'
 
 type Row = { word: string; due: number; state: number; reps: number; lapses: number; known: number; stability: number }
 type Filter = 'learning' | 'mastered' | 'known'
@@ -21,6 +22,7 @@ function nextLabel(due: number) {
 export function Words() {
   const { tick, profile, setProfile, refresh, toast } = useApp()
   const [pickBook, setPickBook] = useState(false)
+  const [dict10, setDict10] = useState(false)
   const [browse, setBrowse] = useState(false)
   const [allWords, setAllWords] = useState<Word[]>([])
   const [rows, setRows] = useState<Row[]>([])
@@ -69,6 +71,11 @@ export function Words() {
   return (
     <div className="page fade-in">
       <div className="page-head"><h1>词库</h1><span className="small muted">共 {rows.length - groups.known.length} 个在学</span></div>
+      <button className="card ai-card wide dictation-card" onClick={() => setDict10(true)}>
+        <b>听写</b><span>听音、看意思，写出 10 个学过的词。光认得不够，还要写得出来</span>
+      </button>
+      {dict10 && <Dictation onClose={() => setDict10(false)} />}
+
       <div className="card book-card">
         <div className="row">
           <div className="book-name"><span className="small muted">词书</span><b>{bookName(book)}</b></div>

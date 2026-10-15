@@ -90,6 +90,13 @@ class WidgetArgs {
   var sub: String = ""
   var word: String = ""
   var meaning: String = ""
+  /** 新版小组件的全部内容（JSON，见 Widgets.kt） */
+  var json: String = ""
+}
+
+@InvokeArg
+class PinArgs {
+  var kind: String = "classic"
 }
 
 @InvokeArg
@@ -410,16 +417,36 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     return r
   }
 
-  // ---- 桌面小组件：网页算好内容推过来，存起来并刷新（见 SaydayWidget.kt） ----
+  // ---- 桌面小组件：网页算好内容推过来，存起来并刷新所有种类（见 Widgets.kt） ----
   @Command
   fun updateWidget(invoke: Invoke) {
     val a = invoke.parseArgs(WidgetArgs::class.java)
-    activity.getSharedPreferences(SaydayWidget.PREFS, android.content.Context.MODE_PRIVATE).edit()
-      .putString("date", a.date).putInt("streak", a.streak).putString("head", a.head).putString("head_until", a.headUntil).putBoolean("practiced", a.practiced)
-      .putString("main", a.main).putString("sub", a.sub).putString("word", a.word).putString("meaning", a.meaning)
-      .apply()
-    SaydayWidget.render(activity)
+    // 新版网页给 json；没有就用老字段拼一份最小的
+    val json = a.json.ifEmpty {
+      org.json.JSONObject().put("date", a.date).put("weekEnd", a.headUntil).put("head", a.head).put("practiced", a.practiced)
+        .put("main", a.main).put("sub", a.sub)
+        .put("words", org.json.JSONArray().apply { if (a.word.isNotEmpty()) put(org.json.JSONObject().put("w", a.word).put("zh", a.meaning)) })
+        .toString()
+    }
+    activity.getSharedPreferences(Widgets.PREFS, android.content.Context.MODE_PRIVATE).edit().putString("json", json).apply()
+    Widgets.renderAll(activity)
     invoke.resolve(JSObject())
+  }
+
+  // ---- 小组件按钮带的动作：打开 App 时取走（practice / episode / words） ----
+  private var pendingAction: String? = activity.intent?.getStringExtra(Widgets.EXTRA_ACTION)?.also { activity.intent?.removeExtra(Widgets.EXTRA_ACTION) }
+
+  override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    intent.getStringExtra(Widgets.EXTRA_ACTION)?.let { pendingAction = it }
+  }
+
+  @Command
+  fun takeAction(invoke: Invoke) {
+    val ret = JSObject()
+    ret.put("action", pendingAction ?: "")
+    pendingAction = null
+    invoke.resolve(ret)
   }
 
   // ---- 导出备份：WebView 不处理网页触发的下载，这里直接写进系统“下载”目录 ----
@@ -493,18 +520,22 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   fun systemStatus(invoke: Invoke) {
     val mgr = AppWidgetManager.getInstance(activity)
     val ret = JSObject()
-    ret.put("widgets", mgr.getAppWidgetIds(ComponentName(activity, SaydayWidget::class.java)).size)
+    val counts = Widgets.count(activity)
+    ret.put("widgets", counts.values.sum())
+    ret.put("kinds", JSObject().apply { for ((k, n) in counts) put(k, n) })
     ret.put("canPin", Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mgr.isRequestPinAppWidgetSupported)
     ret.put("notify", NotificationManagerCompat.from(activity).areNotificationsEnabled())
     invoke.resolve(ret)
   }
 
-  /** 请求把小组件放到桌面（系统弹确认框）；桌面不支持时 ok=false，网页那边提示手动添加 */
+  /** 请求把某种小组件放到桌面（系统弹确认框）；桌面不支持时 ok=false，网页那边提示手动添加 */
   @Command
   fun pinWidget(invoke: Invoke) {
+    val a = invoke.parseArgs(PinArgs::class.java)
+    val cls = Widgets.KINDS[a.kind] ?: SaydayWidget::class.java
     val mgr = AppWidgetManager.getInstance(activity)
     val ok = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mgr.isRequestPinAppWidgetSupported &&
-      mgr.requestPinAppWidget(ComponentName(activity, SaydayWidget::class.java), null, null)
+      mgr.requestPinAppWidget(ComponentName(activity, cls), null, null)
     val ret = JSObject()
     ret.put("ok", ok)
     invoke.resolve(ret)
