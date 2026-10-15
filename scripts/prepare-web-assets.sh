@@ -19,6 +19,8 @@ cat "$ROOT/content/ielts/writing.json" > "$PUB/content/ielts-writing.json"
 for k in reading listening; do cat "$ROOT/content/ielts/$k.json" > "$PUB/content/ielts-$k.json"; done
 # 工作英语（content/work，跨境电商场景）
 cat "$ROOT/content/work/tasks.json" > "$PUB/content/work.json"
+# 每日彩蛋（content/eggs）
+cat "$ROOT/content/eggs/eggs.json" > "$PUB/content/eggs.json"
 for f in calib.json cmudict.min.json cmudict.LICENSE; do cat "$ROOT/packages/speech/$f" > "$PUB/speech/$f"; done
 cat "$ROOT/.cache/models/charsiu_vocab.json" > "$PUB/speech/charsiu_vocab.json"
 for f in icon-180.png icon-192.png icon-512.png icon-maskable-512.png; do cat "$ROOT/assets/brand/$f" > "$ROOT/apps/web/public/$f"; done

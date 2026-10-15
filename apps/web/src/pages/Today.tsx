@@ -18,6 +18,7 @@ import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
 import { markAbilitiesSeen, unseenAbilities, type Ability } from '../lib/growth'
 import { thisWeek } from '../lib/voice-diary'
 import { VoiceDiary } from './VoiceDiary'
+import { EggCard } from '../components/EggCard'
 import { nudge, shouldNudge, unreadNudge, type Nudge } from '../lib/companion'
 import { vocabLevel } from '../lib/calibrate'
 
@@ -104,7 +105,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
 
       {/* 周目标：一周练 4 天算达标；不按天算连续，断一天不清零 */}
       <div className="streak-hero">
-        <div className="streak-num"><b>{wk.lit}<small>/{wk.goal}</small></b><span>{wk.met ? (wk.streak > 1 ? `本周达标 · 连续 ${wk.streak} 周` : '本周达标') : `${wk.lit ? `本周再练 ${wk.goal - wk.lit} 天达标` : `一周练 ${wk.goal} 天就算达标`}${wk.streak ? ` · 已连续 ${wk.streak} 周` : ''}`}</span></div>
+        <div className="streak-num"><b>{wk.lit}<small>/{wk.goal}</small></b><span>{wk.met ? (wk.streak > 1 ? `本周达标 · 连续 ${wk.streak} 周` : '本周达标') : `${wk.lit ? `再练 ${wk.goal - wk.lit} 天达标` : `一周练 ${wk.goal} 天就算达标`}${wk.streak ? ` · 已连续 ${wk.streak} 周` : ''}`}</span></div>
         <div className="week">
           {week.map((w) => {
             const dt = new Date(w.date + 'T12:00:00')
@@ -151,6 +152,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很累，只做 2 分钟</button>}
         <ModelPrefetchBar />
       </div>
+      {(allDone || !!d.done) && <EggCard key={tick} />}
 
       {fresh.length > 0 && (
         <div className="card ability-new">

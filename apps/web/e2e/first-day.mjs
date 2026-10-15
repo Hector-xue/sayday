@@ -217,6 +217,44 @@ try {
   log('隐藏支线', (await text()).replace(/\s+/g, ' ').match(/(这集藏着一段支线|解锁了隐藏支线).{0,40}/)?.[0])
   await clickText('好的'); await sleep(400)
   log('剧集', (await text()).replace(/\s+/g, ' ').match(/明天解锁.{0,30}/)?.[0])
+  // 城市地图：看完第 1 集，伦敦点亮 1 个地方
+  await clickText('城市地图', '.list-row'); await sleep(400)
+  log('城市地图', await p.evaluate(() => document.querySelector('.session-top .muted')?.textContent), await p.evaluate(() => document.querySelector('.place.on')?.innerText.replace(/\s+/g, ' ')))
+  await shot('21b-city-map')
+  await p.click('.session-top .icon-btn'); await sleep(300)
+  // 30 秒专注：开始，点 6 下，等 30 秒结束
+  await clickText('发音', '.tab'); await sleep(400)
+  await p.click('.focus-card'); await sleep(400)
+  await clickText('开始'); await sleep(600)
+  for (let k = 0; k < 6; k++) { await p.evaluate(() => document.querySelector('.focus-opts .opt')?.click()); await sleep(1100) }
+  await shot('21c-focus-play')
+  await p.waitForFunction(() => document.body.innerText.includes('再来 30 秒'), { timeout: 45000 })
+  log('30 秒专注', (await text()).replace(/\s+/g, ' ').match(/30 秒对了.{0,30}/)?.[0])
+  await p.click('.session-top .icon-btn'); await sleep(300)
+  // 每日彩蛋：今天练完了才能开——走一遍“只做 2 分钟”（复习点“记得”，跟读用假麦克风录一句）
+  await clickText('今天', '.tab'); await sleep(500)
+  if (!(await p.$('.egg'))) {
+    await clickText('今天很累'); await sleep(800)
+    const steps2 = []
+    for (let k = 0; k < 20; k++) {
+      const st = await p.evaluate(() => {
+        const bs = [...document.querySelectorAll('.session button')].filter((b) => !b.disabled)
+        const t = (x) => bs.find((b) => b.textContent.trim().startsWith(x))
+        for (const x of ['好的', '看答案', '记得', '下一句', '下一题', '记下了']) if (t(x)) { t(x).click(); return x }
+        if (document.querySelector('.rec-btn') && !document.querySelector('.rec-btn.on')) return 'rec'
+        return 'wait'
+      })
+      steps2.push(st)
+      if (st === '好的') break
+      if (st === 'rec') { await p.click('.rec-btn'); await sleep(3000); await p.click('.rec-btn'); await p.waitForFunction(() => document.querySelector('.ring b') || /出错|没听清/.test(document.querySelector('.rec-label')?.textContent ?? ''), { timeout: 120000 }); await sleep(600) }
+      await sleep(500)
+    }
+    await sleep(800)
+    log('只做 2 分钟', steps2.join(' → '))
+  }
+  await p.waitForSelector('.egg', { timeout: 5000 }).catch(() => {})
+  if (await p.$('.egg.closed')) { await p.click('.egg.closed'); await sleep(300); await p.evaluate(() => document.querySelector('.egg')?.scrollIntoView({ block: 'center' })); await shot('21d-egg') }
+  log('每日彩蛋', await p.evaluate(() => document.querySelector('.egg')?.innerText.replace(/\s+/g, ' ') ?? '没出现（今天还没练完）'))
 
   // 雅思阅读：第 1 篇，判断题选第一个、填空填一个对的一个错的 → 交卷 → 看解析和原文标注
   const clickCard = async (t) => { await p.waitForFunction((t) => [...document.querySelectorAll('.ai-card')].some((b) => b.textContent.includes(t)), {}, t); await p.evaluate((t) => [...document.querySelectorAll('.ai-card')].find((b) => b.textContent.includes(t)).click(), t); await sleep(400) }

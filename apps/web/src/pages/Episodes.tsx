@@ -8,6 +8,8 @@ import { Tappable } from '../components/Tappable'
 import { useApp } from '../store'
 import { BONUS_NEED, bonusLines, clipOf, DEFAULT_ME, epLines, episodeWords, finish, LINE_PASS, queueLines, getMe, getProgress, key, loadSeasons, meKey, meZh, nextUp, teaserFor, unlocked, type EpProgress, type Episode, type Me, type Season } from '../lib/episodes'
 import { MeEditor } from '../components/MeEditor'
+import { CityMap } from '../components/CityMap'
+import { CITIES } from '../lib/citymap'
 import { play, prefetch, stopAudio } from '../lib/tts'
 import { addCard } from '../lib/srs'
 import { db } from '../lib/db'
@@ -23,6 +25,7 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
   const [tab, setTab] = useState<number | null>(null)
   const [me, setMeState] = useState<Me>(DEFAULT_ME)
   const [editMe, setEditMe] = useState(false)
+  const [map, setMap] = useState(false)
   useEffect(() => { loadSeasons().then(setAll); getProgress().then(setP); getMe().then(setMeState) }, [tick, open])
   useEffect(() => {
     if (!all || !openId) return
@@ -68,6 +71,10 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
         })}
       </div>
       <div className="list" style={{ marginTop: 14 }}>
+        <button className="list-row" onClick={() => setMap(true)}>
+          <span className="main"><b>城市地图</b><span>看完一集点亮一个地方 · 已点亮 {CITIES.reduce((n, c) => n + c.places.filter((_, i) => p.done[key(c.season, i + 1)]).length, 0)} 个</span></span>
+          <span className="side">看看</span>
+        </button>
         <button className="list-row" onClick={() => setEditMe(true)}>
           <span className="main"><b>剧里的你</b><span>叫 {me.name === 'Lin' ? 'Lin（林）' : me.name} · {me.voice === 'm' ? '男声' : '女声'}</span></span>
           <span className="side">修改</span>
@@ -76,6 +83,7 @@ export function Episodes({ openId, onOpened }: { openId?: { season: number; ep: 
       <p className="small faint" style={{ margin: '14px 4px' }}>一天一集，像追剧一样学。人物配音为 AI 合成。</p>
       {open && <Player s={open.s} ep={open.ep} me={me} onClose={() => setOpen(null)} />}
       {editMe && <MeEditor me={me} onClose={() => setEditMe(false)} />}
+      {map && <CityMap p={p} onClose={() => setMap(false)} />}
     </div>
   )
 }

@@ -19,9 +19,10 @@ import { prefetch, type Accent } from '../lib/tts'
 import { vocabLevel } from '../lib/calibrate'
 import { lastTests } from '../lib/ielts'
 import { Speaking } from './Speaking'
+import { Focus } from './Focus'
 
 type PairStats = Record<string, { listen: [number, number]; speak: [number, number] }>
-type View = null | { kind: 'speaking' } | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
+type View = null | { kind: 'speaking' } | { kind: 'focus' } | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
 
 export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
   const { profile, tick } = useApp()
@@ -43,6 +44,10 @@ export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
         <span className="small muted">约 12 分钟 · 三个部分</span>
         <b style={{ fontSize: 18 }}>雅思口语模考</b>
         <span>考官提问，你开口答；本机识别 + 流利度 + 发音，接了 AI 还能按四项标准打分{last !== null ? ` · 上次 ${last.toFixed(1)}` : ''}</span>
+      </button>
+
+      <button className="card ai-card wide focus-card" onClick={() => setView({ kind: 'focus' })}>
+        <b>30 秒专注</b><span>只练一组最难分的音，像节奏小游戏：听一个点一个，看 30 秒能对几个</span>
       </button>
 
       <p className="section-title" style={{ marginTop: 0 }}>{weak.length ? '你的弱项' : '中国人常见的难点'}</p>
@@ -80,6 +85,7 @@ export function Lab({ onSetupAi }: { onSetupAi: () => void }) {
       </div>
 
       {view?.kind === 'speaking' && <Speaking onClose={() => setView(null)} onSetupAi={() => { setView(null); onSetupAi() }} />}
+      {view?.kind === 'focus' && <Focus onClose={() => setView(null)} />}
       {view?.kind === 'drill' && <Drill phone={view.phone} accent={accent} onClose={() => setView(null)} onPairs={(s) => setView({ kind: 'pairs', set: s, mode: 'listen' })} />}
       {view?.kind === 'pairs' && <PairGame set={view.set} mode={view.mode} accent={accent} onClose={() => setView(null)} />}
       {view?.kind === 'phone' && <PhoneCard phone={view.phone} accent={accent} onClose={() => setView(null)} onDrill={() => setView({ kind: 'drill', phone: view.phone })} />}
