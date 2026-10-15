@@ -223,3 +223,5 @@
 [data-style="marker"] .line-chart .stroke { stroke: var(--ink); }
 [data-style="marker"] .line-chart .area { fill: color-mix(in srgb, var(--mark) 45%, transparent); }
 [data-style="marker"] .abilities .ok { color: var(--ink); }
+[data-style="marker"] .persona-list .set-row.on .k b, [data-style="marker"] .emma-nudge .reply { color: var(--ink); }
+[data-style="marker"] .persona-list .set-row.on .k b { background: var(--mark); }

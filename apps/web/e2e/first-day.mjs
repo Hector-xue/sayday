@@ -354,8 +354,23 @@ try {
       const D = Date, off = 10 * 86400_000
       globalThis.Date = class extends D { constructor(...a) { super(...(a.length ? a : [D.now() + off])) } static now() { return D.now() + off } }
     })
+    // 假 AI 再起一次：隔了两天以上没聊，Emma 会在后台先发一条
+    const mock2 = process.env.PW ? null : startMockAi(5392)
     await p.reload({ waitUntil: 'networkidle0' }); await sleep(800)
     await clickText('今天', '.tab'); await sleep(600)
+    if (mock2) {
+      await p.waitForSelector('.emma-nudge', { timeout: 15000 }).catch(() => {})
+      log('Emma 主动找你', await p.evaluate(() => document.querySelector('.emma-nudge')?.innerText.replace(/\s+/g, ' ') ?? '没出现'))
+      await p.evaluate(() => document.querySelector('.emma-nudge')?.scrollIntoView({ block: 'center' })); await sleep(200); await shot('28-emma-nudge')
+      await p.click('.emma-nudge'); await sleep(800)
+      await clickText('性格和记忆'); await sleep(300); await shot('29-emma-persona')
+      await clickText('毒舌损友', '.set-row'); await sleep(200)
+      await p.click('.session:last-of-type .session-top .icon-btn'); await sleep(300)
+      log('换性格', await p.evaluate(() => document.querySelector('.session-top .muted')?.textContent))
+      await p.click('.session-top .icon-btn'); await sleep(400)
+      log('看过后今天页', await p.evaluate(() => (document.querySelector('.emma-nudge') ? '还在' : '收起了')))
+      mock2.close()
+    }
     log('回来了', (await text()).replace(/\s+/g, ' ').match(/欢迎回来.{0,90}/)?.[0] ?? '没显示欢迎回来')
     log('周目标', await p.evaluate(() => document.querySelector('.streak-num')?.innerText.replace(/\s+/g, ' ')))
     await shot('25-comeback')

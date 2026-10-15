@@ -17,12 +17,33 @@ const LEVEL_STYLE: Record<string, string> = {
   C2: 'Speak naturally and richly, as to a fluent friend.',
 }
 
-export function systemPrompt(level: Cefr, memory: string[], recentWords: string[]): string {
-  return `You are Emma, 26, a friendly British woman living in a shared flat in London. You work at a small bookshop in Camden and love cooking, walking by the canal and old films. You are chatting by text with your flatmate, a Chinese learner of English (level ${level}), to help them practise.
+// ---- 性格（方案 1.3）：同一个 Emma，三种相处方式。默认温柔，和以前一样 ----
+export type Persona = 'warm' | 'tease' | 'strict'
+export const PERSONAS: { k: Persona; t: string; s: string }[] = [
+  { k: 'warm', t: '温柔鼓励', s: '像好朋友聊天，错了轻轻带过' },
+  { k: 'tease', t: '毒舌损友', s: '爱开玩笑、会损你两句，但不嘲笑你的英语' },
+  { k: 'strict', t: '严格考官', s: '每个错都指出来，追问到你说清楚' },
+]
+export const getPersona = () => kvGet<Persona>('emma_persona', 'warm')
+export const setPersona = (p: Persona) => kvSet('emma_persona', p)
+
+const TONE: Record<Persona, string> = {
+  warm: 'Reply in 1–3 sentences, warm and natural, like a real friend texting. End with one easy question that keeps the chat going, most of the time.',
+  tease: 'Reply in 1–3 sentences like a cheeky, sarcastic best mate texting: playful teasing about life, food, their plans, British banter. Never mock their English level or mistakes, never be cruel. End with a question most of the time.',
+  strict: 'You are also a strict but fair IELTS speaking examiner at heart. Reply in 1–3 sentences, polite and a bit formal. Push for longer, more precise answers: ask follow-up questions that need reasons and examples (why? how? compare...). Do not accept one-word answers — ask them to expand.',
+}
+const FIX_RULE: Record<Persona, string> = {
+  warm: 'Set "fix" ONLY when the learner\'s LAST message has a clear grammar or word-choice mistake (ignore capitalisation, punctuation and tiny typos)',
+  tease: 'Set "fix" ONLY when the learner\'s LAST message has a clear grammar or word-choice mistake (ignore capitalisation, punctuation and tiny typos)',
+  strict: 'Set "fix" whenever the learner\'s LAST message has any grammar, word-choice or unnatural phrasing issue (ignore only capitalisation and punctuation); pick the most important one',
+}
+
+export function systemPrompt(level: Cefr, memory: string[], recentWords: string[], persona: Persona = 'warm'): string {
+  return `You are Emma, 26, a British woman living in a shared flat in London. You work at a small bookshop in Camden and love cooking, walking by the canal and old films. You are chatting by text with your flatmate, a Chinese learner of English (level ${level}), to help them practise.
 
 Rules:
 - ${LEVEL_STYLE[level] ?? LEVEL_STYLE.B1}
-- Reply in 1–3 sentences, warm and natural, like a real friend texting. End with one easy question that keeps the chat going, most of the time.
+- ${TONE[persona]}
 - Never lecture. Never switch to Chinese in your reply.
 - If it fits naturally, use one of these words the learner is studying: ${recentWords.slice(0, 10).join(', ') || '(none)'}.
 - Things you remember about the learner: ${memory.length ? memory.join('; ') : '(nothing yet — ask their name early on)'}.
@@ -32,7 +53,7 @@ Output format, exactly:
 ###
 {"zh": "<natural Simplified Chinese translation of your reply>", "fix": null}
 
-Set "fix" ONLY when the learner's LAST message has a clear grammar or word-choice mistake (ignore capitalisation, punctuation and tiny typos): {"you": "<their sentence>", "better": "<corrected natural sentence>", "why": "<one short reason in Simplified Chinese>"}. If they wrote in Chinese, set fix to {"you": "<their Chinese>", "better": "<how to say it in English>", "why": "可以这样用英文说"}.`
+${FIX_RULE[persona]}: {"you": "<their sentence>", "better": "<corrected natural sentence>", "why": "<one short reason in Simplified Chinese>"}. If they wrote in Chinese, set fix to {"you": "<their Chinese>", "better": "<how to say it in English>", "why": "可以这样用英文说"}.`
 }
 
 /** 把模型输出拆成 回话 / 翻译 / 纠正；流式时只显示 ### 之前的部分 */
@@ -70,7 +91,7 @@ export async function send(cfg: AiConfig, level: Cefr, recentWords: string[], us
   if (messages[0]?.role === 'assistant') messages.unshift({ role: 'user', content: '(continuing our chat)' })
   // 同一方连着两条（比如两次开场白）合并：Claude 等接口要求一问一答交替
   for (let i = messages.length - 1; i > 0; i--) if (messages[i].role === messages[i - 1].role) { messages[i - 1] = { ...messages[i - 1], content: messages[i - 1].content + '\n' + messages[i].content }; messages.splice(i, 1) }
-  const raw = await complete(cfg, { system: systemPrompt(level, await getMemory(), recentWords), messages, maxTokens: 400, temperature: 0.8, onDelta: (t) => onDelta(splitReply(t).text), signal })
+  const raw = await complete(cfg, { system: systemPrompt(level, await getMemory(), recentWords, await getPersona()), messages, maxTokens: 400, temperature: 0.8, onDelta: (t) => onDelta(splitReply(t).text), signal })
   const r = splitReply(raw)
   await add('assistant', r.text, { zh: r.zh, fix: r.fix ?? null })
   // 每 6 句更新一次记忆
@@ -93,4 +114,73 @@ export async function updateMemory(cfg: AiConfig) {
 
 export async function clearChat() {
   await db.run('DELETE FROM chat')
+}
+
+// ---- Emma 主动找你（方案 1.3）：隔两天没聊，她先发一条（用她自己的口吻、带上记得的事）----
+// 打开 App 时在后台生成，存进聊天记录（标成未读），今天页显示、提醒通知也用这一句
+
+/** 多久没聊她会主动找你 */
+export const NUDGE_AFTER = 48 * 3600_000
+
+export type Nudge = { id: number; text: string; zh?: string; ts: number }
+
+/** 还没看的那条主动消息（打开聊天就算看过） */
+export async function unreadNudge(): Promise<Nudge | null> {
+  const r = await db.one<{ id: number; content: string; meta: string; ts: number }>("SELECT id, content, meta, ts FROM chat WHERE role = 'assistant' AND meta LIKE '%\"nudge\":true%' ORDER BY ts DESC LIMIT 1")
+  if (!r) return null
+  const m = JSON.parse(r.meta)
+  if (!m.unread) return null
+  return { id: r.id, text: r.content, zh: m.zh, ts: r.ts }
+}
+
+export async function markNudgeRead() {
+  const rows = await db.all<{ id: number; meta: string }>("SELECT id, meta FROM chat WHERE role = 'assistant' AND meta LIKE '%\"unread\":true%'")
+  await db.batch(rows.map((r) => ({ sql: 'UPDATE chat SET meta = ? WHERE id = ?', params: [JSON.stringify({ ...JSON.parse(r.meta), unread: false }), r.id] })))
+}
+
+/** 该不该主动找：聊过天（至少说过一句）、上一条消息在两天前、最近两天没主动找过 */
+export async function shouldNudge(now = Date.now()): Promise<boolean> {
+  const last = await db.one<{ ts: number }>('SELECT max(ts) ts FROM chat')
+  const said = (await db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user'"))?.n ?? 0
+  // 上一条主动消息还没看：不再追发
+  return said > 0 && !!last?.ts && now - last.ts >= NUDGE_AFTER && !(await unreadNudge())
+}
+
+/** 生成一条主动消息并存起来（失败就算了，不打扰） */
+export async function nudge(cfg: AiConfig, level: Cefr, recentWords: string[], now = Date.now()): Promise<Nudge | null> {
+  if (!(await shouldNudge(now))) return null
+  const last = await db.one<{ ts: number }>('SELECT max(ts) ts FROM chat')
+  const days = Math.max(2, Math.round((now - (last?.ts ?? now)) / 86400_000))
+  const past = (await history(10)).map((m) => `${m.role === 'user' ? 'Learner' : 'Emma'}: ${m.content}`).join('\n')
+  const raw = await complete(cfg, {
+    system: systemPrompt(level, await getMemory(), recentWords, await getPersona()),
+    messages: [{ role: 'user', content: `(You haven't texted each other for ${days} days. Text them first, like a flatmate would: 1–2 short sentences. Follow up on something you remember about them or from your last chat if you can, otherwise share a small thing from your day. End with an easy question. Don't mention studying or apps. Last chat for context:\n${past})` }],
+    maxTokens: 200, temperature: 0.9,
+  })
+  const r = splitReply(raw)
+  if (!r.text) return null
+  await add('assistant', r.text, { zh: r.zh, fix: null, nudge: true, unread: true })
+  return unreadNudge()
+}
+
+/** 提醒通知里 Emma 的口吻（离线模板：接下来几天每天一句，没有新的主动消息时用） */
+export const NUDGE_LINES: Record<Persona, string[]> = {
+  warm: [
+    "Fancy a quick chat? I made far too much pasta again.（来聊两句？我又做多了意面）",
+    "How was your day? Mine was all books and rain.（今天怎么样？我这边全是书和雨）",
+    "I've got the kettle on. Five minutes of English?（水烧上了，来五分钟英语？）",
+    "Tell me one good thing from today!（说一件今天的好事吧！）",
+  ],
+  tease: [
+    "Oi, did you forget me already? Rude.（喂，这么快就把我忘了？过分）",
+    "Your English misses you. So do I, a bit.（你的英语想你了，我也有一点点）",
+    "Still alive? Prove it — say something in English.（还活着吗？说句英语证明一下）",
+    "I bet you can't do two minutes today. Go on, surprise me.（赌你今天两分钟都做不到，来让我意外一下）",
+  ],
+  strict: [
+    "Time for practice. Describe your day in three sentences.（练习时间到：用三句话描述你的一天）",
+    "Part 1 question: what do you usually do in the evening? Answer in full sentences.（口语 Part 1：你晚上一般做什么？用完整句子回答）",
+    "Consistency matters more than talent. Two minutes, now.（坚持比天赋重要。两分钟，现在）",
+    "Yesterday's mistakes won't fix themselves. Shall we?（昨天的错不会自己改好。开始吧？）",
+  ],
 }
