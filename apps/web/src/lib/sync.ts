@@ -1,15 +1,14 @@
-// 多设备同步（方案 M4）：手机、网页、平板用同一个同步码，学习记录合到一起。
+// 学习记录在设备之间合并。两种传法，共用这里的快照、加密、合并：
+//   面对面同步（lib/lan.ts，默认）：同一个 Wi-Fi 下两台设备直接传，不经过任何服务器；
+//   自建同步服务器（给会部署的人，见 packages/sync-server、docs/机器人.md）：几台设备用同一个同步码，
+//     服务器只存密文。聊天机器人也靠它读写学习记录。
 //
 // 端到端加密：同步码只存在你的设备上。同步码 → 账号 id（哈希，服务器只认这个）+ AES-GCM 密钥（服务器拿不到）。
 // 每台设备上传一份自己的完整快照（加密后的学习记录，录音不传），同步时把别的设备更新过的快照拉下来合进本机：
 //   流水类的表（复习记录、跟读、聊天、日记……）取并集，按内容去重；
 //   词卡取复习得更近的那份；每天的计数取较大值；
 //   设置按修改时间新的覆盖旧的，几个累计型的（剧集进度、解锁的能力、开过的彩蛋……）合并。
-// 服务端：packages/sync-server（sayday.ivyea.com/api/sync/）
 import { db, kvGet, kvSet } from './db'
-
-/** 同步服务地址；本地测试可以在 localStorage 里设 sayday-sync-api 指到本机的服务 */
-export const API = (() => { try { return localStorage.getItem('sayday-sync-api') || 'https://sayday.ivyea.com/api/sync' } catch { return 'https://sayday.ivyea.com/api/sync' } })()
 
 // ---------------- 同步码和加密 ----------------
 
@@ -33,8 +32,8 @@ const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16)
 async function sha(parts: string): Promise<ArrayBuffer> { return crypto.subtle.digest('SHA-256', enc.encode(parts)) }
 
 export type Keys = { id: string; key: CryptoKey }
-/** 同步码 → 账号 id + 加密密钥（scope 区分用途：个人同步 / 学习小组） */
-export async function deriveKeys(code: string, scope: 'sync' | 'group' = 'sync'): Promise<Keys> {
+/** 同步码 → 账号 id + 加密密钥 */
+export async function deriveKeys(code: string, scope: 'sync' = 'sync'): Promise<Keys> {
   const base = `sayday-${scope}-v1:${normCode(code)}`
   const id = hex(await sha(base + ':id')).slice(0, 40)
   const key = await crypto.subtle.importKey('raw', await sha(base + ':key'), 'AES-GCM', false, ['encrypt', 'decrypt'])
@@ -184,20 +183,39 @@ export async function mergeSnapshot(s: Snapshot, preferRemote = false): Promise<
 
 // ---------------- 同步流程 ----------------
 
-export type SyncCfg = { code: string; joined: number; pendingFirstPull?: boolean }
+export type SyncCfg = { code: string; joined: number; pendingFirstPull?: boolean; server?: string }
 export type SyncState = { last: number; error: string | null; devices: number }
-export const getSync = () => kvGet<SyncCfg | null>('sync', null)
+/**
+ * 自建服务器同步的配置。0.0.26 及以前的版本没有 server 字段，默认连 sayday.ivyea.com（已停）：
+ * 这种直接关掉（本机记录不动），设置页提示一次改用面对面同步
+ */
+export async function getSync(): Promise<SyncCfg | null> {
+  const cfg = await kvGet<SyncCfg | null>('sync', null)
+  if (cfg && !cfg.server) {
+    await kvSet('sync', null)
+    await kvSet('sync_state', { last: 0, error: null, devices: 0 })
+    await kvSet('sync_retired', true)
+    return null
+  }
+  return cfg
+}
+/** 服务器地址：补上协议、去掉末尾的斜杠 */
+export function normServer(s: string): string {
+  let u = s.trim().replace(/\/+$/, '')
+  if (u && !/^https?:\/\//i.test(u)) u = 'https://' + u
+  return u
+}
 export const getSyncState = () => kvGet<SyncState>('sync_state', { last: 0, error: null, devices: 0 })
 
-async function deviceId(): Promise<string> {
+export async function deviceId(): Promise<string> {
   let d = await kvGet<string>('sync_device', '')
   if (!d) { d = hex(crypto.getRandomValues(new Uint8Array(16)).buffer); await kvSet('sync_device', d) }
   return d
 }
 
-async function req(path: string, init?: RequestInit): Promise<Response> {
+async function req(server: string, path: string, init?: RequestInit): Promise<Response> {
   let r: Response
-  try { r = await fetch(API + path, init) } catch { throw new Error('连不上同步服务，检查一下网络') }
+  try { r = await fetch(server + path, init) } catch { throw new Error('连不上同步服务器，检查一下网络和地址') }
   if (!r.ok) {
     let msg = `同步服务出错（${r.status}）`
     try { msg = (await r.json()).error ?? msg } catch { /* 不是 JSON */ }
@@ -219,17 +237,17 @@ export function syncNow(): Promise<{ pulled: number; changed: number }> {
       const { id, key } = await deriveKeys(cfg.code)
       const dev = await deviceId()
       const seen = await kvGet<Record<string, number>>('sync_seen', {})
-      const { devices } = await (await req(`/v1/a/${id}`)).json() as { devices: { dev: string; ts: number }[] }
+      const { devices } = await (await req(cfg.server!, `/v1/a/${id}`)).json() as { devices: { dev: string; ts: number }[] }
       let pulled = 0, changed = 0
       for (const d of devices) {
         if (d.dev === dev || (seen[d.dev] ?? 0) >= d.ts) continue
-        const blob = new Uint8Array(await (await req(`/v1/a/${id}/d/${d.dev}`)).arrayBuffer())
+        const blob = new Uint8Array(await (await req(cfg.server!, `/v1/a/${id}/d/${d.dev}`)).arrayBuffer())
         changed += await mergeSnapshot(await open<Snapshot>(blob, key), !!cfg.pendingFirstPull)
         seen[d.dev] = d.ts
         pulled++
       }
       const body = await seal(await snapshot(dev), key)
-      await req(`/v1/a/${id}/d/${dev}`, { method: 'PUT', body })
+      await req(cfg.server!, `/v1/a/${id}/d/${dev}`, { method: 'PUT', body })
       await kvSet('sync_seen', seen)
       if (cfg.pendingFirstPull) await kvSet('sync', { ...cfg, pendingFirstPull: false })
       await kvSet('sync_state', { last: Date.now(), error: null, devices: Math.max(1, devices.filter((d) => d.dev !== dev).length + 1) })
@@ -243,9 +261,9 @@ export function syncNow(): Promise<{ pulled: number; changed: number }> {
 }
 
 /** 开启同步：新建（这台设备是第一台）或用已有的同步码加入 */
-export async function enableSync(code?: string): Promise<string> {
+export async function enableSync(server: string, code?: string): Promise<string> {
   const c = code ? normCode(code).match(/.{1,4}/g)!.join('-') : newCode()
-  await kvSet('sync', { code: c, joined: Date.now(), pendingFirstPull: !!code } satisfies SyncCfg)
+  await kvSet('sync', { code: c, joined: Date.now(), pendingFirstPull: !!code, server: normServer(server) } satisfies SyncCfg)
   await kvSet('sync_seen', {})
   return c
 }
@@ -255,7 +273,7 @@ export async function disableSync() {
   const cfg = await getSync()
   if (cfg) {
     const { id } = await deriveKeys(cfg.code)
-    await req(`/v1/a/${id}/d/${await deviceId()}`, { method: 'DELETE' }).catch(() => {})
+    if (cfg.server) await req(cfg.server, `/v1/a/${id}/d/${await deviceId()}`, { method: 'DELETE' }).catch(() => {})
   }
   await kvSet('sync', null)
   await kvSet('sync_state', { last: 0, error: null, devices: 0 })

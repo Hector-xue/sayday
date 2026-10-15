@@ -196,9 +196,15 @@ async fn update_install<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("updateInstall", serde_json::json!({}))
 }
 
+/// 面对面同步出码时列出本机所有局域网地址（手机自己开热点时 Rust 那边猜不到）；返回 { addrs }
+#[tauri::command]
+fn lan_addrs<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("lanAddrs", serde_json::json!({}))
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action, lan_addrs])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

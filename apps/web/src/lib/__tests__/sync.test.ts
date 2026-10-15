@@ -15,12 +15,11 @@ describe('同步码', () => {
     expect(normCode('o1-il')).toBe('0111')
     expect(validCode('ABC')).toBe(false)
   })
-  it('同一个码在不同设备上算出同一个账号和密钥；个人同步和小组分开', async () => {
+  it('同一个码在不同设备上算出同一个账号和密钥', async () => {
     const c = newCode()
     const a = await deriveKeys(c), b = await deriveKeys(c.toLowerCase())
     expect(a.id).toBe(b.id)
     expect(a.id).toMatch(/^[a-f0-9]{40}$/)
-    expect((await deriveKeys(c, 'group')).id).not.toBe(a.id)
   })
   it('加密后能解开，换个码解不开；服务器拿到的是密文', async () => {
     const k1 = await deriveKeys(newCode()), k2 = await deriveKeys(newCode())
@@ -79,5 +78,22 @@ describe('合并别的设备的快照', () => {
     expect(ep['1:1']).toMatchObject({ date: '2026-10-09', quiz: 3, act: 70 })
     expect(ep['1:2']).toBeTruthy()
     expect(n).toBe(ops.length)
+  })
+})
+
+describe('旧版的同步码同步（连 sayday.ivyea.com，已停）', () => {
+  it('升级后自动关掉、记下要提示一次；自建服务器的不动', async () => {
+    const m = await import('../db') as any
+    const { getSync, normServer } = await import('../sync')
+    m.kvSet.mockClear()
+    m.kvGet.mockResolvedValueOnce({ code: 'X', joined: 1 })
+    expect(await getSync()).toBeNull()
+    expect(m.kvSet).toHaveBeenCalledWith('sync', null)
+    expect(m.kvSet).toHaveBeenCalledWith('sync_retired', true)
+    m.kvSet.mockClear()
+    m.kvGet.mockResolvedValueOnce({ code: 'X', joined: 1, server: 'https://a.com/api/sync' })
+    expect((await getSync())?.server).toBe('https://a.com/api/sync')
+    expect(m.kvSet).not.toHaveBeenCalled()
+    expect(normServer(' a.com/api/sync/ ')).toBe('https://a.com/api/sync')
   })
 })

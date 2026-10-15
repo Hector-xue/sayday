@@ -169,6 +169,34 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
       )}
       {vdOpen && <VoiceDiary onClose={() => { setVdOpen(false); thisWeek().then((e) => setVdDue(!e)) }} />}
 
+      <p className="section-title">{hasAi ? 'AI 陪练' : '说和写'}</p>
+      {emma && (
+        <button className="card emma-nudge" onClick={() => onAi('chat')}>
+          <span className="small muted">Emma 给你发了条消息</span>
+          <b className="en">{emma.text}</b>
+          {emma.zh && <span className="small muted">{emma.zh}</span>}
+          <span className="small reply">回她 →</span>
+        </button>
+      )}
+      {hasAi ? (
+        <div className="ai-grid">
+          <button className="card ai-card" onClick={() => onAi('chat')}>
+            <span className="ai-ico"><Icon.chat /></span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
+          </button>
+          <button className="card ai-card" onClick={() => onAi('diary')}>
+            <span className="ai-ico"><Icon.diary /></span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
+          </button>
+        </div>
+      ) : (
+        <button className="card ai-card wide" onClick={() => onAi('setup')}>
+          <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
+        </button>
+      )}
+      <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => onAi('work')}>
+        <b>工作英语</b><span>回买家邮件、给供应商发消息、写 Listing。{hasAi ? 'AI 逐句批改' : '有参考写法，接入 AI 能逐句批改'}</span>
+      </button>
+
+
       {lv && e && (
         <>
           <p className="section-title">离目标</p>
@@ -215,33 +243,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           </div>
         </>
       )}
-
-      <p className="section-title">说和写</p>
-      {emma && (
-        <button className="card emma-nudge" onClick={() => onAi('chat')}>
-          <span className="small muted">Emma 给你发了条消息</span>
-          <b className="en">{emma.text}</b>
-          {emma.zh && <span className="small muted">{emma.zh}</span>}
-          <span className="small reply">回她 →</span>
-        </button>
-      )}
-      {hasAi ? (
-        <div className="ai-grid">
-          <button className="card ai-card" onClick={() => onAi('chat')}>
-            <span className="ai-ico"><Icon.chat /></span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
-          </button>
-          <button className="card ai-card" onClick={() => onAi('diary')}>
-            <span className="ai-ico"><Icon.diary /></span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
-          </button>
-        </div>
-      ) : (
-        <button className="card ai-card wide" onClick={() => onAi('setup')}>
-          <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
-        </button>
-      )}
-      <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => onAi('work')}>
-        <b>工作英语</b><span>回买家邮件、给供应商发消息、写 Listing。{hasAi ? 'AI 逐句批改' : '有参考写法，接入 AI 能逐句批改'}</span>
-      </button>
 
       {support?.show && (
         <div className="card support-nudge" style={{ marginTop: 12 }}>

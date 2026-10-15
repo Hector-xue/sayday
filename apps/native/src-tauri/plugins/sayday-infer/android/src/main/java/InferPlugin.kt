@@ -497,6 +497,28 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
+  /** 面对面同步：本机的局域网 IPv4 地址（Wi-Fi、自己开的热点），无线网卡排前面 */
+  @Command
+  fun lanAddrs(invoke: Invoke) {
+    val out = mutableListOf<Pair<Int, String>>()
+    try {
+      for (ni in java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces())) {
+        if (!ni.isUp || ni.isLoopback) continue
+        val rank = when {
+          ni.name.startsWith("wlan") || ni.name.startsWith("ap") || ni.name.startsWith("swlan") -> 0
+          ni.name.startsWith("eth") || ni.name.startsWith("rndis") -> 1
+          else -> 2
+        }
+        for (a in java.util.Collections.list(ni.inetAddresses)) {
+          if (a is java.net.Inet4Address && !a.isLoopbackAddress && a.isSiteLocalAddress) out.add(rank to (a.hostAddress ?: continue))
+        }
+      }
+    } catch (e: Exception) { /* 列不出来就交给 Rust 那边猜 */ }
+    val ret = JSObject()
+    ret.put("addrs", org.json.JSONArray(out.sortedBy { it.first }.map { it.second }.distinct()))
+    invoke.resolve(ret)
+  }
+
   /** 用别的 App 打开链接（weixin:// 这类 WebView 自己打不开）；没装对应 App 返回 ok=false */
   @Command
   fun openUrl(invoke: Invoke) {

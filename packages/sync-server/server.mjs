@@ -1,14 +1,12 @@
-// 日日说同步服务：多设备同步 + 学习搭子小组。只存加密后的数据块，服务器看不到内容。
+// 日日说自建同步服务（给自己部署的人用；App 默认是面对面同步，不连任何服务器）：几台设备 + 聊天机器人
+// 用同一个同步码共享学习记录。只存加密后的数据块，服务器看不到内容。
 //
 // 加密在客户端做（apps/web/src/lib/sync.ts）：同步码 → 账号 id（哈希）+ 密钥（AES-GCM）。服务器只认 id，拿不到密钥。
 //   PUT    /v1/a/<账号>/d/<设备>     上传这台设备的最新快照（覆盖），≤ 6MB
 //   GET    /v1/a/<账号>             列出各设备快照：[{ dev, ts, size }]
 //   GET    /v1/a/<账号>/d/<设备>     下载某台设备的快照
 //   DELETE /v1/a/<账号>/d/<设备>     这台设备退出同步
-//   PUT    /v1/g/<小组>/m/<成员>     学习搭子：更新自己的小卡片（加密，≤ 4KB）
-//   GET    /v1/g/<小组>             取小组里所有人的卡片
-//   DELETE /v1/g/<小组>/m/<成员>     退出小组
-// 只监听 127.0.0.1，由 nginx 转发 /api/sync/。磁盘剩余不足 MIN_FREE_MB 时拒绝写入；每个 IP 每分钟最多 RATE 次。
+// 只监听 127.0.0.1，由你自己的反向代理（nginx 等，要 HTTPS）转发过来。磁盘剩余不足 MIN_FREE_MB 时拒绝写入；每个 IP 每分钟最多 RATE 次。
 import http from 'node:http'
 import { mkdir, readFile, readdir, rm, stat, statfs, writeFile, rename } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -18,9 +16,7 @@ const DATA = process.env.DATA_DIR ?? '/var/lib/sayday-sync'
 const MIN_FREE_MB = Number(process.env.MIN_FREE_MB ?? 2048)
 const RATE = Number(process.env.RATE ?? 120)
 const MAX_SNAPSHOT = 6 * 1024 * 1024
-const MAX_CARD = 4 * 1024
 const MAX_DEVICES = 8
-const MAX_MEMBERS = 30
 const ID = /^[a-f0-9]{32,64}$/
 
 const hits = new Map()
@@ -81,30 +77,6 @@ export function handler(req, res) {
         await mkdir(dir, { recursive: true })
         await put(file, body)
         return send(res, 200, { ok: true, ts: Date.now() })
-      }
-      return fail(res, 405, '不支持')
-    }
-    m = path.match(/^\/v1\/g\/([^/]+)(?:\/m\/([^/]+))?$/)
-    if (m) {
-      const [, group, member] = m
-      if (!ID.test(group) || (member && !ID.test(member))) return fail(res, 400, '小组或成员 id 不对')
-      const dir = join(DATA, 'g', group)
-      if (!member && req.method === 'GET') {
-        const ms = await list(dir)
-        const out = await Promise.all(ms.map(async (x) => ({ id: x.id, ts: x.ts, data: (await readFile(join(dir, x.id + '.bin'))).toString('base64') })))
-        return send(res, 200, { members: out })
-      }
-      if (!member) return fail(res, 405, '不支持')
-      const file = join(dir, member + '.bin')
-      if (req.method === 'DELETE') { await rm(file, { force: true }); return send(res, 200, { ok: true }) }
-      if (req.method === 'PUT') {
-        if (!(await diskOk())) return fail(res, 507, '服务器空间不足，稍后再试')
-        const body = await readBody(req, MAX_CARD)
-        const others = (await list(dir)).filter((d) => d.id !== member)
-        if (others.length >= MAX_MEMBERS) return fail(res, 409, `一个小组最多 ${MAX_MEMBERS} 人`)
-        await mkdir(dir, { recursive: true })
-        await put(file, body)
-        return send(res, 200, { ok: true })
       }
       return fail(res, 405, '不支持')
     }

@@ -612,14 +612,26 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .sync-code { width: 100%; font-family: var(--num, ui-monospace, monospace); letter-spacing: .04em; text-transform: uppercase; }
 .sync-code-show { font-family: var(--num, ui-monospace, monospace); letter-spacing: .04em; word-break: break-all; color: var(--ink) !important; }
 .set-row.sync-join { gap: 8px; }
-.buddy { display: grid; gap: 10px; }
-.buddy p { margin: 0; }
-.buddy-form { display: grid; gap: 8px; }
-.buddy-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.buddy-list li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; }
-.buddy-list .dots { display: flex; gap: 4px; }
-.buddy-list .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); }
-.buddy-list .dots i.on { background: var(--brand); }
+/* 面对面同步 */
+.lan-page { display: grid; gap: 12px; }
+.lan-page > p { margin: 0; line-height: 1.6; }
+.lan-pick { display: grid; gap: 4px; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; border: 0; }
+.lan-pick b { font-size: 17px; }
+.lan-box { display: grid; gap: 12px; justify-items: stretch; text-align: center; }
+.lan-box > p { margin: 0; line-height: 1.6; }
+.lan-box .err-box { margin: 0; text-align: left; }
+.lan-qr { width: min(72vw, 260px); justify-self: center; border-radius: 12px; }
+.lan-wait { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.lan-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); animation: lan-pulse 1.2s ease-in-out infinite; }
+@keyframes lan-pulse { 50% { opacity: .25; } }
+.lan-manual { display: grid; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); text-align: left; }
+.lan-manual div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.lan-manual b { font-family: var(--num, ui-monospace, monospace); font-size: 18px; letter-spacing: .04em; }
+.lan-cam { position: relative; width: min(80vw, 300px); aspect-ratio: 1; justify-self: center; border-radius: 16px; overflow: hidden; background: #000; }
+.lan-cam video { width: 100%; height: 100%; object-fit: cover; }
+.lan-cam i { position: absolute; inset: 18%; border: 2px solid rgba(255, 255, 255, .85); border-radius: 12px; }
+.lan-field { display: grid; gap: 4px; text-align: left; }
+.lan-ok { font-size: 40px; color: var(--good, var(--brand)); }
 .seen-web { margin: 12px 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); display: grid; gap: 4px; }
 .seen-web p { margin: 0; line-height: 1.55; }
 .seen-web mark { background: var(--brand-soft); color: inherit; border-radius: 3px; padding: 0 2px; }

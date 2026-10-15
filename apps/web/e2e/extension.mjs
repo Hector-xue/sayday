@@ -1,23 +1,14 @@
-// 端到端：浏览器插件划词收词 → 同步 → App（另一台设备）里出现这个词，复习时带原句
+// 端到端：浏览器插件划词收词 → 弹窗导出文件 → App 设置里导入 → 词库里出现这个词，复习时带原句
 // 用法: node e2e/extension.mjs <站点URL> <输出目录> <插件目录 dist/extension>
 import puppeteer from 'puppeteer-core'
 import http from 'node:http'
-import { mkdtempSync, rmSync, readFileSync, writeFileSync, cpSync } from 'node:fs'
+import { mkdtempSync, rmSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const [BASE, OUT, EXT0] = process.argv.slice(2)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const log = (...a) => console.log('·', ...a)
-const data = mkdtempSync(join(OUT, 'sync-data-'))
-process.env.DATA_DIR = data; process.env.MIN_FREE_MB = '1'
-const { handler } = await import('../../../packages/sync-server/server.mjs')
-const srv = http.createServer(handler).listen(5395, '127.0.0.1')
-const API = 'http://127.0.0.1:5395/api/sync'
-// 插件里的同步地址换成本机的临时服务（再允许它访问本机）
-const EXT = mkdtempSync(join(OUT, 'ext-'))
-cpSync(EXT0, EXT, { recursive: true })
-writeFileSync(join(EXT, 'background.js'), readFileSync(join(EXT, 'background.js'), 'utf8').replace("'https://sayday.ivyea.com/api/sync'", `'${API}'`))
-const m = JSON.parse(readFileSync(join(EXT, 'manifest.json'), 'utf8')); m.host_permissions.push('http://127.0.0.1/*'); writeFileSync(join(EXT, 'manifest.json'), JSON.stringify(m))
+const EXT = EXT0
 // 一个英文网页
 const page = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); r.end('<html><head><title>Morning news</title></head><body style="font-size:22px;padding:40px"><p id="t">The river flooded the old town. People were carrying their furniture upstairs all night.</p></body></html>') }).listen(5396, '127.0.0.1')
 const dirs = []
@@ -29,22 +20,17 @@ const launch = async (ext) => {
   return b
 }
 try {
-  // 设备一：App（网页版），走完引导、开同步
+  // 设备一：App（网页版），走完引导
   const app = await launch(null)
   const p = await app.newPage()
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
   p.on('dialog', (d) => d.accept())
-  await p.evaluateOnNewDocument((api) => { try { localStorage.setItem('sayday-sync-api', api) } catch {} }, API)
   await p.goto(BASE, { waitUntil: 'networkidle0' })
   const click = async (pg, t, sel = 'button') => { await pg.waitForFunction((t, sel) => [...document.querySelectorAll(sel)].some((x) => x.textContent.trim().startsWith(t) && !x.disabled), { timeout: 60000 }, t, sel); await pg.evaluate((t, sel) => [...document.querySelectorAll(sel)].find((x) => x.textContent.trim().startsWith(t) && !x.disabled).click(), t, sel); await sleep(250) }
   await click(p, '开始'); await click(p, '7.0'); await click(p, '下一步'); await click(p, '20 分钟'); await click(p, '下一步'); await click(p, '开始测')
   await p.waitForSelector('.quiz-word', { timeout: 60000 })
   for (let k = 0; k < 200 && (await p.$('.quiz-word')); k++) await click(p, '不认识')
   await click(p, '开始今天的练习'); await p.waitForFunction(() => document.body.innerText.includes('今日练习'))
-  await click(p, '今天', '.tab'); await p.click('[aria-label="设置"]'); await sleep(400)
-  await click(p, '开启'); await p.waitForSelector('.sync-code-show', { timeout: 20000 })
-  const code = await p.evaluate(() => document.querySelector('.sync-code-show').textContent)
-  log('App 同步码', code)
 
   // 设备二：装了插件的浏览器，打开英文网页，双击 flooded
   const b = await launch(EXT)
@@ -60,16 +46,24 @@ try {
   await w.screenshot({ path: join(OUT, 'ext-1-card.png') })
   await w.evaluate(() => [...document.documentElement.children].find((x) => x.shadowRoot).shadowRoot.querySelector('button').click())
   await sleep(500)
-  // 插件弹窗：填同步码、同步
+  // 插件弹窗：导出收的词（下载到临时目录）
+  const dl = mkdtempSync(join(OUT, 'ext-dl-')); dirs.push(dl)
   const pop = await b.newPage()
+  await (await pop.createCDPSession()).send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dl })
   await pop.goto(`chrome-extension://${extId}/popup.html`)
-  await pop.type('#code', code); await pop.click('#sync')
-  await pop.waitForFunction(() => /同步好了|失败|不对|出错/.test(document.getElementById('st').textContent), { timeout: 20000 })
-  log('插件弹窗', await pop.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')))
+  await pop.click('#export')
+  for (let k = 0; k < 50 && !readdirSync(dl).some((f) => f.endsWith('.json')); k++) await sleep(200)
+  const file = readdirSync(dl).find((f) => f.endsWith('.json'))
+  log('插件弹窗', await pop.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')), '导出的文件', file)
   await pop.setViewport({ width: 340, height: 520 }); await pop.screenshot({ path: join(OUT, 'ext-2-popup.png') })
 
-  // 回到 App：立即同步 → 词库里有 flood，开一组复习能看到原句
-  await click(p, '立即同步'); await p.waitForFunction(() => document.querySelector('.toast')?.textContent.includes('同步好了'), { timeout: 20000 })
+  // 回到 App：设置 → 导入备份 选这个文件 → 词库里有 flood，开一组复习能看到原句
+  await click(p, '今天', '.tab'); await p.click('[aria-label="设置"]'); await sleep(400)
+  const nav = p.waitForNavigation({ timeout: 20000 }).catch(() => null)
+  await (await p.$('input[type=file][accept*="json"]')).uploadFile(join(dl, file))
+  await p.waitForFunction(() => document.querySelector('.toast')?.textContent.includes('收进'), { timeout: 20000 })
+  log('导入', await p.evaluate(() => document.querySelector('.toast').textContent))
+  await nav; await p.waitForFunction(() => document.body.innerText.includes('今日练习'), { timeout: 30000 })
   await click(p, '词库', '.tab'); await sleep(600)
   log('App 词库', (await p.evaluate(() => document.body.innerText.replace(/\s+/g, ' '))).match(/学习中 \d+/)?.[0])
   await click(p, '今天', '.tab'); await sleep(500); await click(p, '开始'); await sleep(1500)
@@ -78,6 +72,6 @@ try {
   await p.screenshot({ path: join(OUT, 'ext-3-review.png') })
   await app.close(); await b.close()
 } finally {
-  srv.close(); page.close()
-  for (const d of [data, EXT, ...dirs]) rmSync(d, { recursive: true, force: true })
+  page.close()
+  for (const d of dirs) rmSync(d, { recursive: true, force: true })
 }

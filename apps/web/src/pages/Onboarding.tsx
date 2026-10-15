@@ -8,7 +8,9 @@ import { db } from '../lib/db'
 import type { Profile } from '../lib/lesson'
 import { resetVocabState } from '../lib/calibrate'
 import { currentLevel } from '../lib/progress'
-import { disableSync, enableSync, syncNow, validCode } from '../lib/sync'
+import { canLan } from '../lib/lan'
+import { importBackup } from '../lib/backup'
+import { LanJoin } from '../components/LanSync'
 import { kvGet } from '../lib/db'
 
 type Stage = 'welcome' | 'join' | 'goal' | 'minutes' | 'place' | 'quiz' | 'manual' | 'report'
@@ -49,7 +51,7 @@ export function Onboarding({ redo, onExit }: { redo?: 'goal' | 'place'; onExit?:
       </div>
       <div className="onb-foot">
         <button className="btn primary block" onClick={() => setStage('goal')}>开始</button>
-        <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => setStage('join')}>在别的设备上用过？用同步码接上</button>
+        <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => setStage('join')}>在别的设备上用过？接过来</button>
       </div>
     </div>
   )
@@ -236,30 +238,44 @@ function Report({ goal, minutes, r, prev, onStart, onRetry }: { goal: Goal; minu
   )
 }
 
-/** 新设备：输入另一台设备上的同步码，把学习记录拉下来，不用重新定级 */
+/**
+ * 新设备：从旧设备接过学习记录，不用重新定级。
+ * App：面对面同步（旧设备出码、这台扫）；网页版和没有旧设备在身边的：导入备份文件
+ */
 function Join({ onBack }: { onBack: () => void }) {
-  const [code, setCode] = useState('')
-  const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
-  const go = async () => {
-    setBusy(true); setErr('')
-    try {
-      await enableSync(code)
-      await syncNow()
-      if (!(await kvGet('profile', null))) { await disableSync(); setErr('这个同步码下还没有学习记录。确认一下码有没有抄错，或者先在原来的设备上点“立即同步”'); return }
-      location.reload()
-    } catch (e) { await disableSync().catch(() => {}); setErr((e as Error).message || String(e)) } finally { setBusy(false) }
+  const [n, setN] = useState(0)
+  const lan = canLan()
+  const done = async () => {
+    if (await kvGet('profile', null)) { location.reload(); return }
+    setErr('另一台上还没有学习记录（还没走完开始的设置）。先在那台上用起来，或者在这台直接点“返回”从头开始'); setN((x) => x + 1)
+  }
+  const pick = async (f: File) => {
+    const r = await importBackup(f)
+    if (r.ok) location.reload()
+    else if (r.msg) setErr(r.msg)
   }
   return (
     <div className="onb fade-in">
       <div className="onb-body">
         <button className="btn ghost small onb-back" onClick={onBack}>返回</button>
-        <h1>用同步码接上</h1>
-        <p className="lead">在原来的设备上打开 设置 → 多设备同步，把同步码抄过来。学习记录会合到这台设备上。</p>
-        <input className="input sync-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX" autoCapitalize="characters" autoCorrect="off" spellCheck={false} />
-        {err && <div className="err-box" style={{ marginTop: 12 }}>{err}</div>}
+        <h1>从旧设备接过来</h1>
+        {lan ? (
+          <>
+            <p className="lead">两台设备连同一个 Wi-Fi。在旧设备上打开 设置 → 面对面同步 → 在这台出码，然后用这台扫一下。</p>
+            {err && <div className="err-box" style={{ marginBottom: 12 }}>{err}</div>}
+            <LanJoin key={n} fresh onDone={done} />
+          </>
+        ) : (
+          <>
+            <p className="lead">在旧设备上打开 设置 → 导出备份，把文件传到这台设备，再在这里选它。</p>
+            {err && <div className="err-box">{err}</div>}
+          </>
+        )}
       </div>
-      <div className="onb-foot"><button className="btn primary block" disabled={busy || !validCode(code)} onClick={go}>{busy ? '正在拉取学习记录…' : '接上'}</button></div>
+      <div className="onb-foot">
+        <label className={`btn ${lan ? 'ghost' : 'primary'} block`} style={{ display: 'grid', placeItems: 'center' }}>{lan ? '旧设备不在身边？导入备份文件' : '选择备份文件'}<input type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) pick(f) }} /></label>
+      </div>
     </div>
   )
 }
