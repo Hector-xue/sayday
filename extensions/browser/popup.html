@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>日日说 · 收的词</title>
+<style>
+  :root{--ink:#16181d;--soft:#4a4f57;--faint:#8a8f98;--bg:#f7f6f2;--card:#fff;--hair:#e3e1da;--mark:#ffe14d}
+  @media (prefers-color-scheme: dark){:root{--ink:#f1f1f1;--soft:#c9ccd2;--faint:#8a8f98;--bg:#17191d;--card:#22252b;--hair:#3a3d44}}
+  body{margin:0;width:340px;font:14px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink)}
+  main{padding:14px 16px;display:grid;gap:12px} h1{font-size:17px;margin:0} p{margin:0}
+  .muted{color:var(--faint);font-size:12px} .card{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:10px 12px}
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:260px;overflow:auto} li{display:grid;gap:2px}
+  li b{font-size:15px} li .s{color:var(--soft);font-size:12px}
+  input{width:100%;box-sizing:border-box;font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--hair);background:var(--card);color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
+  button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;background:var(--mark);color:#16181d}
+  .row{display:flex;gap:8px;align-items:center}
+</style></head>
+<body><main>
+  <h1>日日说 · 收的词</h1>
+  <p class="muted">网页上双击或选中英文单词就能收。填了同步码，收的词会同步进日日说，复习时带上原句。</p>
+  <div class="card"><ul id="list"></ul><p id="empty" class="muted">还没收词。去网页上双击一个英文单词试试。</p></div>
+  <div class="card" style="display:grid;gap:8px">
+    <p><b>同步到日日说</b></p>
+    <p class="muted">App 里：设置 → 数据 → 多设备同步 → 同步码 → 显示，抄过来</p>
+    <input id="code" placeholder="XXXX-XXXX-XXXX-…" autocomplete="off" spellcheck="false">
+    <div class="row"><button id="sync">保存并同步</button><span id="st" class="muted"></span></div>
+  </div>
+</main><script type="module" src="popup.js"></script></body></html>

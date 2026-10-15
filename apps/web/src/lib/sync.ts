@@ -117,6 +117,8 @@ const KV_MERGE: Record<string, (a: any, b: any) => any> = {
   eggs_opened: (a, b) => ({ ...(b ?? {}), ...(a ?? {}) }),
   focus_best: (a, b) => { const o = { ...(a ?? {}) }; for (const [k, v] of Object.entries<number>(b ?? {})) o[k] = Math.max(o[k] ?? 0, v); return o },
   pair_stats: (a, b) => { const o = { ...(a ?? {}) }; const n = (x: any) => (x?.listen?.[1] ?? 0) + (x?.speak?.[1] ?? 0); for (const [k, v] of Object.entries<any>(b ?? {})) if (n(v) > n(o[k])) o[k] = v; return o },
+  // 浏览器插件划词：按词合并，新的原句为准
+  clips: (a, b) => { const o = { ...(a ?? {}) }; for (const [k, v] of Object.entries<any>(b ?? {})) if (!o[k] || (v?.ts ?? 0) > (o[k]?.ts ?? 0)) o[k] = v; return o },
   band_weeks: (a, b) => mergeWeeks(a, b),
   vocab_weeks: (a, b) => mergeWeeks(a, b),
 }

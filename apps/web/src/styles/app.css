@@ -620,3 +620,6 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .buddy-list .dots { display: flex; gap: 4px; }
 .buddy-list .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); }
 .buddy-list .dots i.on { background: var(--brand); }
+.seen-web { margin: 12px 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); display: grid; gap: 4px; }
+.seen-web p { margin: 0; line-height: 1.55; }
+.seen-web mark { background: var(--brand-soft); color: inherit; border-radius: 3px; padding: 0 2px; }
