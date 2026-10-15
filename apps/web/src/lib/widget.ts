@@ -3,6 +3,7 @@
 import { db, today } from './db'
 import { dayRow } from './lesson'
 import { loadContent } from './content'
+import { currentWeek } from './rhythm'
 
 const tauri = (globalThis as any).__TAURI__?.core as { invoke: (cmd: string, args?: object) => Promise<any> } | undefined
 
@@ -18,7 +19,7 @@ export function streakOf(days: { date: string; active: boolean }[], now = today(
   return n
 }
 
-/** 当前连续天数（今天页顶部和小组件共用） */
+/** 当前连续天数（小组件老版本的兜底标题） */
 export async function currentStreak(): Promise<number> {
   const rows = await db.all<{ date: string; reviews: number; new_words: number; shadows: number; listens: number }>('SELECT date, reviews, new_words, shadows, listens FROM day ORDER BY date DESC LIMIT 400')
   return streakOf(rows.map((r) => ({ date: r.date, active: active(r) })))
@@ -28,6 +29,7 @@ export async function updateWidget() {
   if (!tauri) return
   const d = await dayRow()
   const streak = await currentStreak()
+  const wk = await currentWeek()
   const practiced = active(d)
   // 一个最近在学的词（还没熟的里面最近加入的），显示释义帮着回想
   const card = await db.one<{ word: string }>('SELECT word FROM card WHERE known = 0 AND state != 2 ORDER BY added DESC LIMIT 1')
@@ -38,9 +40,12 @@ export async function updateWidget() {
     widget: {
       date: today(),
       streak,
+      // 标题按周目标：一周练 4 天算达标，不按天连续
+      head: wk.met ? (wk.streak > 1 ? `本周达标 · 连续 ${wk.streak} 周` : '本周达标') : `本周练了 ${wk.lit}/${wk.goal} 天`,
+      headUntil: wk.days[6].date,
       practiced,
       main: d.done ? '今天练完了 ✓' : practiced ? '今天练了一些' : '今天还没练',
-      sub: parts.length ? parts.join(' · ') : '忙的话 2 分钟也算数',
+      sub: parts.length ? parts.join(' · ') : '累的话 2 分钟也算数',
       word: w?.w ?? '',
       meaning: w ? `${w.ipa ? `/${w.ipa}/ ` : ''}${w.zh.split(/[；;]/)[0]}` : '',
     },

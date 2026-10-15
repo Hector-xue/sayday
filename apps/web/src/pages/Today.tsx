@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../store'
 import { Icon } from '../components/icons'
-import { dailySize, dayRow, recentDays, type DayRow } from '../lib/lesson'
+import { dailySize, dayRow, type DayRow } from '../lib/lesson'
 import { weeklyDue } from '../lib/calibrate'
 import { db, today } from '../lib/db'
 import { getAi } from '../lib/ai'
@@ -9,7 +9,7 @@ import { getProgress, loadSeasons, nextUp, teaserFor } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
 import { currentLevel, stats } from '../lib/progress'
 import { eta, goalLabel, type Cefr } from '../lib/levels'
-import { currentStreak } from '../lib/widget'
+import { comeback, currentWeek, spreadBacklog, type Comeback, type Week } from '../lib/rhythm'
 import { checkUpdate, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
 import { SupportSheet } from '../components/SupportSheet'
@@ -18,7 +18,7 @@ import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -34,12 +34,20 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [chatted, setChatted] = useState(false)
   const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
   const [prevTeaser, setPrevTeaser] = useState('')
-  const [streak, setStreak] = useState(0)
+  const [wk, setWk] = useState<Week | null>(null)
+  const [cb, setCb] = useState<Comeback | null>(null)
   const [support, setSupport] = useState<{ s: SupportState; show: boolean } | null>(null)
   const [supportOpen, setSupportOpen] = useState(false)
   useEffect(() => {
     if (profile) {
-      dailySize(profile).then(setSize)
+      // 隔了一周以上回来：先摊开积压的复习（每天不比平时多），再显示“欢迎回来”
+      dailySize(profile).then(async (sz) => {
+        setSize(sz)
+        const c = await comeback(sz.review)
+        if (c && c.backlog > sz.review) await spreadBacklog(sz.review)
+        setCb(c)
+        dueCount().then(setDue)
+      })
       weeklyDue(profile).then(setCheck)
       // 每月可选一次完整复测：离上次完整定级满 30 天
       db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
@@ -50,12 +58,11 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
     db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]).then((r) => setChatted(!!r?.n))
     dayRow().then(setD)
     dueCount().then(setDue)
-    recentDays(7).then(setWeek)
-    currentStreak().then(setStreak)
+    currentWeek().then(async (w) => { setWk(w); setWeek(await Promise.all(w.days.map((x) => dayRow(x.date)))) })
     Promise.all([getSupport(), stats()]).then(([s, st]) => setSupport({ s, show: shouldPrompt(s, st.days) }))
     if (profile) currentLevel(profile).then(setLv)
   }, [tick, profile])
-  if (!profile || !d || !size) return <div className="loading">…</div>
+  if (!profile || !d || !size || !wk) return <div className="loading">…</div>
   const rv = { done: Math.min(d.reviews, size.review), want: Math.min(size.review, d.reviews + due) }
   const items = [
     { k: 'review', ico: <Icon.review />, t: '复习', s: rv.want ? '到期的词，趁快忘之前' : '今天没有到期的词', n: `${rv.done}/${rv.want}`, done: rv.want > 0 && rv.done >= rv.want },
@@ -76,21 +83,32 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
 
       {upd && <UpdateCard info={upd} onClose={() => setUpd(null)} />}
 
+      {/* 周目标：一周练 4 天算达标；不按天算连续，断一天不清零 */}
       <div className="streak-hero">
-        <div className="streak-num"><b>{streak}</b><span>{streak ? '天连续' : '今天开个头'}</span></div>
+        <div className="streak-num"><b>{wk.lit}<small>/{wk.goal}</small></b><span>{wk.met ? (wk.streak > 1 ? `本周达标 · 连续 ${wk.streak} 周` : '本周达标') : `${wk.lit ? `本周再练 ${wk.goal - wk.lit} 天达标` : `一周练 ${wk.goal} 天就算达标`}${wk.streak ? ` · 已连续 ${wk.streak} 周` : ''}`}</span></div>
         <div className="week">
-          {week.map((w, i) => {
-            const dt = new Date(Date.now() - (6 - i) * 86400_000)
+          {week.map((w) => {
+            const dt = new Date(w.date + 'T12:00:00')
             const any = w.reviews + w.new_words + w.shadows + w.listens > 0
+            const isToday = w.date === d.date
             return (
-              <div key={w.date}>
+              <div key={w.date} className={w.date > d.date ? 'future' : undefined}>
                 <div className="d">{WEEK[dt.getDay()]}</div>
-                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${i === 6 ? 'today' : ''}`}>{w.done ? '✓' : dt.getDate()}</div>
+                <div className={`dot ${w.done ? 'done' : any ? 'min' : ''} ${isToday ? 'today' : ''}`}>{w.done ? '✓' : dt.getDate()}</div>
               </div>
             )
           })}
         </div>
       </div>
+
+      {cb && (
+        <div className="card raised comeback">
+          <b style={{ fontSize: 18 }}>欢迎回来</b>
+          <p className="muted">离开了 {cb.away} 天，没关系。先用 3 分钟找回状态：复习几个词、听一句、跟读一句。</p>
+          {cb.backlog > size.review && <p className="small muted">攒下的 {cb.backlog} 个到期词已经分到接下来 {cb.days} 天，每天不比平时多。</p>}
+          <button className="btn primary block" onClick={() => onStart(true, true)}>开始 3 分钟</button>
+        </div>
+      )}
 
       <div className="card raised today-card">
         {allDone ? (
@@ -111,7 +129,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           ))}
         </ul>
         <button className="btn primary block" onClick={() => onStart(false)}>{allDone ? '再来一组' : d.reviews + d.new_words + d.shadows + d.listens > 0 ? '继续' : '开始'}</button>
-        {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很忙，只做 2 分钟</button>}
+        {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很累，只做 2 分钟</button>}
         <ModelPrefetchBar />
       </div>
 

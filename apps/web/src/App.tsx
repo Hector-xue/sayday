@@ -35,7 +35,7 @@ function Main() {
     if (i >= 0 && i !== pill) { setPill(i); setMoves((n) => n + 1) }
     setTab(t)
   }
-  const [session, setSession] = useState<null | { minimum: boolean }>(null)
+  const [session, setSession] = useState<null | { minimum: boolean; comeback?: boolean }>(null)
   const [redo, setRedo] = useState<null | 'goal' | 'place'>(null)
   const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary' | 'writing'>(null)
   const [openEp, setOpenEp] = useState<{ season: number; ep: number } | null>(null)
@@ -46,7 +46,7 @@ function Main() {
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (
     <div className="shell">
-      {tab === 'today' && <Today onStart={(minimum) => setSession({ minimum })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} />}
+      {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
       {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} />}
       {tab === 'words' && <Words />}
@@ -61,7 +61,7 @@ function Main() {
           ))}
         </nav>
       </div>
-      {session && <Session minimum={session.minimum} onClose={() => setSession(null)} />}
+      {session && <Session minimum={session.minimum} comeback={session.comeback} onClose={() => setSession(null)} />}
       {ai === 'chat' && <Chat onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('chat'); setAi('setup') }} />}
       {ai === 'diary' && <Diary onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('diary'); setAi('setup') }} />}
       {ai === 'writing' && <Writing onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('writing'); setAi('setup') }} />}
