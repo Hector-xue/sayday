@@ -73,6 +73,10 @@ class SpeakArgs {
 class WidgetArgs {
   var date: String = ""
   var streak: Int = 0
+  /** 标题行（“本周 3/4 天”这类），网页算好；空 = 老逻辑按 streak 拼 */
+  var head: String = ""
+  /** head 有效到哪天（本周日，yyyy-MM-dd）；过了这天 head 作废 */
+  var headUntil: String = ""
   var practiced: Boolean = false
   var main: String = ""
   var sub: String = ""
@@ -403,7 +407,7 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   fun updateWidget(invoke: Invoke) {
     val a = invoke.parseArgs(WidgetArgs::class.java)
     activity.getSharedPreferences(SaydayWidget.PREFS, android.content.Context.MODE_PRIVATE).edit()
-      .putString("date", a.date).putInt("streak", a.streak).putBoolean("practiced", a.practiced)
+      .putString("date", a.date).putInt("streak", a.streak).putString("head", a.head).putString("head_until", a.headUntil).putBoolean("practiced", a.practiced)
       .putString("main", a.main).putString("sub", a.sub).putString("word", a.word).putString("meaning", a.meaning)
       .apply()
     SaydayWidget.render(activity)

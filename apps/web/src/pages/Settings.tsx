@@ -172,7 +172,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
             <button className="btn small quiet" onClick={async () => { if (!(await openNotifySettings())) toast('到系统设置 → 应用 → 日日说 → 通知 里改') }}>{sys && !sys.notify ? '去打开' : '系统设置'}</button>
           </div>
           <div className="set-row">
-            <div className="k"><b>桌面小组件</b><span>{sys?.widgets ? `桌面上已有 ${sys.widgets} 个 · ` : ''}连续天数、今天练没练、一个在学的词</span></div>
+            <div className="k"><b>桌面小组件</b><span>{sys?.widgets ? `桌面上已有 ${sys.widgets} 个 · ` : ''}本周练了几天、今天练没练、一个在学的词</span></div>
             <button className="btn small quiet" onClick={addWidget}>{sys?.widgets ? '再加一个' : '添加'}</button>
           </div>
         </>) : (

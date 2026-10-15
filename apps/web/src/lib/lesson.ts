@@ -124,16 +124,20 @@ async function pickListens(n: number, vocabCefr: Cefr, used: Set<number>): Promi
   return out
 }
 
-/** 生成今天剩下要做的步骤。minimum = 保底：只复习 5 个词 + 跟读 1 句 */
-export async function buildSession(p: Profile, minimum = false): Promise<Step[]> {
+/**
+ * 生成今天剩下要做的步骤。
+ * minimum = 保底：只复习 5 个词 + 跟读 1 句；comeback = 隔久了回来的 3 分钟：复习 8 个、听 1 句、跟读 1 句，不学新词
+ */
+export async function buildSession(p: Profile, minimum = false, comeback = false): Promise<Step[]> {
   const { words, byWord, sentsByWord } = await loadContent()
   const size = await dailySize(p)
   const lv = await vocabLevel(p)
   const d = await dayRow()
-  const reviewLeft = minimum ? 5 : Math.max(0, size.review - d.reviews)
+  if (comeback) minimum = true
+  const reviewLeft = comeback ? 8 : minimum ? 5 : Math.max(0, size.review - d.reviews)
   const freshLeft = minimum ? 0 : Math.max(0, size.fresh - d.new_words)
   const shadowLeft = minimum ? 1 : Math.max(0, size.shadow - d.shadows)
-  const listenLeft = minimum ? 0 : Math.max(0, size.listen - (d.listens ?? 0))
+  const listenLeft = comeback ? 1 : minimum ? 0 : Math.max(0, size.listen - (d.listens ?? 0))
 
   const due = (await dueWords(reviewLeft)).map((w) => byWord.get(w)).filter(Boolean) as Word[]
   const fresh = await pickNewWords(p, freshLeft, words, lv.frontier)

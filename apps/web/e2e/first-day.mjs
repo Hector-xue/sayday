@@ -332,6 +332,24 @@ try {
   await clickText('词库', '.tab'); await sleep(500)
   log('导出再导入', `备份 ${Math.round(backup.length / 1024)}KB`, (await text()).match(/学习中 \d+/)?.[0])
 
+  // 隔了 10 天再回来：页面时钟往后拨 10 天，今天页应显示“欢迎回来”，3 分钟找回状态能开起来
+  {
+    const shift = await p.evaluateOnNewDocument(() => {
+      const D = Date, off = 10 * 86400_000
+      globalThis.Date = class extends D { constructor(...a) { super(...(a.length ? a : [D.now() + off])) } static now() { return D.now() + off } }
+    })
+    await p.reload({ waitUntil: 'networkidle0' }); await sleep(800)
+    await clickText('今天', '.tab'); await sleep(600)
+    log('回来了', (await text()).replace(/\s+/g, ' ').match(/欢迎回来.{0,90}/)?.[0] ?? '没显示欢迎回来')
+    log('周目标', await p.evaluate(() => document.querySelector('.streak-num')?.innerText.replace(/\s+/g, ' ')))
+    await shot('25-comeback')
+    await clickText('开始 3 分钟'); await sleep(1200)
+    log('3 分钟找回状态', await p.evaluate(() => document.querySelector('.session') ? (document.querySelector('.session h2, .session-top')?.textContent ?? '').replace(/\s+/g, ' ').slice(0, 60) : '没打开'))
+    await p.click('.session-top .icon-btn').catch(() => {}); await sleep(400)
+    await p.removeScriptToEvaluateOnNewDocument(shift.identifier)
+    await p.reload({ waitUntil: 'networkidle0' }); await sleep(500)
+  }
+
   // 深色
   await openSettings(); await clickText('深色'); await clickText('今天', '.tab'); await sleep(400); await shot('13-today-dark')
   await openSettings(); await clickText('跟随系统')

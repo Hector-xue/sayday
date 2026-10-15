@@ -12,7 +12,7 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * 桌面小组件：连续天数、今天练了没有、一个最近在学的词。点一下打开 App。
+ * 桌面小组件：本周练了几天（周目标）、今天练了没有、一个最近在学的词。点一下打开 App。
  * 内容由网页那边算好（updateWidget 命令）存在 SharedPreferences；小组件自己只负责显示，
  * 以及过了换日时间（凌晨 4 点，和 App 一致）后改成“今天还没练”。
  */
@@ -40,23 +40,30 @@ class SaydayWidget : AppWidgetProvider() {
       val date = p.getString("date", "") ?: ""
       val streak = p.getInt("streak", 0)
       val practiced = p.getBoolean("practiced", false)
+      // 周目标（本周练几天）：同一周内数据是旧的也照样成立
+      val until = p.getString("head_until", "") ?: ""
+      val week = when {
+        until.isEmpty() -> ""
+        day(0) <= until -> p.getString("head", "") ?: ""
+        else -> "新的一周"  // 过了周日还没打开 App：本周一天都还没练
+      }
       val head: String
       val main: String
       val sub: String
       when {
         date == day(0) -> {
-          head = if (streak > 0) "连续 $streak 天" else "日日说"
+          head = week.ifEmpty { if (streak > 0) "连续 $streak 天" else "日日说" }
           main = p.getString("main", "") ?: ""
           sub = p.getString("sub", "") ?: ""
         }
         // 数据是昨天的：昨天练过，连续天数还在，提醒别断
         date == day(1) && practiced -> {
-          head = "连续 $streak 天 · 今天别断"
+          head = week.ifEmpty { "连续 $streak 天 · 今天别断" }
           main = "今天还没练"
           sub = "忙的话 2 分钟也算数"
         }
         else -> {
-          head = "日日说"
+          head = week.ifEmpty { "日日说" }
           main = if (date.isEmpty()) "打开 App 开始今天的练习" else "今天还没练"
           sub = "忙的话 2 分钟也算数"
         }

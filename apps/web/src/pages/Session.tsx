@@ -24,7 +24,7 @@ function Example({ s, word, showZh = true }: { s?: Sentence; word: string; showZ
   )
 }
 
-export function Session({ minimum, onClose }: { minimum: boolean; onClose: () => void }) {
+export function Session({ minimum, comeback, onClose }: { minimum: boolean; comeback?: boolean; onClose: () => void }) {
   const { profile, refresh, toast } = useApp()
   const [steps, setSteps] = useState<Step[] | null>(null)
   const [i, setI] = useState(0)
@@ -38,7 +38,7 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
   const accent = profile!.accent
 
   useEffect(() => {
-    buildSession(profile!, minimum).then((s) => {
+    buildSession(profile!, minimum, comeback).then((s) => {
       setSteps(s)
       // 后台提前合成示范读音：先跟读句，再例句
       const clips = [
@@ -59,8 +59,8 @@ export function Session({ minimum, onClose }: { minimum: boolean; onClose: () =>
   if (!steps) return <div className="session"><div className="loading">排今天的内容…</div></div>
   const finish = async () => {
     // 保底：至少做完一步才算今天“做了”；一步没做就关掉不记
-    if (minimum && doneSteps.current > 0) await markDay({ minimum: true, done: true })
-    if (!minimum && doneSteps.current > 0) {
+    if ((minimum || comeback) && doneSteps.current > 0) await markDay({ minimum: true, done: true })
+    if (!minimum && !comeback && doneSteps.current > 0) {
       const rest = await buildSession(profile!, false)
       if (!rest.length) await markDay({ done: true })
     }
