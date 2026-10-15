@@ -15,6 +15,9 @@ import { UpdateCard } from '../components/UpdateCard'
 import { SupportSheet } from '../components/SupportSheet'
 import { ModelPrefetchBar } from '../components/ModelPrefetch'
 import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
+import { markAbilitiesSeen, unseenAbilities, type Ability } from '../lib/growth'
+import { thisWeek } from '../lib/voice-diary'
+import { VoiceDiary } from './VoiceDiary'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -36,6 +39,9 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [prevTeaser, setPrevTeaser] = useState('')
   const [wk, setWk] = useState<Week | null>(null)
   const [cb, setCb] = useState<Comeback | null>(null)
+  const [fresh, setFresh] = useState<Ability[]>([])
+  const [vdDue, setVdDue] = useState(false)
+  const [vdOpen, setVdOpen] = useState(false)
   const [support, setSupport] = useState<{ s: SupportState; show: boolean } | null>(null)
   const [supportOpen, setSupportOpen] = useState(false)
   useEffect(() => {
@@ -61,6 +67,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
     currentWeek().then(async (w) => { setWk(w); setWeek(await Promise.all(w.days.map((x) => dayRow(x.date)))) })
     Promise.all([getSupport(), stats()]).then(([s, st]) => setSupport({ s, show: shouldPrompt(s, st.days) }))
     if (profile) currentLevel(profile).then(setLv)
+    if (profile) unseenAbilities(profile).then(setFresh).catch(() => {})
+    thisWeek().then((e) => setVdDue(!e)).catch(() => {})
   }, [tick, profile])
   if (!profile || !d || !size || !wk) return <div className="loading">…</div>
   const rv = { done: Math.min(d.reviews, size.review), want: Math.min(size.review, d.reviews + due) }
@@ -132,6 +140,21 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         {!allDone && <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => onStart(true)}>今天很累，只做 2 分钟</button>}
         <ModelPrefetchBar />
       </div>
+
+      {fresh.length > 0 && (
+        <div className="card ability-new">
+          <p className="small muted">{fresh.length > 1 ? `你现在能做到的 ${fresh.length} 件事` : '新做到的事'}</p>
+          {fresh.slice(0, 3).map((a) => <b key={a.id}>{a.t}</b>)}
+          <button className="btn small quiet" onClick={() => { markAbilitiesSeen(fresh.map((a) => a.id)); setFresh([]) }}>好</button>
+        </div>
+      )}
+
+      {vdDue && d.reviews + d.new_words + d.shadows + d.listens > 0 && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="row"><div><b>本周的声音日记</b><p className="small muted">读一遍同一段话，1 分钟。几周后和第一周对着听</p></div><div className="spacer" /><button className="btn small quiet" onClick={() => setVdOpen(true)}>录一段</button></div>
+        </div>
+      )}
+      {vdOpen && <VoiceDiary onClose={() => { setVdOpen(false); thisWeek().then((e) => setVdDue(!e)) }} />}
 
       {lv && e && (
         <>

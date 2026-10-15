@@ -541,3 +541,29 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .word-pop .small.faint { margin-top: 8px; }
 @keyframes pop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .word-pop { animation: none; } }
+
+/* 进步看得见：雷达、曲线、能力、声音日记 */
+.radar { display: block; width: 100%; max-width: 340px; margin: 0 auto 6px; }
+.radar .grid { fill: none; stroke: var(--hair); stroke-width: 1; }
+.radar .now { fill: color-mix(in srgb, var(--brand) 22%, transparent); stroke: var(--brand); stroke-width: 2; stroke-linejoin: round; }
+.radar .before { fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.radar .dot { fill: var(--brand); }
+.radar text { font-size: 12px; fill: var(--ink); font-weight: 600; }
+.radar-card { display: grid; gap: 6px; }
+.radar-card p { margin: 0; }
+.line-chart { display: block; width: 100%; height: auto; margin-bottom: 6px; }
+.line-chart .stroke { fill: none; stroke: var(--brand); stroke-width: 2; stroke-linejoin: round; }
+.line-chart .area { fill: color-mix(in srgb, var(--brand) 12%, transparent); }
+.line-chart .dot { fill: var(--brand); }
+.line-chart text { font-size: 11px; fill: var(--ink); font-weight: 600; }
+.line-chart text.axis { fill: var(--faint); font-weight: 400; }
+.abilities .ok { color: var(--brand); display: grid; place-items: center; }
+.abilities .locked .k b { color: var(--soft); font-weight: 500; }
+.ability-new { display: grid; gap: 4px; margin-bottom: 16px; }
+.ability-new p { margin: 0; }
+.ability-new .btn { justify-self: start; margin-top: 6px; }
+.voice-diary { display: grid; gap: 14px; }
+.voice-diary .passage { font-size: 18px; line-height: 1.6; margin: 0; }
+.voice-diary .compare { display: grid; gap: 8px; }
+.voice-diary .compare p { margin: 0; }
+.voice-diary .compare .row { gap: 10px; }

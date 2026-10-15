@@ -12,7 +12,13 @@ import { practiceBand } from '../lib/practice'
 import { db } from '../lib/db'
 import { Icon } from '../components/icons'
 import { ipa } from '../lib/phones'
+import { Line, Radar } from '../components/Charts'
+import { SKILLS, abilities, bandEstimate, markAbilitiesSeen, overallBand, snapshotBands, vocabCurve, type AbilityState, type BandWeek, type Bands, type VocabPoint } from '../lib/growth'
+import { thisWeek, type Entry } from '../lib/voice-diary'
+import { VoiceDiary } from './VoiceDiary'
 
+/** 四项里还没依据的，怎么补上 */
+const HOW: Record<string, string> = { l: '每天练习里多做几题听力', r: '做一次雅思阅读', w: '写一篇雅思作文', s: '做一次口语模考' }
 const SRC: Record<string, string> = { placement: '入门定级', manual: '手动选择', weekly: '每周小测' }
 const md = (ts: number) => { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()}` }
 
@@ -33,11 +39,19 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
   const [pairs, setPairs] = useState<Pair[]>([])
   const [wband, setWband] = useState<{ band: number; ts: number } | null>(null)
   const [pb, setPb] = useState<{ r: Awaited<ReturnType<typeof practiceBand>>; l: Awaited<ReturnType<typeof practiceBand>> }>({ r: null, l: null })
+  const [bands, setBands] = useState<{ now: Bands; weeks: BandWeek[] } | null>(null)
+  const [curve, setCurve] = useState<VocabPoint[]>([])
+  const [abl, setAbl] = useState<AbilityState[]>([])
+  const [vd, setVd] = useState<{ open: boolean; mine: Entry | null }>({ open: false, mine: null })
   const [mock, setMock] = useState<{ band: number | null; fc: number | null; p: number | null; ts: number } | null>(null)
   useEffect(() => {
     if (!profile) return
     currentLevel(profile).then(setLv); stats().then(setSt); weakPhones().then(setWeak); recentDays(7).then(setDays); scoreTrend().then(setTrend)
     listenLevel().then(setLl); recordingPairs().then(setPairs)
+    bandEstimate(profile).then(async (b) => setBands({ now: b, weeks: await snapshotBands(b) }))
+    vocabCurve(profile).then(setCurve)
+    abilities(profile).then((a) => { setAbl(a); markAbilitiesSeen(a.filter((x) => x.at).map((x) => x.a.id)) })
+    thisWeek().then((mine) => setVd((v) => ({ ...v, mine })))
     Promise.all([practiceBand('reading'), practiceBand('listening')]).then(([r, l]) => setPb({ r, l }))
     writingHistory(10).then((h) => { const x = h.find((r) => r.band !== null); setWband(x ? { band: x.band!, ts: x.ts } : null) })
     lastTests(1).then((r) => { if (r[0]) { const d = JSON.parse(r[0].data); setMock({ band: r[0].band, fc: d.grade?.fc ?? d.objective?.fc ?? null, p: d.grade?.p ?? d.objective?.p ?? null, ts: r[0].ts }) } })
@@ -62,6 +76,53 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
         <p className="small muted">{e.hoursLeft ? `已走完 ${Math.round(e.progress * 100)}% · 预计 ${e.date} 到达 · 雅思参考 ${ieltsLabel(lv.cefr)}` : '词汇量已达到目标档位'}</p>
         {nxt && <p className="small" style={{ marginTop: 10 }}>下一个里程碑：再认识约 <b>{Math.max(0, vocabFloor(nxt) - lv.vocab).toLocaleString()}</b> 个词 → 升 {nxt}</p>}
       </div>
+
+      {bands && (() => {
+        const vals = SKILLS.map(({ k }) => bands.now[k]?.band ?? null)
+        const all = vals.every((v) => v != null)
+        // 对比四周前（没有就拿最早的一份，至少隔一周）
+        const cur = bands.weeks[bands.weeks.length - 1]
+        const old = [...bands.weeks].reverse().find((w) => w.week <= new Date(Date.now() - 27 * 86400_000).toISOString().slice(0, 10)) ?? (bands.weeks.length > 1 ? bands.weeks[0] : undefined)
+        const missing = SKILLS.filter(({ k }) => !bands.now[k]).map((x) => x.t)
+        return (
+          <>
+            <p className="section-title">雅思四项（预估）</p>
+            <div className="card radar-card">
+              <Radar axes={SKILLS.map((x) => x.t)} now={vals} before={old && old !== cur ? SKILLS.map(({ k }) => old[k] ?? null) : undefined} />
+              <p className="small muted">{all ? <>总分约 <b className="num">{overallBand(vals as number[]).toFixed(1)}</b>{profile.goal.kind === 'ielts' && profile.goal.ielts ? ` · 目标 ${profile.goal.ielts}` : ''}</> : `还缺${missing.join('、')}：${SKILLS.filter(({ k }) => !bands.now[k]).map(({ k }) => HOW[k]).join('，')}就能出总分`}{old && old !== cur ? ' · 虚线是四周前' : ''}</p>
+              <p className="small faint">{SKILLS.filter(({ k }) => bands.now[k]).map(({ k, t }) => `${t}：${bands.now[k]!.from}`).join('；')}。只是练习里的估算，不等于真考分数。</p>
+            </div>
+          </>
+        )
+      })()}
+
+      {curve.length >= 2 && (
+        <>
+          <p className="section-title">词汇量</p>
+          <div className="card"><Line pts={curve.map((p) => ({ ts: p.ts, v: p.vocab }))} unit=" 词" /><p className="small muted">定级、每周小测和每周记下的估算连起来</p></div>
+        </>
+      )}
+
+      {abl.length > 0 && (() => {
+        const got = abl.filter((x) => x.at).sort((a, b) => b.at! - a.at!)
+        const next = abl.filter((x) => !x.at).slice(0, 2)
+        return (
+          <>
+            <p className="section-title">你现在能做到</p>
+            <div className="list abilities">
+              {got.length === 0 && <div className="set-row"><div className="k"><span>还没有。先从下面这两件开始</span></div></div>}
+              {got.map((x) => <div className="set-row" key={x.a.id}><div className="k"><b>{x.a.t}</b><span>{md(x.at!)} 做到的</span></div><span className="ok"><Icon.check /></span></div>)}
+              {next.map((x) => <div className="set-row locked" key={x.a.id}><div className="k"><b>{x.a.t}</b><span>还差：{x.a.how}</span></div></div>)}
+            </div>
+          </>
+        )
+      })()}
+
+      <p className="section-title">声音日记</p>
+      <button className="card ai-card wide" onClick={() => setVd((v) => ({ ...v, open: true }))}>
+        <b>{vd.mine ? '本周录过了' : '本周还没录'}</b><span>每周读一遍同一段话，几周后和第一周对着听，最直观的进步</span>
+      </button>
+      {vd.open && <VoiceDiary onClose={() => { setVd({ open: false, mine: null }); thisWeek().then((mine) => setVd({ open: false, mine })) }} />}
 
       <p className="section-title">分项</p>
       <div className="list">
