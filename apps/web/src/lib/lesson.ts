@@ -7,6 +7,7 @@ import type { Goal, Cefr } from './levels'
 import type { Accent } from './tts'
 import type { PlacementResult } from './placement'
 import { bookOrder } from './books'
+import { canSpell } from './spell'
 import { getInterests, preferTopics, topicMatcher } from './interests'
 import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type CheckItem } from './calibrate'
 import { CEFR } from './levels'
@@ -42,6 +43,8 @@ export const sizeFor = (minutes: number) => SIZES[minutes] ?? SIZES[20]
 export type Step =
   | { kind: 'learn'; word: Word; sentence?: Sentence }
   | { kind: 'review'; word: Word; sentence?: Sentence }
+  /** 拼写：复习过两次以上的词，部分改成听音写词 */
+  | { kind: 'spell'; word: Word; sentence?: Sentence }
   | { kind: 'shadow'; sentence: Sentence; focus?: string; /** 专练这个弱项音素（CMU） */ phone?: string; /** 剧集台词复习（sentence 是拼出来的，id 为负，不进例句库） */ line?: DueLine }
   | { kind: 'listen'; sentence: Sentence; options: string[]; answer: number }
   | { kind: 'check'; items: CheckItem[] }
@@ -149,9 +152,12 @@ export async function buildSession(p: Profile, minimum = false, comeback = false
   const sentFor = (w: Word) => { const s = pickSentence(sentsByWord.get(w.w), w.rank, used); if (s) used.add(s.id); return s }
 
   const learn: Step[] = fresh.map((w) => ({ kind: 'learn', word: w, sentence: sentFor(w) }))
-  const review: Step[] = due.map((w) => ({ kind: 'review', word: w, sentence: sentFor(w) }))
+  // 复习过两次以上、能拼的词：每三个里有一个改成拼写（听音 + 看意思写出来），光认得不够，还要写得出
+  const reps = new Map((await db.all<{ word: string; reps: number }>(`SELECT word, reps FROM card WHERE word IN (${due.map(() => '?').join(',') || "''"})`, due.map((w) => w.w))).map((r) => [r.word, r.reps]))
+  let k = 0
+  const review: Step[] = due.map((w) => ((reps.get(w.w) ?? 0) >= 2 && canSpell(w.w) && k++ % 3 === 1 ? { kind: 'spell', word: w, sentence: sentFor(w) } : { kind: 'review', word: w, sentence: sentFor(w) }))
   // 跟读：优先今天新词的例句，不够再用复习词的；都没有就按水平挑一句
-  const shadowSrc = [...learn, ...review].map((s) => (s as { sentence?: Sentence; word: Word })).filter((s) => s.sentence)
+  const shadowSrc = [...learn, ...review].filter((x) => x.kind !== 'spell').map((s) => (s as { sentence?: Sentence; word: Word })).filter((s) => s.sentence)
   const shadows: Step[] = shadowSrc.slice(0, shadowLeft).map((s) => ({ kind: 'shadow', sentence: s.sentence!, focus: s.word.w }))
   if (shadows.length < shadowLeft) {
     const { sents } = await loadContent()

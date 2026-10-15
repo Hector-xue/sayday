@@ -664,3 +664,18 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
   :root:not([data-theme="light"]) .wg-days b.today { box-shadow: inset 0 0 0 2px #F3F2EC; }
 }
 .wg-word, .wg-ep, .wg-classic { justify-content: flex-start; gap: 6px; }
+/* 拼写 */
+.spell { display: grid; gap: 10px; }
+.spell-input { font-size: 22px; letter-spacing: .06em; font-family: var(--serif, Georgia, serif); text-align: center; padding: 12px; }
+.spell-input.right { border-color: var(--good, #2e9b5f); }
+.spell-input.wrong, .spell-input.close { border-color: var(--bad, #d14b3f); }
+.spell-res { display: grid; gap: 4px; text-align: center; }
+.spell-res p { margin: 0; }
+.spell-verdict { font-weight: 700; }
+.spell-diff { font-size: 24px; letter-spacing: .08em; }
+.spell-diff .ok { color: var(--ink); }
+.spell-diff .wrong { color: var(--bad, #d14b3f); text-decoration: underline; }
+.spell-diff .missing { color: var(--bad, #d14b3f); opacity: .55; }
+.spell-diff .extra { color: var(--faint); text-decoration: line-through; }
+.spell-answer { font-size: 22px; }
+.dictation-card { margin-bottom: 12px; }
