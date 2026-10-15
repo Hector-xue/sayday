@@ -8,8 +8,10 @@ import { db } from '../lib/db'
 import type { Profile } from '../lib/lesson'
 import { resetVocabState } from '../lib/calibrate'
 import { currentLevel } from '../lib/progress'
+import { disableSync, enableSync, syncNow, validCode } from '../lib/sync'
+import { kvGet } from '../lib/db'
 
-type Stage = 'welcome' | 'goal' | 'minutes' | 'place' | 'quiz' | 'manual' | 'report'
+type Stage = 'welcome' | 'join' | 'goal' | 'minutes' | 'place' | 'quiz' | 'manual' | 'report'
 const IELTS = [5, 5.5, 6, 6.5, 7, 7.5, 8]
 const MINUTES = [{ m: 10, t: '10 分钟', d: '先养成习惯' }, { m: 20, t: '20 分钟', d: '推荐' }, { m: 30, t: '30 分钟', d: '稳步提升' }, { m: 45, t: '45 分钟', d: '冲刺备考' }]
 
@@ -45,9 +47,14 @@ export function Onboarding({ redo, onExit }: { redo?: 'goal' | 'place'; onExit?:
         <h1>每天开口，<br />把英语说出来</h1>
         <p className="lead">先花 3 分钟告诉我你的目标、测一下现在的水平，<br />之后每天的练习都从你的水平开始。</p>
       </div>
-      <div className="onb-foot"><button className="btn primary block" onClick={() => setStage('goal')}>开始</button></div>
+      <div className="onb-foot">
+        <button className="btn primary block" onClick={() => setStage('goal')}>开始</button>
+        <button className="btn ghost block" style={{ marginTop: 8 }} onClick={() => setStage('join')}>在别的设备上用过？用同步码接上</button>
+      </div>
     </div>
   )
+
+  if (stage === 'join') return <Join onBack={() => setStage('welcome')} />
 
   if (stage === 'goal') return (
     <div className="onb fade-in">
@@ -225,6 +232,34 @@ function Report({ goal, minutes, r, prev, onStart, onRetry }: { goal: Goal; minu
         <button className="btn primary block" onClick={onStart}>{prev !== null ? '用这个结果' : '开始今天的练习'}</button>
         {r.answered > 0 && <button className="btn ghost block" onClick={onRetry}>重测一次</button>}
       </div>
+    </div>
+  )
+}
+
+/** 新设备：输入另一台设备上的同步码，把学习记录拉下来，不用重新定级 */
+function Join({ onBack }: { onBack: () => void }) {
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const go = async () => {
+    setBusy(true); setErr('')
+    try {
+      await enableSync(code)
+      await syncNow()
+      if (!(await kvGet('profile', null))) { await disableSync(); setErr('这个同步码下还没有学习记录。确认一下码有没有抄错，或者先在原来的设备上点“立即同步”'); return }
+      location.reload()
+    } catch (e) { await disableSync().catch(() => {}); setErr((e as Error).message || String(e)) } finally { setBusy(false) }
+  }
+  return (
+    <div className="onb fade-in">
+      <div className="onb-body">
+        <button className="btn ghost small onb-back" onClick={onBack}>返回</button>
+        <h1>用同步码接上</h1>
+        <p className="lead">在原来的设备上打开 设置 → 多设备同步，把同步码抄过来。学习记录会合到这台设备上。</p>
+        <input className="input sync-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX" autoCapitalize="characters" autoCorrect="off" spellCheck={false} />
+        {err && <div className="err-box" style={{ marginTop: 12 }}>{err}</div>}
+      </div>
+      <div className="onb-foot"><button className="btn primary block" disabled={busy || !validCode(code)} onClick={go}>{busy ? '正在拉取学习记录…' : '接上'}</button></div>
     </div>
   )
 }

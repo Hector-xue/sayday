@@ -23,13 +23,13 @@ export async function addCard(word: string, known = false) {
   )
 }
 
-/** 评分：忘了 / 模糊 / 记得 / 简单 */
-export async function grade(word: string, rating: Grade, ms?: number) {
+/** 评分：忘了 / 模糊 / 记得 / 简单。at = 实际作答时间（通知里答的题，App 之后才记进来） */
+export async function grade(word: string, rating: Grade, ms?: number, at?: Date) {
   const r = await db.one<Row>('SELECT * FROM card WHERE word = ?', [word])
   if (!r) return
-  const now = new Date()
+  const now = at ?? new Date()
   const { card } = scheduler.next(toCard(r), now, rating)
-  const d = today()
+  const d = today(now)
   await db.batch([
     { sql: 'UPDATE card SET due=?, stability=?, difficulty=?, elapsed_days=?, scheduled_days=?, learning_steps=?, reps=?, lapses=?, state=?, last_review=? WHERE word=?', params: [...params(card), word] },
     { sql: 'INSERT INTO review_log(word, rating, state, ts, ms) VALUES (?,?,?,?,?)', params: [word, rating, r.state, now.getTime(), ms ?? null] },

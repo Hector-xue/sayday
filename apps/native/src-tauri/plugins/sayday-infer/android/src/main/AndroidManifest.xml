@@ -5,6 +5,8 @@
     <!-- 应用内更新：下载新版安装包后交给系统安装器 -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- AI 回复、日记朗读用系统 TTS；安卓 11+ 要声明才能找到语音引擎 -->
+    <!-- 通知里做题：手机重启后把出题闹钟排回去 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
@@ -22,6 +24,15 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/sayday_widget_info" />
+        </receiver>
+        <!-- 通知里做题：到点弹题、接收按钮 / 快捷回复的答案、开机重排闹钟（见 Quiz.kt） -->
+        <receiver
+            android:name="com.ivyea.sayday.infer.QuizReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
         </receiver>
         <!-- 应用内更新：把缓存目录里的安装包交给系统安装器（见 Updater.kt） -->
         <provider

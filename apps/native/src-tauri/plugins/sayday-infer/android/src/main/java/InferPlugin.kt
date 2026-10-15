@@ -45,6 +45,14 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 
 @InvokeArg
+class QuizArgs {
+  /** 题目 JSON 数组（见 Quiz.kt） */
+  var questions: String = "[]"
+  /** 出题时间 JSON 数组（毫秒时间戳） */
+  var times: String = "[]"
+}
+
+@InvokeArg
 class LoadArgs {
   var threads: Int = 4
 }
@@ -510,6 +518,30 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     else
       Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + activity.packageName))
     activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    invoke.resolve(JSObject())
+  }
+
+  // ---- 通知里做题（见 Quiz.kt） ----
+  /** 交一批题和接下来几天的出题时间；times 为空 = 关掉 */
+  @Command
+  fun quizSet(invoke: Invoke) {
+    val a = invoke.parseArgs(QuizArgs::class.java)
+    Quiz.store(activity, a.questions, a.times)
+    invoke.resolve(JSObject())
+  }
+
+  /** 取走通知里答过的题 */
+  @Command
+  fun quizDrain(invoke: Invoke) {
+    val ret = JSObject()
+    ret.put("answers", Quiz.drain(activity))
+    invoke.resolve(ret)
+  }
+
+  /** 设置页“现在试一题”：马上弹一轮 */
+  @Command
+  fun quizTest(invoke: Invoke) {
+    Quiz.startRound(activity)
     invoke.resolve(JSObject())
   }
 }
