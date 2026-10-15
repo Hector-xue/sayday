@@ -6,7 +6,7 @@
 // 浏览器里现场跑 Kokoro 的退路已去掉：kokoro-js 依赖 GPL 的 eSpeak NG，和 MIT 的本项目一起分发不合适；
 // 例句、单词全在音频包里，现编的句子交给系统语音
 // 课程开始时 prefetch 把接下来要用的提前下好
-import { isNative } from './speech/engine'
+import { isShell } from './speech/engine'
 import { canSpeak, speak, stopSpeak } from './speak'
 
 export type Accent = 'us' | 'gb'
@@ -25,7 +25,7 @@ function presets() {
 }
 const norm = (t: string) => t.trim().toLowerCase().replace(/\s+/g, ' ')
 // 音频包地址：网页同站 /audio/；App 里连门户站（公开、带 CORS）
-const PACK = isNative ? 'https://sayday.ivyea.com/audio/' : new URL('/audio/', location.href).href
+const PACK = isShell ? 'https://sayday.ivyea.com/audio/' : new URL('/audio/', location.href).href
 export type Clip = { text: string; sentenceId?: number; word?: string; ep?: string }
 const packUrl = (c: Clip, accent: Accent) =>
   c.sentenceId ? `${PACK}${accent}/s/${c.sentenceId}.mp3` : c.word ? `${PACK}${accent}/w/${encodeURIComponent(c.word)}.mp3` : c.ep ? `${PACK}${accent}/e/${c.ep}.mp3` : null

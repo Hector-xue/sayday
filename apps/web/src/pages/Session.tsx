@@ -12,6 +12,7 @@ import type { Answer } from '../lib/placement'
 import { addCard, grade, preview, Rating } from '../lib/srs'
 import { prefetch } from '../lib/tts'
 import type { Sentence } from '../lib/content'
+import { getClips, markWord, type Clip } from '../lib/clips'
 import { Tappable } from '../components/Tappable'
 
 function Example({ s, word, showZh = true }: { s?: Sentence; word: string; showZh?: boolean }) {
@@ -34,6 +35,9 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   const started = useRef(performance.now())
   const doneSteps = useRef(0)
   const linePassed = useRef(new Set<number>())
+  const [clips, setClips] = useState<Record<string, Clip>>({})
+  useEffect(() => { getClips().then(setClips).catch(() => {}) }, [])
+  const clipOf = (w: string) => clips[w] && <SeenOnWeb c={clips[w]} word={w} />
   const stepStart = useRef(performance.now())
   const accent = profile!.accent
 
@@ -111,12 +115,13 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
               <>
                 {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
                 <p className="zh-mean">{step.word.zh}</p>
+                {clipOf(step.word.w)}
                 <Example s={step.sentence} word={step.word.w} />
                 {step.sentence && <div className="row" style={{ marginTop: 12 }}><PlayButton text={step.sentence.en} clip={{ text: step.sentence.en, sentenceId: step.sentence.id }} accent={accent} label="听例句" /><span className="small muted">听例句</span></div>}
               </>
             ) : (
               <>
-                <Example s={step.sentence} word={step.word.w} showZh={false} />
+                {clipOf(step.word.w) ?? <Example s={step.sentence} word={step.word.w} showZh={false} />}
                 <p className="reveal-hint">先在心里想一下，再看答案</p>
               </>
             )}
@@ -264,6 +269,17 @@ function WeeklyCheck({ items, onDone }: { items: CheckItem[]; onDone: (a: Answer
         <button className="btn" onClick={() => answer(false)}>不认识</button>
         <button className="btn primary" onClick={() => answer(true)}>认识</button>
       </div>
+    </div>
+  )
+}
+
+/** 浏览器插件收词时的原句：“你在哪儿见过它” */
+function SeenOnWeb({ c, word }: { c: Clip; word: string }) {
+  const [a, w, b] = markWord(c.s, word)
+  return (
+    <div className="seen-web">
+      <span className="small muted">你在网上见过它{c.title ? ` · ${c.title.slice(0, 24)}` : ''}</span>
+      <p className="en">{a}{w && <mark>{w}</mark>}{b}</p>
     </div>
   )
 }

@@ -10,3 +10,4 @@ apps/native/src-tauri/icons/
 apps/native/icon-src.png
 apps/native/apk-out/
 apps/native/node_modules/
+/dist/

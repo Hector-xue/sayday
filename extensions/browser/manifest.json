@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "日日说 · 划词收词",
+  "version": "0.0.1",
+  "description": "网页上双击或选中英文单词，看释义、一键收进日日说；复习时会带上你当时看到的原句。",
+  "icons": { "32": "icon-32.png", "128": "icon-128.png" },
+  "permissions": ["storage"],
+  "host_permissions": ["https://sayday.ivyea.com/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [{ "matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "run_at": "document_idle" }],
+  "action": { "default_title": "日日说 · 收的词", "default_popup": "popup.html" }
+}

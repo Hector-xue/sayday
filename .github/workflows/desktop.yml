@@ -1,0 +1,189 @@
+# 桌面版：Windows（安装包 .exe）、macOS（.dmg，Apple 芯片 + Intel）、Linux（AppImage / deb）；顺带打浏览器插件 zip、编一遍 iOS（模拟器包，验证能编过；装到真机要 Apple 开发者账号签名）。
+# 界面和网页版同一套（apps/web），打分在页面里用 onnxruntime-web 跑；音频包、识别模型从 sayday.ivyea.com 取。
+# 打 v* tag 时把安装包传到同一个 GitHub Release；推 feat/desktop** 分支只编不发
+name: desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/desktop**'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: ''
+          - os: macos-latest
+            args: '--target universal-apple-darwin'
+          - os: ubuntu-22.04
+            args: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载音素模型
+        shell: bash
+        env:
+          MODEL_URL: https://github.com/Hector-xue/sayday/releases/download/model-phone-ftall/phone_ctc.ftall.int8.onnx
+          MODEL_SHA256: fb7686d1a479ddc0da84bd1dd5bc87d8f212dd83e8bc41190b7c471b8c89d849
+        run: |
+          mkdir -p .cache/models
+          curl -sSfL --retry 3 -o .cache/models/phone_ctc.int8.onnx "$MODEL_URL"
+          python3 -c "import hashlib,sys; h=hashlib.sha256(open('.cache/models/phone_ctc.int8.onnx','rb').read()).hexdigest(); sys.exit(0 if h==sys.argv[1] else 'sha256 不对：'+h)" "$MODEL_SHA256"
+          curl -sSfL --retry 3 -o .cache/models/charsiu_vocab.json https://huggingface.co/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 组装前端（网页版界面 + 页面里的打分模型）
+        shell: bash
+        run: |
+          cd apps/web
+          npm ci --no-audit --no-fund
+          bash ../../scripts/prepare-web-assets.sh
+          npx tsc --noEmit
+          npx vite build --outDir ../native/dist --emptyOutDir
+
+      - name: Linux 依赖
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/native/src-tauri
+
+      - name: 版本号
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          for f in apps/native/src-tauri/tauri.conf.json apps/native/package.json; do
+            python3 -c "import json,sys; p=sys.argv[1]; d=json.load(open(p, encoding='utf-8')); d['version']=sys.argv[2]; open(p,'w', encoding='utf-8').write(json.dumps(d,ensure_ascii=False,indent=2)+'\n')" "$f" "$V"
+          done
+
+      - name: 图标
+        shell: bash
+        working-directory: apps/native
+        run: |
+          npm ci --no-audit --no-fund
+          cp ../../assets/brand/icon-1024.png icon-src.png
+          npm run tauri -- icon icon-src.png
+
+      - name: 构建
+        shell: bash
+        working-directory: apps/native
+        run: npm run tauri -- build ${{ matrix.args }}
+
+      - name: 收集安装包
+        shell: bash
+        run: |
+          mkdir -p desktop-out
+          V=$(python3 -c "import json; print(json.load(open('apps/native/src-tauri/tauri.conf.json', encoding='utf-8'))['version'])")
+          B=apps/native/src-tauri/target
+          for f in $(find $B -path '*bundle*' \( -name '*.exe' -o -name '*.dmg' -o -name '*.AppImage' -o -name '*.deb' \) 2>/dev/null); do
+            case "$f" in
+              *.exe) cp "$f" "desktop-out/sayday-v$V-windows-x64-setup.exe" ;;
+              *.dmg) cp "$f" "desktop-out/sayday-v$V-macos-universal.dmg" ;;
+              *.AppImage) cp "$f" "desktop-out/sayday-v$V-linux-x86_64.AppImage" ;;
+              *.deb) cp "$f" "desktop-out/sayday-v$V-linux-amd64.deb" ;;
+            esac
+          done
+          ls -la desktop-out
+          [ -n "$(ls desktop-out)" ] || { echo "::error::没找到安装包"; exit 1; }
+
+      - name: 传到 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          T="$GITHUB_REF_NAME"; N="docs/release-notes/$T.md"
+          [ -f "$N" ] || echo "$T" > "$N"
+          # 安卓那边可能先建好了 Release；没建就建（两边谁先都行）
+          gh release view "$T" > /dev/null 2>&1 || gh release create "$T" --prerelease --title "$T" --notes-file "$N" || true
+          gh release upload "$T" desktop-out/* --clobber
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sayday-desktop-${{ matrix.os }}
+          path: desktop-out/*
+          retention-days: 7
+
+  extension:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: 打插件
+        run: |
+          V=$([[ "$GITHUB_REF" == refs/tags/v* ]] && echo "${GITHUB_REF_NAME#v}" || python3 -c "import json; print(json.load(open('extensions/browser/manifest.json'))['version'])")
+          bash scripts/build-extension.sh "$V"
+          node --test extensions/browser/lib.test.mjs
+      - name: 传到 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          T="$GITHUB_REF_NAME"; N="docs/release-notes/$T.md"
+          [ -f "$N" ] || echo "$T" > "$N"
+          gh release view "$T" > /dev/null 2>&1 || gh release create "$T" --prerelease --title "$T" --notes-file "$N" || true
+          gh release upload "$T" dist/sayday-extension-*.zip --clobber
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sayday-extension
+          path: dist/sayday-extension-*.zip
+          retention-days: 7
+
+  ios:
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: 下载音素模型
+        env:
+          MODEL_URL: https://github.com/Hector-xue/sayday/releases/download/model-phone-ftall/phone_ctc.ftall.int8.onnx
+        run: |
+          mkdir -p .cache/models
+          curl -sSfL --retry 3 -o .cache/models/phone_ctc.int8.onnx "$MODEL_URL"
+          curl -sSfL --retry 3 -o .cache/models/charsiu_vocab.json https://huggingface.co/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 组装前端
+        run: |
+          cd apps/web && npm ci --no-audit --no-fund
+          bash ../../scripts/prepare-web-assets.sh
+          npx vite build --outDir ../native/dist --emptyOutDir
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios-sim
+      - name: 编 iOS 模拟器包
+        working-directory: apps/native
+        run: |
+          npm ci --no-audit --no-fund
+          cp ../../assets/brand/icon-1024.png icon-src.png
+          npm run tauri -- icon icon-src.png
+          npm run tauri -- ios init
+          npm run tauri -- ios build --target aarch64-sim --debug
+          mkdir -p ios-out && find src-tauri/gen/apple/build -name "*.app" -maxdepth 6 -exec cp -R {} ios-out/ \;
+          ls -la ios-out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sayday-ios-simulator
+          path: apps/native/ios-out
+          retention-days: 7
