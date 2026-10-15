@@ -73,7 +73,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getProfile().then(setP).catch(() => setP(null))
     // 每次打开 App 重排每日提醒（文案跟着进度更新）
     import('./lib/reminder').then((m) => m.reschedule()).catch(() => {})
-    // 多设备同步：打开 App 拉一次别的设备的记录；有变化就重读档案、刷新页面数据
+    // 自建服务器同步（开了才有）：打开 App 拉一次别的设备的记录；有变化就重读档案、刷新页面数据
     import('./lib/sync').then((m) => m.autoSync()).then((changed) => { if (changed) { getProfile().then(setP).catch(() => {}); setTick((x) => x + 1) } }).catch(() => {})
     // 切到后台时也传一次（两分钟内传过就跳过）
     const onHide = () => { if (document.visibilityState === 'hidden') import('./lib/sync').then((m) => m.autoSync()).catch(() => {}) }

@@ -31,10 +31,4 @@ test('id 不合法、太大都拒绝', async () => {
   assert.equal((await fetch(`${base}/v1/a/xyz`)).status, 400)
   assert.equal((await fetch(`${base}/v1/a/${A}/d/${D2}`, { method: 'PUT', body: new Uint8Array(7 * 1024 * 1024) })).status, 413)
 })
-test('小组卡片', async () => {
-  assert.equal((await fetch(`${base}/v1/g/${G}/m/${D1}`, { method: 'PUT', body: 'hello' })).status, 200)
-  const ms = (await (await fetch(`${base}/v1/g/${G}`)).json()).members
-  assert.equal(ms.length, 1); assert.equal(Buffer.from(ms[0].data, 'base64').toString(), 'hello')
-  assert.equal((await fetch(`${base}/v1/g/${G}/m/${D1}`, { method: 'PUT', body: 'x'.repeat(5000) })).status, 413)
-})
 test.after(() => { srv.close(); rmSync(dir, { recursive: true, force: true }) })

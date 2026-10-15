@@ -1,5 +1,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "允许载入音素模型、推理、录音（含音量）、朗读、导出备份、更新桌面小组件、应用内更新、存收款码到相册、打开外部链接、添加桌面小组件、打开通知设置和通知里做题。"
-permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-insets", "allow-set-bars", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget", "allow-update-start", "allow-update-status", "allow-update-install", "allow-save-image", "allow-open-url", "allow-system-status", "allow-pin-widget", "allow-open-notify-settings", "allow-quiz-set", "allow-quiz-drain", "allow-quiz-test", "allow-take-action"]
+description = "允许载入音素模型、推理、录音（含音量）、朗读、导出备份、更新桌面小组件、应用内更新、存收款码到相册、打开外部链接、添加桌面小组件、打开通知设置、通知里做题和面对面同步时列出本机局域网地址。"
+permissions = ["allow-load-model", "allow-run", "allow-record-start", "allow-record-level", "allow-record-stop", "allow-insets", "allow-set-bars", "allow-speak", "allow-speak-stop", "allow-save-to-downloads", "allow-update-widget", "allow-update-start", "allow-update-status", "allow-update-install", "allow-save-image", "allow-open-url", "allow-system-status", "allow-pin-widget", "allow-open-notify-settings", "allow-quiz-set", "allow-quiz-drain", "allow-quiz-test", "allow-take-action", "allow-lan-addrs"]

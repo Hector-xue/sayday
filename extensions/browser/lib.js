@@ -1,4 +1,4 @@
-// 插件里不依赖浏览器的部分（node --test 能直接测）：查词（和 App 的 lookup 一样的还原规则）、取原句、拼同步快照
+// 插件里不依赖浏览器的部分（node --test 能直接测）：查词（和 App 的 lookup 一样的还原规则）、取原句、拼导出给 App 的快照
 
 /** 词表：{ 词: [音标, 释义, 词频排名] } */
 export function lookup(words, token) {
@@ -32,9 +32,14 @@ export function sentenceAround(text, offset) {
   return s
 }
 
-/** 插件这台“设备”的同步快照：收的词作为新词卡（App 那边已有的不会被覆盖），原句放 kv 'clips' */
+/** 导出给 App 的快照（App 按多设备合并的规则合进去）：收的词作为新词卡（App 那边已有的不会被覆盖），原句放 kv 'clips' */
 export function snapshotOf(dev, clips, now = Date.now()) {
   const card = Object.entries(clips).map(([word, c]) => ({ word, due: c.ts, stability: 0, difficulty: 0, elapsed_days: 0, scheduled_days: 0, learning_steps: 0, reps: 0, lapses: 0, state: 0, last_review: null, added: c.ts, known: 0 }))
   const kvClips = Object.fromEntries(Object.entries(clips).map(([w, c]) => [w, { s: c.s, url: c.url, title: c.title, ts: c.ts }]))
   return { v: 1, dev, ts: now, tables: { card }, kv: { clips: { v: JSON.stringify(kvClips), ts: now } } }
+}
+
+/** 导出文件：App 设置 → 导入备份 认 app = sayday-clips，合并而不是覆盖 */
+export function exportFile(dev, clips, now = Date.now()) {
+  return { app: 'sayday-clips', exported: new Date(now).toISOString(), snapshot: snapshotOf(dev, clips, now) }
 }

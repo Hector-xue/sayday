@@ -6,7 +6,8 @@ import { feishu } from './adapters/feishu.mjs'
 import { agentCore, decode } from './audio.mjs'
 
 const env = process.env
-const API = env.SYNC_API ?? 'https://sayday.ivyea.com/api/sync'
+// 自建同步服务（scripts/deploy-sync.sh，同一台机器上）
+const API = env.SYNC_API ?? 'http://127.0.0.1:5296/api/sync'
 const store = new Store(env.DATA_DIR ?? '/var/lib/sayday-bot')
 
 // 打分、词表和 App 同一套（packages/agent/core.mjs，模型在仓库 .cache/models）

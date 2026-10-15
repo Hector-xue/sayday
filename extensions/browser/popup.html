@@ -8,18 +8,17 @@
   .muted{color:var(--faint);font-size:12px} .card{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:10px 12px}
   ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:260px;overflow:auto} li{display:grid;gap:2px}
   li b{font-size:15px} li .s{color:var(--soft);font-size:12px}
-  input{width:100%;box-sizing:border-box;font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--hair);background:var(--card);color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
+  input{width:100%;box-sizing:border-box;font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--hair);background:var(--card);color:var(--ink);}
   button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;background:var(--mark);color:#16181d}
   .row{display:flex;gap:8px;align-items:center}
 </style></head>
 <body><main>
   <h1>日日说 · 收的词</h1>
-  <p class="muted">网页上双击或选中英文单词就能收。填了同步码，收的词会同步进日日说，复习时带上原句。</p>
+  <p class="muted">网页上双击或选中英文单词就能收。导出成文件、在日日说里导入，收的词就进了词库，复习时带上原句。</p>
   <div class="card"><ul id="list"></ul><p id="empty" class="muted">还没收词。去网页上双击一个英文单词试试。</p></div>
   <div class="card" style="display:grid;gap:8px">
-    <p><b>同步到日日说</b></p>
-    <p class="muted">App 里：设置 → 数据 → 多设备同步 → 同步码 → 显示，抄过来</p>
-    <input id="code" placeholder="XXXX-XXXX-XXXX-…" autocomplete="off" spellcheck="false">
-    <div class="row"><button id="sync">保存并同步</button><span id="st" class="muted"></span></div>
+    <p><b>收进日日说</b></p>
+    <p class="muted">点“导出”存一个文件，在日日说 设置 → 导入备份 里选它。已有的词不会重复，学习记录不会被覆盖。</p>
+    <div class="row"><button id="export">导出收的词</button><span id="st" class="muted"></span></div>
   </div>
 </main><script type="module" src="popup.js"></script></body></html>

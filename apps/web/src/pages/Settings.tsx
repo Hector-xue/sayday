@@ -18,6 +18,7 @@ import { SupportSheet } from '../components/SupportSheet'
 import { ModelPrefetchRow } from '../components/ModelPrefetch'
 import { TOPICS, getInterests, setInterests } from '../lib/interests'
 import { SyncRows } from '../components/SyncRow'
+import { exportBackup, importBackup } from '../lib/backup'
 import { enableQuiz, getQuizCfg, testQuiz, type QuizCfg } from '../lib/quiz'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
@@ -86,50 +87,8 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   useEffect(() => { db.info().then((i) => setStorage(i.mode === 'opfs' ? '本机存储（OPFS）' : i.mode === 'local' ? '浏览器存储（容量有限，建议用 App）' : '临时内存（关掉就没了，请换浏览器或用 App）')) }, [])
   if (!profile) return null
 
-  const exportData = async () => {
-    // 录音存档（recording、voice_diary）是二进制、体积大，不放进 JSON 备份
-    const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work']
-    const out: Record<string, unknown> = { app: 'sayday', exported: new Date().toISOString() }
-    for (const t of tables) out[t] = await db.all(`SELECT * FROM ${t}`)
-    const json = JSON.stringify(out)
-    const name = `sayday-备份-${new Date().toISOString().slice(0, 10)}.json`
-    const tauri = (globalThis as any).__TAURI__?.core
-    if (tauri) {
-      // App 里 WebView 不处理下载：交给原生插件写进系统“下载/Sayday”
-      const u8 = new TextEncoder().encode(json)
-      let bin = ''
-      for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000) as unknown as number[])
-      try { const r = await tauri.invoke('plugin:sayday-infer|save_to_downloads', { name, mime: 'application/json', data: btoa(bin) }); toast('已保存到 ' + r.path) } catch (e) { toast('导出失败：' + ((e as Error)?.message || e)) }
-      return
-    }
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
-    a.download = name
-    a.click()
-    toast('已导出')
-  }
-  // 导入备份：换手机、卸载重装后恢复。只认本 App 导出的表，先清空再写入，一个事务里完成（失败不留半套）
-  const importData = async (file: File) => {
-    let data: Record<string, unknown>
-    try { data = JSON.parse(await file.text()) } catch { toast('不是有效的备份文件'); return }
-    if (data.app !== 'sayday') { toast('这不是日日说的备份文件'); return }
-    const allowed = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work']
-    const tables = allowed.filter((t) => Array.isArray(data[t]))
-    const n = tables.reduce((s, t) => s + (data[t] as unknown[]).length, 0)
-    if (!confirm(`用备份（${String(data.exported).slice(0, 10)}，共 ${n} 条记录）覆盖现在的学习记录？`)) return
-    const items: { sql: string; params?: unknown[] }[] = []
-    for (const t of tables) {
-      items.push({ sql: `DELETE FROM ${t}` })
-      const cols = await db.all<{ name: string }>(`PRAGMA table_info(${t})`)
-      const ok = new Set(cols.map((c) => c.name))
-      for (const row of data[t] as Record<string, unknown>[]) {
-        const ks = Object.keys(row).filter((k) => ok.has(k))
-        if (ks.length) items.push({ sql: `INSERT INTO ${t}(${ks.join(',')}) VALUES (${ks.map(() => '?').join(',')})`, params: ks.map((k) => row[k]) })
-      }
-    }
-    try { await db.batch(items) } catch (e) { toast('导入失败：' + ((e as Error).message || e)); return }
-    toast('已恢复，正在重新载入'); setTimeout(() => location.reload(), 800)
-  }
+  const exportData = async () => { const r = await exportBackup(); if (r) toast(r) }
+  const importData = async (file: File) => { const r = await importBackup(file); if (r.msg) toast(r.msg); if (r.ok) setTimeout(() => location.reload(), 800) }
   const reset = async () => {
     if (!confirm('清空所有学习记录？这一步不能撤销，建议先导出备份。')) return
     await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work', 'kv', 'kv_ts'].map((t) => ({ sql: `DELETE FROM ${t}` })))
@@ -241,7 +200,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="set-row"><div className="k"><b>离线缓存</b><span>已下载示范音频 {cache.clips.toLocaleString()} 条{cache.used ? ` · 本机共占 ${Math.round(cache.used / 1048576)} MB（含学习记录和语音模型）` : ''}</span></div><button className="btn small quiet" disabled={!cache.clips} onClick={clearCache}>清理</button></div>
         )}
         <div className="set-row"><div className="k"><b>导出备份</b><span>全部学习记录，JSON 文件</span></div><button className="btn small quiet" onClick={exportData}>导出</button></div>
-        <div className="set-row"><div className="k"><b>导入备份</b><span>换手机、重装后用导出的文件恢复</span></div><label className="btn small quiet" style={{ display: 'inline-grid', placeItems: 'center' }}>选择文件<input type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importData(f) }} /></label></div>
+        <div className="set-row"><div className="k"><b>导入备份</b><span>换手机、重装后用导出的文件恢复；浏览器插件导出的收词也在这里导入</span></div><label className="btn small quiet" style={{ display: 'inline-grid', placeItems: 'center' }}>选择文件<input type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importData(f) }} /></label></div>
         <div className="set-row"><div className="k"><b>清空记录</b><span>从头开始</span></div><button className="btn small quiet" style={{ color: 'var(--bad)' }} onClick={reset}>清空</button></div>
       </div>
 
@@ -258,7 +217,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
         {privacy && (
           <div className="privacy">
             <p>不需要注册，没有账号，也不收集任何统计数据。</p>
-            <p>录音只在本机打分，不上传；学习记录存在本机，换手机请用“导出备份”。</p>
+            <p>录音只在本机打分，不上传；学习记录存在本机，换手机用“面对面同步”或“导出备份”。面对面同步是两台设备在同一个 Wi-Fi 里直接传，不经过任何服务器。</p>
             <p>会联网的只有这几件事：</p>
             <ul>
               <li>下载示范音频、语音识别模型（只下载，不上传任何东西）</li>
