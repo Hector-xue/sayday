@@ -1,0 +1,15 @@
+{
+  "name": "sayday-bot",
+  "version": "0.0.1",
+  "description": "日日说聊天机器人（Telegram / 飞书）：每天推复习题、在聊天里作答、发语音纠音。以“同步设备”的身份读写学习记录",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node bot.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "ogg-opus-decoder": "1.7.3",
+    "ts-fsrs": "5.2.1"
+  }
+}

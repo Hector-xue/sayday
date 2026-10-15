@@ -39,7 +39,7 @@ async function readBody(req, max) {
   return Buffer.concat(chunks)
 }
 async function diskOk() {
-  try { const s = await statfs(DATA); return (s.bavail * s.bsize) / 1048576 >= MIN_FREE_MB } catch { return false }
+  try { await mkdir(DATA, { recursive: true }); const s = await statfs(DATA); return (s.bavail * s.bsize) / 1048576 >= MIN_FREE_MB } catch { return false }
 }
 /** 先写临时文件再改名：写到一半断电不会留下半个快照 */
 async function put(file, buf) {
