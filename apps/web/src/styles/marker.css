@@ -228,3 +228,4 @@
 [data-style="marker"] .egg-mark { background: var(--mark); color: var(--on-mark); }
 [data-style="marker"] .place.on { background: var(--mark-soft); box-shadow: none; }
 [data-style="marker"] .buddy-list .dots i.on { background: var(--mark); box-shadow: inset 0 0 0 1px var(--ink); }
+[data-style="marker"] .mock-steps li.done { background: var(--mark-soft); }

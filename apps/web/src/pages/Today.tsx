@@ -24,7 +24,7 @@ import { vocabLevel } from '../lib/calibrate'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking') => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking' | 'mock') => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -190,6 +190,11 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
           </button>
         </>
       )}
+
+      <p className="section-title">模拟考试</p>
+      <button className="card ai-card wide mock-entry" onClick={() => onIelts('mock')}>
+        <b>雅思全真模考</b><span>听力、阅读、写作、口语按真考时长走一遍，出四项分数和总分；也能单练一项</span>
+      </button>
 
       {profile.goal.kind === 'ielts' && (
         <>

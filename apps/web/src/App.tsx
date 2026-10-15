@@ -17,6 +17,7 @@ import { Writing } from './pages/Writing'
 import { Practice } from './pages/Practice'
 import { Speaking } from './pages/Speaking'
 import { Work } from './pages/Work'
+import { Mock } from './pages/Mock'
 
 type Tab = 'today' | 'episodes' | 'lab' | 'words' | 'progress' | 'settings'
 // 设置不占底栏：从“今天”和“进步”右上角的齿轮进
@@ -42,7 +43,7 @@ function Main() {
   const [ai, setAi] = useState<null | 'setup' | 'chat' | 'diary' | 'writing' | 'work'>(null)
   const [openEp, setOpenEp] = useState<{ season: number; ep: number } | null>(null)
   const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing' | 'work'>(null)
-  const [ielts, setIelts] = useState<null | 'reading' | 'listening' | 'speaking'>(null)
+  const [ielts, setIelts] = useState<null | 'reading' | 'listening' | 'speaking' | 'mock'>(null)
   const { refresh } = useApp()
   // 桌面小组件上的按钮：打开 App 时直接去对应的地方（开练 / 今日剧集 / 词库）
   useEffect(() => {
@@ -64,7 +65,7 @@ function Main() {
     <div className="shell">
       {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
-      {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} />}
+      {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} onMock={() => setIelts('mock')} />}
       {tab === 'words' && <Words />}
       {tab === 'progress' && <Progress onSettings={() => go('settings')} />}
       {tab === 'settings' && <Settings onRedo={setRedo} onAi={() => setAi('setup')} onBack={() => go('today')} />}
@@ -83,6 +84,7 @@ function Main() {
       {ai === 'work' && <Work onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('work'); setAi('setup') }} />}
       {ai === 'writing' && <Writing onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('writing'); setAi('setup') }} />}
       {(ielts === 'reading' || ielts === 'listening') && <Practice kind={ielts} onClose={() => { setIelts(null); refresh() }} />}
+      {ielts === 'mock' && <Mock onClose={() => { setIelts(null); refresh() }} onSetupAi={() => { setIelts(null); setAi('setup') }} />}
       {ielts === 'speaking' && <Speaking onClose={() => { setIelts(null); refresh() }} onSetupAi={() => { setIelts(null); setAi('setup') }} />}
       {ai === 'setup' && <AiSetup onClose={(ok) => { setAi(ok ? after : null); setAfter(null); refresh() }} />}
     </div>

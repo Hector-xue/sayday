@@ -4,21 +4,24 @@ import { Overlay } from '../components/Overlay'
 import { PlayButton } from '../components/PlayButton'
 import { useApp } from '../store'
 import { AiError, getAi, type AiConfig } from '../lib/ai'
-import { draftKey, gradeWriting, loadWriting, minWords, saveWriting, words, writingHistory, type Prompt, type WBank, type WResult } from '../lib/writing'
+import { draftKey, gradeWriting, loadWriting, minWords, saveWriting, words, writingHistory, type Prompt, type WBank, type WKind, type WResult } from '../lib/writing'
+import { IeltsChart } from '../components/IeltsChart'
+import type { ChartType } from '../lib/ielts-chart'
 import { kvGet, kvSet } from '../lib/db'
 
+const CHART_ZH: Record<string, string> = { line: '折线图', bar: '柱状图', pie: '饼图', table: '表格' }
 const TYPE_ZH: Record<string, string> = { opinion: '讨论双方 + 观点', agree: '同意 / 不同意', problem: '问题 + 解决', adv: '利弊' }
 
 export function Writing({ onClose, onSetup }: { onClose: () => void; onSetup: () => void }) {
   const [bank, setBank] = useState<WBank | null>(null)
-  const [tab, setTab] = useState<'task2' | 'letters'>('task2')
-  const [open, setOpen] = useState<null | { p: Prompt; letter: boolean }>(null)
+  const [tab, setTab] = useState<'task1' | 'task2' | 'letters'>('task2')
+  const [open, setOpen] = useState<null | { p: Prompt; kind: WKind }>(null)
   const [hist, setHist] = useState<Awaited<ReturnType<typeof writingHistory>>>([])
   const [view, setView] = useState<null | { p: Prompt | undefined; text: string; r: WResult }>(null)
   useEffect(() => { loadWriting().then(setBank); writingHistory().then(setHist) }, [open])
   if (!bank) return <Overlay title="雅思写作" onClose={onClose}><div className="loading">…</div></Overlay>
-  const all = [...bank.task2, ...bank.letters]
-  if (open) return <Editor p={open.p} letter={open.letter} onBack={() => setOpen(null)} onSetup={onSetup} />
+  const all = [...(bank.task1 ?? []), ...bank.task2, ...bank.letters]
+  if (open) return <Editor p={open.p} kind={open.kind} onBack={() => setOpen(null)} onSetup={onSetup} />
   if (view) return (
     <Overlay title="批改结果" sub={view.p?.prompt.slice(0, 40)} onClose={() => setView(null)}>
       <Result r={view.r} text={view.text} />
@@ -28,15 +31,16 @@ export function Writing({ onClose, onSetup }: { onClose: () => void; onSetup: ()
   return (
     <Overlay title="雅思写作" sub="写完由你接入的 AI 按官方四项标准批改" onClose={onClose}>
       <div className="seg" style={{ marginBottom: 14 }}>
+        <button aria-pressed={tab === 'task1'} onClick={() => setTab('task1')}>小作文 Task 1</button>
         <button aria-pressed={tab === 'task2'} onClick={() => setTab('task2')}>大作文 Task 2</button>
         <button aria-pressed={tab === 'letters'} onClick={() => setTab('letters')}>书信（G 类）</button>
       </div>
       <div className="list">
-        {bank[tab].map((p) => {
+        {(bank[tab] ?? []).map((p) => {
           const h = done.get(p.id)
           return (
-            <button className="list-row" key={p.id} onClick={() => setOpen({ p, letter: tab === 'letters' })}>
-              <span className="main"><b style={{ fontSize: 15, whiteSpace: 'normal' }}>{p.zh}</b><span>{p.type ? TYPE_ZH[p.type] : '书信'} · 至少 {minWords(tab === 'letters')} 词{h?.band ? ` · 上次 ${h.band.toFixed(1)}` : ''}</span></span>
+            <button className="list-row" key={p.id} onClick={() => setOpen({ p, kind: tab === 'letters' ? 'letter' : tab })}>
+              <span className="main"><b style={{ fontSize: 15, whiteSpace: 'normal' }}>{p.zh}</b><span>{tab === 'task1' ? CHART_ZH[p.type ?? ''] : p.type ? TYPE_ZH[p.type] : '书信'} · 至少 {minWords(tab === 'letters' ? 'letter' : tab)} 词{h?.band ? ` · 上次 ${h.band.toFixed(1)}` : ''}</span></span>
             </button>
           )
         })}
@@ -58,7 +62,8 @@ export function Writing({ onClose, onSetup }: { onClose: () => void; onSetup: ()
   )
 }
 
-function Editor({ p, letter, onBack, onSetup }: { p: Prompt; letter: boolean; onBack: () => void; onSetup: () => void }) {
+function Editor({ p, kind, onBack, onSetup }: { p: Prompt; kind: WKind; onBack: () => void; onSetup: () => void }) {
+  const letter = kind === 'letter'
   const [text, setText] = useState('')
   const [cfg, setCfg] = useState<AiConfig | null | undefined>(undefined)
   const [busy, setBusy] = useState(false)
@@ -71,13 +76,13 @@ function Editor({ p, letter, onBack, onSetup }: { p: Prompt; letter: boolean; on
   // 自动存草稿
   useEffect(() => { if (!loaded.current) return; const h = setTimeout(() => kvSet(draftKey(p.id), text), 600); return () => clearTimeout(h) }, [text])
   useEffect(() => { if (!start) return; const h = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(h) }, [start])
-  const n = words(text), min = minWords(letter), limit = letter ? 20 : 40
+  const n = words(text), min = minWords(kind), limit = kind === 'task2' ? 40 : 20
   const used = start ? Math.floor((now - start) / 60000) : 0
   const go = async () => {
     if (!cfg) { onSetup(); return }
     setBusy(true); setErr('')
     try {
-      const r = await gradeWriting(cfg, p, letter, text.trim())
+      const r = await gradeWriting(cfg, p, kind, text.trim())
       await saveWriting(p.id, text.trim(), r)
       await kvSet(draftKey(p.id), '')
       setRes(r)
@@ -85,11 +90,12 @@ function Editor({ p, letter, onBack, onSetup }: { p: Prompt; letter: boolean; on
   }
   if (res) return <Overlay title="批改结果" onClose={onBack} foot={<button className="btn primary block" onClick={onBack}>回到题目列表</button>}><Result r={res} text={text} /></Overlay>
   return (
-    <Overlay title={letter ? '书信' : '大作文'} sub={start ? `已写 ${used} 分钟 / 建议 ${limit} 分钟` : `建议 ${limit} 分钟`} onClose={onBack}
+    <Overlay title={letter ? '书信' : kind === 'task1' ? '小作文' : '大作文'} sub={start ? `已写 ${used} 分钟 / 建议 ${limit} 分钟` : `建议 ${limit} 分钟`} onClose={onBack}
       right={!start && <button className="btn small ghost" onClick={() => setStart(Date.now())}>计时</button>}
       foot={<button className="btn primary block" disabled={busy || n < 30} onClick={go}>{busy ? 'AI 在批改…（约半分钟）' : cfg === null ? '接入 AI 后批改' : n < min ? `提交批改（才 ${n} 词，不到 ${min} 会扣分）` : '提交批改'}</button>}>
       <div className="card"><p className="en" style={{ fontSize: 16, lineHeight: 1.6 }}>{p.prompt}</p><p className="small muted" style={{ marginTop: 6 }}>{p.zh}</p></div>
-      <textarea className="diary-edit" style={{ marginTop: 12 }} rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder={letter ? 'Dear …,' : 'In recent years, …'} />
+      {kind === 'task1' && p.chart && <div style={{ marginTop: 12 }}><IeltsChart type={p.type as ChartType} c={p.chart} /></div>}
+      <textarea className="diary-edit" style={{ marginTop: 12 }} rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder={letter ? 'Dear …,' : kind === 'task1' ? 'The chart shows …' : 'In recent years, …'} />
       <p className={`small ${n >= min ? 'muted' : 'faint'}`} style={{ marginTop: 6 }}>{n} / {min} 词 · 自动保存草稿</p>
       {err && <div className="err-box">{err}</div>}
     </Overlay>

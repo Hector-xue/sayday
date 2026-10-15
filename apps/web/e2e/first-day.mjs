@@ -263,7 +263,12 @@ try {
   log('每日彩蛋', await p.evaluate(() => document.querySelector('.egg')?.innerText.replace(/\s+/g, ' ') ?? '没出现（今天还没练完）'))
 
   // 雅思阅读：第 1 篇，判断题选第一个、填空填一个对的一个错的 → 交卷 → 看解析和原文标注
-  const clickCard = async (t) => { await p.waitForFunction((t) => [...document.querySelectorAll('.ai-card')].some((b) => b.textContent.includes(t)), {}, t); await p.evaluate((t) => [...document.querySelectorAll('.ai-card')].find((b) => b.textContent.includes(t)).click(), t); await sleep(400) }
+  // 按卡片标题（<b>）找，标题对不上再按全文找（别被描述里提到同一个词的卡片抢先）
+  const clickCard = async (t) => {
+    await p.waitForFunction((t) => [...document.querySelectorAll('.ai-card')].some((b) => b.textContent.includes(t)), {}, t)
+    await p.evaluate((t) => { const cs = [...document.querySelectorAll('.ai-card')]; (cs.find((b) => b.querySelector('b')?.textContent.trim() === t) ?? cs.find((b) => b.querySelector('b')?.textContent.includes(t)) ?? cs.find((b) => b.textContent.includes(t))).click() }, t)
+    await sleep(400)
+  }
   await clickText('今天', '.tab'); await sleep(300)
   await clickCard('阅读')
   await shot('22a-reading-list')
@@ -358,6 +363,24 @@ try {
     await shot('24d-work-result')
     log('工作英语', (await text()).replace(/\s+/g, ' ').match(/AI 评分（满分 10） \S+ 语气：\S+/)?.[0])
     await p.click('.session-top .icon-btn'); await sleep(300)
+    await p.click('.session-top .icon-btn'); await sleep(300)
+
+    // 模拟考试：今天页入口（所有目标都有）→ 单项写作的小作文图表 → 开始全真模考看到四节进度
+    await clickText('今天', '.tab'); await sleep(300)
+    await p.evaluate(() => document.querySelector('.mock-entry')?.click()); await sleep(500)
+    await shot('24e-mock-hub')
+    log('模拟考试', await p.evaluate(() => document.querySelector('.mock .card')?.innerText.replace(/\s+/g, ' ').slice(0, 60)))
+    await p.evaluate(() => [...document.querySelectorAll('.mock .ai-card')].find((b) => b.textContent.startsWith('写作'))?.click()); await sleep(500)
+    await clickText('小作文 Task 1'); await sleep(300)
+    await p.click('.session .list .list-row'); await sleep(600)
+    log('小作文图表', await p.evaluate(() => [document.querySelector('.chart-title')?.textContent, document.querySelectorAll('.ielts-chart polyline').length + ' 条线'].join(' · ')))
+    await shot('24f-task1-chart')
+    await p.click('.session-top .icon-btn'); await sleep(300)
+    await p.click('.session-top .icon-btn'); await sleep(300)
+    await clickText('开始全真模考'); await sleep(500)
+    log('全真模考', await p.evaluate(() => document.querySelector('.mock-steps')?.innerText.replace(/\s+/g, ' ')), await p.evaluate(() => document.querySelector('.session-foot button')?.textContent))
+    await shot('24g-mock-run')
+    await p.evaluate(() => [...document.querySelectorAll('.mock button')].find((b) => b.textContent.includes('放弃'))?.click()); await sleep(500)
     await p.click('.session-top .icon-btn'); await sleep(300)
 
     // 雅思口语模考：10 道题，每题录 3 秒（假麦克风），Part 2 跳过准备；AI（假服务）评分

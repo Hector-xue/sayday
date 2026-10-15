@@ -3,8 +3,13 @@ import { db } from './db'
 import { completeJson, type AiConfig } from './ai'
 import { roundBand } from './ielts'
 
-export type Prompt = { id: string; prompt: string; zh: string; type?: string }
-export type WBank = { task2: Prompt[]; letters: Prompt[] }
+import { chartAsText, type ChartData, type ChartType } from './ielts-chart'
+
+export type Prompt = { id: string; prompt: string; zh: string; type?: string; chart?: ChartData }
+export type WBank = { task1: Prompt[]; task2: Prompt[]; letters: Prompt[] }
+/** 三种写作：学术类小作文（图表）/ 大作文 / G 类书信 */
+export type WKind = 'task1' | 'task2' | 'letter'
+export const kindOf = (letter: boolean | WKind): WKind => (typeof letter === 'string' ? letter : letter ? 'letter' : 'task2')
 let cache: Promise<WBank> | null = null
 export const loadWriting = (): Promise<WBank> => (cache ??= fetch('./content/ielts-writing.json').then((r) => r.json()))
 
@@ -19,20 +24,22 @@ const isResult = (x: any): x is WResult =>
   Array.isArray(x.edits) && x.edits.every((e: any) => typeof e?.from === 'string' && typeof e?.to === 'string') && typeof x.rewrite === 'string'
 
 export const words = (t: string) => (t.match(/[A-Za-z]+(?:['-][A-Za-z]+)*/g) || []).length
-export const minWords = (letter: boolean) => (letter ? 150 : 250)
+export const minWords = (k: boolean | WKind) => (kindOf(k) === 'task2' ? 250 : 150)
 
-export function writingPrompt(p: Prompt, letter: boolean, text: string) {
-  return `Grade this IELTS ${letter ? 'General Training Writing Task 1 (letter)' : 'Writing Task 2 (essay)'} answer written by a Chinese candidate.
+export function writingPrompt(p: Prompt, letter: boolean | WKind, text: string) {
+  const k = kindOf(letter)
+  const what = k === 'task1' ? 'Academic Writing Task 1 (describing a chart)' : k === 'letter' ? 'General Training Writing Task 1 (letter)' : 'Writing Task 2 (essay)'
+  return `Grade this IELTS ${what} answer written by a Chinese candidate.
 
 Question:
 ${p.prompt}
-
-Answer (${words(text)} words; the minimum is ${minWords(letter)}):
+${k === 'task1' && p.chart ? `\nThe chart data (the candidate saw it as a ${p.type} chart):\n${chartAsText(p.type as ChartType, p.chart)}\nCheck the figures they quote against this data; a clear overview of the main trends is essential for Task Achievement above band 6.\n` : ''}
+Answer (${words(text)} words; the minimum is ${minWords(k)}):
 """
 ${text}
 """
 
-Use the official public band descriptors: ${letter ? 'Task Achievement' : 'Task Response'}, Coherence and Cohesion, Lexical Resource, Grammatical Range and Accuracy. Be accurate, not generous; penalise under-length answers as the descriptors say.
+Use the official public band descriptors: ${k === 'task2' ? 'Task Response' : 'Task Achievement'}, Coherence and Cohesion, Lexical Resource, Grammatical Range and Accuracy. Be accurate, not generous; penalise under-length answers as the descriptors say.
 
 Return ONLY JSON:
 {"tr": <band 0-9, halves allowed>, "cc": <band>, "lr": <band>, "gra": <band>,
@@ -40,12 +47,12 @@ Return ONLY JSON:
  "strengths": ["<1-2 specific strengths in Simplified Chinese>"],
  "improve": ["<3 specific, actionable improvements in Simplified Chinese, quoting their words>"],
  "edits": [{"from": "<exact wrong fragment copied from the answer>", "to": "<corrected fragment>", "why": "<short reason in Simplified Chinese>"}],
- "rewrite": "<the whole answer rewritten at band 7.5, keeping their ideas and structure>",
+ "rewrite": "<the whole answer rewritten at band 7.5, keeping their ideas and structure${k === 'task1' ? '; use only figures from the data' : ''}>",
  "phrases": [{"en": "<useful phrase from the rewrite>", "zh": "<Chinese>"}]}
 At most 10 edits, real mistakes only; 4 phrases.`
 }
 
-export async function gradeWriting(cfg: AiConfig, p: Prompt, letter: boolean, text: string): Promise<WResult> {
+export async function gradeWriting(cfg: AiConfig, p: Prompt, letter: boolean | WKind, text: string): Promise<WResult> {
   const r = await completeJson(cfg, { system: 'You are a certified IELTS Writing examiner and a kind, precise teacher.', messages: [{ role: 'user', content: writingPrompt(p, letter, text) }], maxTokens: 3000 }, isResult)
   return { ...r, strengths: r.strengths ?? [], improve: r.improve ?? [], phrases: r.phrases ?? [], overall: roundBand((r.tr + r.cc + r.lr + r.gra) / 4) }
 }
