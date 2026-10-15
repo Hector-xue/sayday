@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 vi.mock('../db', () => ({ db: {}, kvGet: vi.fn(), kvSet: vi.fn(), today: () => '2026-10-15' }))
 import { deriveKeys, newCode, open, seal } from '../sync'
-// @ts-expect-error 机器人那边是纯 JS
 import * as bot from '../../../../../packages/bot/crypto.mjs'
 
 describe('App 和聊天机器人的加密一致', () => {
