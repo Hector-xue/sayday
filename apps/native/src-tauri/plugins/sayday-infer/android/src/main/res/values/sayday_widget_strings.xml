@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sayday_w_week_desc">本周：七天哪天练了、今天的状态、开练</string>
+    <string name="sayday_w_today_desc">今天：本周练了几天、今天练没练</string>
+    <string name="sayday_w_word_desc">单词卡：在学的词、意思、例句</string>
+    <string name="sayday_w_episode_desc">今日剧集</string>
+    <string name="sayday_w_mini_desc">开练按钮</string>
+    <string name="sayday_widget_desc">综合</string>
+</resources>

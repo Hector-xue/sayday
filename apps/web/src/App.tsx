@@ -1,4 +1,5 @@
-import { useState, type CSSProperties, type ReactElement } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
+import { takeLaunchAction } from './lib/system'
 import { AppProvider, useApp } from './store'
 import { Icon } from './components/icons'
 import { Onboarding } from './pages/Onboarding'
@@ -43,6 +44,20 @@ function Main() {
   const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing' | 'work'>(null)
   const [ielts, setIelts] = useState<null | 'reading' | 'listening' | 'speaking'>(null)
   const { refresh } = useApp()
+  // 桌面小组件上的按钮：打开 App 时直接去对应的地方（开练 / 今日剧集 / 词库）
+  useEffect(() => {
+    if (!profile) return
+    const run = async () => {
+      const a = await takeLaunchAction()
+      if (a === 'practice') { go('today'); setSession({ minimum: false }) }
+      else if (a === 'episode') go('episodes')
+      else if (a === 'words') go('words')
+    }
+    run()
+    const onShow = () => { if (document.visibilityState === 'visible') run() }
+    document.addEventListener('visibilitychange', onShow)
+    return () => document.removeEventListener('visibilitychange', onShow)
+  }, [!!profile])
   if (profile === undefined) return <div className="loading">…</div>
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (

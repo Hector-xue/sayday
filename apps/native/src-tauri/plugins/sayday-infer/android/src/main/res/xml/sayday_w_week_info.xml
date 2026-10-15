@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 本周：七天哪天练了、今天的状态、开练。每小时系统刷新一次兜底；换日（凌晨 4 点）另有闹钟刷新，见 Widgets.kt -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="70dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="3600000"
+    android:initialLayout="@layout/sayday_w_week"
+    android:previewLayout="@layout/sayday_w_week"
+    android:description="@string/sayday_w_week_desc"
+    android:widgetCategory="home_screen" />

@@ -13,11 +13,66 @@
         </intent>
     </queries>
     <application>
-        <!-- 桌面小组件（内容由 App 推送，见 SaydayWidget.kt） -->
+        <!-- 桌面小组件（六种，内容由 App 推送，见 Widgets.kt）。SaydayWidget 是最早那个，类名不能改 -->
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayWeekWidget"
+            android:exported="true"
+            android:label="日日说 · 本周">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_w_week_info" />
+        </receiver>
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayTodayWidget"
+            android:exported="true"
+            android:label="日日说 · 今天">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_w_today_info" />
+        </receiver>
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayWordWidget"
+            android:exported="true"
+            android:label="日日说 · 单词卡">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_w_word_info" />
+        </receiver>
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayEpisodeWidget"
+            android:exported="true"
+            android:label="日日说 · 今日剧集">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_w_episode_info" />
+        </receiver>
+        <receiver
+            android:name="com.ivyea.sayday.infer.SaydayMiniWidget"
+            android:exported="true"
+            android:label="日日说 · 开练">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sayday_w_mini_info" />
+        </receiver>
         <receiver
             android:name="com.ivyea.sayday.infer.SaydayWidget"
             android:exported="true"
-            android:label="日日说">
+            android:label="日日说 · 综合">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

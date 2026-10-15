@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 每小时让系统刷新一次：只为过了换日时间后把“今天练完了”改成“今天还没练”，内容本身由 App 推送 -->
+<!-- 综合。每小时系统刷新一次兜底；换日（凌晨 4 点）另有闹钟刷新，见 Widgets.kt -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="180dp"
     android:minHeight="110dp"
@@ -11,4 +11,5 @@
     android:updatePeriodMillis="3600000"
     android:initialLayout="@layout/sayday_widget"
     android:previewLayout="@layout/sayday_widget"
+    android:description="@string/sayday_widget_desc"
     android:widgetCategory="home_screen" />

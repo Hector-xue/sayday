@@ -7,4 +7,5 @@
     <color name="sayday_w_faint">#7F7E77</color>
     <color name="sayday_w_mark">#F7D93F</color>
     <color name="sayday_w_on_mark">#121211</color>
+    <color name="sayday_w_off">#2E2E2B</color>
 </resources>
