@@ -16,6 +16,8 @@ import { getSupport, type SupportState } from '../lib/support'
 import { SupportSheet } from '../components/SupportSheet'
 import { ModelPrefetchRow } from '../components/ModelPrefetch'
 import { TOPICS, getInterests, setInterests } from '../lib/interests'
+import { SyncRows } from '../components/SyncRow'
+import { enableQuiz, getQuizCfg, testQuiz, type QuizCfg } from '../lib/quiz'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -27,6 +29,9 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   useEffect(() => { getReminder().then(setRem) }, [])
   const [sys, setSys] = useState<SystemStatus | null>(null)
   const [tags, setTags] = useState<string[]>([])
+  const [quiz, setQuiz] = useState<QuizCfg | null>(null)
+  useEffect(() => { getQuizCfg().then(setQuiz) }, [])
+  const saveQuiz = async (q: QuizCfg) => { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q) }
   useEffect(() => { getInterests().then(setTags) }, [])
   // 从系统设置 / 桌面回来时刷新（通知开关、小组件个数）
   useEffect(() => {
@@ -129,7 +134,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   }
   const reset = async () => {
     if (!confirm('清空所有学习记录？这一步不能撤销，建议先导出备份。')) return
-    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
+    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work', 'kv', 'kv_ts'].map((t) => ({ sql: `DELETE FROM ${t}` })))
     location.reload()
   }
 
@@ -174,6 +179,19 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
             <div className="seg"><button aria-pressed={!rem.on} onClick={() => saveRem({ ...rem, on: false })}>关</button><button aria-pressed={rem.on} onClick={() => saveRem({ ...rem, on: true })}>开</button></div>
           </div>
         )}
+        {quiz && (
+          <div className="set-row">
+            <div className="k"><b>通知里做题</b><span>{quiz.on ? '每天到点弹 3 道复习题，在通知里直接答，答了就算今天练过' : '不打开 App 也能复习：在通知里点按钮、写拼写'}</span></div>
+            {quiz.on && <input className="input time" type="time" value={`${String(quiz.hour).padStart(2, '0')}:${String(quiz.minute).padStart(2, '0')}`} onChange={(e) => { const [h, m] = e.target.value.split(':').map(Number); if (!Number.isNaN(h)) saveQuiz({ on: true, hour: h, minute: m || 0 }) }} />}
+            <div className="seg"><button aria-pressed={!quiz.on} onClick={() => saveQuiz({ ...quiz, on: false })}>关</button><button aria-pressed={quiz.on} onClick={() => saveQuiz({ ...quiz, on: true })}>开</button></div>
+          </div>
+        )}
+        {quiz?.on && (
+          <div className="set-row">
+            <div className="k"><b>现在试一题</b><span>马上弹一轮，看看通知里怎么答</span></div>
+            <button className="btn small quiet" onClick={async () => { const e = await testQuiz(); toast(e ?? '已经发到通知栏了，下拉看看') }}>试一下</button>
+          </div>
+        )}
           <div className="set-row">
             <div className="k"><b>系统通知</b><span>{sys ? (sys.notify ? '已允许' : '已关闭 · 提醒不会弹出来') : '提醒铃声、横幅样式在系统里改'}</span></div>
             <button className="btn small quiet" onClick={async () => { if (!(await openNotifySettings())) toast('到系统设置 → 应用 → 日日说 → 通知 里改') }}>{sys && !sys.notify ? '去打开' : '系统设置'}</button>
@@ -212,6 +230,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
 
       <p className="section-title">数据</p>
       <div className="list">
+        <SyncRows />
         <div className="set-row"><div className="k"><b>保存在</b><span>{storage}{isNative ? ' · App' : ''}</span></div></div>
         <ModelPrefetchRow />
         {cache && (

@@ -145,6 +145,24 @@ fn open_notify_settings<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("openNotifySettings", serde_json::json!({}))
 }
 
+/// 通知里做题：交一批题和出题时间（都是 JSON 字符串）
+#[tauri::command]
+fn quiz_set<R: Runtime>(app: tauri::AppHandle<R>, questions: String, times: String) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("quizSet", serde_json::json!({ "questions": questions, "times": times }))
+}
+
+/// 取走通知里答过的题；返回 { answers: JSON 字符串 }
+#[tauri::command]
+fn quiz_drain<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("quizDrain", serde_json::json!({}))
+}
+
+/// 马上弹一轮题（设置页试用）
+#[tauri::command]
+fn quiz_test<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("quizTest", serde_json::json!({}))
+}
+
 /// 桌面小组件的内容（网页算好：连续天数、今天练没练、一个在学的词），原样交给 Kotlin
 #[tauri::command]
 fn update_widget<R: Runtime>(app: tauri::AppHandle<R>, widget: Value) -> Result<Value> {
@@ -174,7 +192,7 @@ async fn update_install<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

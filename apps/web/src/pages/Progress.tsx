@@ -16,6 +16,7 @@ import { Line, Radar } from '../components/Charts'
 import { SKILLS, abilities, bandEstimate, markAbilitiesSeen, overallBand, snapshotBands, vocabCurve, type AbilityState, type BandWeek, type Bands, type VocabPoint } from '../lib/growth'
 import { thisWeek, type Entry } from '../lib/voice-diary'
 import { VoiceDiary } from './VoiceDiary'
+import { BuddyCard } from '../components/BuddyCard'
 import { EGG_KIND, collection, type Egg } from '../lib/eggs'
 
 /** 四项里还没依据的，怎么补上 */
@@ -121,6 +122,9 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
           </>
         )
       })()}
+
+      <p className="section-title">学习搭子</p>
+      <BuddyCard key={tick} />
 
       <p className="section-title">声音日记</p>
       <button className="card ai-card wide" onClick={() => setVd((v) => ({ ...v, open: true }))}>

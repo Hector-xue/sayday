@@ -60,4 +60,8 @@ export const MIGRATIONS: string[] = [
   `
   CREATE TABLE work(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, task TEXT NOT NULL, text TEXT NOT NULL, score REAL, result TEXT);
   `,
+  // v0.0.24：多设备同步要知道每个设置是什么时候改的（新的覆盖旧的）；之前存的没有时间，算 0
+  `
+  CREATE TABLE kv_ts(key TEXT PRIMARY KEY, ts INTEGER NOT NULL);
+  `,
 ]

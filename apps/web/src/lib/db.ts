@@ -32,8 +32,12 @@ export async function kvGet<T>(key: string, fallback: T): Promise<T> {
   const r = await db.one<{ value: string }>('SELECT value FROM kv WHERE key = ?', [key])
   return r ? (JSON.parse(r.value) as T) : fallback
 }
+/** 写一个设置，顺带记下修改时间（多设备同步按时间决定谁覆盖谁） */
 export function kvSet(key: string, value: unknown) {
-  return db.run('INSERT INTO kv(key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [key, JSON.stringify(value)])
+  return db.batch([
+    { sql: 'INSERT INTO kv(key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', params: [key, JSON.stringify(value)] },
+    { sql: 'INSERT INTO kv_ts(key, ts) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET ts = excluded.ts', params: [key, Date.now()] },
+  ])
 }
 
 /** 本地日期 YYYY-MM-DD（按凌晨 4 点换日：熬夜学的算前一天） */
