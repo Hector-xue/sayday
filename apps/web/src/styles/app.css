@@ -567,3 +567,9 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .voice-diary .compare { display: grid; gap: 8px; }
 .voice-diary .compare p { margin: 0; }
 .voice-diary .compare .row { gap: 10px; }
+.persona-list .set-row { width: 100%; text-align: left; background: none; border: 0; font: inherit; color: inherit; cursor: pointer; }
+.persona-list .set-row.on .k b { color: var(--brand); }
+.emma-nudge { display: grid; gap: 4px; width: 100%; text-align: left; margin-bottom: 12px; font: inherit; color: inherit; cursor: pointer; }
+.emma-nudge b { font-size: 17px; line-height: 1.45; }
+.emma-nudge .reply { color: var(--brand); font-weight: 600; margin-top: 4px; }
+.persona-list .set-row > svg, .abilities .ok svg { width: 20px; height: 20px; flex: none; }

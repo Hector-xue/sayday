@@ -18,6 +18,8 @@ import { getSupport, shouldPrompt, type SupportState } from '../lib/support'
 import { markAbilitiesSeen, unseenAbilities, type Ability } from '../lib/growth'
 import { thisWeek } from '../lib/voice-diary'
 import { VoiceDiary } from './VoiceDiary'
+import { nudge, shouldNudge, unreadNudge, type Nudge } from '../lib/companion'
+import { vocabLevel } from '../lib/calibrate'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -42,6 +44,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [fresh, setFresh] = useState<Ability[]>([])
   const [vdDue, setVdDue] = useState(false)
   const [vdOpen, setVdOpen] = useState(false)
+  const [emma, setEmma] = useState<Nudge | null>(null)
   const [support, setSupport] = useState<{ s: SupportState; show: boolean } | null>(null)
   const [supportOpen, setSupportOpen] = useState(false)
   useEffect(() => {
@@ -58,7 +61,15 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
       // 每月可选一次完整复测：离上次完整定级满 30 天
       db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
     }
-    getAi().then((c) => setHasAi(!!c))
+    getAi().then(async (c) => {
+      setHasAi(!!c)
+      setEmma(await unreadNudge().catch(() => null))
+      // 隔两天没聊：Emma 在后台先发一条（要接了 AI；失败就算了）
+      if (c && profile && (await shouldNudge().catch(() => false))) {
+        const [lv, ws] = await Promise.all([vocabLevel(profile), db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY added DESC LIMIT 12')])
+        nudge(c, lv.cefr, ws.map((w) => w.word)).then((n) => { if (n) { setEmma(n); import('../lib/reminder').then((m) => m.reschedule()).catch(() => {}) } }).catch(() => {})
+      }
+    })
     Promise.all([loadSeasons(), getProgress()]).then(([all, p]) => { const u = nextUp(all, p); setEp(u); setPrevTeaser(teaserFor(all, u.season.season, u.ep.id)) })
     db.one<{ n: number }>('SELECT count(*) n FROM diary WHERE date = ? AND result IS NOT NULL', [today()]).then((r) => setWrote(!!r?.n))
     db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]).then((r) => setChatted(!!r?.n))
@@ -199,6 +210,14 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
       )}
 
       <p className="section-title">说和写</p>
+      {emma && (
+        <button className="card emma-nudge" onClick={() => onAi('chat')}>
+          <span className="small muted">Emma 给你发了条消息</span>
+          <b className="en">{emma.text}</b>
+          {emma.zh && <span className="small muted">{emma.zh}</span>}
+          <span className="small reply">回她 →</span>
+        </button>
+      )}
       {hasAi ? (
         <div className="ai-grid">
           <button className="card ai-card" onClick={() => onAi('chat')}>

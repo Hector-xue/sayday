@@ -6,7 +6,7 @@ import { Tappable } from '../components/Tappable'
 import { MicInput } from '../components/MicInput'
 import { useApp } from '../store'
 import { AiError, getAi, type AiConfig } from '../lib/ai'
-import { clearChat, getMemory, history, send, type ChatMsg } from '../lib/companion'
+import { clearChat, getMemory, getPersona, history, markNudgeRead, PERSONAS, send, setPersona, type ChatMsg, type Persona } from '../lib/companion'
 import { speak, stopSpeak } from '../lib/speak'
 import { vocabLevel } from '../lib/calibrate'
 import { db } from '../lib/db'
@@ -37,6 +37,7 @@ export function Chat({ onClose, onSetup }: { onClose: () => void; onSetup: () =>
   const [err, setErr] = useState<{ msg: string; retry: () => void } | null>(null)
   const [zh, setZh] = useState<Set<number>>(new Set())
   const [mem, setMem] = useState<string[] | null>(null)
+  const [per, setPer] = useState<Persona>('warm')
   const end = useRef<HTMLDivElement>(null)
   const abort = useRef<AbortController | null>(null)
   const opened = useRef(performance.now())
@@ -47,6 +48,8 @@ export function Chat({ onClose, onSetup }: { onClose: () => void; onSetup: () =>
     // 最近学的词，Emma 会顺手用上（复现）
     db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY added DESC LIMIT 12').then((r) => setWords(r.map((x) => x.word)))
     history().then(setMsgs)
+    markNudgeRead().catch(() => {})
+    getPersona().then(setPer)
     return () => { abort.current?.abort(); stopSpeak(); markDay({ seconds: (performance.now() - opened.current) / 1000 }) }
   }, [])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs, live])
@@ -96,8 +99,8 @@ export function Chat({ onClose, onSetup }: { onClose: () => void; onSetup: () =>
   )
 
   return (
-    <Overlay title="Emma" sub="住在伦敦的室友 · 按你的水平说话，记得你说过的事" onClose={onClose}
-      right={<button className="btn small ghost" onClick={async () => setMem(await getMemory())}>她记得</button>}
+    <Overlay title="Emma" sub={`住在伦敦的室友 · ${PERSONAS.find((x) => x.k === per)!.t}`} onClose={onClose}
+      right={<button className="btn small ghost" onClick={async () => setMem(await getMemory())}>性格和记忆</button>}
       foot={
         <div className="composer">
           <MicInput disabled={live !== null} onText={(t) => setDraft((d) => (d ? d + ' ' : '') + t)} />
@@ -133,7 +136,16 @@ export function Chat({ onClose, onSetup }: { onClose: () => void; onSetup: () =>
         <div ref={end} />
       </div>
       {mem && (
-        <Overlay title="Emma 记得的事" onClose={() => setMem(null)} foot={<button className="btn quiet block" onClick={async () => { if (confirm('清空聊天记录？她记得的事会保留。')) { await clearChat(); setMsgs([]); setMem(null) } }}>清空聊天记录</button>}>
+        <Overlay title="Emma" sub="性格和她记得的事" onClose={() => setMem(null)} foot={<button className="btn quiet block" onClick={async () => { if (confirm('清空聊天记录？她记得的事会保留。')) { await clearChat(); setMsgs([]); setMem(null) } }}>清空聊天记录</button>}>
+          <p className="section-title" style={{ marginTop: 0 }}>性格</p>
+          <div className="list persona-list">
+            {PERSONAS.map((x) => (
+              <button key={x.k} className={`set-row ${per === x.k ? 'on' : ''}`} aria-pressed={per === x.k} onClick={async () => { await setPersona(x.k); setPer(x.k) }}>
+                <div className="k"><b>{x.t}</b><span>{x.s}</span></div>{per === x.k && <Icon.check />}
+              </button>
+            ))}
+          </div>
+          <p className="section-title">她记得的事</p>
           {mem.length ? <ul className="tips" style={{ background: 'none', padding: 0 }}>{mem.map((f) => <li key={f} className="en">{f}</li>)}</ul> : <p className="muted small">还没记住什么。多聊几句，她会记下你的名字、工作、爱好这些。</p>}
           <p className="small faint" style={{ marginTop: 16 }}>每聊 6 句，AI 会把值得记住的事整理一次，只存在这台设备上。</p>
         </Overlay>
