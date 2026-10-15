@@ -17,6 +17,10 @@ tauri-plugin-sayday-infer = { path = "plugins/sayday-infer" }
 # 每日提醒（本地定时通知）。2.5+ 要 tauri 2.12，和上面钉死的 2.11.5 不兼容
 tauri-plugin-notification = "=2.4.0"
 
+# 桌面版 Linux：WebKitGTK 默认不让网页用麦克风，启动时打开（版本跟 wry 用的一致，Cargo.lock 里已有）
+[target.'cfg(target_os = "linux")'.dependencies]
+webkit2gtk = "=2.0.2"
+
 # 安卓 debug 包默认带完整调试信息，单个 .so 就 100MB+；测速包不需要，去掉后体积减半
 [profile.dev]
 debug = false
