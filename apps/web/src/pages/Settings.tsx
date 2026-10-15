@@ -81,7 +81,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   if (!profile) return null
 
   const exportData = async () => {
-    // 录音存档（recording）是二进制、体积大，不放进 JSON 备份
+    // 录音存档（recording、voice_diary）是二进制、体积大，不放进 JSON 备份
     const tables = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice']
     const out: Record<string, unknown> = { app: 'sayday', exported: new Date().toISOString() }
     for (const t of tables) out[t] = await db.all(`SELECT * FROM ${t}`)
@@ -126,7 +126,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   }
   const reset = async () => {
     if (!confirm('清空所有学习记录？这一步不能撤销，建议先导出备份。')) return
-    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
+    await db.batch(['card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'recording', 'voice_diary', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'kv'].map((t) => ({ sql: `DELETE FROM ${t}` })))
     location.reload()
   }
 

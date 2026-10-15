@@ -216,3 +216,10 @@
 [data-style="marker"] .tab { font-weight: 600; }
 [data-style="marker"] .tab[aria-current="page"] { font-weight: 700; }
 [data-style="marker"] .tap.on { background: var(--mark); color: var(--on-mark); }
+
+/* 进步页小图：荧光笔黄填色、墨色描边 */
+[data-style="marker"] .radar .now { fill: color-mix(in srgb, var(--mark) 55%, transparent); stroke: var(--ink); }
+[data-style="marker"] .radar .dot, [data-style="marker"] .line-chart .dot { fill: var(--ink); }
+[data-style="marker"] .line-chart .stroke { stroke: var(--ink); }
+[data-style="marker"] .line-chart .area { fill: color-mix(in srgb, var(--mark) 45%, transparent); }
+[data-style="marker"] .abilities .ok { color: var(--ink); }

@@ -51,4 +51,9 @@ export const MIGRATIONS: string[] = [
   CREATE TABLE practice(id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, kind TEXT NOT NULL, test INTEGER NOT NULL, part INTEGER NOT NULL, score INTEGER NOT NULL, total INTEGER NOT NULL, band REAL, answers TEXT);
   CREATE INDEX practice_kind ON practice(kind, ts);
   `,
+  // v0.0.19：声音日记（每周用同一段话录一次；同一周重录覆盖），pcm 同 recording：16kHz 单声道 int16
+  `
+  CREATE TABLE voice_diary(id INTEGER PRIMARY KEY, week TEXT NOT NULL, pcm BLOB NOT NULL, score INTEGER, wpm REAL, pauses INTEGER, sec REAL NOT NULL, ts INTEGER NOT NULL);
+  CREATE INDEX voice_diary_week ON voice_diary(week);
+  `,
 ]

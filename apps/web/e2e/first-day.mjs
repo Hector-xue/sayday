@@ -308,6 +308,22 @@ try {
   } finally { mock.close() }
   else log('AI 部分', '线上测试跳过（假服务在本机回环地址）')
 
+  // 进步看得见：雅思四项雷达、词汇量曲线、能力解锁、声音日记（录 7 秒假麦克风）
+  {
+    await clickText('进步', '.tab'); await sleep(900)
+    const t = (await text()).replace(/\s+/g, ' ')
+    log('四项预估', t.match(/雅思四项（预估）.{0,120}/)?.[0])
+    log('能做到', t.match(/你现在能做到.{0,120}/)?.[0])
+    await p.evaluate(() => document.querySelector('.radar')?.scrollIntoView({ block: 'start' })); await sleep(300); await shot('26-progress-radar')
+    await p.evaluate(() => [...document.querySelectorAll('.section-title')].find((x) => x.textContent === '你现在能做到')?.scrollIntoView({ block: 'start' })); await sleep(300); await shot('26b-abilities')
+    await p.evaluate(() => [...document.querySelectorAll('button.card')].find((b) => /本周还没录|本周录过了/.test(b.textContent)).click()); await sleep(600)
+    await p.click('.rec-btn'); await sleep(7000); await p.click('.rec-btn')
+    await p.waitForFunction(() => /录了|第一次录音/.test(document.body.innerText), { timeout: 60000 })
+    log('声音日记', (await text()).replace(/\s+/g, ' ').match(/(第一次录音|录了 \d+ 周).{0,80}/)?.[0])
+    await shot('27-voice-diary')
+    await p.click('.session-top .icon-btn'); await sleep(400)
+  }
+
   // 改目标：改完要回到主界面（v0.0.3 的 bug：会卡在引导页出不来）
   await openSettings(); await clickText('修改'); await clickText('下一步'); await clickText('保存'); await sleep(500)
   log('改目标后回到主界面', await p.evaluate(() => !!document.querySelector('.tabbar')))
