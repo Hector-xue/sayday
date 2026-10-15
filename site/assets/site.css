@@ -227,7 +227,7 @@ button { font: inherit; color: inherit; }
 
 /* 下载 */
 .download { padding-bottom: 40px; }
-.dl-grid { margin: 36px auto 0; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; text-align: left; }
+.dl-grid { margin: 36px auto 0; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 14px; text-align: left; }
 .dl { display: flex; flex-direction: column; gap: 4px; padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--hair); transition: transform .15s, box-shadow .2s; }
 a.dl:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 .dl b { font-size: 18px; }
