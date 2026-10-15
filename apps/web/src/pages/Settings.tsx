@@ -164,7 +164,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
 
       <p className="section-title">AI</p>
       <div className="list">
-        <div className="set-row"><div className="k"><b>你自己的 AI</b><span>{ai ? `${providerOf(ai.provider).name} · ${ai.model}` : '陪练聊天、日记批改要用。DeepSeek、通义、Kimi 等都行'}</span></div><button className="btn small quiet" onClick={onAi}>{ai ? '修改' : '接入'}</button></div>
+        <div className="set-row"><div className="k"><b>你自己的 AI</b><span>{ai ? `${providerOf(ai.provider).name} · ${ai.model} · 用在 Emma 聊天、日记、写作和口语批改、工作英语（入口在今天页“AI 陪练”）` : '陪练聊天、日记批改、写作和口语评分要用。DeepSeek、通义、Kimi 等都行'}</span></div><button className="btn small quiet" onClick={onAi}>{ai ? '修改' : '接入'}</button></div>
       </div>
 
       <p className="section-title">提醒与小组件</p>
