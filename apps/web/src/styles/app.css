@@ -582,3 +582,30 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .work > p { margin: 0; }
 .work .material p { margin: 4px 0 0; }
 .work .tips { margin: 0; }
+.focus-card { margin: 12px 0 16px; }
+.focus { display: grid; gap: 14px; }
+.focus p { margin: 0; }
+.focus-play { display: grid; gap: 18px; padding-top: 12px; }
+.focus-top { display: flex; align-items: baseline; gap: 6px; }
+.focus-top b.num { font-size: 44px; line-height: 1; }
+.focus-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+.focus-opts .opt { min-height: 96px; text-align: center; font-size: 22px; transition: transform .12s ease; }
+.focus-opts.ok .opt.right { transform: scale(1.04); }
+.focus-opts.no { animation: shake .3s ease; }
+@keyframes shake { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .focus-opts.no { animation: none; } }
+.egg { margin-bottom: 16px; }
+.egg.closed { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.egg.closed > span:last-child { display: grid; gap: 2px; }
+.egg-mark { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 800; background: var(--brand-soft); color: var(--brand); }
+.egg.open { display: grid; gap: 6px; }
+.egg.open p { margin: 0; }
+.egg-en { font-size: 18px; line-height: 1.5; }
+.egg-zh { color: var(--soft); }
+.set-row.more { width: 100%; justify-content: center; background: none; border: 0; font: inherit; cursor: pointer; }
+.citymap section + section { margin-top: 8px; }
+.city-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.place { position: relative; display: grid; gap: 2px; align-content: start; min-height: 88px; padding: 12px 12px 10px; border-radius: 14px; background: var(--surface-2); color: var(--faint); }
+.place.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.place .no { position: absolute; top: 8px; right: 10px; font-size: 11px; color: var(--faint); font-family: var(--num); }
+.place b { font-size: 15px; padding-right: 16px; line-height: 1.3; }

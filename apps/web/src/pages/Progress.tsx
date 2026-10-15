@@ -16,6 +16,7 @@ import { Line, Radar } from '../components/Charts'
 import { SKILLS, abilities, bandEstimate, markAbilitiesSeen, overallBand, snapshotBands, vocabCurve, type AbilityState, type BandWeek, type Bands, type VocabPoint } from '../lib/growth'
 import { thisWeek, type Entry } from '../lib/voice-diary'
 import { VoiceDiary } from './VoiceDiary'
+import { EGG_KIND, collection, type Egg } from '../lib/eggs'
 
 /** 四项里还没依据的，怎么补上 */
 const HOW: Record<string, string> = { l: '每天练习里多做几题听力', r: '做一次雅思阅读', w: '写一篇雅思作文', s: '做一次口语模考' }
@@ -42,6 +43,8 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
   const [bands, setBands] = useState<{ now: Bands; weeks: BandWeek[] } | null>(null)
   const [curve, setCurve] = useState<VocabPoint[]>([])
   const [abl, setAbl] = useState<AbilityState[]>([])
+  const [eggs, setEggs] = useState<{ date: string; egg: Egg }[]>([])
+  const [eggsAll, setEggsAll] = useState(false)
   const [vd, setVd] = useState<{ open: boolean; mine: Entry | null }>({ open: false, mine: null })
   const [mock, setMock] = useState<{ band: number | null; fc: number | null; p: number | null; ts: number } | null>(null)
   useEffect(() => {
@@ -52,6 +55,7 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
     vocabCurve(profile).then(setCurve)
     abilities(profile).then((a) => { setAbl(a); markAbilitiesSeen(a.filter((x) => x.at).map((x) => x.a.id)) })
     thisWeek().then((mine) => setVd((v) => ({ ...v, mine })))
+    collection().then(setEggs).catch(() => {})
     Promise.all([practiceBand('reading'), practiceBand('listening')]).then(([r, l]) => setPb({ r, l }))
     writingHistory(10).then((h) => { const x = h.find((r) => r.band !== null); setWband(x ? { band: x.band!, ts: x.ts } : null) })
     lastTests(1).then((r) => { if (r[0]) { const d = JSON.parse(r[0].data); setMock({ band: r[0].band, fc: d.grade?.fc ?? d.objective?.fc ?? null, p: d.grade?.p ?? d.objective?.p ?? null, ts: r[0].ts }) } })
@@ -123,6 +127,18 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
         <b>{vd.mine ? '本周录过了' : '本周还没录'}</b><span>每周读一遍同一段话，几周后和第一周对着听，最直观的进步</span>
       </button>
       {vd.open && <VoiceDiary onClose={() => { setVd({ open: false, mine: null }); thisWeek().then((mine) => setVd({ open: false, mine })) }} />}
+
+      {eggs.length > 0 && (
+        <>
+          <p className="section-title">彩蛋收藏 · {eggs.length} 个</p>
+          <div className="list">
+            {(eggsAll ? eggs : eggs.slice(0, 3)).map(({ date, egg }) => (
+              <div className="set-row" key={date}><div className="k"><b className="en">{egg.en}</b><span>{EGG_KIND[egg.kind]} · {egg.zh}</span></div></div>
+            ))}
+            {eggs.length > 3 && <button className="set-row more" onClick={() => setEggsAll((x) => !x)}><span className="small muted">{eggsAll ? '收起' : `看全部 ${eggs.length} 个`}</span></button>}
+          </div>
+        </>
+      )}
 
       <p className="section-title">分项</p>
       <div className="list">
