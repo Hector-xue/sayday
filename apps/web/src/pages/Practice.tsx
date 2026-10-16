@@ -1,5 +1,6 @@
 // 雅思阅读 / 听力练习：选一篇（一部分）或整套 → 作答 → 本机判分，逐题给答案、解析和原文依据
 // 听力默认“考试模式”：和真考一样只放一遍；练习模式可以暂停、重听上一句
+import { Explain, ask } from '../components/Explain'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Overlay } from '../components/Overlay'
 import { PlayButton } from '../components/PlayButton'
@@ -303,6 +304,7 @@ function Report({ kind, test, units, answers, res, onExit }: { kind: Kind; test:
                   <p className="small">{ok ? '✓ ' : '✗ 你的答案：' + shown(g, it, answers[it.n] ?? null) + ' · 正确：'}<b className="en">{shown(g, it, it.a)}</b></p>
                   <p className="small muted">{it.why}</p>
                   <p className="small faint en">原文：“{it.at}”</p>
+                  {!ok && <Explain label="还是不懂？问 AI" prompt={() => ask.practice(kind, it.q, shown(g, it, answers[it.n] ?? null), shown(g, it, it.a), it.why, it.at)} />}
                 </div>
               )
             }))}

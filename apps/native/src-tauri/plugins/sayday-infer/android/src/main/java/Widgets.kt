@@ -177,7 +177,8 @@ object Widgets {
     v.setTextViewText(R.id.w_ipa, w.optString("ipa").let { if (it.isEmpty()) "" else "/$it/" })
     v.setTextViewText(R.id.w_meaning, w.optString("zh"))
     val ex = w.optString("ex")
-    v.setTextViewText(R.id.w_ex, if (ex.isEmpty()) "" else "$ex\n${w.optString("exZh")}")
+    v.setTextViewText(R.id.w_ex, ex)
+    v.setTextViewText(R.id.w_ex_zh, if (ex.isEmpty()) "" else w.optString("exZh"))
     return v
   }
 

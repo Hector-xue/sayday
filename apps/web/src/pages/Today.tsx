@@ -21,6 +21,8 @@ import { VoiceDiary } from './VoiceDiary'
 import { EggCard } from '../components/EggCard'
 import { nudge, shouldNudge, unreadNudge, type Nudge } from '../lib/companion'
 import { vocabLevel } from '../lib/calibrate'
+import { nextMilestone, type Milestone } from '../lib/milestones'
+import { Celebrate } from '../components/Celebrate'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -43,6 +45,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [wk, setWk] = useState<Week | null>(null)
   const [cb, setCb] = useState<Comeback | null>(null)
   const [fresh, setFresh] = useState<Ability[]>([])
+  const [mile, setMile] = useState<Milestone | null>(null)
   const [vdDue, setVdDue] = useState(false)
   const [vdOpen, setVdOpen] = useState(false)
   const [emma, setEmma] = useState<Nudge | null>(null)
@@ -80,6 +83,8 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
     Promise.all([getSupport(), stats()]).then(([s, st]) => setSupport({ s, show: shouldPrompt(s, st.days) }))
     if (profile) currentLevel(profile).then(setLv)
     if (profile) unseenAbilities(profile).then(setFresh).catch(() => {})
+    // 在练习以外达成的里程碑（剧集、听写、聊天里跟读等）：回到今天页时庆祝
+    if (profile) nextMilestone().then(setMile).catch(() => {})
     thisWeek().then((e) => setVdDue(!e)).catch(() => {})
   }, [tick, profile])
   if (!profile || !d || !size || !wk) return <div className="loading">…</div>
@@ -101,6 +106,7 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         <span className="row"><span className="small muted">{now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}</span><button className="icon-btn ghost" aria-label="设置" onClick={onSettings}><Icon.settings /></button></span>
       </div>
 
+      {mile && <Celebrate m={mile} onClose={() => setMile(null)} />}
       {upd && <UpdateCard info={upd} onClose={() => setUpd(null)} />}
 
       {/* 周目标：一周练 4 天算达标；不按天算连续，断一天不清零 */}

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 今天（2×2）：本周练了几天 + 今天练没练 + 开练 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:background="@drawable/sayday_widget_bg">
+<!-- 今天（2×2）：本周练了几天（大数字）+ 今天练没练 + 开练。上下两块贴边，中间弹性空白 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp" android:background="@drawable/sayday_widget_bg">
 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="bottom">
-<TextView android:id="@+id/w_lit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/sayday_w_ink" android:textSize="30sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
-<TextView android:id="@+id/w_goal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="/4" android:textColor="@color/sayday_w_faint" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+<TextView android:id="@+id/w_lit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/sayday_w_ink" android:textSize="40sp" android:textStyle="bold" android:maxLines="1" android:includeFontPadding="false"/>
+<TextView android:id="@+id/w_goal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="2dp" android:text="/4" android:textColor="@color/sayday_w_faint" android:textSize="16sp" android:textStyle="bold" android:maxLines="1" />
 </LinearLayout>
-<TextView android:id="@+id/w_head" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="本周" android:textColor="@color/sayday_w_soft" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-<FrameLayout android:layout_width="1dp" android:layout_height="0dp" android:layout_weight="1" />
-<TextView android:id="@+id/w_main" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="今天还没练" android:textColor="@color/sayday_w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:orientation="horizontal">
-<TextView android:id="@+id/w_btn" android:layout_width="wrap_content" android:layout_height="28dp" android:gravity="center" android:text="开练" android:textColor="@color/sayday_w_bg" android:textSize="12sp" android:textStyle="bold" android:paddingStart="12dp" android:paddingEnd="12dp" android:background="@drawable/sayday_w_btn" android:maxLines="1" />
+<TextView android:id="@+id/w_head" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="本周" android:textColor="@color/sayday_w_soft" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
+<FrameLayout android:layout_width="1dp" android:layout_height="0dp" android:layout_weight="1" android:minHeight="6dp" />
+<TextView android:id="@+id/w_main" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="今天还没练" android:textColor="@color/sayday_w_ink" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="horizontal">
+<TextView android:id="@+id/w_btn" android:layout_width="wrap_content" android:layout_height="34dp" android:gravity="center" android:text="开练" android:textColor="@color/sayday_w_bg" android:textSize="14sp" android:textStyle="bold" android:paddingStart="18dp" android:paddingEnd="18dp" android:background="@drawable/sayday_w_btn" android:maxLines="1" />
 </LinearLayout>
 </LinearLayout>
