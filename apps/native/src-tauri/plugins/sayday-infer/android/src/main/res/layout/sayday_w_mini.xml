@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 开练（1×1）：一个大圆，今天练过显示 ✓ -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-<TextView android:id="@+id/w_big" android:layout_width="44dp" android:layout_height="44dp" android:gravity="center" android:text="练" android:textColor="@color/sayday_w_on_mark" android:textSize="18sp" android:textStyle="bold" android:background="@drawable/sayday_w_big" />
-<TextView android:id="@+id/w_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="日日说" android:textColor="@color/sayday_w_ink" android:textSize="10sp" android:shadowColor="#66000000" android:shadowRadius="2" android:maxLines="1" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:padding="2dp">
+<TextView android:id="@+id/w_big" android:layout_width="50dp" android:layout_height="50dp" android:gravity="center" android:text="练" android:textColor="@color/sayday_w_on_mark" android:textSize="21sp" android:textStyle="bold" android:background="@drawable/sayday_w_big" />
+<TextView android:id="@+id/w_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="日日说" android:textColor="#FFFFFF" android:textSize="11sp" android:shadowColor="#99000000" android:shadowRadius="3" android:maxLines="1" />
 </LinearLayout>

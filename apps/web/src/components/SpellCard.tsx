@@ -4,6 +4,7 @@ import type { Word } from '../lib/content'
 import { diffLetters, judgeSpell, type SpellResult } from '../lib/spell'
 import { play, type Accent } from '../lib/tts'
 import { PlayButton } from './PlayButton'
+import { Explain, ask } from './Explain'
 
 export function SpellCard({ word, accent, onResult }: { word: Word; accent: Accent; onResult: (r: SpellResult) => void }) {
   const [v, setV] = useState('')
@@ -28,9 +29,10 @@ export function SpellCard({ word, accent, onResult }: { word: Word; accent: Acce
       {!res && <button className="btn primary block" disabled={!v.trim()} onClick={submit}>提交</button>}
       {res && (
         <div className="spell-res">
-          <p className="spell-verdict">{res === 'right' ? '拼对了' : res === 'close' ? '差一个字母' : '再记一下'}</p>
+          <p className={`spell-verdict ${res === 'right' ? 'got-right' : 'got-wrong'}`}>{res === 'right' ? '拼对了' : res === 'close' ? '差一个字母' : '再记一下'}</p>
           {res !== 'right' && <p className="spell-diff en">{diffLetters(word.w, v).map((m, i) => <span key={i} className={m.k}>{m.c}</span>)}</p>}
           <p><b className="en spell-answer">{word.w}</b>{word.ipa && <span className="faint"> /{word.ipa}/</span>}</p>
+          {res !== 'right' && <Explain prompt={() => ask.spell(word.w, word.zh, word.ipa, v)} />}
         </div>
       )}
     </div>

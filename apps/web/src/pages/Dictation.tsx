@@ -8,6 +8,7 @@ import { loadContent, type Word } from '../lib/content'
 import { canSpell, type SpellResult } from '../lib/spell'
 import { grade, Rating } from '../lib/srs'
 import { markDay } from '../lib/lesson'
+import { hit, loadSfx, newTally, sfx } from '../lib/feedback'
 
 const N = 10
 
@@ -27,7 +28,8 @@ export function Dictation({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0)
   const [res, setRes] = useState<Record<number, SpellResult>>({})
   const [t0] = useState(performance.now())
-  useEffect(() => { pickDictation().then(setWords) }, [])
+  const [tally] = useState(newTally)
+  useEffect(() => { pickDictation().then(setWords); loadSfx() }, [])
   useEffect(() => () => { markDay({ seconds: (performance.now() - t0) / 1000 }) }, [])
   if (!words || !profile) return <Overlay title="听写" onClose={onClose}><div className="loading">…</div></Overlay>
   if (words.length < 3) return (
@@ -50,6 +52,7 @@ export function Dictation({ onClose }: { onClose: () => void }) {
       ) : (
         <SpellCard key={i} word={words[i]} accent={profile.accent} onResult={async (r) => {
           setRes((x) => ({ ...x, [i]: r }))
+          sfx(hit(tally, r === 'right'))
           await grade(words[i].w, (r === 'right' ? Rating.Good : r === 'close' ? Rating.Hard : Rating.Again) as any)
         }} />
       )}

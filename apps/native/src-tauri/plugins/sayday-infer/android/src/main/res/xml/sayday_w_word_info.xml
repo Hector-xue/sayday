@@ -11,5 +11,6 @@
     android:updatePeriodMillis="3600000"
     android:initialLayout="@layout/sayday_w_word"
     android:previewLayout="@layout/sayday_w_word"
+    android:previewImage="@drawable/sayday_preview_word"
     android:description="@string/sayday_w_word_desc"
     android:widgetCategory="home_screen" />

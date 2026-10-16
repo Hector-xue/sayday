@@ -15,6 +15,11 @@ import type { Sentence } from '../lib/content'
 import { SpellCard } from '../components/SpellCard'
 import { getClips, markWord, type Clip } from '../lib/clips'
 import { Tappable } from '../components/Tappable'
+import { hit, loadSfx, newTally, sfx, summary, verdict, type Tally } from '../lib/feedback'
+import { Explain, ask } from '../components/Explain'
+import { Celebrate } from '../components/Celebrate'
+import { nextMilestone, type Milestone } from '../lib/milestones'
+import { useCountUp } from '../components/motion'
 
 function Example({ s, word, showZh = true }: { s?: Sentence; word: string; showZh?: boolean }) {
   if (!s) return null
@@ -41,6 +46,12 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   const clipOf = (w: string) => clips[w] && <SeenOnWeb c={clips[w]} word={w} />
   const stepStart = useRef(performance.now())
   const accent = profile!.accent
+  // 做题手感：对错计数、连对、结算（见 lib/feedback.ts）
+  const tally = useRef<Tally>(newTally())
+  const [combo, setCombo] = useState(0)
+  const record = (ok: boolean) => { sfx(hit(tally.current, ok)); setCombo(tally.current.combo) }
+  const settled = useRef<Promise<void> | null>(null)
+  useEffect(() => { loadSfx() }, [])
 
   useEffect(() => {
     buildSession(profile!, minimum, comeback).then((s) => {
@@ -62,25 +73,31 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   }, [i, step])
 
   if (!steps) return <div className="session"><div className="loading">排今天的内容…</div></div>
-  const finish = async () => {
+  // 记今天“做完了没”：结算页出来时记一次，中途关掉时也记（只记一次）
+  const settle = () => settled.current ??= (async () => {
     // 保底：至少做完一步才算今天“做了”；一步没做就关掉不记
     if ((minimum || comeback) && doneSteps.current > 0) await markDay({ minimum: true, done: true })
     if (!minimum && !comeback && doneSteps.current > 0) {
       const rest = await buildSession(profile!, false)
       if (!rest.length) await markDay({ done: true })
     }
+  })()
+  const finish = async () => {
+    await settle()
     refresh()
     onClose()
   }
   const next = (completed = true) => { if (completed) doneSteps.current++; setI(i + 1 < steps.length ? i + 1 : steps.length) }
 
-  if (!step) return (
+  if (!step) return steps.length
+    ? <Result steps={steps} tally={tally.current} seconds={(performance.now() - started.current) / 1000} settle={settle} onDone={finish} />
+    : (
     <div className="session">
       <div className="session-body" style={{ justifyContent: 'center', textAlign: 'center' }}>
         <div className="fade-in">
-          <div className="done-mark" aria-hidden>{steps.length ? <Icon.sprout /> : <Icon.cup />}</div>
-          <h2 style={{ margin: '12px 0 8px' }}>{steps.length ? '这一组完成了' : '今天的量已经做完了'}</h2>
-          <p className="muted">{steps.length ? [['review', '复习'], ['spell', '拼写'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((s) => s.kind === k)).map(([k, t]) => `${t} ${steps.filter((s) => s.kind === k).length}`).join(' · ') : '明天到期的词会自动排好。'}</p>
+          <div className="done-mark" aria-hidden><Icon.cup /></div>
+          <h2 style={{ margin: '12px 0 8px' }}>今天的量已经做完了</h2>
+          <p className="muted">明天到期的词会自动排好。</p>
         </div>
       </div>
       <div className="session-foot"><button className="btn primary block" onClick={finish}>好的</button></div>
@@ -90,12 +107,13 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   const doGrade = async (r: Rating) => {
     if (step.kind !== 'review') return
     await grade(step.word.w, r as any, Math.round(performance.now() - stepStart.current))
+    record(r !== Rating.Again)
     next()
   }
   const learn = async (known: boolean) => {
     if (step.kind !== 'learn') return
     await addCard(step.word.w, known)
-    if (!known) await markDay({ new_words: 1 })
+    if (!known) { await markDay({ new_words: 1 }); tally.current.learned.push(step.word.w) }
     next()
   }
 
@@ -104,6 +122,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
       <div className="session-top">
         <button className="icon-btn" onClick={finish} aria-label="结束"><Icon.close /></button>
         <div className="bar"><i style={{ width: `${(i / steps.length) * 100}%` }} /></div>
+        {combo >= 3 && <span className="combo" key={combo}>连对 {combo}</span>}
         <span className="small muted">{i + 1}/{steps.length}</span>
       </div>
 
@@ -133,6 +152,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
           <div className="fade-in">
             <p className="step-kind">复习 · 听音写词</p>
             <SpellCard key={i} word={step.word} accent={accent} onResult={async (r) => {
+              record(r === 'right')
               await grade(step.word.w, (r === 'right' ? Rating.Good : r === 'close' ? Rating.Hard : Rating.Again) as any, Math.round(performance.now() - stepStart.current))
               setScored(true)
             }} />
@@ -161,6 +181,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         }} />}
 
         {step.kind === 'listen' && <Listen key={step.sentence.id} step={step} accent={accent} onAnswer={async (ok) => {
+          record(ok)
           await saveListen(step.sentence.id, step.sentence.hard, step.sentence.cefr, ok)
           setScored(true)
         }} />}
@@ -181,7 +202,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
                 await reviewLine(step.line.ref, r.score)
                 if (r.score >= LINE_PASS) linePassed.current.add(i)
               }
-              if (!scored) { await markDay({ shadows: 1 }); setScored(true) }
+              if (!scored) { tally.current.shadow.push(r.score); record(r.score >= LINE_PASS); await markDay({ shadows: 1 }); setScored(true) }
             }} />
           </div>
         )}
@@ -239,7 +260,7 @@ function Listen({ step, accent, onAnswer }: { step: Extract<Step, { kind: 'liste
         {step.options.map((o, k) => {
           const state = pick === null ? '' : k === step.answer ? 'right' : k === pick ? 'wrong' : 'dim'
           return (
-            <button key={k} className={`opt ${state}`} disabled={pick !== null} onClick={() => { setPick(k); onAnswer(k === step.answer) }}>
+            <button key={k} className={`opt ${state}${pick === k ? (k === step.answer ? ' got-right' : ' got-wrong') : ''}`} disabled={pick !== null} onClick={() => { setPick(k); onAnswer(k === step.answer) }}>
               <b style={{ fontWeight: 500 }}>{o}</b>
             </button>
           )
@@ -249,6 +270,7 @@ function Listen({ step, accent, onAnswer }: { step: Extract<Step, { kind: 'liste
         <div className="example fade-in" style={{ marginTop: 16 }}>
           <p className="small muted">{pick === step.answer ? '答对了。原句：' : '原句是：'}</p>
           <p className="en"><Tappable text={s.en} /></p>
+          {pick !== step.answer && <Explain prompt={() => ask.listen(s.en, s.zh, step.options, step.answer, pick)} />}
         </div>
       )}
     </div>
@@ -294,6 +316,44 @@ function SeenOnWeb({ c, word }: { c: Clip; word: string }) {
     <div className="seen-web">
       <span className="small muted">你在网上见过它{c.title ? ` · ${c.title.slice(0, 24)}` : ''}</span>
       <p className="en">{a}{w && <mark>{w}</mark>}{b}</p>
+    </div>
+  )
+}
+
+/** 一组做完的结算：用时、正确率、最长连对、新学的词、跟读分；有新里程碑就接着弹庆祝页 */
+function Result({ steps, tally, seconds, settle, onDone }: { steps: Step[]; tally: Tally; seconds: number; settle: () => Promise<void>; onDone: () => void }) {
+  const [m, setM] = useState<Milestone | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+  const [s] = useState(() => summary(tally, seconds))
+  const acc = useCountUp(s.accuracy ?? 0, 800)
+  useEffect(() => {
+    sfx('finish')
+    settle().then(() => nextMilestone()).then(setM).catch(() => {})
+  }, [])
+  const kinds = [['review', '复习'], ['spell', '拼写'], ['learn', '新词'], ['listen', '听力'], ['shadow', '跟读']].filter(([k]) => steps.some((x) => x.kind === k)).map(([k, t]) => `${t} ${steps.filter((x) => x.kind === k).length}`).join(' · ')
+  if (celebrate && m) return <Celebrate m={m} onClose={onDone} />
+  return (
+    <div className="session">
+      <div className="session-body result">
+        <div className="fade-in">
+          <div className="done-mark" aria-hidden><Icon.sprout /></div>
+          <h2>{verdict(s)}</h2>
+          <p className="small muted">{kinds}</p>
+          <div className="result-tiles">
+            <div><b>{s.minutes}<small>分钟</small></b><span>用时</span></div>
+            <div><b>{s.accuracy === null ? '—' : <>{acc}<small>%</small></>}</b><span>正确率</span></div>
+            <div><b>{s.best}</b><span>最长连对</span></div>
+          </div>
+          {s.shadowAvg !== null && <p className="small muted" style={{ marginTop: 14 }}>跟读平均 {s.shadowAvg} 分{s.shadowBest! > s.shadowAvg ? ` · 最好 ${s.shadowBest} 分` : ''}</p>}
+          {s.learned.length > 0 && (
+            <>
+              <p className="small muted" style={{ marginTop: 18 }}>新学了 {s.learned.length} 个词</p>
+              <div className="result-words">{s.learned.map((w) => <span key={w}>{w}</span>)}</div>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="session-foot"><button className="btn primary block" onClick={() => (m ? setCelebrate(true) : onDone())}>{m ? '继续' : '好的'}</button></div>
     </div>
   )
 }

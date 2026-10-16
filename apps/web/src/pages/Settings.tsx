@@ -20,6 +20,7 @@ import { TOPICS, getInterests, setInterests } from '../lib/interests'
 import { SyncRows } from '../components/SyncRow'
 import { exportBackup, importBackup } from '../lib/backup'
 import { enableQuiz, getQuizCfg, testQuiz, type QuizCfg } from '../lib/quiz'
+import { loadSfx, setSfx, sfx } from '../lib/feedback'
 
 export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'place') => void; onAi: () => void; onBack: () => void }) {
   const { profile, setProfile, theme, setTheme, style, setStyle, speed, setSpeed, textSize, setTextSize, toast } = useApp()
@@ -32,6 +33,8 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
   const [sys, setSys] = useState<SystemStatus | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [quiz, setQuiz] = useState<QuizCfg | null>(null)
+  const [snd, setSnd] = useState(true)
+  useEffect(() => { loadSfx().then(setSnd) }, [])
   useEffect(() => { getQuizCfg().then(setQuiz) }, [])
   const saveQuiz = async (q: QuizCfg) => { try { const e = await enableQuiz(q); if (e) { toast(e); return } setQuiz(q); if (q.on) toast('开了：每天 ' + String(q.hour).padStart(2, '0') + ':' + String(q.minute).padStart(2, '0') + ' 在通知里弹 3 道题') } catch (e) { toast('没开成：' + ((e as Error).message || e)) } }
   useEffect(() => { getInterests().then(setTags) }, [])
@@ -114,6 +117,10 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
           <div className="k"><b>示范语速</b><span>{speed < 1 ? '放慢一点，听清每个音' : speed > 1 ? '快一点，接近真实语速' : '正常语速'}</span></div>
           <div className="seg">{SPEEDS.map((s) => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s === 1 ? '1×' : `${s}×`}</button>)}</div>
         </div>
+        <div className="set-row">
+          <div className="k"><b>答题音效</b><span>答对、答错、连对和做完一组时的提示音</span></div>
+          <div className="seg"><button aria-pressed={snd} onClick={async () => { await setSfx(true); setSnd(true); sfx('right') }}>开</button><button aria-pressed={!snd} onClick={async () => { await setSfx(false); setSnd(false) }}>关</button></div>
+        </div>
         <div className="set-row interests">
           <div className="k"><b>兴趣</b><span>{tags.length ? '每日听力和跟读的例句多从这些话题里挑' : '选几个，例句多挑你感兴趣的话题；不选就随机'}</span></div>
           <div className="chips">{TOPICS.map((t) => <button key={t.id} className="chip" aria-pressed={tags.includes(t.id)} onClick={async () => { const n = tags.includes(t.id) ? tags.filter((x) => x !== t.id) : [...tags, t.id]; setTags(n); await setInterests(n) }}>{t.zh}</button>)}</div>
@@ -123,7 +130,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
 
       <p className="section-title">AI</p>
       <div className="list">
-        <div className="set-row"><div className="k"><b>你自己的 AI</b><span>{ai ? `${providerOf(ai.provider).name} · ${ai.model} · 用在 Emma 聊天、日记、写作和口语批改、工作英语（入口在今天页“AI 陪练”）` : '陪练聊天、日记批改、写作和口语评分要用。DeepSeek、通义、Kimi 等都行'}</span></div><button className="btn small quiet" onClick={onAi}>{ai ? '修改' : '接入'}</button></div>
+        <div className="set-row"><div className="k"><b>你自己的 AI</b><span>{ai ? `${providerOf(ai.provider).name} · ${ai.model} · 用在 Emma 聊天、日记、写作和口语批改、工作英语（入口在今天页“AI 陪练”），以及做错题时的“问 AI 为什么”` : '陪练聊天、日记批改、写作和口语评分、错题讲解要用。DeepSeek、通义、Kimi 等都行'}</span></div><button className="btn small quiet" onClick={onAi}>{ai ? '修改' : '接入'}</button></div>
       </div>
 
       <p className="section-title">提醒与小组件</p>
@@ -222,7 +229,7 @@ export function Settings({ onRedo, onAi, onBack }: { onRedo: (what: 'goal' | 'pl
             <ul>
               <li>下载示范音频、语音识别模型（只下载，不上传任何东西）</li>
               <li>检查新版本（只读取版本号）</li>
-              <li>你自己接入 AI 后，陪练聊天、日记和写作批改、口语模考评分会把文字发给你选的 AI 服务商（口语发的是本机转写出的文字，不是录音）</li>
+              <li>你自己接入 AI 后，陪练聊天、日记和写作批改、口语模考评分、错题讲解（点了“问 AI 为什么”才发）会把文字发给你选的 AI 服务商（口语发的是本机转写出的文字，不是录音）</li>
             </ul>
           </div>
         )}
