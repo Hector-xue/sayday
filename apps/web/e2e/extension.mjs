@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer-core'
 import http from 'node:http'
 import { mkdtempSync, rmSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { expect, done } from './check.mjs'
 
 const [BASE, OUT, EXT0] = process.argv.slice(2)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -42,7 +43,7 @@ try {
   await w.mouse.click(box.x, box.y, { clickCount: 2 })
   await sleep(1200)
   const card = await w.evaluate(() => { const h = [...document.documentElement.children].find((x) => x.shadowRoot); return h ? h.shadowRoot.querySelector('.c').innerText.replace(/\s+/g, ' ') : null })
-  log('网页上弹的卡片', card)
+  expect(card?.startsWith('flood') && card.includes('洪水'), '网页上双击 flooded 弹出原形 flood 的释义卡', card)
   await w.screenshot({ path: join(OUT, 'ext-1-card.png') })
   await w.evaluate(() => [...document.documentElement.children].find((x) => x.shadowRoot).shadowRoot.querySelector('button').click())
   await sleep(500)
@@ -54,7 +55,9 @@ try {
   await pop.click('#export')
   for (let k = 0; k < 50 && !readdirSync(dl).some((f) => f.endsWith('.json')); k++) await sleep(200)
   const file = readdirSync(dl).find((f) => f.endsWith('.json'))
-  log('插件弹窗', await pop.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')), '导出的文件', file)
+  const popText = await pop.evaluate(() => document.body.innerText.replace(/\s+/g, ' '))
+  expect(popText.includes('The river flooded the old town.'), '插件弹窗里有收的词和原句', popText)
+  expect(Boolean(file), '导出了文件', file)
   await pop.setViewport({ width: 340, height: 520 }); await pop.screenshot({ path: join(OUT, 'ext-2-popup.png') })
 
   // 回到 App：设置 → 导入备份 选这个文件 → 词库里有 flood，开一组复习能看到原句
@@ -62,16 +65,20 @@ try {
   const nav = p.waitForNavigation({ timeout: 20000 }).catch(() => null)
   await (await p.$('input[type=file][accept*="json"]')).uploadFile(join(dl, file))
   await p.waitForFunction(() => document.querySelector('.toast')?.textContent.includes('收进'), { timeout: 20000 })
-  log('导入', await p.evaluate(() => document.querySelector('.toast').textContent))
+  const toast = await p.evaluate(() => document.querySelector('.toast').textContent)
+  expect(toast.includes('收进 1 个词'), 'App 导入后提示收进 1 个词', toast)
   await nav; await p.waitForFunction(() => document.body.innerText.includes('今日练习'), { timeout: 30000 })
   await click(p, '词库', '.tab'); await sleep(600)
-  log('App 词库', (await p.evaluate(() => document.body.innerText.replace(/\s+/g, ' '))).match(/学习中 \d+/)?.[0])
+  const learning = (await p.evaluate(() => document.body.innerText.replace(/\s+/g, ' '))).match(/学习中 (\d+)/)
+  expect(Number(learning?.[1]) >= 1, '词库里“学习中”有这个词', learning?.[0])
   await click(p, '今天', '.tab'); await sleep(500); await click(p, '开始'); await sleep(1500)
   for (let k = 0; k < 12; k++) { if (await p.$('.seen-web')) break; const kind = await p.evaluate(() => document.querySelector('.session .step-kind')?.textContent ?? ''); if (kind.startsWith('复习')) break; await p.evaluate(() => [...document.querySelectorAll('.session-foot button')].find((x) => /记下了|下一/.test(x.textContent))?.click()); await sleep(400) }
-  log('复习时', await p.evaluate(() => (document.querySelector('.seen-web')?.innerText ?? document.querySelector('.session .step-kind')?.textContent ?? '').replace(/\s+/g, ' ')))
+  const review = await p.evaluate(() => (document.querySelector('.seen-web')?.innerText ?? document.querySelector('.session .step-kind')?.textContent ?? '').replace(/\s+/g, ' '))
+  expect(review.includes('Morning news') && review.includes('The river flooded the old town.'), '复习时带上网页标题和原句', review)
   await p.screenshot({ path: join(OUT, 'ext-3-review.png') })
   await app.close(); await b.close()
 } finally {
   page.close()
   for (const d of dirs) rmSync(d, { recursive: true, force: true })
 }
+done()

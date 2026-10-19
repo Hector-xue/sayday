@@ -27,10 +27,10 @@ if not r:
 apk = next((a for a in r["assets"] if a["name"].endswith(".apk")), None)
 if not apk:
     sys.exit("最新 Release 没有 apk")
-print("\t".join([r["tag_name"], apk["name"], apk["url"], str(apk["size"]), apk["browser_download_url"], r.get("published_at") or "", str(r.get("prerelease", False)).lower()]))
+print("\t".join([r["tag_name"], apk["name"], apk["url"], str(apk["size"]), apk["browser_download_url"], r.get("published_at") or "", str(r.get("prerelease", False)).lower(), r["html_url"]]))
 json.dump(r.get("body") or "", open(sys.argv[1] + ".notes", "w"), ensure_ascii=False)
 PY
-IFS=$'\t' read -r tag name url size gh_url published pre < "$tmp/plan"
+IFS=$'\t' read -r tag name url size gh_url published pre release_url < "$tmp/plan"
 version="${tag#v}"
 
 current=$(python3 -c "import json; print(json.load(open('$DEST/version.json'))['version'])" 2>/dev/null || true)
@@ -46,13 +46,15 @@ sha=$(sha256sum "$tmp/$FIXED" | cut -d' ' -f1)
 mv -f "$tmp/$FIXED" "$DEST/$FIXED"
 chmod a+r "$DEST/$FIXED"
 
-python3 - "$version" "$tag" "$published" "$pre" "$gh_url" "$MIRROR_BASE/$FIXED" "$sha" "$size" "$tmp/list.json.notes" > "$DEST/version.json.tmp" <<'PY'
+python3 - "$version" "$tag" "$published" "$pre" "$gh_url" "$MIRROR_BASE/$FIXED" "$sha" "$size" "$tmp/list.json.notes" "$release_url" > "$DEST/version.json.tmp" <<'PY'
 import json, sys
-version, tag, published, pre, gh, mirror, sha, size, notes = sys.argv[1:]
+version, tag, published, pre, gh, mirror, sha, size, notes, release_url = sys.argv[1:]
 print(json.dumps({
     "version": version, "tag": tag, "published_at": published, "prerelease": pre == "true",
     "notes": json.load(open(notes))[:3000],
     "android_arm64_url": gh, "android_arm64_sha256": sha, "android_arm64_size": int(size),
+    # 电脑版 / 浏览器插件按钮直达这一版的 Release 页（releases/latest 不含预发布，列表最上面也可能是模型、音频备份）
+    "release_url": release_url,
     "mirror": {"android_arm64_url": mirror},
     "page": "https://sayday.ivyea.com/",
 }, ensure_ascii=False, indent=2))

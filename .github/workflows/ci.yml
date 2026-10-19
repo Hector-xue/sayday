@@ -1,0 +1,97 @@
+# 每个 PR、每次推 main：类型检查 + 单元测试（网页 / MCP / 机器人 / 同步服务）+ 端到端（做题手感、面对面同步、浏览器插件）。
+# 端到端脚本里有断言，任何一项不对退出码为 1；失败时截图挂在 artifact 上。
+# 浏览器插件那项要用 Chrome for Testing（正式版 Chrome 137 起自动化里不让装未打包插件），本机跑不了，所以放在这里跑。
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载音素模型
+        env:
+          MODEL_URL: https://github.com/Hector-xue/sayday/releases/download/model-phone-ftall/phone_ctc.ftall.int8.onnx
+          MODEL_SHA256: fb7686d1a479ddc0da84bd1dd5bc87d8f212dd83e8bc41190b7c471b8c89d849
+        run: |
+          mkdir -p .cache/models
+          curl -sSfL --retry 3 -o .cache/models/phone_ctc.int8.onnx "$MODEL_URL"
+          python3 -c "import hashlib,sys; h=hashlib.sha256(open('.cache/models/phone_ctc.int8.onnx','rb').read()).hexdigest(); sys.exit(0 if h==sys.argv[1] else 'sha256 不对：'+h)" "$MODEL_SHA256"
+          curl -sSfL --retry 3 -o .cache/models/charsiu_vocab.json https://huggingface.co/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            packages/agent/package-lock.json
+            packages/bot/package-lock.json
+
+      - name: 网页：类型检查 + 单元测试 + 构建
+        working-directory: apps/web
+        run: |
+          npm ci --no-audit --no-fund
+          bash ../../scripts/prepare-web-assets.sh
+          npx tsc --noEmit
+          npx vitest run
+          npx vite build
+
+      - name: MCP / Skill（packages/agent）
+        working-directory: packages/agent
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: 机器人（packages/bot）
+        working-directory: packages/bot
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: 同步服务（packages/sync-server）
+        run: node --test packages/sync-server/server.test.mjs
+
+      - name: 端到端准备（Chrome for Testing、浏览器插件、本地站点）
+        id: prep
+        run: |
+          npx -y @puppeteer/browsers@2.10.5 install chrome@stable --path "$RUNNER_TEMP/cft" | tee "$RUNNER_TEMP/cft.txt"
+          echo "CFT=$(tail -1 "$RUNNER_TEMP/cft.txt" | cut -d' ' -f2-)" >> "$GITHUB_ENV"
+          bash scripts/build-extension.sh
+          mkdir -p "$RUNNER_TEMP/e2e"
+          cd apps/web
+          nohup npx vite preview --host 127.0.0.1 --port 5391 --strictPort > "$RUNNER_TEMP/preview.log" 2>&1 &
+          for i in $(seq 30); do curl -sf http://127.0.0.1:5391/ >/dev/null && break; sleep 1; done
+          curl -sf http://127.0.0.1:5391/ >/dev/null
+
+      - name: 端到端：做题手感（音效 / 连对 / 结算 / 问 AI / 里程碑）
+        working-directory: apps/web
+        run: node e2e/feedback.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e"
+
+      - name: 端到端：面对面同步
+        if: ${{ !cancelled() && steps.prep.outcome == 'success' }}
+        working-directory: apps/web
+        run: node e2e/lan.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e"
+
+      - name: 端到端：浏览器插件收词 → App 导入
+        if: ${{ !cancelled() && steps.prep.outcome == 'success' }}
+        working-directory: apps/web
+        run: node e2e/extension.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e" "$GITHUB_WORKSPACE/dist/extension"
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-screenshots
+          path: ${{ runner.temp }}/e2e/*.png
+          retention-days: 7

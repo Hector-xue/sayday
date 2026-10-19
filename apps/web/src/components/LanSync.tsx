@@ -141,7 +141,7 @@ export function LanJoin({ fresh, onDone }: { fresh?: boolean; onDone: (r: LanRes
 }
 
 export function lanResultText(r: LanResult) {
-  return r.changed ? `合好了：两台设备的学习记录已经合到一起（这台更新了 ${r.changed} 处）` : '合好了：两边本来就一样'
+  return r.changed ? `合好了：两台设备的学习记录已经合到一起（这台更新了 ${r.changed} 处）` : '合好了：这台已经是最新的'
 }
 
 /** 设置里打开的整页：选出码还是扫码 → 交换 → 结果 */
