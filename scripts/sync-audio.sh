@@ -5,6 +5,7 @@
 #       ONLY=add scripts/sync-audio.sh <run_id>   增量（content-audio incremental=true 的产物）：新文件加进 s/ w/ e/，线上已有的一个不删
 # 每次发布后重写 audio/have.txt（线上已有清单，增量合成靠它跳过）
 # 先下到临时目录、校验每片都有清单，再换上（发布中途不会出现半套）
+# 发布完跑 scripts/backup-audio.sh backup，把新音频包备份到 Release audio-pack（CI 产物 3 天就过期）
 set -euo pipefail
 RUN=${1:?run id}
 DEST=${DEST:-/var/www/sayday.ivyea.com/audio}

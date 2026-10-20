@@ -6,6 +6,7 @@
 // 用法: node e2e/feedback.mjs <站点URL> <输出目录>
 import puppeteer from 'puppeteer-core'
 import { startMockAi } from './mock-ai.mjs'
+import { expect, done } from './check.mjs'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -16,7 +17,7 @@ const dir = mkdtempSync(join(OUT, 'chrome-fb-'))
 const mock = startMockAi(5392)
 const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: true, userDataDir: dir, args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] })
 const errors = []
-const seen = { combo: 0, explain: [], results: [] }
+const seen = { combo: 0, explain: [], results: [], celebrate: '' }
 try {
   const p = await b.newPage()
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
@@ -95,7 +96,8 @@ try {
     await sleep(800)
     if (await p.$('.celebrate')) {
       await sleep(1500)
-      log(`第 ${day} 天庆祝页`, await p.evaluate(() => document.querySelector('.celebrate').innerText.replace(/\s+/g, ' ')))
+      seen.celebrate = await p.evaluate(() => document.querySelector('.celebrate').innerText.replace(/\s+/g, ' '))
+      log(`第 ${day} 天庆祝页`, seen.celebrate)
       await p.screenshot({ path: join(OUT, `fb-celebrate-${day}.png`) })
       await clickText('存成图片'); await sleep(1500)
       log('存图后提示', await p.evaluate(() => document.querySelector('.toast')?.textContent ?? '（无提示，走了下载）'))
@@ -111,17 +113,25 @@ try {
       await p.goto(BASE, { waitUntil: 'networkidle0' })
       await p.waitForFunction(() => document.body.innerText.includes('今日练习'), { timeout: 30000 })
     }
-    log(`第 ${day} 天`, await session(day))
+    const r = await session(day)
+    log(`第 ${day} 天`, r)
+    expect(day < 3 ? r === 'ok' : r === 'celebrated', `第 ${day} 天${day < 3 ? '正常做完一组' : '做完弹里程碑庆祝'}`, r)
   }
   // 设置里的答题音效开关
   await p.click('[aria-label="设置"]'); await sleep(500)
-  log('设置', await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.textContent.includes('答题音效'))?.innerText.replace(/\s+/g, ' ')))
+  const sfx = await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.textContent.includes('答题音效'))?.innerText.replace(/\s+/g, ' ') ?? '')
+  expect(sfx.includes('答题音效'), '设置里有答题音效开关', sfx)
   log('最高连对徽章', seen.combo)
   for (const r of seen.results) log('结算', r)
   for (const e of seen.explain) log('讲解', e)
-  log('页面错误', JSON.stringify(errors))
+  expect(seen.celebrate.includes('练了 3 天'), '第 3 天的里程碑是“练了 3 天”', seen.celebrate)
+  expect(seen.combo >= 3, '复习连对 3 题以上出连对徽章', seen.combo)
+  expect(seen.results.length === 3 && seen.results.every((r) => /正确率/.test(r) && /最长连对/.test(r) && /用时/.test(r)), '每天做完都有结算页（用时 / 正确率 / 最长连对）', seen.results.length)
+  expect(seen.explain.some((e) => e.startsWith('听力') && e.includes('OK')), '听力选错能问 AI，出讲解', seen.explain)
+  expect(errors.length === 0, '页面没有报错', errors)
 } finally {
   await b.close()
   mock.close()
   rmSync(dir, { recursive: true, force: true })
 }
+done()

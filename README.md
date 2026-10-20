@@ -4,7 +4,7 @@
 
 一个让人能坚持下去的英语学习软件：离线可用、AI 可插拔、带逐音素的发音纠正。网页和手机 App 共用一套代码。
 
-> 状态：**M2 进行中**（见 [docs/M2-进展.md](docs/M2-进展.md)）。已可用：定级与持续校准 → 每日一课（FSRS 复习 + 新词 + 听力 + 跟读打分）→ 原创剧集四季 40 集（A2→C1）→ 发音实验室（最小对立、口型图、语调曲线）→ 雅思听力 / 阅读整套练习（本机判分）、口语模考、写作批改 → 接入自己的 AI 后的陪练聊天与日记批改；安卓有每日提醒和桌面小组件。网页（PWA，离线可用）与安卓 App 共用一套界面。
+能做什么：定级与持续校准 → 每日一课（FSRS 复习 + 新词 + 听写 + 听力 + 跟读打分）→ 原创剧集四季（A2→C1，带分支）→ 发音实验室（最小对立、口型图、语调曲线）→ 雅思四项专练与全真模考 → 工作英语 → 接上你自己的 AI 后的陪练 Emma、日记和写作批改。
 
 <p>
 <img src="site/assets/shots/marker-today.webp" width="190" alt="今天">
@@ -14,6 +14,28 @@
 </p>
 
 三种界面风格（荧光笔 / 纸与墨 / 经典），各有深色版；发音打分用中国学习者录音微调过（[口音微调方案](docs/口音微调方案.md)）。
+
+## 开始用
+1. **装上**：在 [Release 页](https://github.com/Hector-xue/sayday/releases)（或 [sayday.ivyea.com](https://sayday.ivyea.com/#download)）下载
+   - 安卓：`sayday-v*-arm64.apk`，安装时允许“安装未知来源应用”
+   - 电脑：Windows `.exe`、macOS `.dmg`、Linux `.AppImage` / `.deb`
+   - 浏览器划词插件（Chrome / Edge）：`sayday-extension-v*.zip` 解压，扩展程序 → 开发者模式 → 加载已解压的扩展程序
+2. **定级**：打开后选目标、每天多少时间，做约 3 分钟词汇小测，当天就能开始练。不接 AI 也能用：复习、跟读打分、词典、剧集、雅思听力和阅读都在本机完成。
+3. **接 AI（可选）**：今天页“接入你自己的 AI”（或 设置 → 你自己的 AI → 接入），选服务商、粘贴 API Key、点连接。支持 DeepSeek、通义千问、Kimi、智谱 GLM、硅基流动、OpenAI、Claude、OpenRouter、本机 Ollama 和任意 OpenAI 兼容接口；密钥只存在你的设备上，App 直接连服务商。
+
+换设备：设置 → 面对面同步（两台连同一个 Wi-Fi，扫码直传，不经过服务器），或导出 / 导入备份文件。已装的 App 在 设置 → 关于 → 检查更新 里升级，学习记录都在。
+
+想让你在用的 AI 助手（Claude Code、Codex 等）也会教英语：见 [packages/agent](packages/agent/README.md)（MCP / Skill / HTTP）。聊天机器人、自建同步服务器都是自部署的，见 [docs/机器人.md](docs/机器人.md)。
+
+## 自己构建
+```bash
+scripts/fetch-phone-model.sh           # 音素打分模型（约 120MB，从 Release 下载并校验）
+cd apps/web && npm ci
+bash ../../scripts/prepare-web-assets.sh
+npm run dev                            # 开发；npm run build 出网页版（PWA，dist/ 可直接静态托管）
+npx vitest run                         # 单元测试；e2e/ 下是端到端脚本（CI 每个 PR 都跑，见 .github/workflows/ci.yml）
+```
+安卓包、桌面版都在 GitHub Actions 里构建（`android.yml`、`desktop.yml`），打 `v*` 标签自动发到 Release。
 
 ## 设计原则
 - **门槛降到最低**：每天保底 2 分钟就算学了；断签不惩罚。

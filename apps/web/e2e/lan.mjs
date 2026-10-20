@@ -8,6 +8,7 @@ import puppeteer from 'puppeteer-core'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import jsQR from 'jsqr'
+import { expect, done } from './check.mjs'
 
 const [BASE, OUT] = process.argv.slice(2)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -97,7 +98,8 @@ try {
     return btoa(bin)
   })
   const px = new Uint8ClampedArray(Buffer.from(qr, 'base64'))
-  log('二维码认出来', jsQR(px, 400, 400)?.data)
+  const qrData = jsQR(px, 400, 400)?.data
+  expect(qrData === `SAYDAY1;${s1.addr};47231;${s1.code.replace(/-/g, '')}`, '二维码内容是地址 + 配对码', qrData)
 
   const B = await device('b')
   await B.clickText('在别的设备上用过')
@@ -111,11 +113,13 @@ try {
   await nav
   await B.p.waitForFunction(() => document.body.innerText.includes('今日练习'), { timeout: 30000 })
   await A.p.waitForFunction(() => document.body.innerText.includes('合好了'), { timeout: 20000 })
-  log('A 出码后看到', await A.p.evaluate(() => document.querySelector('.lan-box').innerText.replace(/\s+/g, ' ')))
+  const aSaw = await A.p.evaluate(() => document.querySelector('.lan-box').innerText.replace(/\s+/g, ' '))
+  expect(aSaw.includes('合好了'), 'A 出码后看到“合好了”', aSaw)
   await A.shot('done')
   await A.clickText('好了')
   await B.settings()
-  log('B 接过来后的兴趣（应该是 A 选的美食）', await B.interests())
+  const bi = await B.interests()
+  expect(bi.includes('美食'), 'B 新装接过来后有 A 选的兴趣“美食”', bi)
 
   // 2. B 加“旅行”；A 再出码，B 在设置里扫
   await B.clickText('旅行', '.chip'); await sleep(300)
@@ -124,13 +128,15 @@ try {
   await B.clickText('开始', '.set-row button'); await B.clickText('扫另一台的码', '.lan-pick')
   await typeIn(B, s2)
   await B.p.waitForFunction(() => document.body.innerText.includes('合好了'), { timeout: 20000 })
-  log('B 看到', await B.p.evaluate(() => document.querySelector('.lan-box').innerText.replace(/\s+/g, ' ')))
+  const bSaw = await B.p.evaluate(() => document.querySelector('.lan-box').innerText.replace(/\s+/g, ' '))
+  expect(bSaw.includes('这台已经是最新的'), 'B 只送出、没收到新东西：说“这台已经是最新的”', bSaw)
   await A.p.waitForFunction(() => document.body.innerText.includes('合好了'), { timeout: 20000 })
   const navA = A.p.waitForNavigation({ timeout: 30000 }).catch(() => null)
   await A.clickText('好了'); await navA
   await A.p.waitForFunction(() => document.body.innerText.includes('今日练习'), { timeout: 30000 })
   await A.settings()
-  log('A 同步回来的兴趣（应该有旅行）', await A.interests())
+  const ai = await A.interests()
+  expect(ai.includes('美食') && ai.includes('旅行'), 'A 同步回来 B 加的“旅行”，自己的“美食”还在', ai)
 
   // 配对码错
   const s3 = await hostOn(A)
@@ -140,10 +146,12 @@ try {
   await B.clickText('开始', '.set-row button'); await B.clickText('扫另一台的码', '.lan-pick')
   await typeIn(B, { addr: s3.addr, code: 'ZZZZ-ZZZZ-ZZ' })
   await B.p.waitForSelector('.lan-box .err-box', { timeout: 20000 })
-  log('配对码错', await B.p.evaluate(() => document.querySelector('.lan-box .err-box').textContent))
+  const wrong = await B.p.evaluate(() => document.querySelector('.lan-box .err-box').textContent)
+  expect(wrong.includes('配对码不对'), '配对码错时说“配对码不对”', wrong)
   await B.shot('wrong')
-  log('错误', JSON.stringify(errors))
+  expect(errors.length === 0, '页面没有报错', errors)
   await A.b.close(); await B.b.close()
 } finally {
   for (const d of dirs) rmSync(d, { recursive: true, force: true })
 }
+done()
