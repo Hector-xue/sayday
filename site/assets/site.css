@@ -78,6 +78,8 @@ button { font: inherit; color: inherit; }
 .btn.ghost small { font-size: 11px; font-weight: 600; color: var(--sun-ink); background: color-mix(in srgb, var(--sun) 30%, transparent); padding: 1px 6px; border-radius: 6px; }
 .btn.small { height: 36px; padding: 0 16px; border-radius: 999px; font-size: 14px; }
 .btn.dark { background: var(--navy); color: var(--bg); }
+.btn.small.biz { background: transparent; color: var(--ink); border-color: var(--hair); white-space: nowrap; }
+.btn.small.biz:hover { background: var(--surface-2); }
 
 /* 首屏 */
 .hero { max-width: 1120px; margin: 0 auto; padding: 56px max(16px, 4vw) 40px; display: grid; grid-template-columns: 1.08fr .92fr; gap: 40px; align-items: center; }
@@ -269,6 +271,8 @@ footer nav a:hover { color: var(--ink); }
   .dl-grid { grid-template-columns: 1fr 1fr; }
   .nav nav { display: none; }
   .gh-link { margin-left: auto; }
+  .biz { margin-left: auto; }
+  .biz + .gh-link { margin-left: 0; }
 }
 /* 手机 */
 @media (max-width: 560px) {
@@ -362,3 +366,6 @@ h1, h2 { font-weight: 800; }
 .shots figcaption b { color: var(--ink); margin-right: 6px; }
 @media (min-width: 1000px) { .shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px 20px; overflow: visible; margin: 40px 0 0; padding: 6px 0 0; } .shots figure { width: auto; } }
 @media (max-width: 560px) { .shots figure { width: 200px; } }
+
+/* 加了「帮公司接 AI」后极窄屏放不下：GitHub 图标让位（页脚还有 GitHub 链接） */
+@media (max-width: 420px) { .biz + .gh-link { display: none; } .btn.small.biz { padding: 0 12px; } }
