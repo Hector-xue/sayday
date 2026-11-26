@@ -46,10 +46,14 @@ interface Engine {
 
 // ---------------- 安卓：原生前台播放服务 ----------------
 
-/** 原生那边要完整地址：单词 / 拼读 / 例句都走公开的音频包（单词和拼读的文件名按单词转义） */
+/**
+ * 原生那边要完整地址：单词 / 拼读 / 例句 / 中文都走公开的音频包（单词和拼读的文件名按单词转义；中文不分口音，放 zh/）。
+ * lang 是音频包里没有这段时系统语音用什么语言念
+ */
 export function nativeSeg(s: Seg, accent: Accent): Record<string, unknown> {
   if (s.t === 'gap') return { t: 'gap', ms: s.ms }
   if (s.t === 'say') return { t: 'say', text: s.text, lang: s.lang === 'zh' ? 'zh-CN' : LANG[accent] }
+  if (s.kind === 'z') return { t: 'audio', url: `${PACK_PUBLIC}zh/${s.key}.mp3`, text: s.text, lang: 'zh-CN' }
   const url = `${PACK_PUBLIC}${accent}/${s.kind}/${s.kind === 's' ? s.key : encodeURIComponent(s.key)}.mp3`
   return { t: 'audio', url, text: s.text, lang: LANG[accent] }
 }
@@ -173,13 +177,16 @@ class WebEngine implements Engine {
       return
     }
     let url: string | null = null
-    const clip = seg.kind === 'w' ? { text: seg.text, word: seg.key } : seg.kind === 'p' ? { text: seg.text, spell: seg.key } : { text: seg.text, sentenceId: Number(seg.key) }
+    const zh = seg.kind === 'z'
+    const clip = seg.kind === 'w' ? { text: seg.text, word: seg.key } : seg.kind === 'p' ? { text: seg.text, spell: seg.key } : zh ? { text: seg.text, zh: seg.key } : { text: seg.text, sentenceId: Number(seg.key) }
     try { url = await getAudio(clip, this.o.accent) }
     catch (e) { if (!(e instanceof NoAudio)) throw e }
     if (my !== this.token) return
     const ok = url ? await this.playUrl(url, my) : false
-    // 没有这段音频（没联网、音频包里没有这个词）：系统语音顶上，总比没声音好
-    if (!ok && my === this.token) await speakLang(seg.text, LANG[this.o.accent], 0.9 * this.o.rate).catch((e) => { this.error = `“${seg.text.slice(0, 30)}”的音频没下载到，系统语音也没念出来：${(e as Error)?.message ?? e}` })
+    if (ok || my !== this.token) return
+    // 没有这段音频（没联网、音频包里没有这个词）：系统语音顶上，总比没声音好；浏览器没有中文语音就跳过中文、页面上说一声
+    if (zh && (this.noZh || !(await hasVoice('zh-CN')))) { this.noZh = true; return }
+    await speakLang(seg.text, zh ? 'zh-CN' : LANG[this.o.accent], (zh ? 1 : 0.9) * this.o.rate).catch((e) => { this.error = `“${seg.text.slice(0, 30)}”的音频没下载到，系统语音也没念出来：${(e as Error)?.message ?? e}` })
   }
 
   private async finishTrack(full: boolean) {
@@ -221,7 +228,7 @@ class WebEngine implements Engine {
     this.s = 0
     this.played = 0
     this.error = ''
-    this.noZh = !(await hasVoice('zh-CN'))
+    this.noZh = false
     this.status = tracks.length ? 'playing' : 'ended'
     this.run()
   }

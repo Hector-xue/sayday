@@ -461,17 +461,46 @@ class ListenService : MediaSessionService() {
     }
   }
 
-  /** 线性插值重采样到 24kHz（系统语音各家采样率不同：16k / 22.05k / 24k…） */
+  /**
+   * 重采样到 24kHz（系统语音各家采样率不同：16k / 22.05k / 44.1k / 48k…）。
+   * 用加汉宁窗的 sinc 低通插值：直接线性插值从 44.1k / 48k 往下降，高频会折回来变成刺耳的“电子音”和沙沙声。
+   * 核按 256 个小数相位预先算好，每个输出点只做乘加
+   */
   private fun resample(a: ShortArray, rate: Int): ShortArray {
     if (rate == SR || rate <= 0 || a.isEmpty()) return a
-    val n = (a.size.toLong() * SR / rate).toInt()
     val step = rate.toDouble() / SR
+    // 截止频率（相对输入的奈奎斯特）：往下降采样时压到输出的奈奎斯特以下，留 6% 过渡带
+    val fc = minOf(1.0, SR.toDouble() / rate) * 0.94
+    val half = Math.ceil(12 / fc).toInt()
+    val phases = 256
+    val taps = 2 * half
+    val kern = FloatArray(phases * taps)
+    for (p in 0 until phases) {
+      val frac = p.toDouble() / phases
+      var sum = 0.0
+      for (t in 0 until taps) {
+        val d = frac + half - 1 - t // 输出点到第 t 个输入点的距离（输入采样为单位）
+        val w = if (Math.abs(d) >= half) 0.0 else 0.5 + 0.5 * Math.cos(Math.PI * d / half)
+        val sinc = if (d == 0.0) fc else Math.sin(Math.PI * fc * d) / (Math.PI * d)
+        val v = sinc * w
+        kern[p * taps + t] = v.toFloat()
+        sum += v
+      }
+      // 每个相位归一化：直流增益为 1，不会忽大忽小
+      for (t in 0 until taps) kern[p * taps + t] = (kern[p * taps + t] / sum).toFloat()
+    }
+    val n = (a.size.toLong() * SR / rate).toInt()
     return ShortArray(n) { i ->
       val x = i * step
-      val j = x.toInt().coerceAtMost(a.size - 1)
-      val s0 = a[j].toInt()
-      val s1 = if (j + 1 < a.size) a[j + 1].toInt() else s0
-      (s0 + (s1 - s0) * (x - j)).toInt().toShort()
+      val j = Math.floor(x).toInt()
+      val p = ((x - j) * phases).toInt().coerceIn(0, phases - 1)
+      var acc = 0f
+      val base = j - half + 1
+      for (t in 0 until taps) {
+        val k = base + t
+        if (k >= 0 && k < a.size) acc += a[k] * kern[p * taps + t]
+      }
+      acc.coerceIn(-32768f, 32767f).toInt().toShort()
     }
   }
 

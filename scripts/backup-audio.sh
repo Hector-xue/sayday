@@ -27,7 +27,7 @@ check() {
 if [ "$MODE" = "backup" ]; then
   check "$DEST"
   # mp3 本来就压缩过，只打包不再压缩
-  tar -C "$DEST" -cf "$TMP/$NAME" us gb have.txt
+  tar -C "$DEST" -cf "$TMP/$NAME" us gb $( [ -d "$DEST/zh" ] && echo zh ) have.txt
   (cd "$TMP" && sha256sum "$NAME" > "$NAME.sha256")
   echo "打包 $(du -h "$TMP/$NAME" | cut -f1)"
   if ! gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then

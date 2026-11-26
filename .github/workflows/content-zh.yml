@@ -1,0 +1,95 @@
+# 听学的中文讲解（每个词的释义 + 例句译文，约 3 万句）：sherpa-onnx 合成成 mp3，24 片并行。中文不分口音，只合成一套。
+# 以前中文用手机自带的语音现念，各家引擎参差不齐（机械、电子音、偶尔像青蛙叫），所以和英文一样提前合成好。
+# 产物挂 artifact（保留 3 天），服务器用 ONLY=zh scripts/sync-audio.sh <run_id> 发布到 sayday.ivyea.com/audio/zh/。
+# 内容包变了（新词、新例句、释义整理规则 apps/web/src/lib/gloss.ts 改了）才需要重跑，勾上 incremental 只合成线上还没有的。
+name: content-zh
+
+on:
+  # 改了合成脚本的 PR：只跑一片、每片 3 句，试一下整条流程能不能走通
+  pull_request:
+    paths:
+      - content/audio/zh_items.mjs
+      - content/audio/build_zh.py
+      - apps/web/src/lib/gloss.ts
+      - .github/workflows/content-zh.yml
+  workflow_dispatch:
+    inputs:
+      incremental:
+        description: '只合成线上还没有的'
+        type: boolean
+        default: false
+      model:
+        description: '模型（sherpa-onnx tts-models 的包名）'
+        default: 'kokoro-multi-lang-v1_1'
+      sid:
+        description: '说话人编号'
+        default: '25'
+      limit:
+        description: '每片只合成前几句（试跑用，0 = 全部）'
+        default: '0'
+
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0]' || '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]') }}
+    env:
+      MODEL: ${{ inputs.model || 'kokoro-multi-lang-v1_1' }}
+      SID: ${{ inputs.sid || '25' }}
+      LIMIT: ${{ github.event_name == 'pull_request' && '3' || inputs.limit || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # zh_items.mjs 直接 import apps/web/src/lib/gloss.ts：要 Node 22.18 以上（默认就能去类型运行）
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: ffmpeg + sherpa-onnx
+        run: |
+          which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          pip install -q sherpa-onnx==2.0.3 numpy  # 本机试过的版本
+          python -c "import sherpa_onnx; print('sherpa-onnx', sherpa_onnx.__version__)"
+
+      - name: 模型缓存
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/zh-tts
+          key: zh-tts-${{ env.MODEL }}
+
+      - name: 下载模型
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .cache/zh-tts && cd .cache/zh-tts
+          B=https://github.com/k2-fsa/sherpa-onnx/releases/download
+          curl -sSfL --retry 3 "$B/tts-models/$MODEL.tar.bz2" | tar xj
+          case "$MODEL" in matcha*) curl -sSfL --retry 3 -o vocos-22khz-univ.onnx "$B/vocoder-models/vocos-22khz-univ.onnx";; esac
+          ls -la
+
+      - name: 合成
+        working-directory: content/audio
+        run: |
+          HAVE=""
+          if [ "${{ inputs.incremental }}" = "true" ]; then
+            curl -fsS https://sayday.ivyea.com/audio/have.txt -o have.txt
+            echo "线上已有中文 $(grep -c '^zh/' have.txt || true) 句"
+            HAVE="--have have.txt"
+          fi
+          node zh_items.mjs --shard ${{ matrix.shard }} --shards 24 --out items.json --limit $LIMIT $HAVE
+          python build_zh.py --items items.json --out out --shard ${{ matrix.shard }} --model "$GITHUB_WORKSPACE/.cache/zh-tts/$MODEL" --sid $SID
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zh-${{ matrix.shard }}
+          path: content/audio/out
+          retention-days: 3
+          compression-level: 0
