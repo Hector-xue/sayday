@@ -23,10 +23,12 @@ import { nudge, shouldNudge, unreadNudge, type Nudge } from '../lib/companion'
 import { vocabLevel } from '../lib/calibrate'
 import { nextMilestone, type Milestone } from '../lib/milestones'
 import { Celebrate } from '../components/Celebrate'
+import { todayHeard } from '../lib/listen'
+import { player, recallNow, syncHeard, type PlayState } from '../lib/listen-player'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking' | 'mock') => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts, onListen }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking' | 'mock') => void; onListen: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
@@ -51,6 +53,23 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
   const [emma, setEmma] = useState<Nudge | null>(null)
   const [support, setSupport] = useState<{ s: SupportState; show: boolean } | null>(null)
   const [supportOpen, setSupportOpen] = useState(false)
+  // 听学：在播的话显示讲到哪个词；没在播显示今天听了多久
+  const [hear, setHear] = useState<{ st: PlayState; word: string } | null>(null)
+  const [hearSec, setHearSec] = useState(0)
+  useEffect(() => {
+    let alive = true
+    const look = async () => {
+      const st = await player().state()
+      const n = st.status !== 'idle' ? await recallNow() : null
+      const word = n?.tracks[Math.min(st.index, n.tracks.length - 1)]?.word ?? st.word
+      if (alive) setHear({ st, word })
+    }
+    look()
+    // 原生服务在后台记的“听完的词”先收进来，再算今天听了多久
+    syncHeard().catch(() => 0).then(() => todayHeard()).then((h) => { if (alive) setHearSec(h.sec) }).catch(() => {})
+    const t = setInterval(look, 2000)
+    return () => { alive = false; clearInterval(t) }
+  }, [tick])
   useEffect(() => {
     if (profile) {
       // 隔了一周以上回来：先摊开积压的复习（每天不比平时多），再显示“欢迎回来”
@@ -159,6 +178,14 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts 
         <ModelPrefetchBar />
       </div>
       {(allDone || !!d.done) && <EggCard key={tick} />}
+
+      <button className="card ai-card hear-entry" style={{ marginTop: 12 }} onClick={onListen}>
+        <span className="ai-ico"><Icon.headphones /></span>
+        <span className="t">
+          <b>{hear && (hear.st.status === 'playing' || hear.st.status === 'paused' || hear.st.status === 'preparing') ? `${hear.st.status === 'paused' ? '暂停在' : '正在听'} · ${hear.word}` : '听学'}</b>
+          <span>{hear && hear.st.status !== 'idle' && hear.st.total ? `第 ${hear.st.index + 1}/${hear.st.total} 个词，点开切词、定时关闭` : hearSec >= 60 ? `今天听了 ${Math.round(hearSec / 60)} 分钟。通勤、做家务时戴上耳机接着听` : '戴上耳机像听歌一样：老师读单词、拼写、讲意思和例句'}</span>
+        </span>
+      </button>
 
       {fresh.length > 0 && (
         <div className="card ability-new">

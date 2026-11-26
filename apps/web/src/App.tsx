@@ -18,6 +18,7 @@ import { Practice } from './pages/Practice'
 import { Speaking } from './pages/Speaking'
 import { Work } from './pages/Work'
 import { Mock } from './pages/Mock'
+import { Listen } from './pages/Listen'
 
 type Tab = 'today' | 'episodes' | 'lab' | 'words' | 'progress' | 'settings'
 // 设置不占底栏：从“今天”和“进步”右上角的齿轮进
@@ -44,6 +45,7 @@ function Main() {
   const [openEp, setOpenEp] = useState<{ season: number; ep: number } | null>(null)
   const [after, setAfter] = useState<null | 'chat' | 'diary' | 'writing' | 'work'>(null)
   const [ielts, setIelts] = useState<null | 'reading' | 'listening' | 'speaking' | 'mock'>(null)
+  const [listen, setListen] = useState(false)
   const { refresh, toast } = useApp()
   // 桌面小组件上的按钮：打开 App 时直接去对应的地方（开练 / 今日剧集 / 词库）
   useEffect(() => {
@@ -53,6 +55,8 @@ function Main() {
       if (a === 'practice') { go('today'); setSession({ minimum: false }) }
       else if (a === 'episode') go('episodes')
       else if (a === 'words') go('words')
+      // 点听学的播放通知：回到听学页
+      else if (a === 'listen') { go('today'); setListen(true) }
     }
     run()
     const onShow = () => { if (document.visibilityState === 'visible') run() }
@@ -63,7 +67,7 @@ function Main() {
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (
     <div className="shell">
-      {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} />}
+      {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} onListen={() => setListen(true)} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
       {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} onMock={() => setIelts('mock')} />}
       {tab === 'words' && <Words />}
@@ -78,6 +82,7 @@ function Main() {
           ))}
         </nav>
       </div>
+      {listen && <Listen onClose={() => { setListen(false); refresh() }} />}
       {session && <Session minimum={session.minimum} comeback={session.comeback} onClose={() => setSession(null)} />}
       {ai === 'chat' && <Chat onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('chat'); setAi('setup') }} />}
       {ai === 'diary' && <Diary onClose={() => { setAi(null); refresh() }} onSetup={() => { setAfter('diary'); setAi('setup') }} />}

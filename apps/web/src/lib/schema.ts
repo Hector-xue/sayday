@@ -64,4 +64,10 @@ export const MIGRATIONS: string[] = [
   `
   CREATE TABLE kv_ts(key TEXT PRIMARY KEY, ts INTEGER NOT NULL);
   `,
+  // v0.0.30：听学（被动听）听完的词：sec = 这个词讲了多久（秒）。不进复习，只统计“听过几遍”、每天听了多久
+  `
+  CREATE TABLE passive_log(id INTEGER PRIMARY KEY, word TEXT NOT NULL, ts INTEGER NOT NULL, sec REAL NOT NULL);
+  CREATE INDEX passive_ts ON passive_log(ts);
+  CREATE INDEX passive_word ON passive_log(word);
+  `,
 ]

@@ -36,5 +36,13 @@ fi
 # 现编的句子用系统语音；浏览器里的 Kokoro 已去掉（kokoro-js 依赖 GPL 的 eSpeak NG）
 mkdir -p "$PUB/tts/samples"
 for f in "$ROOT"/spikes/m0/web/tts/samples/*; do cat "$f" > "$PUB/tts/samples/$(basename "$f")"; done
+# 听学里老师拼单词用的字母读音（content/letters，content-letters 工作流生成）；没有就缺着，播放时用系统语音念
+rm -rf "$PUB/tts/letters"
+for acc in us gb; do
+  if ls "$ROOT/content/letters/$acc/"*.mp3 > /dev/null 2>&1; then
+    mkdir -p "$PUB/tts/letters/$acc"
+    for f in "$ROOT/content/letters/$acc/"*.mp3; do cat "$f" > "$PUB/tts/letters/$acc/$(basename "$f")"; done
+  fi
+done
 rm -rf "$PUB/tts/onnx-community" "$PUB/tts/lib" "$PUB/tts/ort"
 du -sh "$PUB"

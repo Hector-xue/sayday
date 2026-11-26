@@ -4,7 +4,7 @@
 
 一个让人能坚持下去的英语学习软件：离线可用、AI 可插拔、带逐音素的发音纠正。网页和手机 App 共用一套代码。
 
-能做什么：定级与持续校准 → 每日一课（FSRS 复习 + 新词 + 听写 + 听力 + 跟读打分）→ 原创剧集四季（A2→C1，带分支）→ 发音实验室（最小对立、口型图、语调曲线）→ 雅思四项专练与全真模考 → 工作英语 → 接上你自己的 AI 后的陪练 Emma、日记和写作批改。
+能做什么：定级与持续校准 → 每日一课（FSRS 复习 + 新词 + 听写 + 听力 + 跟读打分）→ 听学（戴上耳机像听歌一样，老师读单词、拼写、讲意思和例句，锁屏接着播）→ 原创剧集四季（A2→C1，带分支）→ 发音实验室（最小对立、口型图、语调曲线）→ 雅思四项专练与全真模考 → 工作英语 → 接上你自己的 AI 后的陪练 Emma、日记和写作批改。
 
 <p>
 <img src="site/assets/shots/marker-today.webp" width="190" alt="今天">
@@ -52,12 +52,12 @@ npx vitest run                         # 单元测试；e2e/ 下是端到端脚�
 ## 目录
 | 路径 | 内容 |
 |---|---|
-| `apps/web/` | 正式版（React + TypeScript + Vite，PWA）：定级、每日一课、剧集、发音实验室、雅思专项、AI 陪练 / 日记、词库、进步、设置 |
+| `apps/web/` | 正式版（React + TypeScript + Vite，PWA）：定级、每日一课、听学、剧集、发音实验室、雅思专项、AI 陪练 / 日记、词库、进步、设置 |
 | `apps/native/` | Tauri 2 安卓外壳 + 原生推理插件 `sayday-infer`，界面就是 `apps/web`（CI 构建并签名，见 `.github/workflows/android.yml`） |
 | `packages/speech/` | 发音评分核心（CTC-GOP、校准、尾音检查、整句分），网页 / App / 演示页 / MCP 共用 |
 | `packages/asr/` | 离线语音识别（Moonshine 解码），网页 / App / MCP 共用 |
 | `packages/agent/` | 给 AI 助手用的工具：本地 / 远程 MCP、Skill、HTTP API（[说明](packages/agent/README.md)） |
-| `content/` | 内容包构建（`build_content.py`：ECDICT 词表 + Tatoeba 例句 + 定级假词）、剧集台词（`episodes/`，原创）、雅思题库（`ielts/`，原创）与示范音频包（`audio/`，CI 生成） |
+| `content/` | 内容包构建（`build_content.py`：ECDICT 词表 + Tatoeba 例句 + 定级假词）、剧集台词（`episodes/`，原创）、雅思题库（`ielts/`，原创）与示范音频包（`audio/`，CI 生成）、听学拼单词用的字母读音（`letters/`，content-letters 工作流生成） |
 | `site/` | 门户 sayday.ivyea.com |
 | `docs/` | 技术验证报告、进展 |
 | `spikes/` | M0/M1 验证脚本、浏览器演示页 |

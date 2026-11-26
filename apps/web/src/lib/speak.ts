@@ -16,20 +16,43 @@ function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
   return same.find(good) ?? same[0] ?? vs.find(good) ?? vs[0]
 }
 
-export async function speak(text: string, accent: Accent, rate = 0.95): Promise<void> {
-  if (tauri) { await tauri.invoke('plugin:sayday-infer|speak', { text, lang: LANG[accent], rate }); return }
+export const speak = (text: string, accent: Accent, rate = 0.95): Promise<void> => speakLang(text, LANG[accent], rate)
+
+/** 网页里有没有这种语言的系统语音（听学的中文讲解要用；声音列表还没载入时等一下） */
+export async function hasVoice(lang: string): Promise<boolean> {
+  if (isNative) return true
+  if (typeof speechSynthesis === 'undefined') return false
+  if (!speechSynthesis.getVoices().length) await new Promise((r) => { speechSynthesis.onvoiceschanged = r; setTimeout(r, 800) })
+  const p = lang.split('-')[0]
+  return speechSynthesis.getVoices().some((v) => v.lang.replace('_', '-').toLowerCase().startsWith(p))
+}
+
+function pickAnyVoice(lang: string): SpeechSynthesisVoice | undefined {
+  if (lang.startsWith('en')) return pickVoice(lang)
+  const p = lang.split('-')[0]
+  const vs = speechSynthesis.getVoices().filter((v) => v.lang.replace('_', '-').toLowerCase().startsWith(p))
+  const good = (v: SpeechSynthesisVoice) => /natural|neural|enhanced|premium|google/i.test(v.name)
+  // 中文优先普通话（zh-CN），不要粤语 / 台湾腔
+  const main = vs.filter((v) => /^zh[-_]cn/i.test(v.lang) || v.lang.toLowerCase() === lang.toLowerCase())
+  return main.find(good) ?? main[0] ?? vs.find(good) ?? vs[0]
+}
+
+/** 按语言朗读（lang：en-US / en-GB / zh-CN …） */
+export async function speakLang(text: string, lang: string, rate = 0.95): Promise<void> {
+  if (tauri) { await tauri.invoke('plugin:sayday-infer|speak', { text, lang, rate }); return }
   if (typeof speechSynthesis === 'undefined') throw new Error('这个浏览器不支持朗读')
   speechSynthesis.cancel()
   // 部分浏览器首次 getVoices() 为空，等 voiceschanged
   if (!speechSynthesis.getVoices().length) await new Promise((r) => { speechSynthesis.onvoiceschanged = r; setTimeout(r, 800) })
   const u = new SpeechSynthesisUtterance(text)
-  u.lang = LANG[accent]
+  u.lang = lang
   u.rate = rate
-  const v = pickVoice(LANG[accent])
+  const v = pickAnyVoice(lang)
   if (v) u.voice = v
   await new Promise<void>((resolve, reject) => {
-    // 有的浏览器 / 没装语音的系统不触发 onend：按字数估一个上限，到点就当读完了
-    const guard = setTimeout(resolve, Math.max(4000, text.length * 120 / rate))
+    // 有的浏览器 / 没装语音的系统不触发 onend：按字数估一个上限，到点就当读完了（汉字一个字念得比一个字母久）
+    const per = /[\u4e00-\u9fff]/.test(text) ? 320 : 120
+    const guard = setTimeout(resolve, Math.max(4000, text.length * per / rate))
     u.onend = () => { clearTimeout(guard); resolve() }
     u.onerror = (e) => { clearTimeout(guard); if (e.error === 'interrupted' || e.error === 'canceled') resolve(); else reject(new Error('朗读失败：' + e.error)) }
     speechSynthesis.speak(u)
