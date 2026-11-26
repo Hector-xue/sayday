@@ -3,7 +3,10 @@ package com.ivyea.sayday.infer
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.MediaMetadataRetriever
+import android.media.AudioFormat
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -20,19 +23,13 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ConcatenatingMediaSource2
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.source.SilenceMediaSource
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.net.HttpURLConnection
@@ -47,9 +44,11 @@ import java.util.concurrent.TimeUnit
 
 /**
  * 听学：前台播放服务（Media3）。网页把整轮的讲解脚本（每个词一串片段：音频 / 系统语音 / 停顿）交过来，这里：
- *  1. 后台线程一个词一个词地准备：音频包的 mp3 下到缓存（下过的不再下，没信号也能听），字母从 APK 的 assets 里拷出来，
+ *  1. 后台线程一个词一个词地准备：音频包的 mp3（单词、拼读、例句）下到缓存（下过的不再下，没信号也能听），
  *     中文（释义、例句译文）用系统语音合成成 wav（同一句也缓存）；拿不到的英文音频用系统英文语音顶上
- *  2. 每个词拼成一个 ConcatenatingMediaSource2 = 播放列表里的一项：通知栏 / 锁屏 / 耳机的上一个、下一个就是按词切
+ *  2. 每个词的全部片段解码、统一成 24kHz 单声道，按脚本插好停顿，写成一个 wav = 播放列表里的一项：
+ *     通知栏 / 锁屏 / 耳机的上一个、下一个就是按词切。不在播放时一段段接：停顿、音频包、系统语音的格式各不相同，
+ *     每换一段播放器都要重建一次音频输出，会顿一下、偶尔“啪”一声
  *  3. ExoPlayer 管音频焦点（来电话、别的 App 放声音时暂停）、拔耳机停、锁屏不睡（WAKE_MODE_LOCAL）
  *  4. 听完（或听了六成以上切走）的词记进 SharedPreferences，网页打开时取走写进学习记录（listen_drain）
  * 播放列表的第 i 项永远对应网页里的第 i 个词（某个词什么都没准备出来也放一小段静音占位），网页据此显示讲到哪了。
@@ -62,6 +61,8 @@ class ListenService : MediaSessionService() {
     private const val MAX_HEARD = 2000
     private const val CACHE_MAX = 150L * 1024 * 1024
     private const val CACHE_KEEP = 100L * 1024 * 1024
+    /** 拼好的每个词统一成这个采样率（音频包就是 24kHz 单声道） */
+    private const val SR = 24000
 
     @Volatile var instance: ListenService? = null
     private val waiting = mutableListOf<(ListenService) -> Unit>()
@@ -231,20 +232,22 @@ class ListenService : MediaSessionService() {
     player.setPlaybackSpeed(rate.coerceIn(0.5f, 2f))
     player.playWhenReady = true
     worker.execute {
+      // 上一轮没拼完整（缺音频、用系统语音顶的）的词不留：这一轮重新拼
+      listenDir("track").listFiles()?.forEach { if (it.name.endsWith(".part.wav")) it.delete() }
       for ((i, t) in list.withIndex()) {
         if (gen != generation) return@execute
-        // 外层 MediaItem 带上词和意思：通知栏、锁屏、蓝牙车机上显示的就是它
-        val item = MediaItem.Builder().setMediaId("w$i").setMediaMetadata(
+        val f = try { renderTrack(t, gen) } catch (e: Throwable) {
+          Log.w(TAG, "准备 ${t.word} 失败", e)
+          null
+        } ?: silence(t)
+        // MediaItem 带上词和意思：通知栏、锁屏、蓝牙车机上显示的就是它
+        val item = MediaItem.Builder().setMediaId("w$i").setUri(Uri.fromFile(f)).setMediaMetadata(
           MediaMetadata.Builder().setTitle(t.title).setArtist(t.sub).setAlbumTitle("日日说 · 听学").setTrackNumber(i + 1).setTotalTrackCount(list.size).build(),
         ).build()
-        val one = try { buildTrack(t, item) } catch (e: Throwable) {
-          Log.w(TAG, "准备 ${t.word} 失败", e)
-          placeholder(t, item)
-        }
         main.post {
           if (gen != generation) return@post
           val wasEnded = player.playbackState == Player.STATE_ENDED
-          player.addMediaSource(one)
+          player.addMediaItem(item)
           ready = i + 1
           if (i == 0) { player.prepare(); player.play() }
           // 播得比准备得快、停在了末尾：接着放刚准备好的这个词
@@ -263,57 +266,221 @@ class ListenService : MediaSessionService() {
   }
 
   /** 什么都没准备出来的词：放半秒静音占位，保证播放列表第 i 项 = 网页第 i 个词 */
-  private fun placeholder(t: Track, item: MediaItem): MediaSource {
+  private fun silence(t: Track): File {
     t.durMs = 500
-    return ConcatenatingMediaSource2.Builder().setMediaItem(item).add(SilenceMediaSource(500_000), 500).build()
+    val f = File(listenDir("track"), "silence-500.wav")
+    if (f.length() <= 44) writeWav(f, Pcm().apply { gap(500) })
+    return f
   }
 
-  /** 一个词的全部片段拼成一个音源（播放列表里的一项）；顺便算出总时长 */
-  private fun buildTrack(t: Track, item: MediaItem): MediaSource {
-    val b = ConcatenatingMediaSource2.Builder().setMediaItem(item)
-    val factory = ProgressiveMediaSource.Factory(DefaultDataSource.Factory(this))
-    var total = 0L
+  /** 一个词的讲解：所有片段解码成 24kHz 单声道 16 位，中间按脚本插静音，写成一个 wav；顺便算出总时长 */
+  private fun renderTrack(t: Track, gen: Int): File? {
+    val dir = listenDir("track")
+    val key = sha1(t.segs.toString())
+    val done = File(dir, "$key.wav")
+    if (done.length() > 44) {
+      done.setLastModified(System.currentTimeMillis())
+      t.durMs = (done.length() - 44) * 1000 / (SR * 2)
+      return done
+    }
+    val pcm = Pcm()
+    // 每段都拿到了正经的音频（没缺、没用系统语音顶替）才存成正式文件，下次直接用；否则下次重新拼
+    var complete = true
     var parts = 0
     for (k in 0 until t.segs.length()) {
+      if (gen != generation) return null
       val s = t.segs.optJSONObject(k) ?: continue
       when (s.optString("t")) {
-        "gap" -> {
-          val ms = s.optLong("ms", 0).coerceIn(0, 10_000)
-          if (ms <= 0) continue
-          b.add(SilenceMediaSource(ms * 1000), ms); total += ms; parts++
-        }
+        "gap" -> pcm.gap(s.optLong("ms", 0).coerceIn(0, 10_000))
         "audio", "say" -> {
           val lang = s.optString("lang", "en-US")
           val text = s.optString("text")
-          val f = if (s.optString("t") == "audio") fetch(s.optString("url")) ?: synth(text, lang, 0.9f) else synth(text, lang, if (lang.startsWith("zh")) 1.0f else 0.95f)
-          if (f == null) { if (lang.startsWith("zh")) noZh = true; continue }
-          val ms = durationMs(f)
-          b.add(factory.createMediaSource(MediaItem.fromUri(Uri.fromFile(f))), ms)
-          total += ms; parts++
+          var f: File? = null
+          if (s.optString("t") == "audio") {
+            f = fetch(s.optString("url"))
+            if (f == null) complete = false
+          }
+          if (f == null) f = synth(text, lang, if (lang.startsWith("zh")) 1.0f else if (s.optString("t") == "audio") 0.9f else 0.95f)
+          if (f == null) { if (lang.startsWith("zh")) noZh = true; complete = false; continue }
+          val a = decode(f)
+          if (a == null || a.isEmpty()) { complete = false; continue }
+          pcm.clip(a)
+          parts++
         }
       }
     }
-    if (parts == 0) return placeholder(t, item)
-    t.durMs = total
-    return b.build()
+    if (parts == 0) return null
+    val out = if (complete) done else File(dir, "$key.$gen.part.wav")
+    writeWav(out, pcm)
+    t.durMs = maxOf(1L, pcm.n * 1000L / SR)
+    return out
+  }
+
+  /** 拼一个词用的 PCM 缓冲（24kHz 单声道 16 位） */
+  private class Pcm {
+    var buf = ShortArray(SR * 15)
+    var n = 0
+    private fun room(k: Int) { if (n + k > buf.size) buf = buf.copyOf(maxOf(buf.size * 2, n + k)) }
+    fun gap(ms: Long) {
+      val k = (ms * SR / 1000).toInt()
+      room(k)
+      java.util.Arrays.fill(buf, n, n + k, 0.toShort())
+      n += k
+    }
+    /** 接一段音频：首尾 5 毫秒淡入淡出，接缝处不会“啪”一声 */
+    fun clip(a: ShortArray) {
+      room(a.size)
+      val fade = minOf(SR / 200, a.size / 2)
+      for (i in a.indices) {
+        var v = a[i].toInt()
+        if (fade > 0 && i < fade) v = v * i / fade
+        else if (fade > 0 && i >= a.size - fade) v = v * (a.size - 1 - i) / fade
+        buf[n + i] = v.toShort()
+      }
+      n += a.size
+    }
+  }
+
+  private fun writeWav(f: File, p: Pcm) {
+    val bytes = p.n * 2
+    val b = ByteBuffer.allocate(44 + bytes).order(ByteOrder.LITTLE_ENDIAN)
+    b.putInt(0x46464952).putInt(36 + bytes).putInt(0x45564157) // "RIFF" <长度> "WAVE"
+    b.putInt(0x20746d66).putInt(16).putShort(1.toShort()).putShort(1.toShort()).putInt(SR).putInt(SR * 2).putShort(2.toShort()).putShort(16.toShort()) // "fmt "：PCM 单声道 16 位
+    b.putInt(0x61746164).putInt(bytes) // "data"
+    for (i in 0 until p.n) b.putShort(p.buf[i])
+    val tmp = File(f.path + ".tmp")
+    tmp.writeBytes(b.array())
+    if (!tmp.renameTo(f)) { f.delete(); if (!tmp.renameTo(f)) tmp.delete() }
+  }
+
+  /** 解码成 24kHz 单声道：系统语音合成的 wav 直接读，音频包的 mp3 用系统解码器 */
+  private fun decode(f: File): ShortArray? = if (f.name.endsWith(".wav")) readWav(f) else decodeCodec(f)
+
+  private fun readWav(f: File): ShortArray? {
+    val b = ByteBuffer.wrap(f.readBytes()).order(ByteOrder.LITTLE_ENDIAN)
+    val cap = b.capacity()
+    if (cap < 12 || b.getInt(0) != 0x46464952 || b.getInt(8) != 0x45564157) return null
+    var pos = 12
+    var fmt = 0
+    var ch = 0
+    var rate = 0
+    var bits = 0
+    while (pos + 8 <= cap) {
+      val id = b.getInt(pos)
+      var size = b.getInt(pos + 4)
+      val body = pos + 8
+      if (id == 0x20746d66 && body + 16 <= cap) {
+        fmt = b.getShort(body).toInt()
+        ch = b.getShort(body + 2).toInt()
+        rate = b.getInt(body + 4)
+        bits = b.getShort(body + 14).toInt()
+      } else if (id == 0x61746164) {
+        // 有的语音引擎写完不回填长度：按文件剩下的算
+        if (size <= 0 || body + size > cap) size = cap - body
+        if (fmt != 1 || bits != 16 || ch <= 0 || rate <= 0) return null
+        val frames = size / (2 * ch)
+        val mono = ShortArray(frames) { i ->
+          var sum = 0
+          for (c in 0 until ch) sum += b.getShort(body + (i * ch + c) * 2)
+          (sum / ch).toShort()
+        }
+        return resample(mono, rate)
+      }
+      if (size < 0) return null
+      pos = body + size + (size and 1)
+    }
+    return null
+  }
+
+  private fun decodeCodec(f: File): ShortArray? {
+    val ex = MediaExtractor()
+    var codec: MediaCodec? = null
+    try {
+      ex.setDataSource(f.path)
+      val ti = (0 until ex.trackCount).firstOrNull { ex.getTrackFormat(it).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true } ?: return null
+      ex.selectTrack(ti)
+      val fmt = ex.getTrackFormat(ti)
+      var rate = fmt.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+      var ch = fmt.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+      var isFloat = false
+      val c = MediaCodec.createDecoderByType(fmt.getString(MediaFormat.KEY_MIME)!!)
+      codec = c
+      c.configure(fmt, null, null, 0)
+      c.start()
+      val info = MediaCodec.BufferInfo()
+      var out = ShortArray(rate * 3)
+      var n = 0
+      var inDone = false
+      var idle = 0
+      while (true) {
+        if (!inDone) {
+          val i = c.dequeueInputBuffer(10_000)
+          if (i >= 0) {
+            val buf = c.getInputBuffer(i)!!
+            val size = ex.readSampleData(buf, 0)
+            if (size < 0) { c.queueInputBuffer(i, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM); inDone = true }
+            else { c.queueInputBuffer(i, 0, size, ex.sampleTime, 0); ex.advance() }
+          }
+        }
+        val o = c.dequeueOutputBuffer(info, 10_000)
+        if (o >= 0) {
+          idle = 0
+          if (info.size > 0 && ch > 0) {
+            val buf = c.getOutputBuffer(o)!!
+            buf.position(info.offset)
+            buf.limit(info.offset + info.size)
+            val bb = buf.slice().order(ByteOrder.nativeOrder())
+            val frames = info.size / ((if (isFloat) 4 else 2) * ch)
+            if (n + frames > out.size) out = out.copyOf(maxOf(out.size * 2, n + frames))
+            for (k in 0 until frames) {
+              var sum = 0f
+              for (cc in 0 until ch) sum += if (isFloat) bb.getFloat((k * ch + cc) * 4) * 32767f else bb.getShort((k * ch + cc) * 2).toFloat()
+              out[n++] = (sum / ch).coerceIn(-32768f, 32767f).toInt().toShort()
+            }
+          }
+          c.releaseOutputBuffer(o, false)
+          if ((info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) break
+        } else if (o == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+          val nf = c.outputFormat
+          rate = nf.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+          ch = nf.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+          isFloat = nf.containsKey(MediaFormat.KEY_PCM_ENCODING) && nf.getInteger(MediaFormat.KEY_PCM_ENCODING) == AudioFormat.ENCODING_PCM_FLOAT
+        } else if (inDone && ++idle > 200) {
+          // 输入都送完了、2 秒没有输出：解码器卡住了，用已经解出来的
+          break
+        }
+      }
+      return resample(out.copyOf(n), rate)
+    } catch (e: Exception) {
+      Log.i(TAG, "解码失败 ${f.name}：${e.javaClass.simpleName}")
+      return null
+    } finally {
+      try { codec?.stop() } catch (e: Exception) { /* 没启动成功 */ }
+      try { codec?.release() } catch (e: Exception) { /* 已释放 */ }
+      ex.release()
+    }
+  }
+
+  /** 线性插值重采样到 24kHz（系统语音各家采样率不同：16k / 22.05k / 24k…） */
+  private fun resample(a: ShortArray, rate: Int): ShortArray {
+    if (rate == SR || rate <= 0 || a.isEmpty()) return a
+    val n = (a.size.toLong() * SR / rate).toInt()
+    val step = rate.toDouble() / SR
+    return ShortArray(n) { i ->
+      val x = i * step
+      val j = x.toInt().coerceAtMost(a.size - 1)
+      val s0 = a[j].toInt()
+      val s1 = if (j + 1 < a.size) a[j + 1].toInt() else s0
+      (s0 + (s1 - s0) * (x - j)).toInt().toShort()
+    }
   }
 
   /** 听学的缓存目录（系统缓存目录下的 listen/…；和 Context.cacheDir 区分开，别重名） */
   private fun listenDir(name: String) = File(cacheDir, "listen/$name").apply { mkdirs() }
 
-  /** 音频包的 mp3 下到缓存；asset:/// 从 APK 里拷出来。拿不到返回 null（调用方用系统语音顶上） */
+  /** 音频包的 mp3 下到缓存。拿不到返回 null（调用方用系统语音顶上） */
   private fun fetch(url: String): File? {
     if (url.isEmpty()) return null
-    if (url.startsWith("asset:///")) {
-      val path = url.removePrefix("asset:///")
-      val f = File(listenDir("assets"), path.replace('/', '_'))
-      if (f.length() > 0) return f
-      return try {
-        val tmp = File(f.path + ".tmp")
-        assets.open(path).use { input -> tmp.outputStream().use { input.copyTo(it) } }
-        if (tmp.length() > 0 && tmp.renameTo(f)) f else { tmp.delete(); null }
-      } catch (e: Exception) { null }
-    }
     val f = File(listenDir("audio"), sha1(url) + ".mp3")
     if (f.length() > 0) { f.setLastModified(System.currentTimeMillis()); return f }
     var conn: HttpURLConnection? = null
@@ -348,30 +515,6 @@ class ListenService : MediaSessionService() {
     latch.await(20, TimeUnit.SECONDS)
     synthDone.remove(id)
     return if (tmp.length() > 44 && tmp.renameTo(f)) f else { tmp.delete(); null }
-  }
-
-  /**
-   * 片段时长（毫秒）。拼接时每个文件音源都必须给出时长（ConcatenatingMediaSource2 对 ProgressiveMediaSource 的要求，
-   * 不给直接抛异常），所以一定返回正数：读不出来就按文件估——wav 读头里的字节率，mp3 按音频包的 32kbps
-   */
-  private fun durationMs(f: File): Long {
-    val m = MediaMetadataRetriever()
-    val got = try {
-      m.setDataSource(f.path)
-      m.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: -1
-    } catch (e: Exception) { -1L } finally { try { m.release() } catch (e: Exception) {} }
-    if (got > 0) return got
-    if (f.name.endsWith(".wav")) {
-      try {
-        RandomAccessFile(f, "r").use { r ->
-          val h = ByteArray(44)
-          r.readFully(h)
-          val byteRate = ByteBuffer.wrap(h, 28, 4).order(ByteOrder.LITTLE_ENDIAN).int
-          if (byteRate > 0) return maxOf(1L, (f.length() - 44) * 1000 / byteRate)
-        }
-      } catch (e: Exception) { /* 头坏了：按大小估 */ }
-    }
-    return maxOf(1L, f.length() / 4)
   }
 
   /** 缓存超过 150MB：从最久没用的删到 100MB 以下 */

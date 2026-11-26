@@ -8,9 +8,9 @@ import { loadContent, pickSentence, type Sentence, type Word } from './content'
 import { dueWords } from './srs'
 import { previewWords, type Profile } from './lesson'
 
-/** 一段讲解：预生成的音频（单词 / 例句 / 字母）、系统语音现念（中文释义、例句译文）、停顿 */
+/** 一段讲解：预生成的音频（单词 w / 拼读 p / 例句 s）、系统语音现念（中文释义、例句译文）、停顿 */
 export type Seg =
-  | { t: 'audio'; kind: 'w' | 's' | 'l'; key: string; /** 没有这段音频时改用系统语音念的内容 */ text: string }
+  | { t: 'audio'; kind: 'w' | 's' | 'p'; key: string; /** 没有这段音频时改用系统语音念的内容 */ text: string }
   | { t: 'say'; lang: 'zh' | 'en'; text: string }
   | { t: 'gap'; ms: number }
 
@@ -117,27 +117,21 @@ export const glossShort = (parts: GlossPart[]) => parts.map((p) => p.senses.join
 
 export type ScriptOpts = Pick<ListenPrefs, 'spell' | 'zh' | 'example'>
 
-/** 拼读：字母之间短停，长词每 4 个字母多停一下（像老师念电话号码）；连字符念 hyphen，撇号不念 */
-export function spellSegs(word: string): Seg[] {
-  const out: Seg[] = []
-  const chars = [...word.toLowerCase()]
-  let run = 0
-  for (const c of chars) {
-    if (/[a-z]/.test(c)) {
-      if (out.length) out.push({ t: 'gap', ms: run > 0 && run % 4 === 0 && chars.length > 6 ? 380 : 150 })
-      out.push({ t: 'audio', kind: 'l', key: c, text: c.toUpperCase() })
-      run++
-    } else if (c === '-') {
-      out.push({ t: 'gap', ms: 250 }, { t: 'say', lang: 'en', text: 'hyphen' })
-      run = 0
-    } else if (c === ' ') {
-      out.push({ t: 'gap', ms: 450 })
-      run = 0
-    }
-    // 撇号等符号：不念
+/**
+ * 拼读：整个词的字母一段音频（音频包 p/，CI 合成，见 content/audio/build_audio.mjs），不是一个个字母拼起来——
+ * 单个字母单独合成又慢又容易念错（前面多出含糊的音），整串合成一个字母约 0.25 秒、念得清楚。
+ * text 是音频包里没有这个词时（自己收的词、没联网）系统语音念的：字母逗号隔开，连字符念 hyphen，空格停一下，撇号不念
+ */
+export function spellText(word: string): string {
+  const out: string[] = []
+  for (const c of word.toLowerCase()) {
+    if (/[a-z]/.test(c)) out.push(c.toUpperCase())
+    else if (c === '-') out.push('hyphen')
+    else if (c === ' ' && out.length) out[out.length - 1] += '.'
   }
-  return out
+  return out.map((x, i) => (i === out.length - 1 || x.endsWith('.') ? x : x + ',')).join(' ')
 }
+export const spellSeg = (word: string): Seg => ({ t: 'audio', kind: 'p', key: word, text: spellText(word) })
 
 /** 能拼读的词：至少两个字母（单个字母的词拼了等于没拼），最长 20 个字符 */
 export const canSpellAloud = (w: string) => /^[a-z][a-z' -]*[a-z]$/i.test(w) && w.length <= 20
@@ -148,7 +142,7 @@ export function buildTrack(word: Word, sentence: Sentence | undefined, o: Script
   const say = glossSpeech(parts)
   const w: Seg = { t: 'audio', kind: 'w', key: word.w, text: word.w }
   const segs: Seg[] = [w]
-  if (o.spell && canSpellAloud(word.w)) segs.push({ t: 'gap', ms: 500 }, ...spellSegs(word.w), { t: 'gap', ms: 500 }, w)
+  if (o.spell && canSpellAloud(word.w)) segs.push({ t: 'gap', ms: 500 }, spellSeg(word.w), { t: 'gap', ms: 500 }, w)
   if (o.zh && say) segs.push({ t: 'gap', ms: 600 }, { t: 'say', lang: 'zh', text: say })
   if (o.example && sentence) {
     const s: Seg = { t: 'audio', kind: 's', key: String(sentence.id), text: sentence.en }
@@ -161,13 +155,13 @@ export function buildTrack(word: Word, sentence: Sentence | undefined, o: Script
   return { word: word.w, ipa: word.ipa, gloss, sentence: sentence && { id: sentence.id, en: sentence.en, zh: sentence.zh }, segs }
 }
 
-/** 粗估一个词讲多久（秒），给“这一轮约 N 分钟”用：英文单词 0.8 秒、字母 0.45 秒、中文每字 0.22 秒、英文句子每字符 0.07 秒 */
+/** 粗估一个词讲多久（秒），给“这一轮约 N 分钟”用：英文单词 0.8 秒、拼读每个字母 0.3 秒、中文每字 0.22 秒、英文句子每字符 0.07 秒 */
 export function estimateSec(t: Track): number {
   let ms = 0
   for (const s of t.segs) {
     if (s.t === 'gap') ms += s.ms
     else if (s.t === 'say') ms += s.lang === 'zh' ? s.text.length * 220 : 600
-    else if (s.kind === 'l') ms += 450
+    else if (s.kind === 'p') ms += 300 + s.key.replace(/[^a-z]/gi, '').length * 300
     else if (s.kind === 'w') ms += 800
     else ms += Math.max(1200, s.text.length * 70)
   }

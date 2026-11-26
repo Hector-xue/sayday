@@ -46,11 +46,11 @@ interface Engine {
 
 // ---------------- 安卓：原生前台播放服务 ----------------
 
-/** 原生那边要完整地址：单词 / 例句走公开的音频包，字母打在 App 里（asset:///） */
+/** 原生那边要完整地址：单词 / 拼读 / 例句都走公开的音频包（单词和拼读的文件名按单词转义） */
 export function nativeSeg(s: Seg, accent: Accent): Record<string, unknown> {
   if (s.t === 'gap') return { t: 'gap', ms: s.ms }
   if (s.t === 'say') return { t: 'say', text: s.text, lang: s.lang === 'zh' ? 'zh-CN' : LANG[accent] }
-  const url = s.kind === 'l' ? `asset:///letters/${accent}/${s.key}.mp3` : `${PACK_PUBLIC}${accent}/${s.kind}/${s.kind === 'w' ? encodeURIComponent(s.key) : s.key}.mp3`
+  const url = `${PACK_PUBLIC}${accent}/${s.kind}/${s.kind === 's' ? s.key : encodeURIComponent(s.key)}.mp3`
   return { t: 'audio', url, text: s.text, lang: LANG[accent] }
 }
 
@@ -173,14 +173,12 @@ class WebEngine implements Engine {
       return
     }
     let url: string | null = null
-    if (seg.kind === 'l') url = new URL(`./tts/letters/${this.o.accent}/${seg.key}.mp3`, location.href).href
-    else {
-      try { url = await getAudio(seg.kind === 'w' ? { text: seg.text, word: seg.key } : { text: seg.text, sentenceId: Number(seg.key) }, this.o.accent) }
-      catch (e) { if (!(e instanceof NoAudio)) throw e }
-    }
+    const clip = seg.kind === 'w' ? { text: seg.text, word: seg.key } : seg.kind === 'p' ? { text: seg.text, spell: seg.key } : { text: seg.text, sentenceId: Number(seg.key) }
+    try { url = await getAudio(clip, this.o.accent) }
+    catch (e) { if (!(e instanceof NoAudio)) throw e }
     if (my !== this.token) return
     const ok = url ? await this.playUrl(url, my) : false
-    // 没有这段音频（没联网、字母文件缺了）：系统语音顶上，总比没声音好
+    // 没有这段音频（没联网、音频包里没有这个词）：系统语音顶上，总比没声音好
     if (!ok && my === this.token) await speakLang(seg.text, LANG[this.o.accent], 0.9 * this.o.rate).catch((e) => { this.error = `“${seg.text.slice(0, 30)}”的音频没下载到，系统语音也没念出来：${(e as Error)?.message ?? e}` })
   }
 

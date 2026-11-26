@@ -45,18 +45,6 @@ jobs:
           mkdir -p $D && cp .cache/models/phone_ctc.int8.onnx $D/
           ls -la $D
 
-      # 听学里老师拼单词用的字母读音（content/letters，content-letters 工作流生成后入库）：
-      # 原生播放服务从 assets 里读；万一缺了，播放服务改用系统英文语音念字母
-      - name: 字母读音放进插件 assets
-        run: |
-          D=apps/native/src-tauri/plugins/sayday-infer/android/src/main/assets/letters
-          for acc in us gb; do
-            if ls content/letters/$acc/*.mp3 > /dev/null 2>&1; then mkdir -p $D/$acc && cp content/letters/$acc/*.mp3 $D/$acc/; fi
-          done
-          n=$(find $D -name '*.mp3' 2>/dev/null | wc -l)
-          echo "字母读音 $n 个"
-          [ "$n" -eq 52 ] || echo "::warning::字母读音不全（$n/52），缺的用系统语音念"
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
