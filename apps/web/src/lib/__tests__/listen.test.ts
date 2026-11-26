@@ -5,7 +5,7 @@ vi.mock('../lesson', () => ({ previewWords: async () => [] }))
 vi.mock('../srs', () => ({ dueWords: async () => [] }))
 vi.mock('../tts', () => ({ PACK_PUBLIC: 'https://sayday.ivyea.com/audio/', getAudio: async () => '', NoAudio: class extends Error {} }))
 vi.mock('../speak', () => ({ hasVoice: async () => true, speakLang: async () => {}, stopSpeak: () => {} }))
-import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSeg, spellText } from '../listen'
+import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSeg, spellText, zhKey, zhSeg } from '../listen'
 import { nativeSeg } from '../listen-player'
 import type { Word, Sentence } from '../content'
 
@@ -79,23 +79,24 @@ describe('讲解脚本', () => {
   it('全开：读 → 拼 → 再读 → 中文 → 例句 → 译文 → 例句再读，最后留停顿', () => {
     const t = buildTrack(w, S, { spell: true, zh: true, example: true })
     const order = t.segs.filter((s) => s.t !== 'gap').map((s) => (s.t === 'say' ? `say:${s.lang}` : `${s.kind}`))
-    expect(order).toEqual(['w', 'p', 'w', 'say:zh', 's', 'say:zh', 's'])
+    expect(order).toEqual(['w', 'p', 'w', 'z', 's', 'z', 's'])
     expect(t.segs.at(-1)).toEqual({ t: 'gap', ms: 1500 })
     expect(t.gloss).toBe('放弃，抛弃，遗弃')
     expect(t.sentence?.id).toBe(1234)
-    const zh = t.segs.filter((s) => s.t === 'say').map((s) => (s as { text: string }).text)
-    expect(zh).toEqual(['动词，放弃，抛弃，遗弃。', S.zh])
+    const zh = t.segs.filter((s) => s.t === 'audio' && s.kind === 'z')
+    expect(zh).toEqual([zhSeg('动词，放弃，抛弃，遗弃。'), zhSeg(S.zh)])
+    expect(zh.map((s) => (s as { key: string }).key)).toEqual([zhKey('动词，放弃，抛弃，遗弃。'), zhKey(S.zh)])
   })
   it('关掉中文：没有中文段，例句读两遍；关掉拼写和例句：只读词', () => {
     const t = buildTrack(w, S, { spell: true, zh: false, example: true })
-    expect(t.segs.some((s) => s.t === 'say' && s.lang === 'zh')).toBe(false)
+    expect(t.segs.some((s) => s.t === 'audio' && s.kind === 'z')).toBe(false)
     expect(t.segs.filter((s) => s.t === 'audio' && s.kind === 's').length).toBe(2)
     const only = buildTrack(w, S, { spell: false, zh: false, example: false })
     expect(only.segs.filter((s) => s.t !== 'gap')).toEqual([{ t: 'audio', kind: 'w', key: 'abandon', text: 'abandon' }])
   })
   it('没有例句、没有中文释义的词也能讲', () => {
     const t = buildTrack(W('blorp', ''), undefined, { spell: true, zh: true, example: true })
-    expect(t.segs.some((s) => s.t === 'say')).toBe(false)
+    expect(t.segs.some((s) => s.t === 'audio' && s.kind === 'z')).toBe(false)
     expect(t.sentence).toBeUndefined()
   })
   it('估时：全开一个词十几秒，拼读按字母数', () => {
@@ -107,12 +108,19 @@ describe('讲解脚本', () => {
 })
 
 describe('交给原生播放器的地址', () => {
+  it('中文的音频包文件名固定（CI 合成用同一个函数算，改了就对不上线上的音频）', () => {
+    expect(zhKey('名词，市场。')).toBe('1bmkok1y0om')
+    expect(zhKey('')).toBe('wvjl67o803')
+    expect(zhKey('名词，市场。')).not.toBe(zhKey('名词，市场'))
+  })
   it('单词 / 拼读 / 例句都走公开音频包（单词名要转义），中文用 zh-CN', () => {
     expect(nativeSeg({ t: 'audio', kind: 'w', key: "o'clock", text: "o'clock" }, 'gb')).toEqual({ t: 'audio', url: "https://sayday.ivyea.com/audio/gb/w/o'clock.mp3", text: "o'clock", lang: 'en-GB' })
     expect(nativeSeg({ t: 'audio', kind: 'w', key: 'ice cream', text: 'ice cream' }, 'us')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/us/w/ice%20cream.mp3' })
     expect(nativeSeg({ t: 'audio', kind: 's', key: '1234', text: 'x' }, 'us')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/us/s/1234.mp3', lang: 'en-US' })
     expect(nativeSeg({ t: 'audio', kind: 'p', key: 'ice cream', text: 'I, C, E. C, R, E, A, M' }, 'gb')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/gb/p/ice%20cream.mp3', lang: 'en-GB' })
     expect(nativeSeg({ t: 'say', lang: 'zh', text: '你好' }, 'us')).toEqual({ t: 'say', text: '你好', lang: 'zh-CN' })
+    // 中文不分口音，在 zh/ 下按念的字找；没有时系统语音用 zh-CN 念
+    expect(nativeSeg(zhSeg('名词，市场。'), 'gb')).toEqual({ t: 'audio', url: `https://sayday.ivyea.com/audio/zh/${zhKey('名词，市场。')}.mp3`, text: '名词，市场。', lang: 'zh-CN' })
     expect(nativeSeg({ t: 'gap', ms: 300 }, 'us')).toEqual({ t: 'gap', ms: 300 })
   })
 })

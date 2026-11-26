@@ -3,6 +3,7 @@
 # 用法: scripts/sync-audio.sh <run_id>            全量（32 片，整体换上）
 #       ONLY=e scripts/sync-audio.sh <run_id>     只更新剧集（content-episodes 工作流的产物，只换 e/ 目录）
 #       ONLY=add scripts/sync-audio.sh <run_id>   增量（content-audio incremental=true 的产物）：新文件加进 s/ w/ e/，线上已有的一个不删
+#       ONLY=zh scripts/sync-audio.sh <run_id>    听学的中文讲解（content-zh 工作流，24 片）：新文件加进 zh/，线上已有的一个不删
 # 每次发布后重写 audio/have.txt（线上已有清单，增量合成靠它跳过）
 # 先下到临时目录、校验每片都有清单，再换上（发布中途不会出现半套）
 # 发布完跑 scripts/backup-audio.sh backup，把新音频包备份到 Release audio-pack（CI 产物 3 天就过期）
@@ -16,12 +17,32 @@ export GH_TOKEN=${GH_TOKEN:-$(printf 'protocol=https\nhost=github.com\n' | git c
 gh run download "$RUN" -R "$REPO" -D "$TMP/dl"
 # 线上已有清单：<口音>/<目录>/<文件名去 .mp3>
 write_have() {
-  (cd "$DEST" && find us gb -name '*.mp3' | sed 's/\.mp3$//' | sort) > "$DEST/have.txt.new"
+  (cd "$DEST" && find us gb $( [ -d zh ] && echo zh ) -name '*.mp3' | sed 's/\.mp3$//' | sort) > "$DEST/have.txt.new"
   chmod a+r "$DEST/have.txt.new" && mv -f "$DEST/have.txt.new" "$DEST/have.txt"
   echo "have.txt $(wc -l < "$DEST/have.txt") 条"
 }
 mkdir -p "$TMP/audio"
 n=0
+if [ "${ONLY:-}" = "zh" ]; then
+  # 中文讲解：24 片齐全、每片有清单；只往 zh/ 里加（同名的覆盖），不删
+  mkdir -p "$TMP/audio/zh"
+  for d in "$TMP"/dl/zh-*; do
+    ls "$d/zh"/shard-*.json >/dev/null 2>&1 || { echo "缺清单：$d"; exit 1; }
+    find "$d/zh" -name '*.mp3' -exec mv -t "$TMP/audio/zh/" {} +
+    n=$((n + 1))
+  done
+  [ "$n" -eq 24 ] || { echo "中文分片不全：$n/24"; exit 1; }
+  c=$(find "$TMP/audio/zh" -name '*.mp3' | wc -l)
+  echo "zh 新增 $c（线上原有 $(ls "$DEST/zh" 2>/dev/null | wc -l)）"
+  if [ "$c" -gt 0 ]; then
+    mkdir -p "$DEST/zh"
+    chmod -R a+rX "$TMP/audio/zh"
+    find "$TMP/audio/zh" -name '*.mp3' -exec mv -f -t "$DEST/zh/" {} +
+    chmod a+rx "$DEST/zh"
+  fi
+  write_have
+  exit 0
+fi
 for d in "$TMP"/dl/audio-*; do
   for acc in us gb; do
     [ -d "$d/$acc" ] || continue
@@ -74,6 +95,8 @@ for acc in us gb; do
   echo "$acc 句子 $(ls "$TMP/audio/$acc/s" | wc -l) · 单词 $(ls "$TMP/audio/$acc/w" | wc -l) · 剧集 $(ls "$TMP/audio/$acc/e" | wc -l)"
   [ "$(ls "$TMP/audio/$acc/s" | wc -l)" -gt 10000 ] && [ "$(ls "$TMP/audio/$acc/w" | wc -l)" -gt 10000 ] || { echo "$acc 句子或单词数量不对，不发布"; exit 1; }
 done
+# 中文讲解不在这个工作流里（content-zh 单独合成）：整套换上时原样带过去
+[ -d "$DEST/zh" ] && cp -r "$DEST/zh" "$TMP/audio/zh"
 # 全量产物里没有剧集 / 拼读时，保留线上已有的
 for acc in us gb; do
   for k in e p; do

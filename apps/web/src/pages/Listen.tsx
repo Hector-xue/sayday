@@ -125,8 +125,8 @@ export function Listen({ onClose }: { onClose: () => void }) {
       <div className="hear-body">
       {st.noZh && (
         <div className="card hear-note">
-          <b>手机上没有中文语音，中文讲解先跳过了</b>
-          <p className="small muted">{isNative ? '到系统设置里搜“文字转语音”，装一个中文语音引擎（如讯飞、Google 语音服务），再点“换一组”重新开始。' : '这个浏览器没有中文语音。换 Chrome / Edge，或者用安卓 App。'}</p>
+          <b>有几段中文讲解没下载到，先跳过了</b>
+          <p className="small muted">{isNative ? '联网后点“换一组”重新开始就有了。（没联网时会用手机自带的中文语音顶上，这台手机没装：系统设置里搜“文字转语音”可以装一个。）' : '联网后点“换一组”重新开始就有了。（没联网时会用浏览器的中文语音顶上，这个浏览器没有：换 Chrome / Edge 试试。）'}</p>
         </div>
       )}
       {(st.status === 'error' || st.error) && <div className="card hear-note"><b>{st.status === 'error' ? '播放出错了' : '有一段没念出来，已经跳过'}</b><p className="small muted">{st.error || '点“换一组”重新开始试试'}</p></div>}

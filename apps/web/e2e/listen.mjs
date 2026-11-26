@@ -80,7 +80,10 @@ try {
   expect(w2 && w2 !== w1, '自动讲到下一个词', `${w1} → ${w2}`)
   expect((await current()) === w2, '高亮跟着换', await current())
   const said = await p.evaluate(() => globalThis.__said || 0)
-  expect(said >= 2, '中文释义、例句译文用系统语音念了', said)
+  // 中文释义、例句译文先找音频包 zh/<键>.mp3（这里的本地站点没有音频包），找不到才用系统语音顶上
+  const zhReq = reqs.filter((u) => /\/audio\/zh\/[0-9a-z]+\.mp3$/.test(u))
+  expect(zhReq.length >= 2, '中文讲解从音频包 zh/ 取', zhReq.slice(0, 2))
+  expect(said >= 2, '音频包里没有时，中文用系统语音顶上', said)
   // 拼读是音频包里整个词一段（p/<单词>.mp3），不是一个个字母
   const spell = reqs.filter((u) => /\/audio\/(us|gb)\/p\/[^/]+\.mp3$/.test(u))
   expect(spell.some((u) => u.endsWith(`/p/${encodeURIComponent(w1)}.mp3`)), '拼读从音频包取整个词的一段', spell.slice(0, 2))

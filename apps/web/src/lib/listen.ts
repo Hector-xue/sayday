@@ -7,10 +7,14 @@ import { db, kvGet, kvSet, today } from './db'
 import { loadContent, pickSentence, type Sentence, type Word } from './content'
 import { dueWords } from './srs'
 import { previewWords, type Profile } from './lesson'
+import { glossParts, glossShort, glossSpeech, zhKey } from './gloss'
 
-/** 一段讲解：预生成的音频（单词 w / 拼读 p / 例句 s）、系统语音现念（中文释义、例句译文）、停顿 */
+/**
+ * 一段讲解：预生成的音频（单词 w / 拼读 p / 例句 s / 中文 z：释义和例句译文）、系统语音现念、停顿。
+ * 中文也是 CI 提前合成好的（音频包 zh/<zhKey(念的字)>.mp3，不分口音）：手机自带的中文语音大多机械、有杂音
+ */
 export type Seg =
-  | { t: 'audio'; kind: 'w' | 's' | 'p'; key: string; /** 没有这段音频时改用系统语音念的内容 */ text: string }
+  | { t: 'audio'; kind: 'w' | 's' | 'p' | 'z'; key: string; /** 没有这段音频时改用系统语音念的内容 */ text: string }
   | { t: 'say'; lang: 'zh' | 'en'; text: string }
   | { t: 'gap'; ms: number }
 
@@ -47,71 +51,8 @@ export async function getPrefs(): Promise<ListenPrefs> {
 }
 export const savePrefs = (p: ListenPrefs) => kvSet('listen', p)
 
-// ---------------- 释义：词典写法 → 能念出来的中文 ----------------
-
-// ECDICT 的词性缩写（a. = 形容词）。及物 / 不及物都念“动词”：听的时候分得太细反而记不住
-const POS: Record<string, string> = {
-  n: '名词', a: '形容词', adj: '形容词', v: '动词', vt: '动词', vi: '动词', adv: '副词', pron: '代词', prep: '介词', conj: '连词',
-  num: '数词', int: '感叹词', interj: '感叹词', art: '冠词', aux: '助动词', abbr: '缩写', pl: '复数', vbl: '动词',
-}
-
-export type GlossPart = { pos: string; senses: string[] }
-
-/**
- * 词典释义整理成“词性 + 前几个意思”：去掉 [计] <法> (芭蕾舞用语) 这类标注，同一个词性（vt. / vi.）合并，
- * 最多 maxPos 个词性、每个最多 maxSense 个意思，意思加起来不超过 maxChars 个字（听的时候太长记不住）
- */
-export function glossParts(zh: string, maxPos = 2, maxSense = 3, maxChars = 24): GlossPart[] {
-  const clean = zh
-    .replace(/\\[rn]|[\r\n]/g, '；')
-    // 书名号的旧写法 <<启示录>>：留下书名（只去括号）
-    .replace(/<<([^<>]*)>>|《([^》]*)》/g, (_, a, b) => a ?? b)
-    .replace(/\[[^\]]*\]|<[^>]*>|\([^)]*\)|（[^）]*）|【[^】]*】/g, '')
-    .replace(/[<>[\]()（）【】]/g, '')
-    // 逗号后面紧跟词性的（“细读, vi. 细看”）也是另起一组
-    .replace(new RegExp(`[,，]\\s*(?=(?:${Object.keys(POS).join('|')})\\.)`, 'gi'), '；')
-  const parts: GlossPart[] = []
-  let chars = 0
-  // 分号后面没写词性的（“vt. 剽窃；偷偷地做；vi. 窃取”里的“偷偷地做”）接着算前一个词性
-  let last = ''
-  for (const group of clean.split(/[；;]/)) {
-    // 开头的词性可能连着写好几个（“vt.vi.”“n.&a.”）：都吃掉，用第一个认识的
-    let body = group
-    let pos = ''
-    let tagged = false
-    for (;;) {
-      const m = body.match(/^\s*([a-z]+)\.\s*(?:[&/和]\s*)?/i)
-      if (!m || !Object.hasOwn(POS, m[1].toLowerCase())) break
-      pos ||= POS[m[1].toLowerCase()]
-      tagged = true
-      body = body.slice(m[0].length)
-    }
-    if (!tagged) pos = last
-    last = pos
-    const senses = body.split(/[,，、/]/).map((s) => s.trim()).filter((s) => s && /[\u4e00-\u9fff]/.test(s))
-    if (!senses.length) continue
-    let part = parts.find((p) => p.pos === pos)
-    if (!part) {
-      if (parts.length >= maxPos) continue
-      part = { pos, senses: [] }
-      parts.push(part)
-    }
-    for (const s of senses) {
-      if (part.senses.length >= maxSense || part.senses.includes(s)) continue
-      // 第一个意思总要留；后面的超过字数就不要了
-      if (chars > 0 && chars + s.length > maxChars) break
-      part.senses.push(s)
-      chars += s.length
-    }
-  }
-  return parts.filter((p) => p.senses.length)
-}
-
-/** 念给你听的：“名词，市场。形容词，不同的，变化多的。” */
-// 词典里的“测定...的时间”：省略号念出来不像话，换成“某事”
-export const glossSpeech = (parts: GlossPart[]) => parts.map((p) => (p.pos ? `${p.pos}，` : '') + p.senses.join('，').replace(/\.{2,}|…+/g, '某事') + '。').join('')
-/** 屏幕和锁屏上显示的：“n. 市场；a. 不同的，变化多的” 太长，只要意思 */
-export const glossShort = (parts: GlossPart[]) => parts.map((p) => p.senses.join('，')).join('；')
+// 释义整理（词典写法 → 能念出来的中文）在 gloss.ts：音频包的 CI 合成也要用同一份代码算出要念的中文
+export { glossParts, glossShort, glossSpeech, zhKey, type GlossPart } from './gloss'
 
 // ---------------- 讲解脚本 ----------------
 
@@ -136,6 +77,9 @@ export const spellSeg = (word: string): Seg => ({ t: 'audio', kind: 'p', key: wo
 /** 能拼读的词：至少两个字母（单个字母的词拼了等于没拼），最长 20 个字符 */
 export const canSpellAloud = (w: string) => /^[a-z][a-z' -]*[a-z]$/i.test(w) && w.length <= 20
 
+/** 一段中文（释义 / 例句译文）：音频包里按念的字找 */
+export const zhSeg = (text: string): Seg => ({ t: 'audio', kind: 'z', key: zhKey(text), text })
+
 export function buildTrack(word: Word, sentence: Sentence | undefined, o: ScriptOpts): Track {
   const parts = glossParts(word.zh)
   const gloss = glossShort(parts)
@@ -143,11 +87,11 @@ export function buildTrack(word: Word, sentence: Sentence | undefined, o: Script
   const w: Seg = { t: 'audio', kind: 'w', key: word.w, text: word.w }
   const segs: Seg[] = [w]
   if (o.spell && canSpellAloud(word.w)) segs.push({ t: 'gap', ms: 500 }, spellSeg(word.w), { t: 'gap', ms: 500 }, w)
-  if (o.zh && say) segs.push({ t: 'gap', ms: 600 }, { t: 'say', lang: 'zh', text: say })
+  if (o.zh && say) segs.push({ t: 'gap', ms: 600 }, zhSeg(say))
   if (o.example && sentence) {
     const s: Seg = { t: 'audio', kind: 's', key: String(sentence.id), text: sentence.en }
     segs.push({ t: 'gap', ms: 800 }, s)
-    if (o.zh && sentence.zh) segs.push({ t: 'gap', ms: 450 }, { t: 'say', lang: 'zh', text: sentence.zh }, { t: 'gap', ms: 450 }, s)
+    if (o.zh && sentence.zh) segs.push({ t: 'gap', ms: 450 }, zhSeg(sentence.zh), { t: 'gap', ms: 450 }, s)
     else segs.push({ t: 'gap', ms: 900 }, s)
   }
   // 词和词之间留一口气
@@ -161,6 +105,7 @@ export function estimateSec(t: Track): number {
   for (const s of t.segs) {
     if (s.t === 'gap') ms += s.ms
     else if (s.t === 'say') ms += s.lang === 'zh' ? s.text.length * 220 : 600
+    else if (s.kind === 'z') ms += s.text.length * 220
     else if (s.kind === 'p') ms += 300 + s.key.replace(/[^a-z]/gi, '').length * 300
     else if (s.kind === 'w') ms += 800
     else ms += Math.max(1200, s.text.length * 70)
