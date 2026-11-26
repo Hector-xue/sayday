@@ -57,7 +57,7 @@ npx vitest run                         # 单元测试；e2e/ 下是端到端脚�
 | `packages/speech/` | 发音评分核心（CTC-GOP、校准、尾音检查、整句分），网页 / App / 演示页 / MCP 共用 |
 | `packages/asr/` | 离线语音识别（Moonshine 解码），网页 / App / MCP 共用 |
 | `packages/agent/` | 给 AI 助手用的工具：本地 / 远程 MCP、Skill、HTTP API（[说明](packages/agent/README.md)） |
-| `content/` | 内容包构建（`build_content.py`：ECDICT 词表 + Tatoeba 例句 + 定级假词）、剧集台词（`episodes/`，原创）、雅思题库（`ielts/`，原创）与示范音频包（`audio/`，CI 生成）、听学拼单词用的字母读音（`letters/`，content-letters 工作流生成） |
+| `content/` | 内容包构建（`build_content.py`：ECDICT 词表 + Tatoeba 例句 + 定级假词）、剧集台词（`episodes/`，原创）、雅思题库（`ielts/`，原创）与示范音频包（`audio/`，CI 生成，含听学的拼读） |
 | `site/` | 门户 sayday.ivyea.com |
 | `docs/` | 技术验证报告、进展 |
 | `spikes/` | M0/M1 验证脚本、浏览器演示页 |

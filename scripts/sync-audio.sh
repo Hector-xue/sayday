@@ -25,9 +25,9 @@ n=0
 for d in "$TMP"/dl/audio-*; do
   for acc in us gb; do
     [ -d "$d/$acc" ] || continue
-    mkdir -p "$TMP/audio/$acc/s" "$TMP/audio/$acc/w" "$TMP/audio/$acc/e"
+    mkdir -p "$TMP/audio/$acc/s" "$TMP/audio/$acc/w" "$TMP/audio/$acc/e" "$TMP/audio/$acc/p"
     ls "$d/$acc"/shard-*.json >/dev/null 2>&1 || { echo "缺清单：$d"; exit 1; }
-    for k in s w e; do [ -d "$d/$acc/$k" ] && find "$d/$acc/$k" -name '*.mp3' -exec mv -t "$TMP/audio/$acc/$k/" {} +; done
+    for k in s w e p; do [ -d "$d/$acc/$k" ] && find "$d/$acc/$k" -name '*.mp3' -exec mv -t "$TMP/audio/$acc/$k/" {} +; done
     cat "$d/$acc"/shard-*.json > /dev/null
     n=$((n + 1))
   done
@@ -56,7 +56,7 @@ if [ "${ONLY:-}" = "add" ]; then
   # 增量：32 片齐全；只往线上目录里加文件（同名的覆盖），不删任何东西
   [ "$n" -eq 32 ] || { echo "分片不全：$n/32"; exit 1; }
   for acc in us gb; do
-    for k in s w e; do
+    for k in s w e p; do
       c=$(find "$TMP/audio/$acc/$k" -name '*.mp3' | wc -l)
       echo "$acc/$k 新增 $c"
       [ "$c" -gt 0 ] || continue
@@ -74,9 +74,11 @@ for acc in us gb; do
   echo "$acc 句子 $(ls "$TMP/audio/$acc/s" | wc -l) · 单词 $(ls "$TMP/audio/$acc/w" | wc -l) · 剧集 $(ls "$TMP/audio/$acc/e" | wc -l)"
   [ "$(ls "$TMP/audio/$acc/s" | wc -l)" -gt 10000 ] && [ "$(ls "$TMP/audio/$acc/w" | wc -l)" -gt 10000 ] || { echo "$acc 句子或单词数量不对，不发布"; exit 1; }
 done
-# 全量产物里没有剧集时，保留线上已有的剧集音频
+# 全量产物里没有剧集 / 拼读时，保留线上已有的
 for acc in us gb; do
-  if [ -z "$(ls -A "$TMP/audio/$acc/e")" ] && [ -d "$DEST/$acc/e" ]; then rmdir "$TMP/audio/$acc/e"; cp -r "$DEST/$acc/e" "$TMP/audio/$acc/e"; fi
+  for k in e p; do
+    if [ -z "$(ls -A "$TMP/audio/$acc/$k")" ] && [ -d "$DEST/$acc/$k" ]; then rmdir "$TMP/audio/$acc/$k"; cp -r "$DEST/$acc/$k" "$TMP/audio/$acc/$k"; fi
+  done
 done
 chmod -R a+rX "$TMP/audio"
 rm -rf "$DEST.new" && mv "$TMP/audio" "$DEST.new"

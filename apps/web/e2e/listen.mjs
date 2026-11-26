@@ -1,6 +1,6 @@
 // 端到端：听学（网页版播放器）。新用户走完引导，打开“听学”，选“预习新词”听 10 个：
 //   - 设置页能选来源、每轮词数；开始后显示当前词、音标、意思、例句，这一轮的词表里当前词高亮
-//   - 不点任何按钮也会自己讲完一个词、接着讲下一个；讲完的词记成“听过 1 遍”
+//   - 不点任何按钮也会自己讲完一个词、接着讲下一个；拼读取音频包里整个词的一段；讲完的词记成“听过 1 遍”
 //   - 下一个 / 上一个 / 暂停能用；关掉听学页回到今天页，入口显示“暂停在 · 某词”；再打开接着显示
 //   - “换一组”回到设置页
 // 声音换成假的（音频播放、系统朗读都立刻结束），不然 CI 里没有音频包、没有系统语音，要等很久
@@ -21,6 +21,8 @@ try {
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
   p.on('dialog', (d) => d.accept())
   p.on('pageerror', (e) => errors.push(e.message))
+  const reqs = []
+  p.on('request', (r) => reqs.push(r.url()))
   await p.evaluateOnNewDocument(() => {
     // 假声音：音频 40ms 播完，系统朗读 40ms 读完，有一个中文和一个英文的声音
     HTMLMediaElement.prototype.play = function () { setTimeout(() => this.dispatchEvent(new Event('ended')), 40); return Promise.resolve() }
@@ -79,6 +81,10 @@ try {
   expect((await current()) === w2, '高亮跟着换', await current())
   const said = await p.evaluate(() => globalThis.__said || 0)
   expect(said >= 2, '中文释义、例句译文用系统语音念了', said)
+  // 拼读是音频包里整个词一段（p/<单词>.mp3），不是一个个字母
+  const spell = reqs.filter((u) => /\/audio\/(us|gb)\/p\/[^/]+\.mp3$/.test(u))
+  expect(spell.some((u) => u.endsWith(`/p/${encodeURIComponent(w1)}.mp3`)), '拼读从音频包取整个词的一段', spell.slice(0, 2))
+  expect(!reqs.some((u) => /\/letters\//.test(u)), '不再取单个字母的音频')
 
   // 下一个 / 上一个
   await p.click('[aria-label="下一个"]'); await waitWord((w) => document.querySelector('.hear-word')?.textContent !== w, w2)

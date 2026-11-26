@@ -5,7 +5,7 @@ vi.mock('../lesson', () => ({ previewWords: async () => [] }))
 vi.mock('../srs', () => ({ dueWords: async () => [] }))
 vi.mock('../tts', () => ({ PACK_PUBLIC: 'https://sayday.ivyea.com/audio/', getAudio: async () => '', NoAudio: class extends Error {} }))
 vi.mock('../speak', () => ({ hasVoice: async () => true, speakLang: async () => {}, stopSpeak: () => {} }))
-import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSegs, type Seg } from '../listen'
+import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSeg, spellText } from '../listen'
 import { nativeSeg } from '../listen-player'
 import type { Word, Sentence } from '../content'
 
@@ -55,20 +55,13 @@ describe('释义整理成能念的中文', () => {
 })
 
 describe('拼读', () => {
-  const letters = (segs: Seg[]) => segs.filter((s) => s.t === 'audio').map((s) => (s as { key: string }).key).join('')
-  it('一个字母一段音频，中间短停；长词每 4 个字母多停一下', () => {
-    const s = spellSegs('abandon')
-    expect(letters(s)).toBe('abandon')
-    const gaps = s.filter((x) => x.t === 'gap').map((x) => (x as { ms: number }).ms)
-    expect(gaps).toEqual([150, 150, 150, 380, 150, 150])
-    expect(s.every((x) => x.t !== 'audio' || (x.kind === 'l' && x.text === x.key.toUpperCase()))).toBe(true)
+  it('整个词一段音频（音频包 p/），不是一个个字母拼', () => {
+    expect(spellSeg('abandon')).toEqual({ t: 'audio', kind: 'p', key: 'abandon', text: 'A, B, A, N, D, O, N' })
   })
-  it('连字符念 hyphen、撇号不念、空格多停', () => {
-    const s = spellSegs("x-ray")
-    expect(letters(s)).toBe('xray')
-    expect(s.some((x) => x.t === 'say' && x.text === 'hyphen')).toBe(true)
-    expect(letters(spellSegs("o'clock"))).toBe('oclock')
-    expect(spellSegs('ice cream').some((x) => x.t === 'gap' && x.ms === 450)).toBe(true)
+  it('系统语音顶替时念的：连字符念 hyphen、撇号不念、空格停一下', () => {
+    expect(spellText('x-ray')).toBe('X, hyphen, R, A, Y')
+    expect(spellText("o'clock")).toBe('O, C, L, O, C, K')
+    expect(spellText('ice cream')).toBe('I, C, E. C, R, E, A, M')
   })
   it('单个字母的词、太长的、带怪字符的不拼', () => {
     expect(canSpellAloud('a')).toBe(false)
@@ -86,7 +79,7 @@ describe('讲解脚本', () => {
   it('全开：读 → 拼 → 再读 → 中文 → 例句 → 译文 → 例句再读，最后留停顿', () => {
     const t = buildTrack(w, S, { spell: true, zh: true, example: true })
     const order = t.segs.filter((s) => s.t !== 'gap').map((s) => (s.t === 'say' ? `say:${s.lang}` : `${s.kind}`))
-    expect(order).toEqual(['w', ...'abandon'.split('').map(() => 'l'), 'w', 'say:zh', 's', 'say:zh', 's'])
+    expect(order).toEqual(['w', 'p', 'w', 'say:zh', 's', 'say:zh', 's'])
     expect(t.segs.at(-1)).toEqual({ t: 'gap', ms: 1500 })
     expect(t.gloss).toBe('放弃，抛弃，遗弃')
     expect(t.sentence?.id).toBe(1234)
@@ -105,7 +98,8 @@ describe('讲解脚本', () => {
     expect(t.segs.some((s) => s.t === 'say')).toBe(false)
     expect(t.sentence).toBeUndefined()
   })
-  it('估时：全开一个词十几秒', () => {
+  it('估时：全开一个词十几秒，拼读按字母数', () => {
+    expect(estimateSec({ word: 'go', ipa: '', gloss: '', segs: [spellSeg('go')] })).toBeCloseTo(0.9)
     const sec = estimateSec(buildTrack(w, S, { spell: true, zh: true, example: true }))
     expect(sec).toBeGreaterThan(10)
     expect(sec).toBeLessThan(30)
@@ -113,11 +107,11 @@ describe('讲解脚本', () => {
 })
 
 describe('交给原生播放器的地址', () => {
-  it('单词 / 例句走公开音频包（单词名要转义），字母走 App 里的 asset，中文用 zh-CN', () => {
+  it('单词 / 拼读 / 例句都走公开音频包（单词名要转义），中文用 zh-CN', () => {
     expect(nativeSeg({ t: 'audio', kind: 'w', key: "o'clock", text: "o'clock" }, 'gb')).toEqual({ t: 'audio', url: "https://sayday.ivyea.com/audio/gb/w/o'clock.mp3", text: "o'clock", lang: 'en-GB' })
     expect(nativeSeg({ t: 'audio', kind: 'w', key: 'ice cream', text: 'ice cream' }, 'us')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/us/w/ice%20cream.mp3' })
     expect(nativeSeg({ t: 'audio', kind: 's', key: '1234', text: 'x' }, 'us')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/us/s/1234.mp3', lang: 'en-US' })
-    expect(nativeSeg({ t: 'audio', kind: 'l', key: 'q', text: 'Q' }, 'us')).toMatchObject({ url: 'asset:///letters/us/q.mp3' })
+    expect(nativeSeg({ t: 'audio', kind: 'p', key: 'ice cream', text: 'I, C, E. C, R, E, A, M' }, 'gb')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/gb/p/ice%20cream.mp3', lang: 'en-GB' })
     expect(nativeSeg({ t: 'say', lang: 'zh', text: '你好' }, 'us')).toEqual({ t: 'say', text: '你好', lang: 'zh-CN' })
     expect(nativeSeg({ t: 'gap', ms: 300 }, 'us')).toEqual({ t: 'gap', ms: 300 })
   })
