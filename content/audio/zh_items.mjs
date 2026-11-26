@@ -15,8 +15,12 @@ const pack = new URL('../pack/', import.meta.url)
 const words = JSON.parse(readFileSync(new URL('words.json', pack)))
 const sents = JSON.parse(readFileSync(new URL('sentences.json', pack)))
 
-/** 交给合成的写法：例句译文里夹着的英文人名换成中文译名（中文模型遇到英文要么跳过要么念成字母） */
-export const speakable = (t) => t.replace(/\bTom\b/gi, '汤姆').replace(/\bMary\b/g, '玛丽').replace(/\bJohn\b/g, '约翰')
+/**
+ * 交给合成的写法（键还是按原文算）：
+ * - 例句译文里夹着的英文人名换成中文译名（中文模型遇到英文要么跳过要么念成字母）
+ * - 例句译文有台湾写法的“著”（试著、睡著了）：模型会念成 zhù，除了著名、著作、显著、名著这类都换成“着”
+ */
+export const speakable = (t) => t.replace(/\bTom\b/gi, '汤姆').replace(/\bMary\b/g, '玛丽').replace(/\bJohn\b/g, '约翰').replace(/(?<![显昭卓名论原巨专编土合译遗新拙大])著(?![名作称述者书录])/g, '着')
 
 const texts = [...new Set([...words.map((w) => glossSpeech(glossParts(String(w[4] ?? '')))), ...sents.map((s) => s[2])].filter((t) => t && /[一-鿿]/.test(t)))]
 const all = texts.map((text) => ({ key: zhKey(text), text, say: speakable(text) })).sort((a, b) => (a.key < b.key ? -1 : 1))

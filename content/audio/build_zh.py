@@ -1,6 +1,6 @@
 """听学的中文讲解：zh_items.mjs 列出的中文 → sherpa-onnx 合成 → mp3（24kHz 单声道 64kbps，和英文音频包一样）。
 输出 <out>/zh/<键>.mp3，外加 <out>/zh/shard-<i>.json（清单）。
-用法: python build_zh.py --items items.json --out out --shard 0 --model kokoro-multi-lang-v1_1 --sid 50 [--speed 1.0]
+用法: python build_zh.py --items items.json --out out --shard 0 --model kokoro-multi-lang-v1_1 --sid 25 [--speed 1.0]
 模型目录（sherpa-onnx 的 tts-models 发布包解开）：kokoro-multi-lang-v1_1（Kokoro v1.1-zh）或 matcha-icefall-zh-baker（另需 vocos-22khz-univ.onnx）
 为什么不用手机自带的中文语音：各家手机的引擎参差不齐，用户反馈“电子音太重、机械、偶尔像青蛙叫”。
 """
