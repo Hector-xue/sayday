@@ -2,7 +2,7 @@
 import { db } from './db'
 import { mergeSnapshot, type Snapshot } from './sync'
 
-const TABLES = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work']
+const TABLES = ['kv', 'card', 'review_log', 'attempt', 'phoneme_stat', 'day', 'level_estimate', 'listen_log', 'chat', 'diary', 'speaking_test', 'writing', 'practice', 'work', 'passive_log']
 
 /** 导出；返回给用户看的一句话 */
 export async function exportBackup(): Promise<string> {

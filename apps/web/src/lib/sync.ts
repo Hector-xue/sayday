@@ -66,7 +66,7 @@ export async function open<T>(blob: Uint8Array, key: CryptoKey): Promise<T> {
 
 type Row = Record<string, unknown>
 /** 只在这台设备上有意义的设置：不传、也不被别的设备覆盖 */
-const LOCAL_KV = new Set(['reminder', 'notify_quiz', 'backlog_spread', 'theme', 'text_size', 'sync', 'sync_seen', 'sync_device', 'buddy'])
+const LOCAL_KV = new Set(['reminder', 'notify_quiz', 'backlog_spread', 'theme', 'text_size', 'sync', 'sync_seen', 'sync_device', 'buddy', 'listen_now'])
 const isLocalKv = (k: string) => LOCAL_KV.has(k) || k.startsWith('sync_')
 
 /** 流水表：按内容去重的键（自增 id 不同步，各设备自己编） */
@@ -81,6 +81,7 @@ const LOGS: Record<string, (r: Row) => string> = {
   writing: (r) => `${r.prompt_id}|${r.ts}`,
   practice: (r) => `${r.kind}|${r.ts}`,
   work: (r) => `${r.task}|${r.ts}`,
+  passive_log: (r) => `${r.word}|${r.ts}`,
 }
 const DAY_COUNTS = ['reviews', 'new_words', 'shadows', 'seconds', 'minimum', 'done', 'listens']
 

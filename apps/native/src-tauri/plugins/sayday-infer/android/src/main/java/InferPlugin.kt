@@ -115,6 +115,23 @@ class UpdateArgs {
 }
 
 @InvokeArg
+class ListenStartArgs {
+  /** 整轮讲解脚本（JSON 数组，见 Listen.kt / 网页 listen-player.ts） */
+  var tracks: String = "[]"
+  var rate: Float = 1f
+  /** 听完一轮从头再来 */
+  var repeat: Boolean = true
+}
+
+@InvokeArg
+class ListenControlArgs {
+  /** play / pause / next / prev / seek / rate / sleep / stop */
+  var action: String = ""
+  /** seek 的词序号、rate 的语速、sleep 的分钟数 */
+  var value: Double = 0.0
+}
+
+@InvokeArg
 class RunArgs {
   /** 已归一化的 16kHz 单声道音频，float32 小端序的 base64 */
   lateinit var audio: String
@@ -377,6 +394,54 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
   fun speakStop(invoke: Invoke) {
     tts?.stop()
     invoke.resolve(JSObject())
+  }
+
+  // ---- 听学：前台播放服务（见 Listen.kt）。锁屏、切到后台、关掉听学页都接着播 ----
+  @Command
+  fun listenStart(invoke: Invoke) {
+    val a = invoke.parseArgs(ListenStartArgs::class.java)
+    ListenService.with(activity) { s ->
+      try {
+        s.load(a.tracks, a.rate, a.repeat)
+        invoke.resolve(JSObject())
+      } catch (e: Throwable) {
+        invoke.reject("没能开始播放：${e.javaClass.simpleName}: ${e.message}")
+      }
+    }
+  }
+
+  @Command
+  fun listenControl(invoke: Invoke) {
+    val a = invoke.parseArgs(ListenControlArgs::class.java)
+    val s = ListenService.instance
+    if (s == null) { invoke.resolve(JSObject()); return }
+    activity.runOnUiThread {
+      try { s.control(a.action, a.value) } catch (e: Throwable) { android.util.Log.w("SaydayListen", "控制失败 ${a.action}", e) }
+      invoke.resolve(JSObject())
+    }
+  }
+
+  @Command
+  fun listenState(invoke: Invoke) {
+    val s = ListenService.instance
+    if (s == null) { invoke.resolve(JSObject().apply { put("status", "idle") }); return }
+    activity.runOnUiThread {
+      val r = JSObject()
+      try {
+        val o = s.state()
+        for (k in o.keys()) r.put(k, o.get(k))
+      } catch (e: Throwable) {
+        r.put("status", "idle")
+      }
+      invoke.resolve(r)
+    }
+  }
+
+  @Command
+  fun listenDrain(invoke: Invoke) {
+    val r = JSObject()
+    r.put("heard", ListenService.drain(activity))
+    invoke.resolve(r)
   }
 
   // ---- 应用内更新（见 Updater.kt）----

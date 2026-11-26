@@ -745,3 +745,33 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 @keyframes confetti { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: .9; transform: translateY(105vh) rotate(540deg); } }
 @media (prefers-reduced-motion: reduce) { .combo, .got-right, .got-wrong, .celebrate-num mark, .result-tiles > div { animation: none; } .confetti { display: none; } }
 .q-res .explain-btn { justify-self: start; margin-top: 4px; }
+
+/* ---- 听学：像听歌一样听老师讲词 ---- */
+/* 弹层内容区是纵向 flex：里面 overflow:hidden 的列表会被压扁，整页包一层不收缩的 */
+.hear-body { flex: none; }
+.hear-intro p { margin: 0 2px; font-size: 14px; line-height: 1.6; color: var(--soft); }
+.hear-src .side { color: var(--brand); width: 22px; height: 22px; }
+.hear-src .side svg { width: 22px; height: 22px; }
+.hear-now { text-align: center; padding: 22px 4px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hear-pos { letter-spacing: .02em; }
+.hear-word { font-size: 46px; line-height: 1.1; font-weight: 500; color: var(--ink); word-break: break-word; margin-top: 4px; }
+.hear-gloss { font-size: 16px; color: var(--ink); max-width: 30em; line-height: 1.5; }
+.hear-ex { margin-top: 14px; max-width: 30em; display: flex; flex-direction: column; gap: 4px; }
+.hear-ex .en { font-size: 18px; line-height: 1.45; color: var(--ink); }
+.hear-ctrl { display: flex; align-items: center; justify-content: center; gap: 28px; margin: 22px 0 6px; }
+.hear-ctrl .icon-btn svg { width: 26px; height: 26px; }
+.hear-play { width: 72px; height: 72px; border-radius: 50%; border: 0; display: grid; place-items: center; color: var(--brand-ink); background: linear-gradient(135deg, var(--brand-2), var(--brand)); box-shadow: 0 12px 28px -14px var(--brand); transition: transform .12s; }
+.hear-play:active { transform: scale(.95); }
+.hear-play:disabled { opacity: .5; }
+.hear-play svg { width: 30px; height: 30px; }
+.hear-status { text-align: center; min-height: 1.4em; margin: 0 0 6px; }
+.hear-note { margin-bottom: 12px; }
+.hear-note b { font-size: 15px; }
+.hear-note p { margin: 6px 0 0; }
+.list-row[aria-current="true"] { background: var(--brand-soft); }
+.list-row[aria-current="true"] .main b { color: var(--brand); }
+.hear-entry { border-style: solid; flex-direction: row; align-items: center; gap: 14px; }
+.hear-entry .ai-ico { margin: 0; color: var(--brand); display: grid; place-items: center; }
+.hear-entry .ai-ico svg { width: 26px; height: 26px; }
+.hear-entry .t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+[data-style="paper"] .hear-play { background: var(--brand); box-shadow: none; }

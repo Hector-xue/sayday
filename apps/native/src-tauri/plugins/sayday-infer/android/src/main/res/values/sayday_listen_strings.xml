@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 听学播放通知的渠道名（系统设置 → 通知里看到的） -->
+    <string name="sayday_listen_channel">听学播放</string>
+</resources>

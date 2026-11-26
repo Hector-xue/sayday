@@ -10,6 +10,11 @@
     <!-- AI 回复、日记朗读用系统 TTS；安卓 11+ 要声明才能找到语音引擎 -->
     <!-- 通知里做题：手机重启后把出题闹钟排回去 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 听学：锁屏、切到后台也接着播的前台播放服务（Listen.kt）；音频包要联网下载；播放时不让 CPU 睡着 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
@@ -92,6 +97,15 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- 听学的播放服务（Media3）：通知栏、锁屏、耳机 / 蓝牙按键都连到这里。exported 是为了让系统和蓝牙设备能控制播放 -->
+        <service
+            android:name="com.ivyea.sayday.infer.ListenService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
         <!-- 应用内更新：把缓存目录里的安装包交给系统安装器（见 Updater.kt） -->
         <provider
             android:name="com.ivyea.sayday.infer.UpdateFileProvider"

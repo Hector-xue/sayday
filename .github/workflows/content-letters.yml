@@ -1,0 +1,65 @@
+# 听学里老师拼单词用的 26 个字母读音（美音 / 英音各一套，Kokoro 合成，和单词、例句同一个声音）。
+# 只有 52 个小文件，不进音频包，随 App 打包：产物下载后放进 content/letters/<口音>/<字母>.mp3 入库
+#   gh run download <run> -R Hector-xue/sayday -n letters -D content/letters
+# 换了声音（build_audio.mjs 的 VOICE）才需要重跑：手动触发；改了这个文件推到分支上也会跑一次
+# （手动触发只认默认分支上已有的工作流，新加的时候靠 push 跑第一次）
+name: content-letters
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - '.github/workflows/content-letters.yml'
+
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: ffmpeg
+        run: |
+          which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          ffmpeg -version | head -1
+
+      - name: npm ci
+        working-directory: content/audio
+        # onnxruntime-node 安装时会去下 GPU 版二进制（这边用不到，而且那个地址已经 404），跳过
+        env:
+          npm_config_onnxruntime_node_install_cuda: skip
+        run: npm ci --no-audit --no-fund
+
+      - name: Kokoro 模型缓存
+        uses: actions/cache@v4
+        with:
+          path: content/audio/node_modules/@huggingface/transformers/.cache
+          key: kokoro-82m-v1.0-q8
+
+      - name: 合成
+        working-directory: content/audio
+        run: |
+          set -euo pipefail
+          for acc in us gb; do
+            node build_audio.mjs --accent "$acc" --shard 0 --shards 1 --out out --dtype q8 --only l
+          done
+          # 26 个字母两种口音必须齐全，每个都不能是空文件
+          for acc in us gb; do
+            n=$(find "out/$acc/l" -name '*.mp3' -size +1k | wc -l)
+            echo "$acc：$n 个"
+            [ "$n" -eq 26 ] || { echo "::error::$acc 字母不全（$n/26）"; exit 1; }
+          done
+          mkdir -p letters
+          for acc in us gb; do mkdir -p "letters/$acc" && cp out/$acc/l/*.mp3 "letters/$acc/"; done
+          du -sh letters
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: letters
+          path: content/audio/letters
+          retention-days: 7

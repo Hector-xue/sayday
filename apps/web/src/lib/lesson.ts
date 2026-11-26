@@ -68,6 +68,13 @@ async function pickNewWords(p: Profile, n: number, words: Word[], frontier: numb
   return [...tagged, ...rest, ...cand.slice(400)].slice(0, n)
 }
 
+/** 接下来要学的新词（听学的“预习新词”用）：和每日练习挑新词同一套规则，只是不入库 */
+export async function previewWords(p: Profile, n: number): Promise<Word[]> {
+  const { words } = await loadContent()
+  const lv = await vocabLevel(p)
+  return pickNewWords(p, n, words, lv.frontier)
+}
+
 /** 今天每项的量：按短板加权（听力落后词汇一档以上就多排听力） */
 export async function dailySize(p: Profile) {
   const base = { ...sizeFor(p.minutes) }

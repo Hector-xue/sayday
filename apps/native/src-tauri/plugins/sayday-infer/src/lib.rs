@@ -202,9 +202,36 @@ fn lan_addrs<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
     app.state::<Infer<R>>().inner().call("lanAddrs", serde_json::json!({}))
 }
 
+/// 听学：把整轮讲解脚本交给原生前台播放服务（锁屏、后台都接着播）
+#[tauri::command]
+async fn listen_start<R: Runtime>(app: tauri::AppHandle<R>, tracks: String, rate: Option<f32>, repeat: Option<bool>) -> Result<Value> {
+    app.state::<Infer<R>>()
+        .inner()
+        .call("listenStart", serde_json::json!({ "tracks": tracks, "rate": rate.unwrap_or(1.0), "repeat": repeat.unwrap_or(true) }))
+}
+
+/// 听学：播放 / 暂停 / 上一个 / 下一个 / 跳到第几个 / 语速 / 定时关闭 / 停止
+#[tauri::command]
+async fn listen_control<R: Runtime>(app: tauri::AppHandle<R>, action: String, value: Option<f64>) -> Result<Value> {
+    app.state::<Infer<R>>()
+        .inner()
+        .call("listenControl", serde_json::json!({ "action": action, "value": value.unwrap_or(0.0) }))
+}
+
+#[tauri::command]
+async fn listen_state<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("listenState", serde_json::json!({}))
+}
+
+/// 取走后台播放时记下的“听完的词”（JSON 数组字符串）
+#[tauri::command]
+fn listen_drain<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("listenDrain", serde_json::json!({}))
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action, lan_addrs])
+        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action, lan_addrs, listen_start, listen_control, listen_state, listen_drain])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);
