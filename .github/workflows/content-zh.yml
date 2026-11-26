@@ -1,6 +1,7 @@
 # 听学的中文讲解（每个词的释义 + 例句译文，约 3 万句）：sherpa-onnx 合成成 mp3，24 片并行。中文不分口音，只合成一套。
 # 以前中文用手机自带的语音现念，各家引擎参差不齐（机械、电子音、偶尔像青蛙叫），所以和英文一样提前合成好。
 # 产物挂 artifact（保留 3 天），服务器用 ONLY=zh scripts/sync-audio.sh <run_id> 发布到 sayday.ivyea.com/audio/zh/。
+# 换声音 / 语速（改这里的默认值）要整套重跑（别勾 incremental），并把 apps/web/src/lib/gloss.ts 的 ZH_VER 加 1，手机里缓存的旧声音才会作废。
 # 内容包变了（新词、新例句、释义整理规则 apps/web/src/lib/gloss.ts 改了）才需要重跑，勾上 incremental 只合成线上还没有的。
 name: content-zh
 
@@ -23,7 +24,10 @@ on:
         default: 'kokoro-multi-lang-v1_1'
       sid:
         description: '说话人编号'
-        default: '25'
+        default: '36'
+      speed:
+        description: '语速（1 = 模型原速，越大越快）'
+        default: '1.15'
       limit:
         description: '每片只合成前几句（试跑用，0 = 全部）'
         default: '0'
@@ -39,7 +43,8 @@ jobs:
         shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0]' || '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]') }}
     env:
       MODEL: ${{ inputs.model || 'kokoro-multi-lang-v1_1' }}
-      SID: ${{ inputs.sid || '25' }}
+      SID: ${{ inputs.sid || '36' }}
+      SPEED: ${{ inputs.speed || '1.15' }}
       LIMIT: ${{ github.event_name == 'pull_request' && '3' || inputs.limit || '0' }}
     steps:
       - uses: actions/checkout@v4
@@ -85,7 +90,7 @@ jobs:
             HAVE="--have have.txt"
           fi
           node zh_items.mjs --shard ${{ matrix.shard }} --shards 24 --out items.json --limit $LIMIT $HAVE
-          python build_zh.py --items items.json --out out --shard ${{ matrix.shard }} --model "$GITHUB_WORKSPACE/.cache/zh-tts/$MODEL" --sid $SID
+          python build_zh.py --items items.json --out out --shard ${{ matrix.shard }} --model "$GITHUB_WORKSPACE/.cache/zh-tts/$MODEL" --sid $SID --speed $SPEED
 
       - uses: actions/upload-artifact@v4
         with:

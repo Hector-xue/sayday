@@ -7,6 +7,7 @@ vi.mock('../tts', () => ({ PACK_PUBLIC: 'https://sayday.ivyea.com/audio/', getAu
 vi.mock('../speak', () => ({ hasVoice: async () => true, speakLang: async () => {}, stopSpeak: () => {} }))
 import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSeg, spellText, zhKey, zhSeg } from '../listen'
 import { nativeSeg } from '../listen-player'
+import { ZH_VER } from '../gloss'
 import type { Word, Sentence } from '../content'
 
 const W = (w: string, zh: string, ipa = ''): Word => ({ w, rank: 1000, cefr: 'B1', ipa, zh, tags: [], cmu: ['X'], sensitive: false })
@@ -120,7 +121,7 @@ describe('交给原生播放器的地址', () => {
     expect(nativeSeg({ t: 'audio', kind: 'p', key: 'ice cream', text: 'I, C, E. C, R, E, A, M' }, 'gb')).toMatchObject({ url: 'https://sayday.ivyea.com/audio/gb/p/ice%20cream.mp3', lang: 'en-GB' })
     expect(nativeSeg({ t: 'say', lang: 'zh', text: '你好' }, 'us')).toEqual({ t: 'say', text: '你好', lang: 'zh-CN' })
     // 中文不分口音，在 zh/ 下按念的字找；没有时系统语音用 zh-CN 念
-    expect(nativeSeg(zhSeg('名词，市场。'), 'gb')).toEqual({ t: 'audio', url: `https://sayday.ivyea.com/audio/zh/${zhKey('名词，市场。')}.mp3`, text: '名词，市场。', lang: 'zh-CN' })
+    expect(nativeSeg(zhSeg('名词，市场。'), 'gb')).toEqual({ t: 'audio', url: `https://sayday.ivyea.com/audio/zh/${zhKey('名词，市场。')}.mp3?v=${ZH_VER}`, text: '名词，市场。', lang: 'zh-CN' })
     expect(nativeSeg({ t: 'gap', ms: 300 }, 'us')).toEqual({ t: 'gap', ms: 300 })
   })
 })

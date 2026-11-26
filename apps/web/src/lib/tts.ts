@@ -8,6 +8,7 @@
 // 课程开始时 prefetch 把接下来要用的提前下好
 import { isShell } from './speech/engine'
 import { canSpeak, speak, stopSpeak } from './speak'
+import { ZH_VER, zhPackPath } from './gloss'
 
 export type Accent = 'us' | 'gb'
 const CACHE = 'sayday-tts-v1'
@@ -30,7 +31,7 @@ const PACK = isShell ? PACK_PUBLIC : new URL('/audio/', location.href).href
 /** spell：听学里老师拼这个词（音频包 p/，整个词的字母一段）；zh：听学的中文讲解（音频包 zh/<键>.mp3，不分口音，键见 gloss.ts 的 zhKey） */
 export type Clip = { text: string; sentenceId?: number; word?: string; ep?: string; spell?: string; zh?: string }
 const packUrl = (c: Clip, accent: Accent) =>
-  c.zh ? `${PACK}zh/${c.zh}.mp3` : c.sentenceId ? `${PACK}${accent}/s/${c.sentenceId}.mp3` : c.word ? `${PACK}${accent}/w/${encodeURIComponent(c.word)}.mp3` : c.spell ? `${PACK}${accent}/p/${encodeURIComponent(c.spell)}.mp3` : c.ep ? `${PACK}${accent}/e/${c.ep}.mp3` : null
+  c.zh ? `${PACK}${zhPackPath(c.zh)}` : c.sentenceId ? `${PACK}${accent}/s/${c.sentenceId}.mp3` : c.word ? `${PACK}${accent}/w/${encodeURIComponent(c.word)}.mp3` : c.spell ? `${PACK}${accent}/p/${encodeURIComponent(c.spell)}.mp3` : c.ep ? `${PACK}${accent}/e/${c.ep}.mp3` : null
 const packMiss = new Set<string>()
 async function fromPack(c: Clip, accent: Accent): Promise<Blob | null> {
   const url = packUrl(c, accent)
@@ -44,7 +45,7 @@ async function fromPack(c: Clip, accent: Accent): Promise<Blob | null> {
 const keyUrl = (text: string, accent: Accent) => new URL(`./tts-cache/${accent}/${encodeURIComponent(norm(text))}.wav`, location.href).href
 // 本机缓存的键：一般按文字；剧集的另几套配音（男声 .m、换名字 .n-xxx）文字可能和原版一样，按配音键存，不然会拿到原版的声音
 // 拼读也按单词存（念的文字 “A, B, C” 不是正经的句子）
-const cacheKey = (c: Clip, accent: Accent) => (c.ep?.includes('.') ? new URL(`./tts-cache/${accent}/e/${c.ep}.mp3`, location.href).href : c.spell ? new URL(`./tts-cache/${accent}/p/${encodeURIComponent(c.spell)}.mp3`, location.href).href : c.zh ? new URL(`./tts-cache/zh/${c.zh}.mp3`, location.href).href : keyUrl(c.text, accent))
+const cacheKey = (c: Clip, accent: Accent) => (c.ep?.includes('.') ? new URL(`./tts-cache/${accent}/e/${c.ep}.mp3`, location.href).href : c.spell ? new URL(`./tts-cache/${accent}/p/${encodeURIComponent(c.spell)}.mp3`, location.href).href : c.zh ? new URL(`./tts-cache/zh/${c.zh}.v${ZH_VER}.mp3`, location.href).href : keyUrl(c.text, accent))
 
 // ---- 下载队列：后台一条条下，播放请求不排队 ----
 type Job = Clip & { accent: Accent }

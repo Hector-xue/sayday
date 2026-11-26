@@ -6,6 +6,7 @@
 // 两种播法给页面的状态（PlayState）一样，页面每半秒问一次
 import { isNative } from './speech/engine'
 import { getAudio, NoAudio, PACK_PUBLIC, type Accent } from './tts'
+import { zhPackPath } from './gloss'
 import { hasVoice, speakLang, stopSpeak } from './speak'
 import { logHeard, type Heard, type Seg, type Source, type Track } from './listen'
 import { kvGet, kvSet } from './db'
@@ -53,7 +54,7 @@ interface Engine {
 export function nativeSeg(s: Seg, accent: Accent): Record<string, unknown> {
   if (s.t === 'gap') return { t: 'gap', ms: s.ms }
   if (s.t === 'say') return { t: 'say', text: s.text, lang: s.lang === 'zh' ? 'zh-CN' : LANG[accent] }
-  if (s.kind === 'z') return { t: 'audio', url: `${PACK_PUBLIC}zh/${s.key}.mp3`, text: s.text, lang: 'zh-CN' }
+  if (s.kind === 'z') return { t: 'audio', url: `${PACK_PUBLIC}${zhPackPath(s.key)}`, text: s.text, lang: 'zh-CN' }
   const url = `${PACK_PUBLIC}${accent}/${s.kind}/${s.kind === 's' ? s.key : encodeURIComponent(s.key)}.mp3`
   return { t: 'audio', url, text: s.text, lang: LANG[accent] }
 }
