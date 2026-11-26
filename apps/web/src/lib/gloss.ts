@@ -85,3 +85,10 @@ export function zhKey(text: string): string {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36)
 }
+
+/**
+ * 中文讲解音频包（zh/<zhKey>.mp3）的版本：换了声音或语速（整套重新合成，文件名不变）就加 1。
+ * 地址带上它，手机里缓存的旧音频就对不上了，不会新旧两种声音混着播。v2：换成更年轻的女声，语速加快
+ */
+export const ZH_VER = 2
+export const zhPackPath = (key: string) => `zh/${key}.mp3?v=${ZH_VER}`

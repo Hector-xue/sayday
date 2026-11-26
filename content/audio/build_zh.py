@@ -1,7 +1,8 @@
 """听学的中文讲解：zh_items.mjs 列出的中文 → sherpa-onnx 合成 → mp3（24kHz 单声道 64kbps，和英文音频包一样）。
 输出 <out>/zh/<键>.mp3，外加 <out>/zh/shard-<i>.json（清单）。
-用法: python build_zh.py --items items.json --out out --shard 0 --model kokoro-multi-lang-v1_1 --sid 25 [--speed 1.0]
+用法: python build_zh.py --items items.json --out out --shard 0 --model kokoro-multi-lang-v1_1 --sid 36 --speed 1.15
 模型目录（sherpa-onnx 的 tts-models 发布包解开）：kokoro-multi-lang-v1_1（Kokoro v1.1-zh）或 matcha-icefall-zh-baker（另需 vocos-22khz-univ.onnx）
+声音：sid 36（年龄模型估约 25 岁）、1.15 倍速（每秒约 3.8 个字）。原先的 sid 25 被用户说像中年人、偏慢，估出来 67 岁、每秒 3.1 字。
 为什么不用手机自带的中文语音：各家手机的引擎参差不齐，用户反馈“电子音太重、机械、偶尔像青蛙叫”。
 """
 import argparse, json, os, subprocess, sys, time
@@ -14,8 +15,8 @@ ap.add_argument('--items', required=True)
 ap.add_argument('--out', default='out')
 ap.add_argument('--shard', type=int, default=0)
 ap.add_argument('--model', required=True)
-ap.add_argument('--sid', type=int, default=0)
-ap.add_argument('--speed', type=float, default=1.0)
+ap.add_argument('--sid', type=int, default=36)
+ap.add_argument('--speed', type=float, default=1.15)
 ap.add_argument('--threads', type=int, default=os.cpu_count() or 2)
 a = ap.parse_args()
 
@@ -54,7 +55,7 @@ for i, it in enumerate(items):
     done.append({'key': it['key'], 'text': it['text'], 'sec': round(len(x) / g.sample_rate, 2)})
     if i % 100 == 0:
         print(f'{i}/{len(items)} {time.time() - t0:.0f}s', flush=True)
-json.dump({'shard': a.shard, 'model': name, 'sid': a.sid, 'items': done, 'bad': bad}, open(os.path.join(out, f'shard-{a.shard}.json'), 'w', encoding='utf-8'), ensure_ascii=False)
+json.dump({'shard': a.shard, 'model': name, 'sid': a.sid, 'speed': a.speed, 'items': done, 'bad': bad}, open(os.path.join(out, f'shard-{a.shard}.json'), 'w', encoding='utf-8'), ensure_ascii=False)
 print(f'合成 {len(done)} 句，失败 {len(bad)} 句，{time.time() - t0:.0f}s')
 if len(bad) > max(5, len(items) // 50):
     sys.exit('失败太多')
