@@ -94,8 +94,9 @@ jobs:
         working-directory: apps/web
         run: node e2e/extension.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e" "$GITHUB_WORKSPACE/dist/extension"
 
+      # 通过了也传：改界面时直接看 CI 上的真实截图
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ !cancelled() }}
         with:
           name: e2e-screenshots
           path: ${{ runner.temp }}/e2e/*.png

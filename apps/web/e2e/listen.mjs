@@ -2,7 +2,8 @@
 //   - 设置页能选来源、每轮词数；开始后显示当前词、音标、意思、例句，这一轮的词表里当前词高亮
 //   - 不点任何按钮也会自己讲完一个词、接着讲下一个；拼读取音频包里整个词的一段；讲完的词记成“听过 1 遍”
 //   - 下一个 / 上一个 / 暂停能用；关掉听学页回到今天页，入口显示“暂停在 · 某词”；再打开接着显示
-//   - “换一组”回到设置页
+//   - “换一组”换成另一组词接着听；“停止”回到设置页
+//   - 纯听学：按词表往下听，今天听过的不再排进下一组，设置页显示进度
 // 声音换成假的（音频播放、系统朗读都立刻结束），不然 CI 里没有音频包、没有系统语音，要等很久
 // 用法: node e2e/listen.mjs <站点URL> <输出目录>
 import puppeteer from 'puppeteer-core'
@@ -62,7 +63,7 @@ try {
   await clickText('10 词', '.seg button')
   await p.screenshot({ path: join(OUT, 'listen-setup.png') })
   const setup = await text()
-  expect(['今天的词', '快忘的词', '最近学的', '预习新词', '拼写', '中文讲解', '例句', '循环'].every((t) => setup.includes(t)), '设置页有四种来源和四个开关')
+  expect(['纯听学', '今天的词', '快忘的词', '最近学的', '预习新词', '拼写', '中文讲解', '例句', '循环'].every((t) => setup.includes(t)), '设置页有五种来源和四个开关')
   await clickText('开始听')
   await p.waitForSelector('.hear-word', { timeout: 15000 })
   const w1 = await word()
@@ -115,10 +116,33 @@ try {
   const heardRow = await p.evaluate((w) => [...document.querySelectorAll('.list-row')].find((r) => r.querySelector('b')?.textContent === w)?.textContent ?? '', w1)
   expect(heardRow.includes('听过 1 遍'), '讲完的词记成听过 1 遍', heardRow)
 
-  // 换一组：回到设置页
+  // 换一组：换成另一组词，接着听
+  const group = async () => p.evaluate(() => [...document.querySelectorAll('.session-body .list-row:not(.hear-src) b')].map((b) => b.textContent))
+  const g1 = await group()
   await clickText('换一组')
+  await p.waitForFunction((w) => { const b = [...document.querySelectorAll('.session-body .list-row:not(.hear-src) b')].map((x) => x.textContent); return b.length && !b.includes(w) }, { timeout: 15000 }, g1[0]).catch(() => {})
+  const g2 = await group()
+  expect(!!(await p.$('.hear-word')), '换一组后接着播')
+  expect(g2.length === 10 && g2.every((w) => !g1.includes(w)), '换一组换成另外 10 个词', `${g1.slice(0, 3)} → ${g2.slice(0, 3)}`)
+
+  // 停止：回到设置页
+  await clickText('停止，换个听法')
   await p.waitForFunction(() => document.body.innerText.includes('听什么'), { timeout: 6000 }).catch(() => {})
-  expect((await text()).includes('开始听'), '换一组回到设置页')
+  expect((await text()).includes('开始听'), '停止回到设置页')
+
+  // 纯听学：有进度；今天刚听过的词不会再排进新的一组
+  await clickText('纯听学', '.hear-src')
+  await p.waitForFunction(() => /在听 [1-9]/.test(document.querySelector('.hear-course')?.textContent ?? ''), { timeout: 8000 }).catch(() => {})
+  const prog = await p.evaluate(() => document.querySelector('.hear-course')?.textContent ?? '')
+  await p.screenshot({ path: join(OUT, 'listen-course-setup.png') })
+  expect(/听熟 0 个 · 在听 [1-9]\d* 个 · 词表共 \d+ 个/.test(prog), '纯听学显示进度（听过的词算“在听”）', prog)
+  await clickText('开始听')
+  await p.waitForSelector('.hear-word', { timeout: 15000 })
+  const g3 = await group()
+  expect(g3.length === 10 && !g3.includes(w1), '纯听学的一组不含今天刚听完的词', `${w1} ∉ ${g3.slice(0, 5)}`)
+  expect((await text()).includes('纯听学进度'), '播放时也显示纯听学进度')
+  await p.screenshot({ path: join(OUT, 'listen-course.png') })
+  await clickText('停止，换个听法')
   expect(errors.length === 0, '页面没有报错', errors)
 } finally {
   await b.close()

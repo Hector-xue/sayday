@@ -766,6 +766,8 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .hear-play svg { width: 30px; height: 30px; }
 .hear-status { text-align: center; min-height: 1.4em; margin: 0 0 6px; }
 .hear-note { margin-bottom: 12px; }
+.hear-course { margin: 8px 2px 0; line-height: 1.6; }
+.hear-stop { margin-top: 16px; }
 .hear-note b { font-size: 15px; }
 .hear-note p { margin: 6px 0 0; }
 .list-row[aria-current="true"] { background: var(--brand-soft); }

@@ -6,7 +6,7 @@
 import { db, kvGet, kvSet, today } from './db'
 import { loadContent, pickSentence, type Sentence, type Word } from './content'
 import { dueWords } from './srs'
-import { previewWords, type Profile } from './lesson'
+import { listenCourse, previewWords, type Profile } from './lesson'
 import { glossParts, glossShort, glossSpeech, zhKey } from './gloss'
 
 /**
@@ -21,8 +21,9 @@ export type Seg =
 /** 一个词的完整讲解 */
 export type Track = { word: string; ipa: string; gloss: string; sentence?: { id: number; en: string; zh: string }; segs: Seg[] }
 
-export type Source = 'today' | 'weak' | 'recent' | 'preview'
+export type Source = 'course' | 'today' | 'weak' | 'recent' | 'preview'
 export const SOURCES: { k: Source; name: string; desc: string }[] = [
+  { k: 'course', name: '纯听学', desc: '按词表一组组往下听，自己记进度，和每日练习分开' },
   { k: 'today', name: '今天的词', desc: '今天学的新词和到期要复习的' },
   { k: 'weak', name: '快忘的词', desc: '常记错、快到复习时间的' },
   { k: 'recent', name: '最近学的', desc: '按学的时间从近到远' },
@@ -40,7 +41,7 @@ export type ListenPrefs = {
   loop: boolean
 }
 export const COUNTS = [10, 20, 40] as const
-export const DEFAULT_PREFS: ListenPrefs = { src: 'today', n: 20, spell: true, zh: true, example: true, loop: true }
+export const DEFAULT_PREFS: ListenPrefs = { src: 'course', n: 20, spell: true, zh: true, example: true, loop: true }
 
 export async function getPrefs(): Promise<ListenPrefs> {
   const p = await kvGet<Partial<ListenPrefs> | null>('listen', null)
@@ -121,36 +122,91 @@ export function dayStart(now = new Date()): number {
   return new Date(y, m - 1, d, 4).getTime()
 }
 
-/** 按来源挑词（已去掉词库里查不到的）。“今天的词”没有时退到“最近学的”，返回实际用的来源 */
-export async function pickWords(src: Source, n: number, profile: Profile, rnd = Math.random): Promise<{ words: Word[]; src: Source }> {
+// ---------------- 纯听学的进度 ----------------
+
+/** 纯听学：一个词在这么多个不同的日子里听完过，就算听熟了，不再排进新的一组 */
+export const MASTER_DAYS = 3
+export type HeardStat = { days: number; last: number }
+
+/** 每个词在几个不同的日子里听完过、最后一次是什么时候（日子按凌晨 4 点换，和 db.today 一致） */
+export async function heardStats(now = new Date()): Promise<Map<string, HeardStat>> {
+  // 本地时间的“第几天”：时间戳加上时区偏移、减 4 小时再按天取整（不用 SQLite 的 localtime：浏览器里的 SQLite 不一定知道时区；CAST：参数按浮点传进来时除法不取整）
+  const shift = 4 * 3600_000 + now.getTimezoneOffset() * 60_000
+  const rows = await db.all<{ word: string; days: number; last: number }>('SELECT word, count(DISTINCT CAST((ts - ?) / 86400000 AS INTEGER)) days, max(ts) last FROM passive_log GROUP BY word', [shift])
+  return new Map(rows.map((r) => [r.word, { days: r.days, last: r.last }]))
+}
+
+/**
+ * 纯听学排下一组：前几天听过、还没听熟的先复习（最多占一半，最久没听的在前；今天听过的不算，免得一直是那几个），
+ * 其余按词表顺序补没听过的新词；新词没了再多排些在听的。exclude：“换一组”时把这一组的词去掉
+ */
+export function pickCourse(order: string[], stats: Map<string, HeardStat>, n: number, since: number, exclude: Set<string> = new Set()): string[] {
+  const ok = order.filter((w) => !exclude.has(w))
+  const learning = ok.filter((w) => { const s = stats.get(w); return !!s && s.days < MASTER_DAYS })
+  const due = learning.filter((w) => stats.get(w)!.last < since).sort((a, b) => stats.get(a)!.last - stats.get(b)!.last)
+  const review = due.slice(0, Math.floor(n / 2))
+  const out = [...review, ...ok.filter((w) => !stats.has(w)).slice(0, n - review.length)]
+  if (out.length < n) {
+    const has = new Set(out)
+    out.push(...[...due, ...learning].filter((w) => !has.has(w) && has.add(w)).slice(0, n - out.length))
+  }
+  return out
+}
+
+export type CourseProgress = { total: number; done: number; learning: number }
+export function courseProgress(order: string[], stats: Map<string, HeardStat>): CourseProgress {
+  let done = 0, learning = 0
+  for (const w of order) {
+    const s = stats.get(w)
+    if (s) s.days >= MASTER_DAYS ? done++ : learning++
+  }
+  return { total: order.length, done, learning }
+}
+
+/** 纯听学的进度：词表多少个词、听熟了几个、在听几个 */
+export async function courseStatus(profile: Profile): Promise<CourseProgress> {
+  const [course, stats] = await Promise.all([listenCourse(profile), heardStats()])
+  return courseProgress(course.map((w) => w.w), stats)
+}
+
+/**
+ * 按来源挑词（已去掉词库里查不到的）。“今天的词”没有时退到“最近学的”，返回实际用的来源。
+ * exclude：“换一组”时去掉正在听的这一组，换成别的词
+ */
+export async function pickWords(src: Source, n: number, profile: Profile, rnd = Math.random, exclude: Set<string> = new Set()): Promise<{ words: Word[]; src: Source }> {
   const { byWord } = await loadContent()
-  const keep = (ws: string[]) => [...new Set(ws)].map((w) => byWord.get(w)).filter((w): w is Word => !!w)
+  const keep = (ws: string[]) => [...new Set(ws)].filter((w) => !exclude.has(w)).map((w) => byWord.get(w)).filter((w): w is Word => !!w)
+  const more = n + exclude.size
+  if (src === 'course') {
+    const course = await listenCourse(profile)
+    return { words: keep(pickCourse(course.map((w) => w.w), await heardStats(), n, dayStart(), exclude)), src }
+  }
   if (src === 'today') {
     const fresh = (await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 AND added >= ? ORDER BY added', [dayStart()])).map((r) => r.word)
-    const due = await dueWords(n)
+    const due = await dueWords(more)
     const ws = keep([...fresh, ...due]).slice(0, n)
     if (ws.length) return { words: ws, src }
-    return pickWords('recent', n, profile, rnd)
+    return pickWords('recent', n, profile, rnd, exclude)
   }
   if (src === 'weak') {
     // 记错过的在前（错得多的更前），再按复习时间从近到远；学习中（还没稳定）的也算
-    const rows = await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY (lapses > 0) DESC, lapses DESC, due ASC LIMIT ?', [n * 2])
+    const rows = await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY (lapses > 0) DESC, lapses DESC, due ASC LIMIT ?', [n * 2 + exclude.size])
     // 取前 2n 个打乱再截 n 个：每次听的不完全一样，又都是最该听的
     const ws = keep(rows.map((r) => r.word))
     for (let i = ws.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ws[i], ws[j]] = [ws[j], ws[i]] }
     return { words: ws.slice(0, n), src }
   }
   if (src === 'recent') {
-    const rows = await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY added DESC LIMIT ?', [n])
-    return { words: keep(rows.map((r) => r.word)), src }
+    const rows = await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 ORDER BY added DESC LIMIT ?', [more])
+    return { words: keep(rows.map((r) => r.word)).slice(0, n), src }
   }
-  return { words: await previewWords(profile, n), src }
+  return { words: keep((await previewWords(profile, more)).map((w) => w.w)).slice(0, n), src }
 }
 
 /** 挑词 + 给每个词配一句例句（同一轮里例句不重复）+ 排出讲解脚本 */
-export async function buildPlaylist(prefs: ListenPrefs, profile: Profile): Promise<{ tracks: Track[]; src: Source }> {
+export async function buildPlaylist(prefs: ListenPrefs, profile: Profile, exclude?: Set<string>): Promise<{ tracks: Track[]; src: Source }> {
   const { sentsByWord } = await loadContent()
-  const { words, src } = await pickWords(prefs.src, prefs.n, profile)
+  const { words, src } = await pickWords(prefs.src, prefs.n, profile, Math.random, exclude)
   const used = new Set<number>()
   const tracks = words.map((w) => {
     const s = prefs.example ? pickSentence(sentsByWord.get(w.w), w.rank, used) : undefined
