@@ -5,7 +5,7 @@ vi.mock('../lesson', () => ({ previewWords: async () => [] }))
 vi.mock('../srs', () => ({ dueWords: async () => [] }))
 vi.mock('../tts', () => ({ PACK_PUBLIC: 'https://sayday.ivyea.com/audio/', getAudio: async () => '', NoAudio: class extends Error {} }))
 vi.mock('../speak', () => ({ hasVoice: async () => true, speakLang: async () => {}, stopSpeak: () => {} }))
-import { buildTrack, canSpellAloud, dayStart, estimateSec, glossParts, glossShort, glossSpeech, spellSeg, spellText, zhKey, zhSeg } from '../listen'
+import { MASTER_DAYS, buildTrack, canSpellAloud, courseProgress, dayStart, estimateSec, pickCourse, glossParts, glossShort, glossSpeech, spellSeg, spellText, zhKey, zhSeg } from '../listen'
 import { nativeSeg } from '../listen-player'
 import { ZH_VER } from '../gloss'
 import type { Word, Sentence } from '../content'
@@ -131,5 +131,38 @@ describe('换日', () => {
     expect(new Date(dayStart(new Date(2026, 10, 25, 2, 0))).getDate()).toBe(24)
     expect(new Date(dayStart(new Date(2026, 10, 25, 2, 0))).getHours()).toBe(4)
     expect(new Date(dayStart(new Date(2026, 10, 25, 9, 0))).getDate()).toBe(25)
+  })
+})
+
+describe('纯听学排组', () => {
+  const order = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10']
+  const since = 1_000_000
+  it('第一次：按词表顺序取前 n 个新词', () => {
+    expect(pickCourse(order, new Map(), 4, since)).toEqual(['a1', 'a2', 'a3', 'a4'])
+  })
+  it('前几天听过没听熟的先复习（最多一半，最久没听的在前），再往下接新词；听熟的不再出现', () => {
+    const st = new Map([
+      ['a1', { days: MASTER_DAYS, last: 10 }],
+      ['a2', { days: 1, last: 300 }],
+      ['a3', { days: 2, last: 100 }],
+      ['a4', { days: 1, last: 200 }],
+    ])
+    expect(pickCourse(order, st, 4, since)).toEqual(['a3', 'a4', 'a5', 'a6'])
+  })
+  it('今天刚听过的不复习：再开一组接着给新词', () => {
+    const st = new Map(['a1', 'a2', 'a3', 'a4'].map((w) => [w, { days: 1, last: since + 5 }]))
+    expect(pickCourse(order, st, 4, since)).toEqual(['a5', 'a6', 'a7', 'a8'])
+  })
+  it('换一组：去掉正在听的这些词', () => {
+    expect(pickCourse(order, new Map(), 4, since, new Set(['a1', 'a2', 'a3', 'a4']))).toEqual(['a5', 'a6', 'a7', 'a8'])
+  })
+  it('新词听完了：用还没听熟的补满，不重复', () => {
+    const st = new Map(order.map((w, i) => [w, { days: i < 8 ? MASTER_DAYS : 1, last: since + i }]))
+    expect(pickCourse(order, st, 4, since)).toEqual(['a9', 'a10'])
+    expect(pickCourse(order, new Map(order.map((w) => [w, { days: MASTER_DAYS, last: 1 }])), 4, since)).toEqual([])
+  })
+  it('进度：听熟几个、在听几个、词表共几个（不在词表里的不算）', () => {
+    const st = new Map([['a1', { days: 3, last: 1 }], ['a2', { days: 1, last: 1 }], ['zz', { days: 5, last: 1 }]])
+    expect(courseProgress(order, st)).toEqual({ total: 10, done: 1, learning: 1 })
   })
 })

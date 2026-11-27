@@ -5,7 +5,7 @@ import { Overlay } from '../components/Overlay'
 import { Icon } from '../components/icons'
 import { useApp } from '../store'
 import { isNative } from '../lib/speech/engine'
-import { COUNTS, SOURCES, buildPlaylist, estimateSec, getPrefs, heardCounts, savePrefs, todayHeard, type ListenPrefs } from '../lib/listen'
+import { COUNTS, MASTER_DAYS, SOURCES, buildPlaylist, courseStatus, estimateSec, getPrefs, heardCounts, savePrefs, todayHeard, type CourseProgress, type ListenPrefs } from '../lib/listen'
 import { player, recallNow, rememberNow, syncHeard, type NowPlaying, type PlayState } from '../lib/listen-player'
 
 const SLEEPS = [0, 15, 30, 60]
@@ -20,12 +20,18 @@ export function Listen({ onClose }: { onClose: () => void }) {
   const [heard, setHeard] = useState({ sec: 0, words: 0 })
   const [counts, setCounts] = useState<Map<string, number>>(new Map())
   const [sleepPick, setSleepPick] = useState(0)
+  const [prog, setProg] = useState<CourseProgress | null>(null)
   const cur = useRef<HTMLButtonElement | null>(null)
+  // 轮询里刷新纯听学进度要用最新的 profile（effect 只在打开时建一次）
+  const prof = useRef(profile)
+  prof.current = profile
 
   const refreshHeard = async (n: NowPlaying | null) => {
     await syncHeard().catch(() => 0)
     setHeard(await todayHeard().catch(() => ({ sec: 0, words: 0 })))
     if (n) setCounts(await heardCounts(n.tracks.map((t) => t.word)).catch(() => new Map()))
+    const p = prof.current
+    if (p) setProg(await courseStatus(p).catch(() => null))
   }
 
   useEffect(() => {
@@ -39,6 +45,9 @@ export function Listen({ onClose }: { onClose: () => void }) {
     return () => { alive = false; clearInterval(poll); clearInterval(slow) }
   }, [])
 
+  // 刚打开时 profile 可能还没读出来：读出来了再算一次进度
+  useEffect(() => { if (profile) courseStatus(profile).then(setProg).catch(() => {}) }, [profile])
+
   // 换词时把当前这个词滚到看得见的地方
   useEffect(() => { cur.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [st?.index])
 
@@ -51,13 +60,14 @@ export function Listen({ onClose }: { onClose: () => void }) {
   const track = active ? now!.tracks[Math.min(st.index, now!.tracks.length - 1)] : null
   const total = now?.tracks.reduce((s, t) => s + estimateSec(t), 0) ?? 0
 
-  const start = async () => {
+  /** 开始听；换一组时 exclude 是正在听的这些词，换成别的（没有别的词就接着听现在这组） */
+  const start = async (exclude?: Set<string>) => {
     if (busy) return
     setBusy(true)
     try {
-      const { tracks, src } = await buildPlaylist(prefs, profile)
+      const { tracks, src } = await buildPlaylist(prefs, profile, exclude)
       if (!tracks.length) {
-        toast(src === 'preview' ? '没有可以预习的新词了' : '还没有学过的词：先在今日练习里学几个新词')
+        toast(exclude ? '没有别的词了，接着听这一组' : src === 'course' ? '词表里的词都听熟了' : src === 'preview' ? '没有可以预习的新词了' : '还没有学过的词：先在今日练习里学几个新词')
         return
       }
       if (src !== prefs.src) toast('今天还没有要学的词，先听最近学的')
@@ -79,12 +89,15 @@ export function Listen({ onClose }: { onClose: () => void }) {
     refreshHeard(null)
   }
 
+  const next = () => start(new Set(now?.tracks.map((t) => t.word)))
+  const progLine = prog && prog.total ? `听熟 ${prog.done} 个 · 在听 ${prog.learning} 个 · 词表共 ${prog.total} 个` : ''
+
   const head = heard.sec >= 30 ? `今天听了 ${fmtMin(heard.sec)} · ${heard.words} 个词` : undefined
 
   if (!active) {
     return (
       <Overlay title="听学" sub={head ?? '戴上耳机，像听歌一样学单词'} onClose={onClose}
-        foot={<button className="btn primary block" disabled={busy} onClick={start}><Icon.headphones />{busy ? '准备中…' : '开始听'}</button>}>
+        foot={<button className="btn primary block" disabled={busy} onClick={() => start()}><Icon.headphones />{busy ? '准备中…' : '开始听'}</button>}>
         <div className="hear-body">
         <div className="hear-intro fade-in">
           <p>老师一个词一个词地讲：读单词、拼写、讲中文意思、读例句。{isNative ? '锁屏、切到别的 App 都接着播，耳机按键能暂停和切词。' : '页面开着就一直播，键盘的媒体键也能控制。'}</p>
@@ -98,6 +111,9 @@ export function Listen({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
+        {prefs.src === 'course' && (
+          <p className="small muted hear-course">每组先复习前几天听过的，再接着往下听新词；一个词在 {MASTER_DAYS} 个不同的日子里都听过，就算听熟了。{progLine && <><br />{progLine}</>}</p>
+        )}
         <p className="section-title">怎么讲</p>
         <div className="list">
           <div className="set-row">
@@ -121,7 +137,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
 
   return (
     <Overlay title="听学" sub={`${label} · ${now!.tracks.length} 个词 · 一轮约 ${fmtMin(total)}`} onClose={onClose}
-      right={<button className="btn small quiet" onClick={stop}>换一组</button>}>
+      right={<button className="btn small quiet" disabled={busy} onClick={next}>{busy ? '换词中…' : '换一组'}</button>}>
       <div className="hear-body">
       {st.noZh && (
         <div className="card hear-note">
@@ -156,6 +172,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
       <p className="small muted hear-status">
         {preparing ? '正在准备音频…' : isNative && st.ready < st.total ? `已准备 ${st.ready}/${st.total} 个词，边听边准备` : isNative ? '音频都在手机上了，没信号也能听' : ''}
       </p>
+      {now!.src === 'course' && progLine && <p className="small muted hear-status">纯听学进度：{progLine}</p>}
 
       <div className="list" style={{ marginTop: 8 }}>
         <div className="set-row">
@@ -173,6 +190,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
           </button>
         ))}
       </div>
+      <button className="btn quiet block hear-stop" onClick={stop}>停止，换个听法</button>
       </div>
     </Overlay>
   )

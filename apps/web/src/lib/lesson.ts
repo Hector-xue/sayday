@@ -54,18 +54,40 @@ export async function dayRow(date = today()): Promise<DayRow> {
   return (await db.one<DayRow>('SELECT * FROM day WHERE date = ?', [date])) ?? { date, reviews: 0, new_words: 0, shadows: 0, listens: 0, seconds: 0, minimum: 0, done: 0 }
 }
 
-async function pickNewWords(p: Profile, n: number, words: Word[], frontier: number): Promise<Word[]> {
-  const have = new Set((await db.all<{ word: string }>('SELECT word FROM card')).map((r) => r.word))
+/** 能学的词（去掉虚词、敏感词、没有音标的） */
+const learnableOf = (words: Word[], skip: Set<string>) => words.filter((w) => !skip.has(w.w) && !FUNCTION_WORDS.has(w.w) && !w.sensitive && w.cmu.length > 0)
+
+/** 新词的先后顺序：选了词书按词书，否则从 from 往上按词频（雅思目标：接下来 400 个词里带 ielts 标签的优先） */
+function newWordOrder(p: Profile, learnable: Word[], frontier: number): Word[] {
   const from = Math.max(1, frontier)
-  const learnable = words.filter((w) => !have.has(w.w) && !FUNCTION_WORDS.has(w.w) && !w.sensitive && w.cmu.length > 0)
-  if (p.book) return bookOrder(learnable, p.book, from).slice(0, n)
+  if (p.book) return bookOrder(learnable, p.book, from)
   const cand = learnable.filter((w) => w.rank >= from)
-  if (p.goal.kind !== 'ielts') return cand.slice(0, n)
-  // 雅思目标：在接下来 400 个词的窗口里，带 ielts 标签的优先
+  if (p.goal.kind !== 'ielts') return cand
   const win = cand.slice(0, 400)
   const tagged = win.filter((w) => w.tags.includes('ielts'))
   const rest = win.filter((w) => !w.tags.includes('ielts'))
-  return [...tagged, ...rest, ...cand.slice(400)].slice(0, n)
+  return [...tagged, ...rest, ...cand.slice(400)]
+}
+
+async function pickNewWords(p: Profile, n: number, words: Word[], frontier: number): Promise<Word[]> {
+  const have = new Set((await db.all<{ word: string }>('SELECT word FROM card')).map((r) => r.word))
+  return newWordOrder(p, learnableOf(words, have), frontier).slice(0, n)
+}
+
+/**
+ * 纯听学的词表：和每日练习挑新词同一个顺序（词书 / 从你的水平往上按词频），但和学没学过无关，只去掉标了“认识”的词。
+ * 起点第一次用时按当时的水平定下来存着（水平涨了起点也不跟着挪，进度才不会忽多忽少）；换了词书或目标才重新定
+ */
+export async function listenCourse(p: Profile): Promise<Word[]> {
+  const { words } = await loadContent()
+  const id = `${p.book ?? ''}|${p.goal.kind}`
+  let c = await kvGet<{ id: string; from: number } | null>('listen_course', null)
+  if (!c || c.id !== id || !Number.isFinite(c.from)) {
+    c = { id, from: (await vocabLevel(p)).frontier }
+    await kvSet('listen_course', c)
+  }
+  const known = new Set((await db.all<{ word: string }>('SELECT word FROM card WHERE known = 1')).map((r) => r.word))
+  return newWordOrder(p, learnableOf(words, known), c.from)
 }
 
 /** 接下来要学的新词（听学的“预习新词”用）：和每日练习挑新词同一套规则，只是不入库 */
