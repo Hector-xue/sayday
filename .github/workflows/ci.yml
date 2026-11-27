@@ -29,6 +29,10 @@ jobs:
           curl -sSfL --retry 3 -o .cache/models/phone_ctc.int8.onnx "$MODEL_URL"
           python3 -c "import hashlib,sys; h=hashlib.sha256(open('.cache/models/phone_ctc.int8.onnx','rb').read()).hexdigest(); sys.exit(0 if h==sys.argv[1] else 'sha256 不对：'+h)" "$MODEL_SHA256"
           curl -sSfL --retry 3 -o .cache/models/charsiu_vocab.json https://huggingface.co/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
+          # 安卓 App 自己下载模型，认的是 InferPlugin.kt 里写的指纹：必须和这里（网页、桌面版用的）是同一份
+          grep -q "MODEL_SHA256 = \"$MODEL_SHA256\"" apps/native/src-tauri/plugins/sayday-infer/android/src/main/java/InferPlugin.kt || { echo "InferPlugin.kt 的 MODEL_SHA256 和这里不一致"; exit 1; }
+          # 门户上 App 下载用的那份（gzip）在不在：服务器的事，不让 CI 挂，只提醒
+          curl -sfI "https://sayday.ivyea.com/asr/phone-ctc-${MODEL_SHA256:0:8}/phone_ctc.int8.onnx.gz" >/dev/null || echo "::warning::门户上没有 App 下载用的模型 phone-ctc-${MODEL_SHA256:0:8}（跑 scripts/deploy-demo.sh）"
 
       - uses: actions/setup-node@v4
         with:
@@ -66,6 +70,8 @@ jobs:
       - name: 端到端准备（Chrome for Testing、浏览器插件、本地站点）
         id: prep
         run: |
+          # 中文字体：不装的话截图里中文全是方块，看不了界面
+          (sudo apt-get install -y -qq fonts-noto-cjk >/dev/null 2>&1 || (sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk >/dev/null)) || echo "::warning::中文字体没装上"
           npx -y @puppeteer/browsers@2.10.5 install chrome@stable --path "$RUNNER_TEMP/cft" | tee "$RUNNER_TEMP/cft.txt"
           echo "CFT=$(tail -1 "$RUNNER_TEMP/cft.txt" | cut -d' ' -f2-)" >> "$GITHUB_ENV"
           bash scripts/build-extension.sh

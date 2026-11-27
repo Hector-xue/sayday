@@ -52,11 +52,24 @@ impl<R: Runtime> Infer<R> {
     }
 }
 
+/// 载入音素模型；本机还没有时先下载（可能要几分钟），所以是 async：不能卡住主线程
 #[tauri::command]
-fn load_model<R: Runtime>(app: tauri::AppHandle<R>, threads: Option<u32>) -> Result<Value> {
+async fn load_model<R: Runtime>(app: tauri::AppHandle<R>, threads: Option<u32>) -> Result<Value> {
     app.state::<Infer<R>>()
         .inner()
         .call("loadModel", serde_json::json!({ "threads": threads.unwrap_or(4) }))
+}
+
+/// 音素模型在不在本机、下载进度
+#[tauri::command]
+async fn model_status<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("modelStatus", serde_json::json!({}))
+}
+
+/// 后台下载音素模型（马上返回）；auto：自动预下，用流量时不下
+#[tauri::command]
+async fn model_fetch<R: Runtime>(app: tauri::AppHandle<R>, auto: Option<bool>) -> Result<Value> {
+    app.state::<Infer<R>>().inner().call("modelFetch", serde_json::json!({ "auto": auto.unwrap_or(false) }))
 }
 
 #[tauri::command]
@@ -231,7 +244,7 @@ fn listen_drain<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Value> {
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("sayday-infer")
-        .invoke_handler(tauri::generate_handler![load_model, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action, lan_addrs, listen_start, listen_control, listen_state, listen_drain])
+        .invoke_handler(tauri::generate_handler![load_model, model_status, model_fetch, run, record_start, record_level, record_stop, insets, set_bars, speak, speak_stop, save_to_downloads, update_widget, update_start, update_status, update_install, save_image, open_url, system_status, pin_widget, open_notify_settings, quiz_set, quiz_drain, quiz_test, take_action, lan_addrs, listen_start, listen_control, listen_state, listen_drain])
         .setup(|app, _api| {
             #[cfg(target_os = "android")]
             let infer = Infer(_api.register_android_plugin(PLUGIN_IDENTIFIER, "InferPlugin")?);

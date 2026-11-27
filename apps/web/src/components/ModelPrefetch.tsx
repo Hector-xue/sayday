@@ -1,5 +1,5 @@
-// 网页版：发音模型（约 120MB）在后台提前下进离线缓存，第一次跟读不用干等。
-// 今天页：打开几秒后自动开始，只在下载中显示一条进度；设置页：显示状态，可手动下载
+// 发音模型在后台提前下好，第一次跟读不用干等：网页约 120MB 下进离线缓存；安卓约 86MB（安装包里不带，省得每次更新都下），用流量时不自动下。
+// 今天页：打开几秒后自动开始，只在下载中显示一条进度；设置页：显示状态，可手动下载。桌面版模型在安装包里，不用下
 import { useEffect, useState } from 'react'
 import { isNative, modelCached, modelCacheStatus, onModelCache, prefetchModel, type ModelCache } from '../lib/speech/engine'
 
@@ -19,11 +19,10 @@ function useModelCache() {
 export function ModelPrefetchBar() {
   const m = useModelCache()
   useEffect(() => {
-    if (isNative) return
     const t = setTimeout(() => { prefetchModel(true) }, 3000)
     return () => clearTimeout(t)
   }, [])
-  if (isNative || m.state !== 'downloading') return null
+  if (m.state !== 'downloading') return null
   const pct = m.total ? Math.round(((m.got ?? 0) / m.total) * 100) : null
   return (
     <div className="model-dl" role="status">
@@ -36,9 +35,8 @@ export function ModelPrefetchBar() {
 /** 设置页的一行 */
 export function ModelPrefetchRow() {
   const m = useModelCache()
-  if (isNative) return null
   const pct = m.total ? Math.round(((m.got ?? 0) / m.total) * 100) : 0
-  const text = { idle: '约 120MB，跟读打分要用；下好后能离线', cached: '已下载，可离线跟读打分', downloading: `下载中 ${pct}%（${mb(m.got)} / ${mb(m.total)}）`, error: '没下完，再点一次接着下', unsupported: '这个浏览器存不住离线文件，跟读时现下' }[m.state]
+  const text = { idle: isNative ? '约 86MB，跟读打分要用；用流量时不自动下' : '约 120MB，跟读打分要用；下好后能离线', cached: '已下载，可离线跟读打分', downloading: `下载中 ${pct}%（${mb(m.got)} / ${mb(m.total)}）`, error: '没下完，再点一次接着下', unsupported: '这个浏览器存不住离线文件，跟读时现下' }[m.state]
   return (
     <div className="set-row">
       <div className="k"><b>发音模型</b><span>{text}</span></div>

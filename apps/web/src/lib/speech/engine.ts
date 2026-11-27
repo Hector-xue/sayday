@@ -57,16 +57,53 @@ export const modelCacheStatus = () => mc
 export function onModelCache(f: (s: ModelCache) => void) { mcListeners.add(f); return () => { mcListeners.delete(f) } }
 let prefetching: Promise<void> | null = null
 
-/** 模型是不是已经在离线缓存里 */
+// ---- 安卓：模型不在安装包里，第一次用时原生那边下载（门户 gzip 约 86MB），进度从 model_status 读 ----
+type NativeModel = { state: 'cached' | 'missing' | 'downloading' | 'error'; got: number; total: number; error: string; metered: boolean }
+/** 原生模型状态；桌面版（模型打在安装包里、没有这个命令）返回 null */
+async function nativeModel(): Promise<NativeModel | null> {
+  try { return await tauri!.invoke('plugin:sayday-infer|model_status') } catch { return null }
+}
+/** 原生下载中：每半秒读一次进度交给 f，下完（或出错、没在下）就停 */
+function pollNative(f: (m: NativeModel) => void): () => void {
+  let stop = false
+  ;(async () => {
+    while (!stop) {
+      const m = await nativeModel()
+      if (!m || stop) return
+      f(m)
+      if (m.state !== 'downloading') return
+      await new Promise((r) => setTimeout(r, 500))
+    }
+  })()
+  return () => { stop = true }
+}
+
+/** 模型是不是已经在本机（网页：离线缓存；安卓：私有目录） */
 export async function modelCached(): Promise<boolean> {
-  if (isNative) return true
+  if (isNative) return (await nativeModel())?.state !== 'missing'
   try { return !!(await caches.match(modelUrl())) } catch { return false }
 }
 
 /** 把模型下进缓存。auto：自动触发时，省流量模式下不下（设置里手动点的不管） */
 export function prefetchModel(auto = false): Promise<void> {
-  if (isNative || status.state === 'ready') return Promise.resolve()
+  if (status.state === 'ready') return Promise.resolve()
   if (prefetching) return prefetching
+  if (isNative) {
+    prefetching = (async () => {
+      const m0 = await nativeModel()
+      if (!m0 || m0.state === 'cached') { setMc({ state: 'cached' }); return }
+      const r: { started: boolean } = await tauri!.invoke('plugin:sayday-infer|model_fetch', { auto })
+      if (!r.started) { setMc({ state: 'idle' }); return } // 在用流量：先不自动下
+      setMc({ state: 'downloading', got: 0 })
+      await new Promise<void>((done) => {
+        pollNative((m) => {
+          if (m.state === 'downloading') setMc({ state: 'downloading', got: m.got, total: m.total })
+          else { setMc({ state: m.state === 'cached' ? 'cached' : 'error' }); done() }
+        })
+      })
+    })().catch((e) => { setMc({ state: 'error' }); console.warn('模型预下载失败', e) }).finally(() => { prefetching = null })
+    return prefetching
+  }
   prefetching = (async () => {
     if (await modelCached()) { setMc({ state: 'cached' }); return }
     if (!('serviceWorker' in navigator)) { setMc({ state: 'unsupported' }); return }
@@ -95,7 +132,7 @@ export function prefetchModel(auto = false): Promise<void> {
   return prefetching
 }
 
-/** 准备好推理（网页首次要下载约 120MB 模型，之后走离线缓存） */
+/** 准备好推理（首次要下载模型：网页约 120MB 存进离线缓存，安卓约 86MB 存进 App 私有目录） */
 export function ensureEngine(): Promise<void> {
   if (loading) return loading
   setStatus({ state: 'loading' })
@@ -108,7 +145,12 @@ export function ensureEngine(): Promise<void> {
     return loading
   }
   if (tauri) {
-    loading = tauri.invoke('plugin:sayday-infer|load_model', { threads: 4 }).then(() => setStatus({ state: 'ready' }))
+    // 安卓第一次用要先下载模型：载入期间把下载进度显示在跟读按钮上
+    let stopPoll = () => {}
+    const t = setTimeout(() => { stopPoll = pollNative((m) => { if (m.state === 'downloading') setStatus({ state: 'loading', got: m.got, total: m.total }) }) }, 300)
+    loading = tauri.invoke('plugin:sayday-infer|load_model', { threads: 4 })
+      .finally(() => { clearTimeout(t); stopPoll() })
+      .then(() => { setStatus({ state: 'ready' }); if (mc.state !== 'cached') setMc({ state: 'cached' }) })
   } else {
     worker = new Worker(new URL('./infer-worker.ts', import.meta.url), { type: 'module' })
     loading = new Promise<void>((resolve, reject) => {

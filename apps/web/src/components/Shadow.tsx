@@ -105,7 +105,7 @@ export function Shadow({ text, sentenceId, clip: clipIn, accent, onScored }: { t
           {phase === 'rec' ? <Icon.stop /> : <Icon.mic />}
         </button>
         <div className="rec-label">
-          {msg || (loadingModel && !isNative ? `首次使用要下载发音模型 ${eng.total ? Math.round(((eng.got ?? 0) / eng.total) * 100) + '%' : ''}（约 120MB，只下一次）` : eng.state === 'error' ? '发音模型载入失败：' + eng.error : result ? '再读一遍可以刷新分数' : '点一下开始跟读')}
+          {msg || (loadingModel && (!isNative || eng.total) ? `首次使用要下载发音模型 ${eng.total ? Math.round(((eng.got ?? 0) / eng.total) * 100) + '%' : ''}（约 ${isNative ? 86 : 120}MB，只下一次）` : eng.state === 'error' ? '发音模型载入失败：' + eng.error : result ? '再读一遍可以刷新分数' : '点一下开始跟读')}
         </div>
       </div>
       {result && <ScoreView r={result} />}

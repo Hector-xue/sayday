@@ -2,6 +2,8 @@
 // 安卓上关掉这个页面、锁屏都接着播（原生前台服务），再打开这里能看到讲到哪了、切词、定时关闭
 import { useEffect, useRef, useState } from 'react'
 import { Overlay } from '../components/Overlay'
+import { Sheet } from '../components/Sheet'
+import { BOOKS, bookName } from '../lib/books'
 import { Icon } from '../components/icons'
 import { useApp } from '../store'
 import { isNative } from '../lib/speech/engine'
@@ -21,17 +23,20 @@ export function Listen({ onClose }: { onClose: () => void }) {
   const [counts, setCounts] = useState<Map<string, number>>(new Map())
   const [sleepPick, setSleepPick] = useState(0)
   const [prog, setProg] = useState<CourseProgress | null>(null)
+  const [pickBook, setPickBook] = useState(false)
   const cur = useRef<HTMLButtonElement | null>(null)
-  // 轮询里刷新纯听学进度要用最新的 profile（effect 只在打开时建一次）
+  // 轮询里刷新纯听学进度要用最新的 profile 和词书（effect 只在打开时建一次）
   const prof = useRef(profile)
   prof.current = profile
+  const bookRef = useRef('')
+  bookRef.current = prefs?.book ?? ''
 
   const refreshHeard = async (n: NowPlaying | null) => {
     await syncHeard().catch(() => 0)
     setHeard(await todayHeard().catch(() => ({ sec: 0, words: 0 })))
     if (n) setCounts(await heardCounts(n.tracks.map((t) => t.word)).catch(() => new Map()))
     const p = prof.current
-    if (p) setProg(await courseStatus(p).catch(() => null))
+    if (p) setProg(await courseStatus(p, bookRef.current).catch(() => null))
   }
 
   useEffect(() => {
@@ -46,7 +51,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
   }, [])
 
   // 刚打开时 profile 可能还没读出来：读出来了再算一次进度
-  useEffect(() => { if (profile) courseStatus(profile).then(setProg).catch(() => {}) }, [profile])
+  useEffect(() => { if (profile && prefs) courseStatus(profile, prefs.book).then(setProg).catch(() => {}) }, [profile, prefs?.book])
 
   // 换词时把当前这个词滚到看得见的地方
   useEffect(() => { cur.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [st?.index])
@@ -90,6 +95,8 @@ export function Listen({ onClose }: { onClose: () => void }) {
   }
 
   const next = () => start(new Set(now?.tracks.map((t) => t.word)))
+  /** 纯听学用的词书名：跟每日练习一样时注明 */
+  const bookLabel = prefs.book === 'freq' ? '按常用程度' : prefs.book ? bookName(prefs.book) : `跟每日练习一样（${bookName(profile.book)}）`
   const progLine = prog && prog.total ? `听熟 ${prog.done} 个 · 在听 ${prog.learning} 个 · 词表共 ${prog.total} 个` : ''
 
   const head = heard.sec >= 30 ? `今天听了 ${fmtMin(heard.sec)} · ${heard.words} 个词` : undefined
@@ -112,7 +119,29 @@ export function Listen({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         {prefs.src === 'course' && (
-          <p className="small muted hear-course">每组先复习前几天听过的，再接着往下听新词；一个词在 {MASTER_DAYS} 个不同的日子里都听过，就算听熟了。{progLine && <><br />{progLine}</>}</p>
+          <>
+            <div className="list" style={{ marginTop: 10 }}>
+              <button className="list-row hear-book" onClick={() => setPickBook(true)}>
+                <span className="main"><b>词书</b><span>{bookLabel}</span></span>
+                <span className="side">换</span>
+              </button>
+            </div>
+            <p className="small muted hear-course">每组先复习前几天听过的，再接着往下听新词；一个词在 {MASTER_DAYS} 个不同的日子里都听过，就算听熟了。{progLine && <><br />{progLine}</>}</p>
+          </>
+        )}
+        {pickBook && (
+          <Sheet onClose={() => setPickBook(false)}>
+            <h2 style={{ fontSize: 20 }}>听哪本词书</h2>
+            <p className="small muted" style={{ marginTop: 4 }}>只影响纯听学听哪些词，每日练习不变；每本书的进度各算各的。</p>
+            <div className="list" style={{ marginTop: 14 }}>
+              {[{ tag: '', name: '跟每日练习一样', desc: `现在是${bookName(profile.book)}` }, { tag: 'freq', name: '按常用程度', desc: '从你的水平往上，最常用的先听' }, ...BOOKS].map((b) => (
+                <button key={b.tag || 'same'} className="list-row hear-book-opt" aria-pressed={prefs.book === b.tag} onClick={() => { setP({ ...prefs, book: b.tag }); setPickBook(false) }}>
+                  <span className="main"><b>{b.name}</b><span>{b.desc}</span></span>
+                  <span className="side">{prefs.book === b.tag ? <Icon.check /> : null}</span>
+                </button>
+              ))}
+            </div>
+          </Sheet>
         )}
         <p className="section-title">怎么讲</p>
         <div className="list">
@@ -133,7 +162,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
   const playing = st.status === 'playing'
   const preparing = st.status === 'preparing'
   const left = st.sleepAt ? Math.max(0, st.sleepAt - Date.now()) : 0
-  const label = SOURCES.find((s) => s.k === now!.src)?.name ?? ''
+  const label = (SOURCES.find((s) => s.k === now!.src)?.name ?? '') + (now!.src === 'course' && prefs.book ? `（${prefs.book === 'freq' ? '按常用程度' : bookName(prefs.book)}）` : '')
 
   return (
     <Overlay title="听学" sub={`${label} · ${now!.tracks.length} 个词 · 一轮约 ${fmtMin(total)}`} onClose={onClose}
