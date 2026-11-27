@@ -134,6 +134,7 @@ try {
   await clickText('纯听学', '.hear-src')
   await p.waitForFunction(() => /在听 [1-9]/.test(document.querySelector('.hear-course')?.textContent ?? ''), { timeout: 8000 }).catch(() => {})
   const prog = await p.evaluate(() => document.querySelector('.hear-course')?.textContent ?? '')
+  await p.screenshot({ path: join(OUT, 'listen-course-setup.png') })
   expect(/听熟 0 个 · 在听 [1-9]\d* 个 · 词表共 \d+ 个/.test(prog), '纯听学显示进度（听过的词算“在听”）', prog)
   await clickText('开始听')
   await p.waitForSelector('.hear-word', { timeout: 15000 })
