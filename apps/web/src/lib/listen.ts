@@ -23,7 +23,7 @@ export type Track = { word: string; ipa: string; gloss: string; sentence?: { id:
 
 export type Source = 'course' | 'today' | 'weak' | 'recent' | 'preview'
 export const SOURCES: { k: Source; name: string; desc: string }[] = [
-  { k: 'course', name: '纯听学', desc: '按词表一组组往下听，自己记进度，和每日练习分开' },
+  { k: 'course', name: '纯听学', desc: '按词表一组组往下听，单独记进度' },
   { k: 'today', name: '今天的词', desc: '今天学的新词和到期要复习的' },
   { k: 'weak', name: '快忘的词', desc: '常记错、快到复习时间的' },
   { k: 'recent', name: '最近学的', desc: '按学的时间从近到远' },
