@@ -6,7 +6,7 @@ import { dueWords } from './srs'
 import type { Goal, Cefr } from './levels'
 import type { Accent } from './tts'
 import type { PlacementResult } from './placement'
-import { bookOrder } from './books'
+import { bookOrder, inBook } from './books'
 import { canSpell } from './spell'
 import { getInterests, preferTopics, topicMatcher } from './interests'
 import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type CheckItem } from './calibrate'
@@ -75,19 +75,30 @@ async function pickNewWords(p: Profile, n: number, words: Word[], frontier: numb
 }
 
 /**
- * 纯听学的词表：和每日练习挑新词同一个顺序（词书 / 从你的水平往上按词频），但和学没学过无关，只去掉标了“认识”的词。
- * 起点第一次用时按当时的水平定下来存着（水平涨了起点也不跟着挪，进度才不会忽多忽少）；换了词书或目标才重新定
+ * 纯听学的词表，和学没学过无关，只去掉标了“认识”的词。book：听学自己选的词书
+ * （'' = 跟每日练习一样，'freq' = 按常用程度，其余是词书标签）。
+ * 选了词书：只听这本书里的词，从你的水平附近往难里听，听完再回头补前面那些常用的；
+ * 按常用程度：从你的水平往上（雅思目标雅思词优先），和每日练习挑新词同一个顺序。
+ * 起点第一次用时按当时的水平定下来存着（水平涨了起点也不跟着挪，进度才不会忽多忽少），每本书各记各的
  */
-export async function listenCourse(p: Profile): Promise<Word[]> {
+export async function listenCourse(p: Profile, book = ''): Promise<Word[]> {
   const { words } = await loadContent()
-  const id = `${p.book ?? ''}|${p.goal.kind}`
-  let c = await kvGet<{ id: string; from: number } | null>('listen_course', null)
-  if (!c || c.id !== id || !Number.isFinite(c.from)) {
-    c = { id, from: (await vocabLevel(p)).frontier }
-    await kvSet('listen_course', c)
+  const tag = book === 'freq' ? '' : book || p.book || ''
+  const id = `${tag}|${p.goal.kind}`
+  let starts = await kvGet<Record<string, number> | null>('listen_course_from', null)
+  if (!starts) {
+    // v0.0.34 只记一个起点（listen_course）：接着用，进度不变
+    const old = await kvGet<{ id: string; from: number } | null>('listen_course', null)
+    starts = old && Number.isFinite(old.from) ? { [old.id]: old.from } : {}
+  }
+  if (!Number.isFinite(starts[id])) {
+    starts[id] = (await vocabLevel(p)).frontier
+    await kvSet('listen_course_from', starts)
   }
   const known = new Set((await db.all<{ word: string }>('SELECT word FROM card WHERE known = 1')).map((r) => r.word))
-  return newWordOrder(p, learnableOf(words, known), c.from)
+  const ok = learnableOf(words, known)
+  if (tag) return bookOrder(ok.filter((w) => inBook(w, tag)), tag, starts[id])
+  return newWordOrder({ ...p, book: undefined }, ok, starts[id])
 }
 
 /** 接下来要学的新词（听学的“预习新词”用）：和每日练习挑新词同一套规则，只是不入库 */

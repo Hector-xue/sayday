@@ -58,6 +58,12 @@ class LoadArgs {
 }
 
 @InvokeArg
+class FetchArgs {
+  /** 自动预下（今天页打开时）：用流量时不下，等连上 Wi-Fi 或用户手动点 */
+  var auto: Boolean = false
+}
+
+@InvokeArg
 class SaveArgs {
   lateinit var name: String
   var mime: String = "application/json"
@@ -140,8 +146,9 @@ class RunArgs {
 /**
  * 原生音素推理 + 录音。
  *
- * 模型随 APK 打在 assets/models/ 里（CI 现导出，不入库），首次使用拷到 filesDir 再建会话：
- * ORT 从文件路径建会话可以内存映射，比把 122MB 读进 ByteArray 省一半内存。
+ * 模型不打进 APK（不然每次更新都要多下 86MB，而模型很少换）：第一次用时从门户下载（gzip 压缩的，约 86MB；
+ * 门户不通再从 GitHub 下原文件），按指纹校验后存进 filesDir。ORT 从文件路径建会话可以内存映射，比把 122MB 读进 ByteArray 省一半内存。
+ * 以前的版本从 APK 拷出来的那份，指纹对得上就接着用，升级不用重下。
  * 音频和 logits 都走 base64 编码的 float32：JSON 数组要大好几倍，序列化也慢。
  */
 @TauriPlugin(permissions = [Permission(strings = [Manifest.permission.RECORD_AUDIO], alias = "microphone")])
@@ -168,22 +175,128 @@ class InferPlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
-  // 模型从 APK 拷到私有目录才能按文件路径加载。拷的时候记下 App 的安装时间：
-  // 升级 App 后（可能换了模型，评分校准表也跟着换）安装时间变了，就重新拷一次
+  companion object {
+    // 音素模型（口音微调版，Release「model-phone-ftall」）。换模型要连评分校准表 calib.json 一起换，并改这里的指纹和地址
+    // （ci.yml 会核对这里的指纹和它下载的那份一致）
+    const val MODEL_SHA256 = "fb7686d1a479ddc0da84bd1dd5bc87d8f212dd83e8bc41190b7c471b8c89d849"
+    val MODEL_URLS = listOf(
+      // 门户：gzip 压缩过（scripts/deploy-demo.sh 放的），目录名带指纹前缀
+      "https://sayday.ivyea.com/asr/phone-ctc-${MODEL_SHA256.take(8)}/phone_ctc.int8.onnx.gz",
+      "https://github.com/Hector-xue/sayday/releases/download/model-phone-ftall/phone_ctc.ftall.int8.onnx",
+    )
+  }
+
+  private val modelLock = Any()
+  // 下载进度（给 modelStatus 读；不走 worker 线程，下载时也能马上答）
+  @Volatile private var dlState = "idle"
+  @Volatile private var dlGot = 0L
+  @Volatile private var dlTotal = 0L
+  @Volatile private var dlError = ""
+
+  private fun sha256(f: File): String {
+    val md = java.security.MessageDigest.getInstance("SHA-256")
+    f.inputStream().use { input -> val buf = ByteArray(1 shl 20); while (true) { val n = input.read(buf); if (n < 0) break; md.update(buf, 0, n) } }
+    return md.digest().joinToString("") { "%02x".format(it) }
+  }
+
+  private val modelPath get() = File(activity.filesDir, "models/phone_ctc.int8.onnx")
+  private val modelStamp get() = File(activity.filesDir, "models/phone_ctc.sha256")
+
+  /** 本机已有、指纹对得上的模型（没有返回 null）。算过一次指纹就记下来，之后只比记下的 */
+  private fun modelReady(): File? {
+    val f = modelPath
+    if (!f.exists()) return null
+    if (modelStamp.exists() && modelStamp.readText() == MODEL_SHA256) return f
+    if (sha256(f) == MODEL_SHA256) { modelStamp.writeText(MODEL_SHA256); return f }
+    return null
+  }
+
+  /** 拿到模型文件：本机没有就下载（门户 → GitHub），边下边算指纹，对上才换进去 */
   private fun modelFile(): File {
-    val f = File(activity.filesDir, "models/phone_ctc.int8.onnx")
-    val stamp = File(activity.filesDir, "models/phone_ctc.stamp")
-    @Suppress("DEPRECATION")
-    val installed = activity.packageManager.getPackageInfo(activity.packageName, 0).lastUpdateTime.toString()
-    if (!f.exists() || !stamp.exists() || stamp.readText() != installed) {
+    synchronized(modelLock) {
+      modelReady()?.let { dlState = "cached"; return it }
+      val f = modelPath
       f.parentFile?.mkdirs()
-      val tmp = File(f.path + ".tmp")
-      activity.assets.open("models/phone_ctc.int8.onnx").use { input -> tmp.outputStream().use { input.copyTo(it, 1 shl 20) } }
-      f.delete()
-      if (!tmp.renameTo(f)) throw IllegalStateException("模型文件替换失败")
-      stamp.writeText(installed)
+      modelStamp.delete()
+      val tmp = File(f.path + ".part")
+      var last: Throwable? = null
+      for (url in MODEL_URLS) {
+        try {
+          dlState = "downloading"; dlGot = 0; dlTotal = 0; dlError = ""
+          val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+            connectTimeout = 10_000; readTimeout = 30_000; instanceFollowRedirects = true
+          }
+          try {
+            if (conn.responseCode != 200) throw java.io.IOException("HTTP ${conn.responseCode}")
+            dlTotal = conn.contentLengthLong.coerceAtLeast(0)
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            val counted = object : java.io.FilterInputStream(conn.inputStream) {
+              override fun read(b: ByteArray, off: Int, len: Int): Int { val n = super.read(b, off, len); if (n > 0) dlGot += n; return n }
+              override fun read(): Int { val c = super.read(); if (c >= 0) dlGot++; return c }
+            }
+            val input = if (url.endsWith(".gz")) java.util.zip.GZIPInputStream(counted, 1 shl 16) else counted
+            input.use { inp ->
+              tmp.outputStream().use { out ->
+                val buf = ByteArray(1 shl 16)
+                while (true) { val n = inp.read(buf); if (n < 0) break; md.update(buf, 0, n); out.write(buf, 0, n) }
+              }
+            }
+            val got = md.digest().joinToString("") { "%02x".format(it) }
+            if (got != MODEL_SHA256) throw java.io.IOException("下载的模型指纹不对（$got）")
+          } finally { conn.disconnect() }
+          f.delete()
+          if (!tmp.renameTo(f)) throw IllegalStateException("模型文件替换失败")
+          modelStamp.writeText(MODEL_SHA256)
+          dlState = "cached"
+          return f
+        } catch (e: Throwable) {
+          last = e
+          tmp.delete()
+          android.util.Log.w("sayday", "模型下载失败 $url：${e.javaClass.simpleName}: ${e.message}")
+        }
+      }
+      dlState = "error"
+      dlError = "发音模型下载失败：${last?.javaClass?.simpleName}: ${last?.message}（检查网络后再试）"
+      throw IllegalStateException(dlError)
     }
-    return f
+  }
+
+  /** 正在用流量（不是 Wi-Fi）：自动预下就先不下 */
+  private fun metered(): Boolean {
+    val cm = activity.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager ?: return false
+    return cm.isActiveNetworkMetered
+  }
+
+  /** 模型状态：cached（本机有了）/ missing / downloading（got、total 是下载的字节数）/ error */
+  @Command
+  fun modelStatus(invoke: Invoke) {
+    val ret = JSObject()
+    val state = when {
+      dlState == "downloading" -> "downloading"
+      dlState == "cached" -> "cached"
+      modelPath.exists() && modelStamp.exists() && modelStamp.readText() == MODEL_SHA256 -> "cached"
+      dlState == "error" -> "error"
+      // 旧版本从 APK 拷出来的那份还没核对过指纹：当作有，真用时 modelReady 会核对
+      modelPath.exists() -> "cached"
+      else -> "missing"
+    }
+    ret.put("state", state)
+    ret.put("got", dlGot)
+    ret.put("total", dlTotal)
+    ret.put("error", dlError)
+    ret.put("metered", metered())
+    invoke.resolve(ret)
+  }
+
+  /** 后台下载模型（马上返回，进度看 modelStatus）。auto 且在用流量时不下 */
+  @Command
+  fun modelFetch(invoke: Invoke) {
+    val args = invoke.parseArgs(FetchArgs::class.java)
+    val ret = JSObject()
+    if (args.auto && metered() && modelPath.length() == 0L) { ret.put("started", false); ret.put("reason", "metered"); invoke.resolve(ret); return }
+    Thread { try { modelFile() } catch (_: Throwable) {} }.apply { isDaemon = true; name = "model-fetch" }.start()
+    ret.put("started", true)
+    invoke.resolve(ret)
   }
 
   @Command

@@ -26,24 +26,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 模型不入库：用口音微调过的 int8 音素模型（训练和评测见 docs/口音微调方案.md、.github/workflows/finetune.yml），
-      # 放在 Release「model-phone-ftall」里，按指纹校验。App 的评分校准表 packages/speech/calib.json 是按这一份拟合的，换模型必须一起换
-      - name: 下载音素模型
-        env:
-          MODEL_URL: https://github.com/Hector-xue/sayday/releases/download/model-phone-ftall/phone_ctc.ftall.int8.onnx
-          MODEL_SHA256: fb7686d1a479ddc0da84bd1dd5bc87d8f212dd83e8bc41190b7c471b8c89d849
+      # 音素模型（122MB）不打进 APK：App 第一次用时自己下载（InferPlugin.kt 的 MODEL_URLS / MODEL_SHA256），
+      # 不然每次更新都要多下 86MB。这里只要前端用的音素表
+      - name: 音素表
         run: |
           mkdir -p .cache/models
-          curl -sSfL --retry 3 -o .cache/models/phone_ctc.int8.onnx "$MODEL_URL"
-          echo "$MODEL_SHA256  .cache/models/phone_ctc.int8.onnx" | sha256sum -c -
           curl -sSfL --retry 3 -o .cache/models/charsiu_vocab.json https://huggingface.co/charsiu/tokenizer_en_cmu/resolve/main/vocab.json
           ls -la .cache/models
-
-      - name: 模型放进插件 assets
-        run: |
-          D=apps/native/src-tauri/plugins/sayday-infer/android/src/main/assets/models
-          mkdir -p $D && cp .cache/models/phone_ctc.int8.onnx $D/
-          ls -la $D
 
       - uses: actions/setup-node@v4
         with:

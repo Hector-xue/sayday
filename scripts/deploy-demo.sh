@@ -52,6 +52,22 @@ cat "$ASR/onnx/encoder_model_quantized.onnx" > "$STAGE/asr/moonshine-base-q8/enc
 cat "$ASR/onnx/decoder_model_merged_quantized.onnx" > "$STAGE/asr/moonshine-base-q8/decoder.onnx"
 cat "$ASR/vocab.json" > "$STAGE/asr/moonshine-base-q8/vocab.json"
 
+# 安卓 App 的音素模型（安装包里不带，第一次用时来这里下）：gzip 压过（122MB → 约 86MB），目录名 = 指纹前 8 位。
+# 指纹以 InferPlugin.kt 的 MODEL_SHA256 为准；本机 .cache 里的模型对不上就不放（App 会改从 GitHub 下原文件）
+PSHA=$(grep -o 'MODEL_SHA256 = "[0-9a-f]*"' "$ROOT/apps/native/src-tauri/plugins/sayday-infer/android/src/main/java/InferPlugin.kt" | grep -o '[0-9a-f]\{64\}')
+PGZ=$ROOT/.cache/models/phone_ctc.int8.onnx.${PSHA:0:8}.gz
+if [ ! -s "$PGZ" ]; then
+  if echo "$PSHA  $ROOT/.cache/models/phone_ctc.int8.onnx" | sha256sum -c --status -; then
+    gzip -9 -c "$ROOT/.cache/models/phone_ctc.int8.onnx" > "$PGZ.part" && mv -f "$PGZ.part" "$PGZ"
+  else
+    echo "!! 本机模型和 InferPlugin.kt 的指纹对不上，门户不放 App 下载用的模型（先跑 scripts/fetch-phone-model.sh）"
+  fi
+fi
+if [ -s "$PGZ" ]; then
+  mkdir -p "$STAGE/asr/phone-ctc-${PSHA:0:8}"
+  cat "$PGZ" > "$STAGE/asr/phone-ctc-${PSHA:0:8}/phone_ctc.int8.onnx.gz"
+fi
+
 # 先放到同级临时目录，再整体替换，避免发布中途页面读到半套文件
 NEW="$DEST.new.$$"
 rm -rf "$NEW"

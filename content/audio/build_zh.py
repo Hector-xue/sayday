@@ -1,4 +1,4 @@
-"""听学的中文讲解：zh_items.mjs 列出的中文 → sherpa-onnx 合成 → mp3（24kHz 单声道 64kbps，和英文音频包一样）。
+"""听学的中文讲解：zh_items.mjs 列出的中文 → sherpa-onnx 合成 → mp3（24kHz 单声道 48kbps：比 64k 小四分之一，频宽一样是满的 11kHz；32k 会切到 8kHz、齿音发闷，实测过）。
 输出 <out>/zh/<键>.mp3，外加 <out>/zh/shard-<i>.json（清单）。
 用法: python build_zh.py --items items.json --out out --shard 0 --model kokoro-multi-lang-v1_1 --sid 36 --speed 1.15
 模型目录（sherpa-onnx 的 tts-models 发布包解开）：kokoro-multi-lang-v1_1（Kokoro v1.1-zh）或 matcha-icefall-zh-baker（另需 vocos-22khz-univ.onnx）
@@ -50,7 +50,7 @@ for i, it in enumerate(items):
     pcm = (np.clip(x / max(1.0, float(np.max(np.abs(x)))), -1, 1) * 32767).astype('<i2').tobytes()
     dst = os.path.join(out, it['key'] + '.mp3')
     r = subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-f', 's16le', '-ar', str(g.sample_rate), '-ac', '1', '-i', '-',
-                        '-af', 'aresample=24000:resampler=soxr', '-ar', '24000', '-ac', '1', '-b:a', '64k', dst], input=pcm)
+                        '-af', 'aresample=24000:resampler=soxr', '-ar', '24000', '-ac', '1', '-b:a', '48k', dst], input=pcm)
     if r.returncode: bad.append(it['key']); continue
     done.append({'key': it['key'], 'text': it['text'], 'sec': round(len(x) / g.sample_rate, 2)})
     if i % 100 == 0:

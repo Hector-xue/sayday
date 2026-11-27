@@ -39,15 +39,18 @@ export type ListenPrefs = {
   example: boolean
   /** 听完一轮从头再来 */
   loop: boolean
+  /** 纯听学用哪本词书：'' 跟每日练习一样，'freq' 按常用程度，其余是词书标签（books.ts） */
+  book: string
 }
 export const COUNTS = [10, 20, 40] as const
-export const DEFAULT_PREFS: ListenPrefs = { src: 'course', n: 20, spell: true, zh: true, example: true, loop: true }
+export const DEFAULT_PREFS: ListenPrefs = { src: 'course', n: 20, spell: true, zh: true, example: true, loop: true, book: '' }
 
 export async function getPrefs(): Promise<ListenPrefs> {
   const p = await kvGet<Partial<ListenPrefs> | null>('listen', null)
   const out = { ...DEFAULT_PREFS, ...(p ?? {}) }
   if (!SOURCES.some((s) => s.k === out.src)) out.src = DEFAULT_PREFS.src
   if (!COUNTS.includes(out.n as never)) out.n = DEFAULT_PREFS.n
+  if (typeof out.book !== 'string') out.book = ''
   return out
 }
 export const savePrefs = (p: ListenPrefs) => kvSet('listen', p)
@@ -164,8 +167,8 @@ export function courseProgress(order: string[], stats: Map<string, HeardStat>): 
 }
 
 /** 纯听学的进度：词表多少个词、听熟了几个、在听几个 */
-export async function courseStatus(profile: Profile): Promise<CourseProgress> {
-  const [course, stats] = await Promise.all([listenCourse(profile), heardStats()])
+export async function courseStatus(profile: Profile, book = ''): Promise<CourseProgress> {
+  const [course, stats] = await Promise.all([listenCourse(profile, book), heardStats()])
   return courseProgress(course.map((w) => w.w), stats)
 }
 
@@ -173,12 +176,12 @@ export async function courseStatus(profile: Profile): Promise<CourseProgress> {
  * 按来源挑词（已去掉词库里查不到的）。“今天的词”没有时退到“最近学的”，返回实际用的来源。
  * exclude：“换一组”时去掉正在听的这一组，换成别的词
  */
-export async function pickWords(src: Source, n: number, profile: Profile, rnd = Math.random, exclude: Set<string> = new Set()): Promise<{ words: Word[]; src: Source }> {
+export async function pickWords(src: Source, n: number, profile: Profile, rnd = Math.random, exclude: Set<string> = new Set(), book = ''): Promise<{ words: Word[]; src: Source }> {
   const { byWord } = await loadContent()
   const keep = (ws: string[]) => [...new Set(ws)].filter((w) => !exclude.has(w)).map((w) => byWord.get(w)).filter((w): w is Word => !!w)
   const more = n + exclude.size
   if (src === 'course') {
-    const course = await listenCourse(profile)
+    const course = await listenCourse(profile, book)
     return { words: keep(pickCourse(course.map((w) => w.w), await heardStats(), n, dayStart(), exclude)), src }
   }
   if (src === 'today') {
@@ -206,7 +209,7 @@ export async function pickWords(src: Source, n: number, profile: Profile, rnd = 
 /** 挑词 + 给每个词配一句例句（同一轮里例句不重复）+ 排出讲解脚本 */
 export async function buildPlaylist(prefs: ListenPrefs, profile: Profile, exclude?: Set<string>): Promise<{ tracks: Track[]; src: Source }> {
   const { sentsByWord } = await loadContent()
-  const { words, src } = await pickWords(prefs.src, prefs.n, profile, Math.random, exclude)
+  const { words, src } = await pickWords(prefs.src, prefs.n, profile, Math.random, exclude, prefs.book)
   const used = new Set<number>()
   const tracks = words.map((w) => {
     const s = prefs.example ? pickSentence(sentsByWord.get(w.w), w.rank, used) : undefined
