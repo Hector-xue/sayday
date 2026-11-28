@@ -3,7 +3,7 @@
 //  - 听力：每天的“听音选义”按句子难度统计正确率
 //  - 护栏：升档马上显示；降档要连续两次小测都低于当前档才显示，避免一次状态不好就打击人
 import { db, kvGet, kvSet, today } from './db'
-import { BANDS, type Answer } from './placement'
+import { BANDS, frontierFrom, type Answer } from './placement'
 import { CEFR, cefrFromVocab, type Cefr } from './levels'
 import { State } from './srs'
 import { loadContent, type Word } from './content'
@@ -40,8 +40,8 @@ export function computeVocab(bands: number[], cardsPerBand: number[], learned: n
   return Math.round(bands.reduce((s, k, i) => s + k * Math.max(0, bandSize(i) - cardsPerBand[i]), 0) + learned)
 }
 
-/** 学新词的起点：第一个“认识不到八成”的档 */
-export const frontierOf = (bands: number[]) => { const i = bands.findIndex((k) => k < 0.8); return i < 0 ? 12000 : BANDS[i][0] }
+/** 学新词的起点（规则见 placement.frontierFrom：连着两档不到八成才算，一档手滑不算） */
+export const frontierOf = (bands: number[]) => frontierFrom(bands)
 
 export type Level = { cefr: Cefr; raw: Cefr; vocab: number; learned: number; frontier: number; state: VocabState }
 

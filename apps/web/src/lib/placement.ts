@@ -59,9 +59,17 @@ export function scorePlacement(answers: Answer[]): PlacementResult {
     return { from, to, known: real.length ? corrected(real, fa) : 0 }
   })
   const vocab = Math.round(bands.reduce((s, b) => s + b.known * (b.to - b.from + 1), 0))
-  // 学新词的起点：第一个“认识不到八成”的档
-  const fb = bands.find((b) => b.known < 0.8)
-  return { vocab, cefr: cefrFromVocab(vocab), falseAlarm: +fa.toFixed(2), bands, frontier: fb ? fb.from : 12000, answered: answers.length }
+  return { vocab, cefr: cefrFromVocab(vocab), falseAlarm: +fa.toFixed(2), bands, frontier: frontierFrom(bands.map((b) => b.known)), answered: answers.length }
+}
+
+/**
+ * 学新词的起点：第一个“认识不到八成、下一档也不到八成”的档（最后一档单看自己）。
+ * 以前只看第一个不到八成的档：每档只测 7 个词，最常用那档手滑点错两个就是 0.71，
+ * 词汇量估出来五千多，新词却从 say / go / get 教起
+ */
+export function frontierFrom(known: number[]): number {
+  const i = known.findIndex((k, j) => k < 0.8 && (j === known.length - 1 || known[j + 1] < 0.8))
+  return i < 0 ? 12000 : BANDS[i][0]
 }
 
 /** 不测、手动选档时的默认起点 */

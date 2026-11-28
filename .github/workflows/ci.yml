@@ -85,6 +85,11 @@ jobs:
         working-directory: apps/web
         run: node e2e/feedback.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e"
 
+      - name: 端到端：主要页面（今天 / 学词卡 / 词库 / 专项 / 进步）
+        if: ${{ !cancelled() && steps.prep.outcome == 'success' }}
+        working-directory: apps/web
+        run: node e2e/pages.mjs http://127.0.0.1:5391/ "$RUNNER_TEMP/e2e"
+
       - name: 端到端：听学（网页播放器自己往下讲、切词、暂停、记“听过”）
         if: ${{ !cancelled() && steps.prep.outcome == 'success' }}
         working-directory: apps/web

@@ -8,6 +8,7 @@ import { loadContent, pickSentence, type Sentence, type Word } from './content'
 import { dueWords } from './srs'
 import { listenCourse, previewWords, type Profile } from './lesson'
 import { glossParts, glossShort, glossSpeech, zhKey } from './gloss'
+import { MASTER_DAYS, heardStats, type HeardStat } from './heard'
 
 /**
  * 一段讲解：预生成的音频（单词 w / 拼读 p / 例句 s / 中文 z：释义和例句译文）、系统语音现念、停顿。
@@ -127,28 +128,25 @@ export function dayStart(now = new Date()): number {
 
 // ---------------- 纯听学的进度 ----------------
 
-/** 纯听学：一个词在这么多个不同的日子里听完过，就算听熟了，不再排进新的一组 */
-export const MASTER_DAYS = 3
-export type HeardStat = { days: number; last: number }
+export { MASTER_DAYS, heardStats, type HeardStat } from './heard'
 
-/** 每个词在几个不同的日子里听完过、最后一次是什么时候（日子按凌晨 4 点换，和 db.today 一致） */
-export async function heardStats(now = new Date()): Promise<Map<string, HeardStat>> {
-  // 本地时间的“第几天”：时间戳加上时区偏移、减 4 小时再按天取整（不用 SQLite 的 localtime：浏览器里的 SQLite 不一定知道时区；CAST：参数按浮点传进来时除法不取整）
-  const shift = 4 * 3600_000 + now.getTimezoneOffset() * 60_000
-  const rows = await db.all<{ word: string; days: number; last: number }>('SELECT word, count(DISTINCT CAST((ts - ?) / 86400000 AS INTEGER)) days, max(ts) last FROM passive_log GROUP BY word', [shift])
-  return new Map(rows.map((r) => [r.word, { days: r.days, last: r.last }]))
-}
+/** 每组最多带几个“每日练习里记错过”的词 */
+export const WEAK_PER_GROUP = 2
 
 /**
  * 纯听学排下一组：前几天听过、还没听熟的先复习（最多占一半，最久没听的在前；今天听过的不算，免得一直是那几个），
+ * 再带上每日练习里记错过的词（weak，最多 WEAK_PER_GROUP 个，今天听过的不再排），
  * 其余按词表顺序补没听过的新词；新词没了再多排些在听的。exclude：“换一组”时把这一组的词去掉
  */
-export function pickCourse(order: string[], stats: Map<string, HeardStat>, n: number, since: number, exclude: Set<string> = new Set()): string[] {
+export function pickCourse(order: string[], stats: Map<string, HeardStat>, n: number, since: number, exclude: Set<string> = new Set(), weak: string[] = []): string[] {
   const ok = order.filter((w) => !exclude.has(w))
   const learning = ok.filter((w) => { const s = stats.get(w); return !!s && s.days < MASTER_DAYS })
   const due = learning.filter((w) => stats.get(w)!.last < since).sort((a, b) => stats.get(a)!.last - stats.get(b)!.last)
   const review = due.slice(0, Math.floor(n / 2))
-  const out = [...review, ...ok.filter((w) => !stats.has(w)).slice(0, n - review.length)]
+  const taken = new Set(review)
+  const wrong = [...new Set(weak)].filter((w) => !exclude.has(w) && !taken.has(w) && !((stats.get(w)?.last ?? 0) >= since)).slice(0, Math.min(WEAK_PER_GROUP, n - review.length))
+  for (const w of wrong) taken.add(w)
+  const out = [...review, ...wrong, ...ok.filter((w) => !stats.has(w) && !taken.has(w)).slice(0, n - review.length - wrong.length)]
   if (out.length < n) {
     const has = new Set(out)
     out.push(...[...due, ...learning].filter((w) => !has.has(w) && has.add(w)).slice(0, n - out.length))
@@ -182,7 +180,9 @@ export async function pickWords(src: Source, n: number, profile: Profile, rnd = 
   const more = n + exclude.size
   if (src === 'course') {
     const course = await listenCourse(profile, book)
-    return { words: keep(pickCourse(course.map((w) => w.w), await heardStats(), n, dayStart(), exclude)), src }
+    // 每日练习里记错过、还没记牢的词（稳定度不到三周），错得多的在前
+    const weak = (await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 AND lapses > 0 AND stability < 21 ORDER BY lapses DESC, due ASC LIMIT 20')).map((r) => r.word).filter((w) => byWord.has(w))
+    return { words: keep(pickCourse(course.map((w) => w.w), await heardStats(), n, dayStart(), exclude, weak)), src }
   }
   if (src === 'today') {
     const fresh = (await db.all<{ word: string }>('SELECT word FROM card WHERE known = 0 AND added >= ? ORDER BY added', [dayStart()])).map((r) => r.word)

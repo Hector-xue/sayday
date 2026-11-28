@@ -43,7 +43,8 @@ try {
   for (let k = 0; k < 200 && (await p.$('.quiz-word')); k++) await clickText('不认识')
   await clickText('开始今天的练习')
   await p.waitForFunction(() => document.body.innerText.includes('今日练习'))
-  // 接假 AI
+  // 接假 AI（入口在“专项”页签）
+  await clickText('专项', '.tab'); await sleep(300)
   await clickText('接入你自己的 AI'); await sleep(300)
   await clickText('其他（OpenAI 兼容）')
   await p.type('input[placeholder="https://…/v1"]', 'http://127.0.0.1:5392/v1')
@@ -51,6 +52,7 @@ try {
   await clickText('连接')
   await p.waitForFunction(() => /和 Emma 聊几句/.test(document.body.innerText), { timeout: 20000 })
   log('接入假 AI')
+  await clickText('今天', '.tab'); await sleep(500)
 
   /** 做一组：复习都点“记得”，拼写故意写错一次，听力选第一个，跟读跳过 */
   async function session(day) {

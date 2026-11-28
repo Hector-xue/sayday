@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
-import { db } from '../lib/db'
-import { loadContent, pickSentence, rankLabel, type Word } from '../lib/content'
+import { db, today } from '../lib/db'
+import { briefZh, loadContent, pickSentence, rankLabel, type Word } from '../lib/content'
 import { PlayButton } from '../components/PlayButton'
 import { State, addCard } from '../lib/srs'
 import { BOOKS, bookName, inBook } from '../lib/books'
@@ -12,11 +12,13 @@ import { Dictation } from './Dictation'
 type Row = { word: string; due: number; state: number; reps: number; lapses: number; known: number; stability: number }
 type Filter = 'learning' | 'mastered' | 'known'
 
+/** 按“日子”说（凌晨 4 点换日，和每日练习一致），不按 24 小时：晚上学的词明早到期，是“明天”不是“今天内” */
 function nextLabel(due: number) {
-  const d = (due - Date.now()) / 86400_000
-  if (d <= 0) return '该复习了'
-  if (d < 1) return '今天内'
-  return `${Math.round(d)} 天后`
+  const now = new Date()
+  if (due <= now.getTime()) return '该复习了'
+  const days = Math.round((Date.parse(today(new Date(due))) - Date.parse(today(now))) / 86400_000)
+  if (days <= 0) return '今天内'
+  return days === 1 ? '明天' : `${days} 天后`
 }
 
 export function Words() {
@@ -120,7 +122,7 @@ export function Words() {
           <div className="list">
             {dict.map((w) => (
               <div className="list-row" key={w.w}>
-                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => setOpen(w)}><b>{w.w}</b><span>{w.zh}</span></button>
+                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => setOpen(w)}><b>{w.w}</b><span>{briefZh(w.zh)}</span></button>
                 <button className="btn small quiet" onClick={() => addWord(w)}>加入学习</button>
               </div>
             ))}
@@ -187,7 +189,7 @@ function BookBrowser({ words, status, title, onOpen, onAdd, onClose }: { words: 
           <div className="list">
             {list.slice(0, n).map((w) => (
               <div className="list-row" key={w.w}>
-                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(w)}><b>{w.w}</b><span>{w.zh}</span></button>
+                <button className="main" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(w)}><b>{w.w}</b><span>{briefZh(w.zh)}</span></button>
                 {status.has(w.w) ? <span className="side">{LABEL[status.get(w.w)!]}</span> : <button className="btn small quiet" onClick={() => onAdd(w)}>加入学习</button>}
               </div>
             ))}

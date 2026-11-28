@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import * as ort from 'onnxruntime-node'
 import { decode as silkDecode } from 'silk-wasm'
 import { scoreWith, phoneIdsOf, normalize, tokenize, dictWord } from '../speech/score.mjs'
+import { normIpa } from '../speech/ipa.mjs'
 import { transcribe as moonshine } from '../asr/moonshine.mjs'
 
 const ROOT = new URL('../../', import.meta.url).pathname
@@ -17,7 +18,7 @@ const json = (p) => JSON.parse(readFileSync(p, 'utf8'))
 let content = null
 export function getContent() {
   if (content) return content
-  const words = json(join(ROOT, 'content/pack/words.json')).map((x) => ({ w: x[0], rank: x[1], cefr: x[2], ipa: x[3], zh: x[4], tags: x[5] ? String(x[5]).split(' ') : [], sensitive: x[7] === 1 }))
+  const words = json(join(ROOT, 'content/pack/words.json')).map((x) => ({ w: x[0], rank: x[1], cefr: x[2], ipa: normIpa(x[3], x[6] ? String(x[6]).split(' ') : []), zh: x[4], tags: x[5] ? String(x[5]).split(' ') : [], sensitive: x[7] === 1 }))
   const sents = json(join(ROOT, 'content/pack/sentences.json')).map((x) => ({ id: x[0], en: x[1], zh: x[2], hard: x[3], cefr: x[4], words: x[5] }))
   const byWord = new Map(words.map((w) => [w.w, w]))
   const sentsByWord = new Map()

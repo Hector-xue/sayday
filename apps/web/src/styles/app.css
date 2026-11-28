@@ -270,6 +270,11 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .fade-in, .rec-btn.on { animation: none; } .bar > i { transition: none; } }
 .onb-back { margin: 0 0 -8px -10px; padding-left: 10px; padding-right: 10px; }
 .skill-lv { font: 600 20px var(--num); color: var(--brand); }
+.band-four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.band-four > div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 0; border-radius: 12px; background: var(--surface-2); }
+.band-four span { font-size: 12px; color: var(--soft); }
+.band-four b { font: 600 22px var(--num); }
+.band-four b.none { color: var(--faint); font-weight: 400; }
 .pairs { display: grid; gap: 14px; }
 .pair + .pair { border-top: 1px solid var(--hair); padding-top: 14px; }
 .pair .en { font-family: var(--serif); font-size: 17px; margin-bottom: 8px; }
@@ -582,7 +587,7 @@ html[data-text="xl"] :is(.page, .session, .onb, .sheet) > * { zoom: 1.2; }
 .work > p { margin: 0; }
 .work .material p { margin: 4px 0 0; }
 .work .tips { margin: 0; }
-.focus-card { margin: 12px 0 16px; }
+.focus-card { margin: 0; }
 .focus { display: grid; gap: 14px; }
 .focus p { margin: 0; }
 .focus-play { display: grid; gap: 18px; padding-top: 12px; }
