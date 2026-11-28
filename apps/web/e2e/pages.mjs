@@ -77,6 +77,8 @@ try {
         const senses = card.zh.split(/[；;]/).map((g) => g.replace(/^[a-z]+\.\s*/i, '').split(/[,，]/).length)
         expect(card.zh.split(/[；;]/).length <= 3 && senses.every((n, i) => n <= (i ? 2 : 3)), '意思最多三种词性、第一种三个其余两个', card.zh)
       }
+      const oneLine = await p.evaluate(() => { const el = document.querySelector('.word-big'); return el.getBoundingClientRect().height < parseFloat(getComputedStyle(el).fontSize) * 1.7 })
+      if (card.w.length >= 10 || !learned.length) expect(oneLine, `学词卡上的词一行放得下，不在词中间断开（${card.w}）`)
       learned.push(card.w)
       await clickText('记下了')
     } else if (kind.startsWith('听力')) { await p.evaluate(() => document.querySelector('.session .options .opt').click()); await sleep(300); await clickText('下一题') }

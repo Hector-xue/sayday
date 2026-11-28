@@ -266,7 +266,7 @@ function PairGame({ set, mode, accent, onClose }: { set: PairSet; mode: 'listen'
       ) : (
         <div className="fade-in" key={i}>
           <p className="step-kind">{i + 1}/{ROUNDS} · 读这个词</p>
-          <div className="row"><div className="word-big">{r.target}</div><div className="spacer" /><PlayButton text={r.target} clip={{ text: r.target, word: r.target }} accent={accent} /></div>
+          <div className="row"><div className="word-big" style={{ ['--len' as string]: r.target.length }}>{r.target}</div><div className="spacer" /><PlayButton text={r.target} clip={{ text: r.target, word: r.target }} accent={accent} /></div>
           <p className="small muted">别读成 <span className="en">{r.other}</span>{ipaOf.get(r.other) ? ` /${ipaOf.get(r.other)}/` : ''}</p>
           <div className="pair-mouths">
             <Mouth phone={set.a} size={120} />

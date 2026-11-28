@@ -151,7 +151,7 @@ export function Words() {
       {browse && book && <BookBrowser words={bookWords} status={status} title={bookName(book)} onOpen={(w) => setOpen(w)} onAdd={addWord} onClose={() => setBrowse(false)} />}
       {open && profile && (
         <Sheet onClose={() => setOpen(null)}>
-            <div className="row"><div className="word-big" style={{ fontSize: 36 }}>{open.w}</div><div className="spacer" /><PlayButton text={open.w} clip={{ text: open.w, word: open.w }} accent={profile.accent} /></div>
+            <div className="row"><div className="word-big" style={{ ['--len' as string]: open.w.length, ['--max' as string]: '36px' }}>{open.w}</div><div className="spacer" /><PlayButton text={open.w} clip={{ text: open.w, word: open.w }} accent={profile.accent} /></div>
             <p className="ipa">{open.ipa ? `/${open.ipa}/ · ` : ''}{rankLabel(open)} · {open.cefr}</p>
             <p className="zh-mean">{open.zh}</p>
             {(() => { const s = pickSentence(sents?.get(open.w), open.rank); return s ? (

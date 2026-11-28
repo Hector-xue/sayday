@@ -134,7 +134,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         {step.kind === 'review' && (
           <div className="fade-in">
             <p className="step-kind">复习 · 还记得意思吗？</p>
-            <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
+            <div className="row"><div className="word-big" style={{ ['--len' as string]: step.word.w.length }}>{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
             {revealed ? (
               <>
                 {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
@@ -168,7 +168,7 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         {step.kind === 'learn' && (
           <div className="fade-in">
             <p className="step-kind">新词{step.word.tags.includes('ielts') ? ' · 雅思词汇' : ''}{step.heard ? ' · 听学里听熟了' : ''}</p>
-            <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
+            <div className="row"><div className="word-big" style={{ ['--len' as string]: step.word.w.length }}>{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
             {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
             <p className="zh-mean">{briefZh(step.word.zh)}</p>
             <Example s={step.sentence} word={step.word.w} />

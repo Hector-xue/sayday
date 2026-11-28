@@ -110,7 +110,7 @@
 
 /* ---------- 练习（全屏）：单词像词典里的词条 ---------- */
 [data-style="paper"] .step-kind { color: var(--brand); letter-spacing: .14em; font-size: 12px; }
-[data-style="paper"] .word-big { font: 400 64px/1.02 var(--serif); margin-top: 14px; }
+[data-style="paper"] .word-big { font: 400 64px/1.02 var(--serif); font-size: min(var(--max, 64px), var(--fit)); margin-top: 14px; }
 [data-style="paper"] .ipa { font: italic 18px var(--serif); margin-top: 8px; }
 [data-style="paper"] .zh-mean { font-size: 17px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hair); }
 [data-style="paper"] .example { border-top: 0; margin-top: 20px; }
