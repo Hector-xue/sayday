@@ -67,6 +67,8 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   }, [])
 
   const step = steps?.[i]
+  // 到结算页时把还挂着的“跳过了这句”收掉（连着跳过几句时，上一句的提示还没消失）
+  useEffect(() => { if (steps?.length && i >= steps.length) toast('') }, [i, steps])
   useEffect(() => {
     setRevealed(false); setScored(false); stepStart.current = performance.now()
     if (step?.kind === 'review') preview(step.word.w).then(setIvals)
