@@ -13,6 +13,7 @@ import { buildCheck, listenLevel, listenTarget, vocabLevel, weeklyDue, type Chec
 import { CEFR } from './levels'
 import { weakPhones } from './progress'
 import { dueLines, type DueLine } from './episodes'
+import { heardMastered } from './heard'
 
 export type Profile = {
   goal: Goal
@@ -41,7 +42,7 @@ export const SIZES: Record<number, { review: number; fresh: number; shadow: numb
 export const sizeFor = (minutes: number) => SIZES[minutes] ?? SIZES[20]
 
 export type Step =
-  | { kind: 'learn'; word: Word; sentence?: Sentence }
+  | { kind: 'learn'; word: Word; sentence?: Sentence; /** 纯听学里已经听熟了 */ heard?: boolean }
   | { kind: 'review'; word: Word; sentence?: Sentence }
   /** 拼写：复习过两次以上的词，部分改成听音写词 */
   | { kind: 'spell'; word: Word; sentence?: Sentence }
@@ -69,9 +70,21 @@ function newWordOrder(p: Profile, learnable: Word[], frontier: number): Word[] {
   return [...tagged, ...rest, ...cand.slice(400)]
 }
 
+/**
+ * 纯听学里听熟了的词，学新词时先学（最多占一半，常用的在前）：耳朵已经熟了，在这里记住意思、会拼会读，
+ * 听学和每日练习就接上了。其余照常按 order
+ */
+export function mixHeard(order: Word[], familiar: Word[], n: number): Word[] {
+  const first = [...familiar].sort((a, b) => a.rank - b.rank).slice(0, Math.floor(n / 2))
+  const has = new Set(first.map((w) => w.w))
+  return [...first, ...order.filter((w) => !has.has(w.w)).slice(0, n - first.length)]
+}
+
 async function pickNewWords(p: Profile, n: number, words: Word[], frontier: number): Promise<Word[]> {
   const have = new Set((await db.all<{ word: string }>('SELECT word FROM card')).map((r) => r.word))
-  return newWordOrder(p, learnableOf(words, have), frontier).slice(0, n)
+  const ok = learnableOf(words, have)
+  const heard = await heardMastered().catch(() => new Set<string>())
+  return mixHeard(newWordOrder(p, ok, frontier), heard.size ? ok.filter((w) => heard.has(w.w)) : [], n)
 }
 
 /**
@@ -188,10 +201,11 @@ export async function buildSession(p: Profile, minimum = false, comeback = false
 
   const due = (await dueWords(reviewLeft)).map((w) => byWord.get(w)).filter(Boolean) as Word[]
   const fresh = await pickNewWords(p, freshLeft, words, lv.frontier)
+  const heard = fresh.length ? await heardMastered().catch(() => new Set<string>()) : new Set<string>()
   const used = new Set<number>()
   const sentFor = (w: Word) => { const s = pickSentence(sentsByWord.get(w.w), w.rank, used); if (s) used.add(s.id); return s }
 
-  const learn: Step[] = fresh.map((w) => ({ kind: 'learn', word: w, sentence: sentFor(w) }))
+  const learn: Step[] = fresh.map((w) => ({ kind: 'learn', word: w, sentence: sentFor(w), heard: heard.has(w.w) || undefined }))
   // 复习过两次以上、能拼的词：每三个里有一个改成拼写（听音 + 看意思写出来），光认得不够，还要写得出
   const reps = new Map((await db.all<{ word: string; reps: number }>(`SELECT word, reps FROM card WHERE word IN (${due.map(() => '?').join(',') || "''"})`, due.map((w) => w.w))).map((r) => [r.word, r.reps]))
   let k = 0

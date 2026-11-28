@@ -127,7 +127,7 @@ try {
   await shot('09-today-after')
   log('今天页（做完后）', (await text()).replace(/\s+/g, ' ').match(/今日练习.*?跟读.*?\d+\/\d+|今天的练习完成了.*?跟读.*?\d+\/\d+/)?.[0])
 
-  for (const [tab, name] of [['发音', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress']]) {
+  for (const [tab, name] of [['专项', '10a-lab'], ['词库', '10-words'], ['进步', '11-progress']]) {
     await clickText(tab, '.tab'); await sleep(700); await shot(name)
   }
   log('进步页分项', (await text()).replace(/\s+/g, ' ').match(/分项.*?发音 \S+/)?.[0])
@@ -147,7 +147,7 @@ try {
   log('设置·发音模型', await p.evaluate(() => [...document.querySelectorAll('.set-row')].find((x) => x.innerText.startsWith('发音模型'))?.innerText.replace(/\s+/g, ' ')))
 
   // 发音实验室：音标口型卡、最小对立听辨两题
-  await clickText('发音', '.tab'); await sleep(300)
+  await clickText('专项', '.tab'); await sleep(300)
   await p.evaluate(() => [...document.querySelectorAll('.phone-chips button')].find((b) => b.textContent === 'θ').click()); await sleep(500)
   await shot('10b-phone')
   log('口型卡', (await text()).replace(/\s+/g, ' ').match(/舌尖伸到[^·]*/)?.[0])
@@ -228,7 +228,7 @@ try {
   await shot('21b-city-map')
   await p.click('.session-top .icon-btn'); await sleep(300)
   // 30 秒专注：开始，点 6 下，等 30 秒结束
-  await clickText('发音', '.tab'); await sleep(400)
+  await clickText('专项', '.tab'); await sleep(400)
   await p.click('.focus-card'); await sleep(400)
   await clickText('开始'); await sleep(600)
   for (let k = 0; k < 6; k++) { await p.evaluate(() => document.querySelector('.focus-opts .opt')?.click()); await sleep(1100) }
@@ -269,7 +269,7 @@ try {
     await p.evaluate((t) => { const cs = [...document.querySelectorAll('.ai-card')]; (cs.find((b) => b.querySelector('b')?.textContent.trim() === t) ?? cs.find((b) => b.querySelector('b')?.textContent.includes(t)) ?? cs.find((b) => b.textContent.includes(t))).click() }, t)
     await sleep(400)
   }
-  await clickText('今天', '.tab'); await sleep(300)
+  await clickText('专项', '.tab'); await sleep(300)
   await clickCard('阅读')
   await shot('22a-reading-list')
   await clickText('Passage 1'); await sleep(400)
@@ -309,7 +309,7 @@ try {
   // 测线上（https）时跳过：Chrome 不让公网 https 页面访问本机回环地址上的假服务（Private Network Access）
   const mock = process.env.PW ? null : startMockAi(5392)
   if (mock) try {
-    await clickText('今天', '.tab'); await sleep(300)
+    await clickText('专项', '.tab'); await sleep(300)
     await clickText('接入你自己的 AI'); await sleep(300)
     await clickText('其他（OpenAI 兼容）')
     await p.type('input[placeholder="https://…/v1"]', 'http://127.0.0.1:5392/v1')
@@ -340,7 +340,7 @@ try {
     await p.click('.session-top .icon-btn'); await sleep(400)
     log('今天页日记状态', (await text()).includes('今天写过了') ? '已写' : '未显示')
     // 雅思写作：选第一题，写一段，提交 → 假 AI 批改
-    await clickText('今天', '.tab'); await sleep(300)
+    await clickText('专项', '.tab'); await sleep(300)
     await clickCard('大作文'); await sleep(400)
     await p.click('.session .list .list-row'); await sleep(400)
     await p.type('.diary-edit', 'Nowadays many people work from home. Some people thinks it is better for employees because they save time. However, others believe it harms teamwork. In my opinion, both views have some truth, so companies should find a balance between office work and remote work.')
@@ -352,7 +352,7 @@ try {
     await p.click('.session-top .icon-btn'); await sleep(300)
 
     // 工作英语：回买家邮件 → 假 AI 批改
-    await clickText('今天', '.tab'); await sleep(300)
+    await clickText('专项', '.tab'); await sleep(300)
     await clickCard('工作英语'); await sleep(400)
     await shot('24b-work-list')
     await clickText('回复买家：包裹晚到了', '.list-row'); await sleep(400)
@@ -365,8 +365,8 @@ try {
     await p.click('.session-top .icon-btn'); await sleep(300)
     await p.click('.session-top .icon-btn'); await sleep(300)
 
-    // 模拟考试：今天页入口（所有目标都有）→ 单项写作的小作文图表 → 开始全真模考看到四节进度
-    await clickText('今天', '.tab'); await sleep(300)
+    // 模拟考试：“专项”页签入口（所有目标都有）→ 单项写作的小作文图表 → 开始全真模考看到四节进度
+    await clickText('专项', '.tab'); await sleep(300)
     await p.evaluate(() => document.querySelector('.mock-entry')?.click()); await sleep(500)
     await shot('24e-mock-hub')
     log('模拟考试', await p.evaluate(() => document.querySelector('.mock .card')?.innerText.replace(/\s+/g, ' ').slice(0, 60)))
@@ -384,8 +384,8 @@ try {
     await p.click('.session-top .icon-btn'); await sleep(300)
 
     // 雅思口语模考：10 道题，每题录 3 秒（假麦克风），Part 2 跳过准备；AI（假服务）评分
-    await clickText('发音', '.tab'); await sleep(300)
-    await p.click('.mock-card'); await sleep(400)
+    await clickText('专项', '.tab'); await sleep(300)
+    await clickText('口语模考'); await sleep(400)
     await clickText('开始')
     for (let k = 0; k < 12; k++) {
       await p.waitForFunction(() => /说完了|准备好了/.test(document.querySelector('.session-foot')?.textContent ?? '') || /模考报告|正在整理/.test(document.body.innerText), { timeout: 60000 })

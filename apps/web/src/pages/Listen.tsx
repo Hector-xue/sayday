@@ -126,7 +126,7 @@ export function Listen({ onClose }: { onClose: () => void }) {
                 <span className="side">换</span>
               </button>
             </div>
-            <p className="small muted hear-course">每组先复习前几天听过的，再接着往下听新词；一个词在 {MASTER_DAYS} 个不同的日子里都听过，就算听熟了。{progLine && <><br />{progLine}</>}</p>
+            <p className="small muted hear-course">每组先复习前几天听过的，带上每日练习里记错的词，再接着往下听新词；一个词在 {MASTER_DAYS} 个不同的日子里都听过，就算听熟了，每日练习学到它时会先学。{progLine && <><br />{progLine}</>}</p>
           </>
         )}
         {pickBook && (

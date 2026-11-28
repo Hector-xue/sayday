@@ -23,7 +23,7 @@ import { Listen } from './pages/Listen'
 type Tab = 'today' | 'episodes' | 'lab' | 'words' | 'progress' | 'settings'
 // 设置不占底栏：从“今天”和“进步”右上角的齿轮进
 const TABS: { k: Tab; t: string; i: () => ReactElement }[] = [
-  { k: 'today', t: '今天', i: Icon.today }, { k: 'episodes', t: '剧集', i: Icon.film }, { k: 'lab', t: '发音', i: Icon.mic }, { k: 'words', t: '词库', i: Icon.words }, { k: 'progress', t: '进步', i: Icon.progress },
+  { k: 'today', t: '今天', i: Icon.today }, { k: 'episodes', t: '剧集', i: Icon.film }, { k: 'lab', t: '专项', i: Icon.mic }, { k: 'words', t: '词库', i: Icon.words }, { k: 'progress', t: '进步', i: Icon.progress },
 ]
 
 function Main() {
@@ -67,9 +67,9 @@ function Main() {
   if (!profile || redo) return <Onboarding redo={redo ?? undefined} key={redo ?? 'new'} onExit={() => setRedo(null)} />
   return (
     <div className="shell">
-      {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onIelts={setIelts} onListen={() => setListen(true)} />}
+      {tab === 'today' && <Today onStart={(minimum, comeback) => setSession({ minimum, comeback })} onRetest={() => setRedo('place')} onAi={setAi} onEpisode={(id) => { setOpenEp(id); go('episodes') }} onSettings={() => go('settings')} onListen={() => setListen(true)} />}
       {tab === 'episodes' && <Episodes openId={openEp} onOpened={() => setOpenEp(null)} />}
-      {tab === 'lab' && <Lab onSetupAi={() => setAi('setup')} onMock={() => setIelts('mock')} />}
+      {tab === 'lab' && <Lab onAi={setAi} onIelts={setIelts} />}
       {tab === 'words' && <Words />}
       {tab === 'progress' && <Progress onSettings={() => go('settings')} />}
       {tab === 'settings' && <Settings onRedo={setRedo} onAi={() => setAi('setup')} onBack={() => go('today')} />}
@@ -91,7 +91,7 @@ function Main() {
       {(ielts === 'reading' || ielts === 'listening') && <Practice kind={ielts} onClose={() => { setIelts(null); refresh() }} />}
       {ielts === 'mock' && <Mock onClose={() => { setIelts(null); refresh() }} onSetupAi={() => { setIelts(null); setAi('setup') }} />}
       {ielts === 'speaking' && <Speaking onClose={() => { setIelts(null); refresh() }} onSetupAi={() => { setIelts(null); setAi('setup') }} />}
-      {ai === 'setup' && <AiSetup onClose={(ok) => { setAi(ok ? after : null); setAfter(null); refresh(); if (ok && !after) { go('today'); toast('AI 接好了：今天页“AI 陪练”里能和 Emma 聊天、写日记；模拟考试的写作和口语、工作英语也会用 AI 批改') } }} />}
+      {ai === 'setup' && <AiSetup onClose={(ok) => { setAi(ok ? after : null); setAfter(null); refresh(); if (ok && !after) { go('lab'); toast('AI 接好了：“专项”里能和 Emma 聊天、写日记；写作、口语模考和工作英语也会用 AI 批改') } }} />}
     </div>
   )
 }

@@ -92,7 +92,10 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
           <>
             <p className="section-title">雅思四项（预估）</p>
             <div className="card radar-card">
-              <Radar axes={SKILLS.map((x) => x.t)} now={vals} before={old && old !== cur ? SKILLS.map(({ k }) => old[k] ?? null) : undefined} />
+              {/* 不到三项有分时雷达图只是一条线（字还压在线上），先并排列四项 */}
+              {vals.filter((v) => v != null).length >= 3
+                ? <Radar axes={SKILLS.map((x) => x.t)} now={vals} before={old && old !== cur ? SKILLS.map(({ k }) => old[k] ?? null) : undefined} />
+                : <div className="band-four">{SKILLS.map(({ k, t }, i) => <div key={k}><span>{t}</span><b className={vals[i] == null ? 'none' : undefined}>{vals[i]?.toFixed(1) ?? '—'}</b></div>)}</div>}
               <p className="small muted">{all ? <>总分约 <b className="num">{overallBand(vals as number[]).toFixed(1)}</b>{profile.goal.kind === 'ielts' && profile.goal.ielts ? ` · 目标 ${profile.goal.ielts}` : ''}</> : `还缺${missing.join('、')}：${SKILLS.filter(({ k }) => !bands.now[k]).map(({ k }) => HOW[k]).join('，')}就能出总分`}{old && old !== cur ? ' · 虚线是四周前' : ''}</p>
               <p className="small faint">{SKILLS.filter(({ k }) => bands.now[k]).map(({ k, t }) => `${t}：${bands.now[k]!.from}`).join('；')}。只是练习里的估算，不等于真考分数。</p>
             </div>
@@ -144,9 +147,9 @@ export function Progress({ onSettings }: { onSettings: () => void }) {
       <div className="list">
         <div className="set-row"><div className="k"><b>词汇</b><span>约 {lv.vocab.toLocaleString()} 词 · 每学会一个词都算上</span></div><b className="skill-lv">{lv.cefr}</b></div>
         <div className="set-row"><div className="k"><b>听力</b><span>{ll && ll.cefr ? `听音选义 ${ll.n} 题，正确率 ${Math.round(ll.acc * 100)}%` : (ll?.n ?? 0) >= 6 ? `做了 ${ll!.n} 题，正确率 ${Math.round(ll!.acc * 100)}%，某一档稳定答对七成就出结果` : `每天练习里的听力题，再做 ${6 - (ll?.n ?? 0)} 题以上出结果`}</span></div><b className="skill-lv">{ll?.cefr ?? '—'}</b></div>
-        <div className="set-row"><div className="k"><b>口语（模考）</b><span>{mock ? `${new Date(mock.ts).toLocaleDateString()} · ${mock.band !== null ? 'AI 四项评分' : `流利 ${mock.fc ?? '—'} · 发音 ${mock.p ?? '—'}（参考）`}` : '在“今天 → 模拟考试”里考一次口语'}</span></div><b className="skill-lv">{mock?.band?.toFixed(1) ?? '—'}</b></div>
+        <div className="set-row"><div className="k"><b>口语（模考）</b><span>{mock ? `${new Date(mock.ts).toLocaleDateString()} · ${mock.band !== null ? 'AI 四项评分' : `流利 ${mock.fc ?? '—'} · 发音 ${mock.p ?? '—'}（参考）`}` : '在“专项 → 口语模考”里考一次'}</span></div><b className="skill-lv">{mock?.band?.toFixed(1) ?? '—'}</b></div>
         {(pb.r || pb.l) && <div className="set-row"><div className="k"><b>雅思听力 / 阅读</b><span>最近几次练习按比例折算{pb.l ? ` · 听力 ${pb.l.n} 题` : ''}{pb.r ? ` · 阅读 ${pb.r.n} 题` : ''}</span></div><b className="skill-lv">{pb.l?.band.toFixed(1) ?? '—'} / {pb.r?.band.toFixed(1) ?? '—'}</b></div>}
-        <div className="set-row"><div className="k"><b>写作</b><span>{wband ? `${new Date(wband.ts).toLocaleDateString()} · AI 四项评分` : '在“今天 → 模拟考试 → 写作”写一篇'}</span></div><b className="skill-lv">{wband?.band.toFixed(1) ?? '—'}</b></div>
+        <div className="set-row"><div className="k"><b>写作</b><span>{wband ? `${new Date(wband.ts).toLocaleDateString()} · AI 四项评分` : (profile.goal.kind === 'ielts' ? '在“专项 → 写作”写一篇' : '在“专项 → 全真模考”里单练写作')}</span></div><b className="skill-lv">{wband?.band.toFixed(1) ?? '—'}</b></div>
         <div className="set-row"><div className="k"><b>发音</b><span>{st.recentScore !== null ? '最近 20 句跟读的平均分' : '跟读几句就有'}</span></div><b className="skill-lv">{st.recentScore ?? '—'}</b></div>
       </div>
 

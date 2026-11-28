@@ -13,9 +13,19 @@ const toCard = (r: Row): Card => ({
 })
 const params = (c: Card) => [c.due.getTime(), c.stability, c.difficulty, c.elapsed_days, c.scheduled_days, c.learning_steps, c.reps, c.lapses, c.state, c.last_review ? c.last_review.getTime() : null]
 
-/** 新词入库（学的时候调用） */
-export async function addCard(word: string, known = false) {
-  const c = createEmptyCard(new Date())
+/** 明天开始的时间（换日按凌晨 4 点，和 today() 一致） */
+export function tomorrowStart(now = new Date()): Date {
+  const [y, m, d] = today(now).split('-').map(Number)
+  return new Date(y, m - 1, d + 1, 4)
+}
+
+/**
+ * 新词入库（学的时候、从剧集/查词里加的时候调用）。
+ * 第一次复习排到明天：刚看过的词马上算“到期”，做完一组今天的复习反而变多，还会把一分钟前刚学的词再考一遍
+ */
+export async function addCard(word: string, known = false, now = new Date()) {
+  const c = createEmptyCard(now)
+  if (!known) c.due = tomorrowStart(now)
   await db.run(
     `INSERT INTO card(word, due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review, added, known)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(word) DO NOTHING`,

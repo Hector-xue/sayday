@@ -3,12 +3,11 @@ import { useApp } from '../store'
 import { Icon } from '../components/icons'
 import { dailySize, dayRow, type DayRow } from '../lib/lesson'
 import { weeklyDue } from '../lib/calibrate'
-import { db, today } from '../lib/db'
+import { db } from '../lib/db'
 import { getAi } from '../lib/ai'
 import { getProgress, loadSeasons, nextUp, teaserFor } from '../lib/episodes'
 import { dueCount } from '../lib/srs'
-import { currentLevel, stats } from '../lib/progress'
-import { eta, goalLabel, type Cefr } from '../lib/levels'
+import { stats } from '../lib/progress'
 import { comeback, currentWeek, spreadBacklog, type Comeback, type Week } from '../lib/rhythm'
 import { checkUpdate, type UpdateInfo } from '../lib/update'
 import { UpdateCard } from '../components/UpdateCard'
@@ -28,20 +27,16 @@ import { player, recallNow, syncHeard, type PlayState } from '../lib/listen-play
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts, onListen }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onIelts: (k: 'reading' | 'listening' | 'speaking' | 'mock') => void; onListen: () => void }) {
+export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onListen }: { onStart: (minimum: boolean, comeback?: boolean) => void; onRetest: () => void; onAi: (k: 'chat') => void; onEpisode: (id: { season: number; ep: number }) => void; onSettings: () => void; onListen: () => void }) {
   const { profile, tick } = useApp()
   const [d, setD] = useState<DayRow | null>(null)
   const [due, setDue] = useState(0)
   const [week, setWeek] = useState<DayRow[]>([])
-  const [lv, setLv] = useState<{ cefr: Cefr; vocab: number } | null>(null)
   const [size, setSize] = useState<Awaited<ReturnType<typeof dailySize>> | null>(null)
   const [check, setCheck] = useState(false)
   const [retest, setRetest] = useState(false)
-  const [hasAi, setHasAi] = useState(false)
   const [upd, setUpd] = useState<UpdateInfo | null>(null)
   useEffect(() => { checkUpdate(true).then(setUpd).catch(() => {}) }, [])
-  const [wrote, setWrote] = useState(false)
-  const [chatted, setChatted] = useState(false)
   const [ep, setEp] = useState<ReturnType<typeof nextUp> | null>(null)
   const [prevTeaser, setPrevTeaser] = useState('')
   const [wk, setWk] = useState<Week | null>(null)
@@ -85,7 +80,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
       db.one<{ ts: number }>("SELECT max(ts) ts FROM level_estimate WHERE source IN ('placement', 'manual')").then((r) => setRetest(Date.now() - (r?.ts ?? Date.now()) > 30 * 86400_000))
     }
     getAi().then(async (c) => {
-      setHasAi(!!c)
       setEmma(await unreadNudge().catch(() => null))
       // 隔两天没聊：Emma 在后台先发一条（要接了 AI；失败就算了）
       if (c && profile && (await shouldNudge().catch(() => false))) {
@@ -94,13 +88,10 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
       }
     })
     Promise.all([loadSeasons(), getProgress()]).then(([all, p]) => { const u = nextUp(all, p); setEp(u); setPrevTeaser(teaserFor(all, u.season.season, u.ep.id)) })
-    db.one<{ n: number }>('SELECT count(*) n FROM diary WHERE date = ? AND result IS NOT NULL', [today()]).then((r) => setWrote(!!r?.n))
-    db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]).then((r) => setChatted(!!r?.n))
     dayRow().then(setD)
     dueCount().then(setDue)
     currentWeek().then(async (w) => { setWk(w); setWeek(await Promise.all(w.days.map((x) => dayRow(x.date)))) })
     Promise.all([getSupport(), stats()]).then(([s, st]) => setSupport({ s, show: shouldPrompt(s, st.days) }))
-    if (profile) currentLevel(profile).then(setLv)
     if (profile) unseenAbilities(profile).then(setFresh).catch(() => {})
     // 在练习以外达成的里程碑（剧集、听写、聊天里跟读等）：回到今天页时庆祝
     if (profile) nextMilestone().then(setMile).catch(() => {})
@@ -115,7 +106,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
     { k: 'shadow', ico: <Icon.mic />, t: '跟读', s: '逐个音标打分', n: `${Math.min(d.shadows, size.shadow)}/${size.shadow}`, done: d.shadows >= size.shadow },
   ]
   const allDone = items.every((x) => x.done || (x.k === 'review' && rv.want === 0))
-  const e = lv ? eta(lv.cefr, profile.goal.target, profile.minutes, profile.start) : null
   const now = new Date()
 
   return (
@@ -202,7 +192,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
       )}
       {vdOpen && <VoiceDiary onClose={() => { setVdOpen(false); thisWeek().then((e) => setVdDue(!e)) }} />}
 
-      <p className="section-title">{hasAi ? 'AI 陪练' : '说和写'}</p>
       {emma && (
         <button className="card emma-nudge" onClick={() => onAi('chat')}>
           <span className="small muted">Emma 给你发了条消息</span>
@@ -210,35 +199,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
           {emma.zh && <span className="small muted">{emma.zh}</span>}
           <span className="small reply">回她 →</span>
         </button>
-      )}
-      {hasAi ? (
-        <div className="ai-grid">
-          <button className="card ai-card" onClick={() => onAi('chat')}>
-            <span className="ai-ico"><Icon.chat /></span><b>和 Emma 聊几句</b><span>{chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
-          </button>
-          <button className="card ai-card" onClick={() => onAi('diary')}>
-            <span className="ai-ico"><Icon.diary /></span><b>写今天的日记</b><span>{wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
-          </button>
-        </div>
-      ) : (
-        <button className="card ai-card wide" onClick={() => onAi('setup')}>
-          <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
-        </button>
-      )}
-      <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => onAi('work')}>
-        <b>工作英语</b><span>回买家邮件、给供应商发消息、写 Listing。{hasAi ? 'AI 逐句批改' : '有参考写法，接入 AI 能逐句批改'}</span>
-      </button>
-
-
-      {lv && e && (
-        <>
-          <p className="section-title">离目标</p>
-          <div className="card">
-            <p className="level-line">现在 <b>{lv.cefr}</b>（约 {lv.vocab.toLocaleString()} 词，估算）→ 目标 <b>{goalLabel(profile.goal)}</b>（{profile.goal.target}）</p>
-            <div className="bar" style={{ margin: '12px 0 8px' }}><i style={{ width: `${Math.round(e.progress * 100)}%` }} /></div>
-            <p className="small muted">{e.hoursLeft === 0 ? '词汇量已经达标，接下来重点练听说。' : `已走完 ${Math.round(e.progress * 100)}% · 按每天 ${profile.minutes} 分钟，预计 ${e.date} 到达`}</p>
-          </div>
-        </>
       )}
 
       {ep && ep.state !== 'all-done' && (
@@ -249,31 +209,6 @@ export function Today({ onStart, onRetest, onAi, onEpisode, onSettings, onIelts,
             <b className="en" style={{ fontSize: 18 }}>{ep.ep.title}</b>
             <span>{ep.state === 'ready' ? ep.ep.scene_zh : prevTeaser}</span>
           </button>
-        </>
-      )}
-
-      <p className="section-title">模拟考试</p>
-      <button className="card ai-card wide mock-entry" onClick={() => onIelts('mock')}>
-        <b>雅思全真模考</b><span>听力、阅读、写作、口语按真考时长走一遍，出四项分数和总分；也能单练一项</span>
-      </button>
-
-      {profile.goal.kind === 'ielts' && (
-        <>
-          <p className="section-title">雅思专项</p>
-          <div className="ai-grid">
-            <button className="card ai-card" onClick={() => onIelts('listening')}>
-              <span className="ai-ico"><Icon.headphones /></span><b>听力</b><span>四个部分，和真考一样只放一遍</span>
-            </button>
-            <button className="card ai-card" onClick={() => onIelts('reading')}>
-              <span className="ai-ico"><Icon.book /></span><b>阅读</b><span>学术类文章，判断、填空、配对</span>
-            </button>
-            <button className="card ai-card" onClick={() => onIelts('speaking')}>
-              <span className="ai-ico"><Icon.speak /></span><b>口语模考</b><span>三个部分完整走一遍</span>
-            </button>
-            <button className="card ai-card" onClick={() => onAi('writing')}>
-              <span className="ai-ico"><Icon.pen /></span><b>写作</b><span>{hasAi ? '大作文 / 书信，AI 批改' : '需要先接入 AI'}</span>
-            </button>
-          </div>
         </>
       )}
 

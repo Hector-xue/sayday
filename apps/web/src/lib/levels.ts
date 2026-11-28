@@ -10,8 +10,8 @@ export function cefrFromVocab(v: number): Cefr {
 }
 /** 档位对应的词汇量下限（给“离下一档还差多少词”用） */
 export function vocabFloor(c: Cefr): number {
-  if (c === 'Pre-A1') return 0
-  const i = VOCAB_CUTS.findIndex(([, x]) => x === c)
+  // 某档的下限 = 上一档的上限；C2 没有上限，不在表里，以前按 0 算，C1 的人会看到“再认识 0 个词升 C2”
+  const i = CEFR.indexOf(c)
   return i <= 0 ? 0 : VOCAB_CUTS[i - 1][0]
 }
 export function nextCefr(c: Cefr): Cefr | null {

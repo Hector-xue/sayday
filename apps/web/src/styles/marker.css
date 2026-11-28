@@ -108,7 +108,7 @@
 
 /* ---------- 练习（全屏） ---------- */
 [data-style="marker"] .step-kind { align-self: flex-start; width: fit-content; color: var(--on-mark); background: var(--mark); padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
-[data-style="marker"] .word-big { align-self: flex-start; font: 800 56px/1.12 var(--display); background: var(--hl); padding: 0 .08em; margin-left: -.08em; border-radius: 4px; }
+[data-style="marker"] .word-big { align-self: flex-start; font: 800 56px/1.12 var(--display); font-size: min(var(--max, 56px), var(--fit)); background: var(--hl); padding: 0 .08em; margin-left: -.08em; border-radius: 4px; }
 [data-style="marker"] .ipa { font: 500 17px var(--display); color: var(--soft); margin-top: 6px; }
 [data-style="marker"] .zh-mean { font-size: 18px; font-weight: 600; }
 [data-style="marker"] .example { border-top: 0; margin-top: 22px; padding: 18px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }

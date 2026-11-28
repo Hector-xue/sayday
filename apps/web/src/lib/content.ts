@@ -1,4 +1,5 @@
 // 离线内容包：词表 + 例句（content/build_content.py 生成，随应用缓存）
+import { normIpa } from './phones'
 export type Word = { w: string; rank: number; cefr: string; ipa: string; zh: string; tags: string[]; cmu: string[]; sensitive: boolean }
 /** 词表前 1.2 万是按常用程度排的；之后是补进来的考试大纲词（排名只是顺序，不代表常用程度） */
 export const COMMON_WORDS = 12000
@@ -12,7 +13,8 @@ export function loadContent() {
   if (!cache) {
     cache = (async () => {
       const [w, s] = await Promise.all([fetch('./content/words.json').then((r) => r.json()), fetch('./content/sentences.json').then((r) => r.json())])
-      const words: Word[] = w.map((x: any[]) => ({ w: x[0], rank: x[1], cefr: x[2], ipa: x[3], zh: x[4], tags: x[5] ? String(x[5]).split(' ') : [], cmu: x[6] ? String(x[6]).split(' ') : [], sensitive: x[7] === 1 }))
+      // 音标统一成现在的写法（词典里是 sei、'wɒ:tә 这种老式写法，见 phones.normIpa）
+      const words: Word[] = w.map((x: any[]) => { const cmu = x[6] ? String(x[6]).split(' ') : []; return { w: x[0], rank: x[1], cefr: x[2], ipa: normIpa(x[3], cmu), zh: x[4], tags: x[5] ? String(x[5]).split(' ') : [], cmu, sensitive: x[7] === 1 } })
       const sents: Sentence[] = s.map((x: any[]) => ({ id: x[0], en: x[1], zh: x[2], hard: x[3], cefr: x[4], words: x[5] }))
       const byWord = new Map(words.map((x) => [x.w, x]))
       const sentsByWord = new Map<string, Sentence[]>()
@@ -56,4 +58,29 @@ export function lookup(byWord: Map<string, Word>, token: string): Word | undefin
   if (t.endsWith('ly')) tries.push(t.slice(0, -2))
   for (const x of tries) { const w = byWord.get(x); if (w) return w }
   return undefined
+}
+
+/** 按逗号拆开，括号里的逗号不拆（“拉塞尔（英国工程师, 整流器发明人）”是一个意思） */
+function splitSenses(s: string): string[] {
+  const out: string[] = []
+  let depth = 0, cur = ''
+  for (const ch of s) {
+    if ('(（['.includes(ch)) depth++
+    else if (')）]'.includes(ch)) depth = Math.max(0, depth - 1)
+    if ((ch === ',' || ch === '，') && depth === 0) { out.push(cur.trim()); cur = '' } else cur += ch
+  }
+  out.push(cur.trim())
+  return out.filter(Boolean)
+}
+
+/**
+ * 学词卡上只放常用的意思：最多三种词性，第一种留三个意思、其余各留两个。
+ * 词典原文一个词能列二三十个意思（turn 有 n./vt./vi. 共 30 多个），记的时候反而抓不住重点；词库详情页还是全部显示
+ */
+export function briefZh(zh: string): string {
+  return zh.split(/[；;]/).map((g) => g.trim()).filter(Boolean).slice(0, 3).map((g, i) => {
+    const m = g.match(/^([a-z]+\.)\s*([\s\S]*)$/i)
+    const senses = splitSenses(m ? m[2] : g).slice(0, i === 0 ? 3 : 2)
+    return (m ? `${m[1]} ` : '') + senses.join(', ')
+  }).join('；')
 }

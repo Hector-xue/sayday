@@ -1,4 +1,5 @@
-// 发音实验室：弱项专项练习、最小对立（先听辨再说对）、音标口型
+// “专项”页签：雅思模考和单项、AI 陪练（聊天 / 日记 / 工作英语）、发音（弱项专项练习、最小对立、音标口型）。
+// 今天页只放每天要做的；这些按需去练的都在这里
 import { Icon } from '../components/icons'
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
@@ -18,19 +19,29 @@ import { markDay, saveAttempt } from '../lib/lesson'
 import { prefetch, type Accent } from '../lib/tts'
 import { vocabLevel } from '../lib/calibrate'
 import { lastTests } from '../lib/ielts'
+import { getAi } from '../lib/ai'
+import { db, today } from '../lib/db'
 import { Speaking } from './Speaking'
 import { Focus } from './Focus'
 
 type PairStats = Record<string, { listen: [number, number]; speak: [number, number] }>
 type View = null | { kind: 'speaking' } | { kind: 'focus' } | { kind: 'drill'; phone: string } | { kind: 'pairs'; set: PairSet; mode: 'listen' | 'speak' } | { kind: 'phone'; phone: string }
 
-export function Lab({ onSetupAi, onMock }: { onSetupAi: () => void; onMock: () => void }) {
+export function Lab({ onAi, onIelts }: { onAi: (k: 'setup' | 'chat' | 'diary' | 'writing' | 'work') => void; onIelts: (k: 'reading' | 'listening' | 'mock') => void }) {
   const { profile, tick } = useApp()
   const [weak, setWeak] = useState<Awaited<ReturnType<typeof weakPhones>>>([])
   const [ps, setPs] = useState<PairStats>({})
   const [view, setView] = useState<View>(null)
   const [last, setLast] = useState<number | null>(null)
+  const [ai, setAi] = useState<{ has: boolean; chatted: boolean; wrote: boolean } | null>(null)
   useEffect(() => { weakPhones(4).then(setWeak); kvGet<PairStats>('pair_stats', {}).then(setPs); lastTests(1).then((r) => setLast(r[0]?.band ?? null)) }, [tick, view])
+  useEffect(() => {
+    Promise.all([
+      getAi(),
+      db.one<{ n: number }>("SELECT count(*) n FROM chat WHERE role = 'user' AND ts > ?", [Date.now() - 18 * 3600_000]),
+      db.one<{ n: number }>('SELECT count(*) n FROM diary WHERE date = ? AND result IS NOT NULL', [today()]),
+    ]).then(([c, ch, di]) => setAi({ has: !!c, chatted: !!ch?.n, wrote: !!di?.n })).catch(() => setAi({ has: false, chatted: false, wrote: false }))
+  }, [tick])
   if (!profile) return null
   const accent = profile.accent
   const pct = (x?: [number, number]) => (x && x[1] ? `${Math.round((x[0] / x[1]) * 100)}%` : '—')
@@ -38,22 +49,58 @@ export function Lab({ onSetupAi, onMock }: { onSetupAi: () => void; onMock: () =
 
   return (
     <div className="page fade-in">
-      <div className="page-head"><h1>发音</h1></div>
+      <div className="page-head"><h1>专项</h1></div>
 
-      <button className="card raised ai-card wide mock-card" onClick={() => setView({ kind: 'speaking' })}>
-        <span className="small muted">约 12 分钟 · 三个部分</span>
-        <b style={{ fontSize: 18 }}>雅思口语模考</b>
-        <span>考官提问，你开口答；本机识别 + 流利度 + 发音，接了 AI 还能按四项标准打分{last !== null ? ` · 上次 ${last.toFixed(1)}` : ''}</span>
+      <p className="section-title" style={{ marginTop: 0 }}>{profile.goal.kind === 'ielts' ? '雅思' : '模拟考试'}</p>
+      <button className="card raised ai-card wide mock-entry" onClick={() => onIelts('mock')}>
+        <b style={{ fontSize: 18 }}>雅思全真模考</b><span>听力、阅读、写作、口语按真考时长走一遍，出四项分数和总分；也能单练一项</span>
       </button>
-      <button className="card ai-card wide" style={{ marginTop: 10 }} onClick={onMock}>
-        <b>全真模考</b><span>听力、阅读、写作、口语四项连考，出总分</span>
+      {profile.goal.kind === 'ielts' ? (
+        <div className="ai-grid" style={{ marginTop: 12 }}>
+          <button className="card ai-card" onClick={() => onIelts('listening')}>
+            <span className="ai-ico"><Icon.headphones /></span><b>听力</b><span>四个部分，和真考一样只放一遍</span>
+          </button>
+          <button className="card ai-card" onClick={() => onIelts('reading')}>
+            <span className="ai-ico"><Icon.book /></span><b>阅读</b><span>学术类文章，判断、填空、配对</span>
+          </button>
+          <button className="card ai-card" onClick={() => setView({ kind: 'speaking' })}>
+            <span className="ai-ico"><Icon.speak /></span><b>口语模考</b><span>{last !== null ? `三个部分，约 12 分钟 · 上次 ${last.toFixed(1)}` : '三个部分，约 12 分钟'}</span>
+          </button>
+          <button className="card ai-card" onClick={() => onAi('writing')}>
+            <span className="ai-ico"><Icon.pen /></span><b>写作</b><span>{ai?.has ? '大作文 / 书信，AI 批改' : '需要先接入 AI'}</span>
+          </button>
+        </div>
+      ) : (
+        <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => setView({ kind: 'speaking' })}>
+          <b>雅思口语模考</b><span>考官提问，你开口答；本机识别 + 流利度 + 发音，接了 AI 还能按四项标准打分{last !== null ? ` · 上次 ${last.toFixed(1)}` : ''}</span>
+        </button>
+      )}
+
+      <p className="section-title">{ai?.has ? 'AI 陪练' : '说和写'}</p>
+      {ai?.has ? (
+        <div className="ai-grid">
+          <button className="card ai-card" onClick={() => onAi('chat')}>
+            <span className="ai-ico"><Icon.chat /></span><b>和 Emma 聊几句</b><span>{ai.chatted ? '今天聊过了，还可以接着聊' : '伦敦的室友，按你的水平说话'}</span>
+          </button>
+          <button className="card ai-card" onClick={() => onAi('diary')}>
+            <span className="ai-ico"><Icon.diary /></span><b>写今天的日记</b><span>{ai.wrote ? '今天写过了 ✓' : '写几句，AI 帮你改'}</span>
+          </button>
+        </div>
+      ) : (
+        <button className="card ai-card wide" onClick={() => onAi('setup')}>
+          <b>接入你自己的 AI</b><span>解锁陪练聊天和日记批改。DeepSeek、通义、Kimi、智谱等都可以，密钥只存在这台设备上</span>
+        </button>
+      )}
+      <button className="card ai-card wide" style={{ marginTop: 12 }} onClick={() => onAi('work')}>
+        <b>工作英语</b><span>回买家邮件、给供应商发消息、写 Listing。{ai?.has ? 'AI 逐句批改' : '有参考写法，接入 AI 能逐句批改'}</span>
       </button>
 
+      <p className="section-title">发音</p>
       <button className="card ai-card wide focus-card" onClick={() => setView({ kind: 'focus' })}>
         <b>30 秒专注</b><span>只练一组最难分的音，像节奏小游戏：听一个点一个，看 30 秒能对几个</span>
       </button>
 
-      <p className="section-title" style={{ marginTop: 0 }}>{weak.length ? '你的弱项' : '中国人常见的难点'}</p>
+      <p className="section-title">{weak.length ? '你的弱项' : '中国人常见的难点'}</p>
       <div className="list">
         {(weak.length ? weak.map((w) => ({ phone: w.phone, note: `练过 ${w.n} 次，${Math.round((w.bad / w.n) * 100)}% 没读准` })) : COMMON_HARD.slice(0, 4).map((p) => ({ phone: p, note: '跟读几句后，这里换成你自己的弱项' }))).map((x) => (
           <button className="list-row" key={x.phone} onClick={() => setView({ kind: 'drill', phone: x.phone })}>
@@ -87,7 +134,7 @@ export function Lab({ onSetupAi, onMock }: { onSetupAi: () => void; onMock: () =
         <div className="phone-chips">{Object.keys(IPA).filter((p) => !VOWEL_SET.has(p)).map((p) => <button key={p} onClick={() => setView({ kind: 'phone', phone: p })}>{IPA[p]}</button>)}</div>
       </div>
 
-      {view?.kind === 'speaking' && <Speaking onClose={() => setView(null)} onSetupAi={() => { setView(null); onSetupAi() }} />}
+      {view?.kind === 'speaking' && <Speaking onClose={() => setView(null)} onSetupAi={() => { setView(null); onAi('setup') }} />}
       {view?.kind === 'focus' && <Focus onClose={() => setView(null)} />}
       {view?.kind === 'drill' && <Drill phone={view.phone} accent={accent} onClose={() => setView(null)} onPairs={(s) => setView({ kind: 'pairs', set: s, mode: 'listen' })} />}
       {view?.kind === 'pairs' && <PairGame set={view.set} mode={view.mode} accent={accent} onClose={() => setView(null)} />}
@@ -219,7 +266,7 @@ function PairGame({ set, mode, accent, onClose }: { set: PairSet; mode: 'listen'
       ) : (
         <div className="fade-in" key={i}>
           <p className="step-kind">{i + 1}/{ROUNDS} · 读这个词</p>
-          <div className="row"><div className="word-big">{r.target}</div><div className="spacer" /><PlayButton text={r.target} clip={{ text: r.target, word: r.target }} accent={accent} /></div>
+          <div className="row"><div className="word-big" style={{ ['--len' as string]: r.target.length }}>{r.target}</div><div className="spacer" /><PlayButton text={r.target} clip={{ text: r.target, word: r.target }} accent={accent} /></div>
           <p className="small muted">别读成 <span className="en">{r.other}</span>{ipaOf.get(r.other) ? ` /${ipaOf.get(r.other)}/` : ''}</p>
           <div className="pair-mouths">
             <Mouth phone={set.a} size={120} />

@@ -11,7 +11,7 @@ import { applyCheck, saveListen, type CheckItem } from '../lib/calibrate'
 import type { Answer } from '../lib/placement'
 import { addCard, grade, preview, Rating } from '../lib/srs'
 import { prefetch } from '../lib/tts'
-import type { Sentence } from '../lib/content'
+import { briefZh, type Sentence } from '../lib/content'
 import { SpellCard } from '../components/SpellCard'
 import { getClips, markWord, type Clip } from '../lib/clips'
 import { Tappable } from '../components/Tappable'
@@ -67,6 +67,8 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
   }, [])
 
   const step = steps?.[i]
+  // 到结算页时把还挂着的“跳过了这句”收掉（连着跳过几句时，上一句的提示还没消失）
+  useEffect(() => { if (steps?.length && i >= steps.length) toast('') }, [i, steps])
   useEffect(() => {
     setRevealed(false); setScored(false); stepStart.current = performance.now()
     if (step?.kind === 'review') preview(step.word.w).then(setIvals)
@@ -88,6 +90,8 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
     onClose()
   }
   const next = (completed = true) => { if (completed) doneSteps.current++; setI(i + 1 < steps.length ? i + 1 : steps.length) }
+  // 跳过最后一步时直接出结算页，不再弹“跳过了”（不然那条提示会一直挂在结算页上）
+  const skip = (msg: string) => { if (i + 1 < steps.length) toast(msg); next(false) }
 
   if (!step) return steps.length
     ? <Result steps={steps} tally={tally.current} seconds={(performance.now() - started.current) / 1000} settle={settle} onDone={finish} />
@@ -130,11 +134,11 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         {step.kind === 'review' && (
           <div className="fade-in">
             <p className="step-kind">复习 · 还记得意思吗？</p>
-            <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
+            <div className="row"><div className="word-big" style={{ ['--len' as string]: step.word.w.length }}>{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
             {revealed ? (
               <>
                 {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
-                <p className="zh-mean">{step.word.zh}</p>
+                <p className="zh-mean">{briefZh(step.word.zh)}</p>
                 {clipOf(step.word.w)}
                 <Example s={step.sentence} word={step.word.w} />
                 {step.sentence && <div className="row" style={{ marginTop: 12 }}><PlayButton text={step.sentence.en} clip={{ text: step.sentence.en, sentenceId: step.sentence.id }} accent={accent} label="听例句" /><span className="small muted">听例句</span></div>}
@@ -163,10 +167,10 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
 
         {step.kind === 'learn' && (
           <div className="fade-in">
-            <p className="step-kind">新词{step.word.tags.includes('ielts') ? ' · 雅思词汇' : ''}</p>
-            <div className="row"><div className="word-big">{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
+            <p className="step-kind">新词{step.word.tags.includes('ielts') ? ' · 雅思词汇' : ''}{step.heard ? ' · 听学里听熟了' : ''}</p>
+            <div className="row"><div className="word-big" style={{ ['--len' as string]: step.word.w.length }}>{step.word.w}</div><div className="spacer" /><PlayButton text={step.word.w} clip={{ text: step.word.w, word: step.word.w }} accent={accent} /></div>
             {step.word.ipa && <p className="ipa">/{step.word.ipa}/</p>}
-            <p className="zh-mean">{step.word.zh}</p>
+            <p className="zh-mean">{briefZh(step.word.zh)}</p>
             <Example s={step.sentence} word={step.word.w} />
             {step.sentence && <div className="row" style={{ marginTop: 12 }}><PlayButton text={step.sentence.en} clip={{ text: step.sentence.en, sentenceId: step.sentence.id }} accent={accent} label="听例句" /><span className="small muted">听例句</span></div>}
           </div>
@@ -226,13 +230,13 @@ export function Session({ minimum, comeback, onClose }: { minimum: boolean; come
         )}
         {step.kind === 'listen' && (
           <div className="row">
-            {!scored && <button className="btn quiet" style={{ flex: 1 }} onClick={() => { toast('跳过了这题'); next(false) }}>跳过</button>}
+            {!scored && <button className="btn quiet" style={{ flex: 1 }} onClick={() => skip('跳过了这题')}>跳过</button>}
             <button className="btn primary" style={{ flex: 2 }} disabled={!scored} onClick={() => next()}>下一题</button>
           </div>
         )}
         {step.kind === 'shadow' && (
           <div className="row">
-            <button className="btn quiet" style={{ flex: 1 }} onClick={() => { toast('跳过了这句'); next(false) }}>跳过</button>
+            <button className="btn quiet" style={{ flex: 1 }} onClick={() => skip('跳过了这句')}>跳过</button>
             <button className="btn primary" style={{ flex: 2 }} disabled={!scored} onClick={() => next()}>下一句</button>
           </div>
         )}
